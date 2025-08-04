@@ -30,11 +30,16 @@
     <Property Id="ARPCONTACT" Value="tech@mcneel.com"/>
     <Property Id="ARPHELPTELEPHONE" Value="+1 (206) 545-7000"/>
     <Property Id='ARPNOMODIFY'>1</Property>
+    <Property Id='ProductBuildVersion'>$(var.BuildVersion)</Property>
+    <Property Id='ProductExpirationPeriod'>$(var.ExpirationPeriod)</Property>
 
     <Directory Id="TARGETDIR" Name="SourceDir"/>
 
     <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of Rhino.Inside® for Revit is already installed." />
     <MediaTemplate EmbedCab="yes" />
+
+    <Binary Id="CustomActions" SourceFile="CustomActions\bin\$(var.Configuration)\RhinoInside.Revit.Setup.Actions.CA.dll" />
+    <Binary Id="CustomActionConfig" SourceFile="CustomActions\Properties\CustomAction.config" />
 
     <Feature Id="Revit.2018.Addin" Title="Revit 2018 Addin" Level="1" >
       <Condition Level="0">REVIT2018_INSTALLLOCATION=""</Condition>
@@ -103,37 +108,11 @@
     <CustomAction Id="SetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[APPLICATIONFOLDER]"/>
 
     <?if $(var.ExpirationPeriod) > 0 ?>
-    <CustomAction Id="WIPExpirationDateWarning" Script="vbscript">
-      <![CDATA[
-      ExpirationDate = DateAdd("d", $(var.BuildVersion) + $(var.ExpirationPeriod), DateSerial(2000,1,1))
-      DaysLeft = Cint(DateDiff("d", Now(), ExpirationDate))      
-      Set Record = Session.Installer.CreateRecord(1)
-      
-      If DaysLeft < 0 Then
-        Record.StringData(0) = _
-        "This Work-In-Progress installer expired on" & vbCrlf & _
-        FormatDateTime(ExpirationDate, 1) & "." & vbCrlf & vbCrlf & _
-        "Please check for updates at 'https://www.rhino3d.com/inside/revit/'"
-        Session.Message &H01000000, Record
-      End If
-      
-      If DaysLeft = 0 Then
-        Record.StringData(0) = _
-        "This Work-In-Progress installer expires today." & vbCrlf & vbCrlf & _
-        "Please check for updates at 'https://www.rhino3d.com/inside/revit/'"
-        Session.Message &H02000000, Record
-      End If
-      
-      If DaysLeft > 0 Then
-        Record.StringData(0) = _
-        "This installer contains a Work-In-Progress version of $(var.ProductName)." & vbCrlf & vbCrlf & _
-        "It will expire on " & FormatDateTime(ExpirationDate, 1) & "," & vbCrlf & _
-        DaysLeft & " days from now."
-        Session.Message &H03000000, Record
-      End If
-      
-      ]]>
-    </CustomAction>
+
+    <CustomAction Id="WIPExpirationDateWarning"
+                  BinaryKey="CustomActions" DllEntry="WIPExpirationDateWarning"
+                  Execute="immediate" Return="check"/>
+
     <?endif?>
     
     <InstallUISequence>
