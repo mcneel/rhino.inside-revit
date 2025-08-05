@@ -428,6 +428,13 @@ namespace RhinoInside.Revit.GH.Types
               layer.IsLocked = true;
               break;
 
+            case ARDB.BuiltInCategory.OST_VolumeOfInterest:
+              layer.PlotWeight = -1.0;
+#if RHINO_8
+              layer.PerViewportIsVisibleInNewDetails = false;
+#endif
+              break;
+
             case ARDB.BuiltInCategory.OST_GridChains:
               layer.Color = System.Drawing.Color.FromArgb(35, layer.Color);
               break;

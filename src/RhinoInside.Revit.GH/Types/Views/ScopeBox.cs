@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using Rhino.Geometry;
-using Rhino.DocObjects;
 using Rhino;
-using ERDB = RhinoInside.Revit.External.DB;
+using Rhino.DocObjects;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -211,6 +211,7 @@ namespace RhinoInside.Revit.GH.Types
               {
                 var parent = doc.Layers[att.LayerIndex];
                 var layer = doc.Layers.FirstOrDefault(x => x.ParentLayerId == parent.Id && x.Name == "Planes");
+                var wasLayerLocked = false;
                 if (layer is null)
                 {
                   planesAtt.LayerIndex = doc.Layers.Add
@@ -219,12 +220,13 @@ namespace RhinoInside.Revit.GH.Types
                     {
                       ParentLayerId = parent.Id,
                       Name = "Planes",
-                      IsVisible = false,
-//#if RHINO_8
-//                      IsLocked = true
-//#else
-                      IsLocked = false
-//#endif
+                      Color = System.Drawing.Color.FromArgb(0, System.Drawing.Color.Black), // Make planes "invisible"
+                      PlotWeight = -1.0,
+                      IsLocked = false,
+                      IsVisible = true,
+#if RHINO_8
+                      PerViewportIsVisibleInNewDetails = false,
+#endif
                     }
                   );
                   layer = doc.Layers[index];
@@ -232,35 +234,32 @@ namespace RhinoInside.Revit.GH.Types
                 else
                 {
                   planesAtt.LayerIndex = layer.Index;
-//#if !RHINO_8
-                  if (layer.IsLocked) layer.IsLocked = false; // Allow me to center the planes please!!
-//#endif
+                  wasLayerLocked = layer.IsLocked;
+                  if (wasLayerLocked) layer.IsLocked = false;
                 }
 
-                var planes = new (int Name, Plane Plane, Interval U, Interval V)[]
+                var planes = new (int Index, string Name, Plane Plane, Interval U, Interval V)[]
                 {
-                  (0, new Plane(box.PointAt(0.0, 0.5, 0.5),  box.Plane.YAxis, box.Plane.ZAxis), box.Y, box.Z), // left
-                  (1, new Plane(box.PointAt(1.0, 0.5, 0.5), -box.Plane.YAxis, box.Plane.ZAxis), box.Y, box.Z), // right
-                  (2, new Plane(box.PointAt(0.5, 0.0, 0.5), -box.Plane.XAxis, box.Plane.ZAxis), box.X, box.Z), // front
-                  (3, new Plane(box.PointAt(0.5, 1.0, 0.5),  box.Plane.XAxis, box.Plane.ZAxis), box.X, box.Z), // back
-                  (4, new Plane(box.PointAt(0.5, 0.5, 0.0),  box.Plane.XAxis, box.Plane.YAxis), box.X, box.Y), // bottom
-                  (5, new Plane(box.PointAt(0.5, 0.5, 1.0), -box.Plane.XAxis, box.Plane.YAxis), box.X, box.Y)  // top
+                  (0, "Left", new Plane(box.PointAt(0.0, 0.5, 0.5),  -box.Plane.YAxis, -box.Plane.ZAxis), box.Y, box.Z), // left
+                  (1, "Right", new Plane(box.PointAt(1.0, 0.5, 0.5), box.Plane.YAxis, -box.Plane.ZAxis), box.Y, box.Z), // right
+                  (2, "Front", new Plane(box.PointAt(0.5, 0.0, 0.5), box.Plane.XAxis, -box.Plane.ZAxis), box.X, box.Z), // front
+                  (3, "Back", new Plane(box.PointAt(0.5, 1.0, 0.5),  -box.Plane.XAxis, -box.Plane.ZAxis), box.X, box.Z), // back
+                  (4, "Bottom", new Plane(box.PointAt(0.5, 0.5, 0.0),  -box.Plane.XAxis, -box.Plane.YAxis), box.X, box.Y), // bottom
+                  (5, "Top", new Plane(box.PointAt(0.5, 0.5, 1.0), box.Plane.XAxis, -box.Plane.YAxis), box.X, box.Y)  // top
                 };
 
                 planesAtt.AddToGroup(index);
-                planesAtt.ColorSource = ObjectColorSource.ColorFromObject;
-                planesAtt.ObjectColor = System.Drawing.Color.FromArgb(0); // Make planes "invisible"
-                planesAtt.PlotColorSource = ObjectPlotColorSource.PlotColorFromDisplay;
+                planesAtt.ColorSource = ObjectColorSource.ColorFromLayer;
+                planesAtt.PlotColorSource = ObjectPlotColorSource.PlotColorFromLayer;
                 var name = 0;
                 foreach (var plane in planes)
                 {
                   viewportIds.TryGetValue(name++, out var viewports);
-                  AddClippingPlane(doc, plane.Plane, viewports, planesAtt);
+                  planesAtt.Name = $"{att.Name} - {plane.Name}";
+                  AddClippingPlane(doc, plane.Plane, plane.U, plane.V, viewports, att.LayerIndex, planesAtt);
                 }
 
-                // This makes the gumball ignore the Planes even are visible.
-                layer.SetPersistentLocking(true);
-                layer.IsLocked = true;
+                if (wasLayerLocked) layer.IsLocked = true;
               }
             }
           }
@@ -276,33 +275,32 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    private static ClippingPlaneObject AddClippingPlane(RhinoDoc document, Plane plane, IEnumerable<Guid> viewportIds, ObjectAttributes attributes)
+    private static ClippingPlaneObject AddClippingPlane
+    (
+      RhinoDoc document,
+      Plane plane, Interval uInterval, Interval vInterval,
+      IEnumerable<Guid> viewportIds, int layerIndex,
+      ObjectAttributes attributes)
     {
-      var interval = new Interval(-Revit.ModelUnits * 3, +Revit.ModelUnits * 3);
-//#if RHINO_8
-//      var surface = new PlaneSurface(plane, interval, interval);
-//      var clippingSurface = new ClippingPlaneSurface(surface);
+      var minInterval = new Interval(-document.ModelAbsoluteTolerance, +document.ModelAbsoluteTolerance);
+      var id = document.Objects.AddClippingPlane(plane, minInterval.T0, minInterval.T1, viewportIds ?? new Guid[] { Guid.Empty }, attributes);
+      if (document.Objects.Find(id) is ClippingPlaneObject clippingPlane)
+      {
+        var clippingSurface = clippingPlane.ClippingPlaneGeometry;
 
-//      foreach (var vport in viewportIds ?? Array.Empty<Guid>())
-//        clippingSurface.AddClipViewportId(vport);
+#if RHINO_8
+        clippingSurface.ParticipationListsEnabled = true;
+        clippingSurface.SetClipParticipation(Array.Empty<Guid>(), new int[] { layerIndex }, true);
+#endif
 
-//      clippingSurface.ParticipationListsEnabled = true;
-//      clippingSurface.SetClipParticipation(Array.Empty<Guid>(), new int[] { attributes.LayerIndex }, true);
-//      var id = document.Objects.Add(clippingSurface, attributes);
-//      var clippingPlane = document.Objects.Find(id) as ClippingPlaneObject;
-//#else
-      var id = document.Objects.AddClippingPlane(plane, 3.0 * Revit.ModelUnits, 3.0 * Revit.ModelUnits, viewportIds ?? new Guid[] { Guid.Empty }, attributes);
+        clippingSurface.Extend(0, uInterval.Length < minInterval.Length ? minInterval : uInterval);
+        clippingSurface.Extend(1, vInterval.Length < minInterval.Length ? minInterval : vInterval);
+        clippingPlane.CommitChanges();
 
-      var clippingPlane = document.Objects.Find(id) as ClippingPlaneObject;
-      var clippingSurface = clippingPlane.ClippingPlaneGeometry;
+        return clippingPlane;
+      }
 
-      // Centered on the plane please!!
-      clippingSurface.Extend(0, interval);
-      clippingSurface.Extend(1, interval);
-      clippingPlane.CommitChanges();
-//#endif
-
-      return clippingPlane;
+      return null;
     }
 
     public bool BakeInstanceDefinition
@@ -318,7 +316,6 @@ namespace RhinoInside.Revit.GH.Types
       overwrite = false;
 
       var box = new Box(Plane.WorldXY, new Interval(-0.5, +0.5), new Interval(-0.5, +0.5), new Interval(-0.5, +0.5));
-      box.Inflate(-0.001);
 
       var name = "*Revit::Annotation::Scope Box";
       var idef = doc.InstanceDefinitions.Find(name);
@@ -374,6 +371,6 @@ namespace RhinoInside.Revit.GH.Types
 
       return guid != Guid.Empty;
     }
-    #endregion
+#endregion
   }
 }
