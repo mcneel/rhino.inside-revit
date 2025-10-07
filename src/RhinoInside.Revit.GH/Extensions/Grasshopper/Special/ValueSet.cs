@@ -1472,6 +1472,7 @@ namespace Grasshopper.Special
     #endregion
   }
 
+#if !RHINO_9
   [EditorBrowsable(EditorBrowsableState.Never)]
   public class ValuePicker : ValueSet<IGH_Goo>
   {
@@ -1492,4 +1493,5 @@ namespace Grasshopper.Special
     )
     { }
   }
+#endif
 }
