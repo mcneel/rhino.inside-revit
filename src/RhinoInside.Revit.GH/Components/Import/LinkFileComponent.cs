@@ -74,22 +74,21 @@ namespace RhinoInside.Revit.GH.Components.Import
       ARDB.Level level)
     {
         ARDB.ElementId linkId = ARDB.ElementId.InvalidElementId;
+
+#if REVIT_2023
         if (SupportedExtensions.Contains(".3dm") && options is ARDB.ImportOptions3DM options3dm)
-            linkId = doc.Link(path, options3dm, view);
-            
-        else if (SupportedExtensions.Contains(".obj") && options is ARDB.OBJImportOptions optionsObj)
-            linkId = doc.Link(path, optionsObj, view);
-            
-        else if ((SupportedExtensions.Contains(".dwg") ||
-                  SupportedExtensions.Contains(".dxf")) && options is ARDB.DWGImportOptions optionsDwg)
-        {
+              linkId = doc.Link(path, options3dm, view);
+#endif
+#if REVIT_2025
+        if (SupportedExtensions.Contains(".obj") && options is ARDB.OBJImportOptions optionsObj)
+              linkId = doc.Link(path, optionsObj, view);
+#endif
+        if ((SupportedExtensions.Contains(".dwg") || SupportedExtensions.Contains(".dxf")) && options is ARDB.DWGImportOptions optionsDwg)
           if (!doc.Link(path, optionsDwg, view, out linkId))
             throw new Exceptions.RuntimeException($"Failed to link file: {path}");
-        }
-            
-        else
-            throw new Exceptions.RuntimeException($"Unsupported file extension or import options type for: {path}");
 
+        if (linkId == ARDB.ElementId.InvalidElementId)
+            throw new Exceptions.RuntimeException($"Unsupported file extension or import options type for: {path}");
 
       // Get the import instance
       if (!(doc.GetElement(linkId) is ARDB.ImportInstance importInstance))
