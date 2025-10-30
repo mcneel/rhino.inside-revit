@@ -10,7 +10,11 @@ namespace RhinoInside.Revit.GH.Components.Import
   public class LinkOBJ : LinkFileComponent
   {
     public override Guid ComponentGuid => new Guid("B5E9F2C7-6F0E-8C9F-E5B8-0D2F4E6F7C8D");
+#if REVIT_2025
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
+#else
+    public override GH_Exposure Exposure => GH_Exposure.hidden;
+#endif
     protected override string IconTag => string.Empty;
 
     public LinkOBJ() : base
@@ -77,10 +81,11 @@ namespace RhinoInside.Revit.GH.Components.Import
 
     const string _Output_ = "Link";
 
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
-
+      #if REVIT_2025
       ReconstructElement<ARDB.ImportInstance>
       (
         doc.Value, _Output_, importInstance =>
@@ -99,8 +104,10 @@ namespace RhinoInside.Revit.GH.Components.Import
           return importInstance;
         }
       );
+#endif
     }
 
+#if REVIT_2025
     ARDB.ImportInstance Reconstruct
     (
       ARDB.ImportInstance importInstance,
@@ -121,5 +128,6 @@ namespace RhinoInside.Revit.GH.Components.Import
 
       return importInstance;
     }
+#endif
   }
 }
