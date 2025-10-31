@@ -77,7 +77,7 @@
         <Directory Id="AutodeskSharedFolder" Name="Autodesk Shared">
           <Directory Id="ComponentsFolder" Name="Components">
             <Directory Id="Components2026Folder" Name="2026">
-              <Directory Id="Components140Folder" Name="1.4.0">
+              <Directory Id="Components140Folder" Name="1.8.0">
               </Directory>
             </Directory>
           </Directory>
