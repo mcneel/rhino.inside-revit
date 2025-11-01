@@ -2,6 +2,23 @@
 <Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
   
   <Fragment>
+
+    <Property Id="SHARED_COMPONENTS_2026_INSTALLPATH">
+      <RegistrySearch Id="Components2026InstallPath"
+                      Root="HKLM"
+                      Key="SOFTWARE\Autodesk\SharedComponents\2026"
+                      Name="InstallPath"
+                      Type="directory" />
+    </Property>
+
+    <Property Id="SHARED_COMPONENTS_2026_VERSION">
+      <RegistrySearch Id="Components2026Version"
+                      Root="HKLM"
+                      Key="SOFTWARE\Autodesk\SharedComponents\2026"
+                      Name="Version"
+                      Type="raw" />
+    </Property>
+
     <DirectoryRef Id="TARGETDIR">
       <Directory Id="APPLICATIONFOLDER">
         <Directory Id="APPLICATIONFOLDER2018" Name="2018">
@@ -76,10 +93,7 @@
       <Directory Id="CommonFiles64Folder">
         <Directory Id="AutodeskSharedFolder" Name="Autodesk Shared">
           <Directory Id="ComponentsFolder" Name="Components">
-            <Directory Id="Components2026Folder" Name="2026">
-              <Directory Id="Components140Folder" Name="1.8.0">
-              </Directory>
-            </Directory>
+            <Directory Id="SHARED_COMPONENTS_2026_FOLDER" Name="2026" />
           </Directory>
         </Directory>
       </Directory>
@@ -94,6 +108,7 @@
     <SetProperty Id="INSTALLFOLDER_2024" Value="[APPLICATIONFOLDER]2024\[ApplicationFolderName]\" After="CostFinalize"/>
     <SetProperty Id="INSTALLFOLDER_2025" Value="[APPLICATIONFOLDER]2025\[ApplicationFolderName]\" After="CostFinalize"/>
     <SetProperty Id="INSTALLFOLDER_2026" Value="[APPLICATIONFOLDER]2026\[ApplicationFolderName]\" After="CostFinalize"/>
+    <SetProperty Id="SHARED_COMPONENTS_2026_FOLDER" Value="[SHARED_COMPONENTS_2026_INSTALLPATH]\[SHARED_COMPONENTS_2026_VERSION]" After="CostFinalize"/>
 
   </Fragment>
 
@@ -413,7 +428,7 @@
   <Fragment>
     <ComponentGroup Id="Addins.2026.RhinoInsideRevit">
 
-      <Component Id="Revit.2026.opennurbs_private.manifest" Guid="{BC75D212-44FD-4DAE-8991-B8298D8A0BAD}" Directory="Components140Folder">
+      <Component Id="Revit.2026.opennurbs_private.manifest" Guid="{BC75D212-44FD-4DAE-8991-B8298D8A0BAD}" Directory="SHARED_COMPONENTS_2026_FOLDER">
         <Condition>Privileged</Condition>
         <File Id="Revit.2026.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
