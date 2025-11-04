@@ -1,12 +1,143 @@
 using System.Collections.Generic;
 
-#if !REVIT_2025
 namespace RhinoInside.Revit.External.DB.Schemas
 {
   public partial class ParameterId
   {
     static readonly Dictionary<ParameterId, int> map = new Dictionary<ParameterId, int>()
     {
+      { AllowMultipleSelection, -1612357 }, // ALLOW_MULTIPLE_SELECTION
+      { EllipseModificationKeepsRatio, -1612354 }, // ELLIPSE_MODIFICATION_KEEPS_RATIO
+      { AnalyticalNodeCanBeHosted, -1180421 }, // ANALYTICAL_NODE_CAN_BE_HOSTED
+      { AnalyticalNodeType, -1180420 }, // ANALYTICAL_NODE_TYPE
+      { RebarStaggeredSet, -1180415 }, // REBAR_STAGGERED_SET
+      { RebarMaximumNumber, -1180414 }, // REBAR_MAXIMUM_NUMBER
+      { RebarMinimumNumber, -1180413 }, // REBAR_MINIMUM_NUMBER
+      { RebarSpliceShiftBars, -1180412 }, // REBAR_SPLICE_SHIFT_BARS
+      { RebarSpliceStaggerLengthMultiplier, -1180411 }, // REBAR_SPLICE_STAGGER_LENGTH_MULTIPLIER
+      { RebarStaggerOffsetAtEnd, -1180410 }, // REBAR_STAGGER_OFFSET_AT_END
+      { RebarStaggerOffsetAtStart, -1180409 }, // REBAR_STAGGER_OFFSET_AT_START
+      { SpliceTypeAtEnd, -1180408 }, // SPLICE_TYPE_AT_END
+      { SpliceTypeAtStart, -1180407 }, // SPLICE_TYPE_AT_START
+      { SpliceLapLengthAtEnd, -1180406 }, // SPLICE_LAP_LENGTH_AT_END
+      { SpliceLapLengthAtStart, -1180405 }, // SPLICE_LAP_LENGTH_AT_START
+      { SpliceByRulesRunout, -1180404 }, // SPLICE_BY_RULES_RUNOUT
+      { SpliceByRulesMinLength, -1180403 }, // SPLICE_BY_RULES_MIN_LENGTH
+      { SpliceByRulesMaxLength, -1180402 }, // SPLICE_BY_RULES_MAX_LENGTH
+      { RebarSpliceSpliceLinePosition, -1180401 }, // REBAR_SPLICE_SPLICE_LINE_POSITION
+      { RebarSpliceLapLengthMultiplier, -1180400 }, // REBAR_SPLICE_LAP_LENGTH_MULTIPLIER
+      { SteelElemSinglePartMark, -1180319 }, // STEEL_ELEM_SINGLE_PART_MARK
+      { SteelElemMark, -1180318 }, // STEEL_ELEM_MARK
+      { BendingdetailPosition, -1180317 }, // BENDINGDETAIL_POSITION
+      { TagHeadAlignment, -1180310 }, // TAG_HEAD_ALIGNMENT
+      { RebarBarSpliceLengths, -1180309 }, // REBAR_BAR_SPLICE_LENGTHS
+      { ExcavationVolumeOnToposolid, -1180308 }, // EXCAVATION_VOLUME_ON_TOPOSOLID
+      { TotalExcavationVolume, -1180307 }, // TOTAL_EXCAVATION_VOLUME
+      { ExcavationVolume, -1180306 }, // EXCAVATION_VOLUME
+      { ExcavationElementFamilyAndType, -1180305 }, // EXCAVATION_ELEMENT_FAMILY_AND_TYPE
+      { ExcavationElementId, -1180304 }, // EXCAVATION_ELEMENT_ID
+      { IndividualExcavationVolume, -1180303 }, // INDIVIDUAL_EXCAVATION_VOLUME
+      { TagHeadPosition, -1180302 }, // TAG_HEAD_POSITION
+      { RebarConstraintsStatus, -1180301 }, // REBAR_CONSTRAINTS_STATUS
+      { ToposolidFacesLocation, -1180201 }, // TOPOSOLID_FACES_LOCATION
+      { FamilyUsingMultiple, -1180200 }, // FAMILY_USING_MULTIPLE
+      { UsingMultiple, -1180000 }, // USING_MULTIPLE
+      { PlacementTop, -1166006 }, // PLACEMENT_TOP
+      { PlacementRight, -1166005 }, // PLACEMENT_RIGHT
+      { PlacementBottom, -1166004 }, // PLACEMENT_BOTTOM
+      { PlacementLeft, -1166003 }, // PLACEMENT_LEFT
+      { PlacementCenterY, -1166002 }, // PLACEMENT_CENTER_Y
+      { PlacementCenterX, -1166001 }, // PLACEMENT_CENTER_X
+      { PlacementParamsShow, -1166000 }, // PLACEMENT_PARAMS_SHOW
+      { ExchangeEntityId, -1155401 }, // EXCHANGE_ENTITY_ID
+      { ExchangeId, -1155400 }, // EXCHANGE_ID
+      { TagOrientationBehavior, -1155321 }, // TAG_ORIENTATION_BEHAVIOR
+      { FamilyNestingBehavior, -1155320 }, // FAMILY_NESTING_BEHAVIOR
+      { BendingDetailTypeSchematicHeight, -1155318 }, // BENDING_DETAIL_TYPE_SCHEMATIC_HEIGHT
+      { BendingDetailTypeSchematicWidth, -1155317 }, // BENDING_DETAIL_TYPE_SCHEMATIC_WIDTH
+      { BendingDetailTypeTagTypeId, -1155315 }, // BENDING_DETAIL_TYPE_TAG_TYPE_ID
+      { BlendDepthParam, -1155314 }, // BLEND_DEPTH_PARAM
+      { BendingDetailDetailLevel, -1155313 }, // BENDING_DETAIL_DETAIL_LEVEL
+      { BendingDetailAngularDimensionTextPosition, -1155312 }, // BENDING_DETAIL_ANGULAR_DIMENSION_TEXT_POSITION
+      { BendingDetailSegmentLengthDimensionTextPosition, -1155311 }, // BENDING_DETAIL_SEGMENT_LENGTH_DIMENSION_TEXT_POSITION
+      { BendingDetailSegmentRepresentation, -1155310 }, // BENDING_DETAIL_SEGMENT_REPRESENTATION
+      { BendingDetailVaryingRebarDimension, -1155309 }, // BENDING_DETAIL_VARYING_REBAR_DIMENSION
+      { BendingDetailRepresentationFor3dBars, -1155308 }, // BENDING_DETAIL_REPRESENTATION_FOR_3D_BARS
+      { BendingDetailTypeAngularDimensionsMeasurement, -1155307 }, // BENDING_DETAIL_TYPE_ANGULAR_DIMENSIONS_MEASUREMENT
+      { BendingDetailTypeAngularDimensionsForHooksEnabled, -1155306 }, // BENDING_DETAIL_TYPE_ANGULAR_DIMENSIONS_FOR_HOOKS_ENABLED
+      { BendingDetailTypeBendDiameterDimensionsForHooksEnabled, -1155305 }, // BENDING_DETAIL_TYPE_BEND_DIAMETER_DIMENSIONS_FOR_HOOKS_ENABLED
+      { BendingDetailTypeBendDiameterDimensionsForSegmentsEnabled, -1155304 }, // BENDING_DETAIL_TYPE_BEND_DIAMETER_DIMENSIONS_FOR_SEGMENTS_ENABLED
+      { BendingDetailTypeShowBarBendingUsing, -1155302 }, // BENDING_DETAIL_TYPE_SHOW_BAR_BENDING_USING
+      { BendingDetailTypeDiameterDimensionTypeId, -1155301 }, // BENDING_DETAIL_TYPE_DIAMETER_DIMENSION_TYPE_ID
+      { BendingDetailTypeRadialDimensionTypeId, -1155300 }, // BENDING_DETAIL_TYPE_RADIAL_DIMENSION_TYPE_ID
+      { BendingDetailTypeBendDiameterDimensionsEnabled, -1155299 }, // BENDING_DETAIL_TYPE_BEND_DIAMETER_DIMENSIONS_ENABLED
+      { BendingDetailTypeAngularDimensionOffset, -1155298 }, // BENDING_DETAIL_TYPE_ANGULAR_DIMENSION_OFFSET
+      { BendingDetailTypeShowAngularDimensionsFor, -1155297 }, // BENDING_DETAIL_TYPE_SHOW_ANGULAR_DIMENSIONS_FOR
+      { BendingDetailTypeAngularDimensionTypeId, -1155296 }, // BENDING_DETAIL_TYPE_ANGULAR_DIMENSION_TYPE_ID
+      { BendingDetailTypeAngularDimensionsEnabled, -1155295 }, // BENDING_DETAIL_TYPE_ANGULAR_DIMENSIONS_ENABLED
+      { BendingDetailTypeOrthogonalAndOverallDimesionsEnabled, -1155294 }, // BENDING_DETAIL_TYPE_ORTHOGONAL_AND_OVERALL_DIMESIONS_ENABLED
+      { BendingDetailTypeSegmentLengthDimensionsForHooksEnabled, -1155293 }, // BENDING_DETAIL_TYPE_SEGMENT_LENGTH_DIMENSIONS_FOR_HOOKS_ENABLED
+      { BendingDetailTypeSegmentLengthDimensionsOffset, -1155292 }, // BENDING_DETAIL_TYPE_SEGMENT_LENGTH_DIMENSIONS_OFFSET
+      { BendingDetailTypeSegmentLengthsDisplayOption, -1155291 }, // BENDING_DETAIL_TYPE_SEGMENT_LENGTHS_DISPLAY_OPTION
+      { BendingDetailTypeSegmentLengthsForArcsDisplayOption, -1155290 }, // BENDING_DETAIL_TYPE_SEGMENT_LENGTHS_FOR_ARCS_DISPLAY_OPTION
+      { BendingDetailTypeSegmentLengthDimensionTypeId, -1155289 }, // BENDING_DETAIL_TYPE_SEGMENT_LENGTH_DIMENSION_TYPE_ID
+      { BendingDetailTypeSegmentLengthDimensionsEnabled, -1155288 }, // BENDING_DETAIL_TYPE_SEGMENT_LENGTH_DIMENSIONS_ENABLED
+      { SsePointOffsetFromSnaps, -1155285 }, // SSE_POINT_OFFSET_FROM_SNAPS
+      { LoadIsConstrainedOnHost, -1155284 }, // LOAD_IS_CONSTRAINED_ON_HOST
+      { RebarAlignmentOptions, -1155283 }, // REBAR_ALIGNMENT_OPTIONS
+      { ScheduleRowHeightInput, -1155282 }, // SCHEDULE_ROW_HEIGHT_INPUT
+      { ScheduleResizeRows, -1155281 }, // SCHEDULE_RESIZE_ROWS
+      { ScheduleRotationOnSheet, -1155280 }, // SCHEDULE_ROTATION_ON_SHEET
+      { LayerElemScheduleFamily, -1155279 }, // LAYER_ELEM_SCHEDULE_FAMILY
+      { LayerElemIsVariable, -1155278 }, // LAYER_ELEM_IS_VARIABLE
+      { LayerElemIsStructuralMaterial, -1155277 }, // LAYER_ELEM_IS_STRUCTURAL_MATERIAL
+      { LayerElemIsCoreLayer, -1155276 }, // LAYER_ELEM_IS_CORE_LAYER
+      { LayerElemCompoundElemType, -1155275 }, // LAYER_ELEM_COMPOUND_ELEM_TYPE
+      { LayerElemCompoundElemFamily, -1155274 }, // LAYER_ELEM_COMPOUND_ELEM_FAMILY
+      { SsePointElevationBaseType, -1155273 }, // SSE_POINT_ELEVATION_BASE_TYPE
+      { SsePointElevation, -1155272 }, // SSE_POINT_ELEVATION
+      { SsePointOffsetFromSurface, -1155271 }, // SSE_POINT_OFFSET_FROM_SURFACE
+      { SsePointBasetypeEnum, -1155270 }, // SSE_POINT_BASETYPE_ENUM
+      { ToposolidContourSubcategoryId, -1155269 }, // TOPOSOLID_CONTOUR_SUBCATEGORY_ID
+      { ToposolidContourDisplaySettingsIdParam, -1155268 }, // TOPOSOLID_CONTOUR_DISPLAY_SETTINGS_ID_PARAM
+      { ToposolidSubdivideMaterial, -1155267 }, // TOPOSOLID_SUBDIVIDE_MATERIAL
+      { ToposolidSubdivideHeight, -1155266 }, // TOPOSOLID_SUBDIVIDE_HEIGHT
+      { ToposolidInheritContours, -1155265 }, // TOPOSOLID_INHERIT_CONTOURS
+      { ToposolidFunctionParam, -1155264 }, // TOPOSOLID_FUNCTION_PARAM
+      { PreferPatternAlignUiFilter, -1155263 }, // PREFER_PATTERN_ALIGN_UI_FILTER
+      { ToposolidElevationAtTop, -1155261 }, // TOPOSOLID_ELEVATION_AT_TOP
+      { ToposolidElevationAtBottom, -1155260 }, // TOPOSOLID_ELEVATION_AT_BOTTOM
+      { ToposolidStructureIdParam, -1155259 }, // TOPOSOLID_STRUCTURE_ID_PARAM
+      { LowestAssociatedLevel, -1155257 }, // LOWEST_ASSOCIATED_LEVEL
+      { HighestAssociatedLevel, -1155256 }, // HIGHEST_ASSOCIATED_LEVEL
+      { ToposolidHeightabovelevelParam, -1155255 }, // TOPOSOLID_HEIGHTABOVELEVEL_PARAM
+      { ToposolidAttrThicknessParam, -1155254 }, // TOPOSOLID_ATTR_THICKNESS_PARAM
+      { ToposolidTypeDefaultThicknessParam, -1155253 }, // TOPOSOLID_TYPE_DEFAULT_THICKNESS_PARAM
+      { OffsetFromReferenceBase, -1155252 }, // OFFSET_FROM_REFERENCE_BASE
+      { ReferenceBaseOnHost, -1155251 }, // REFERENCE_BASE_ON_HOST
+      { OvalFramingHeight, -1155250 }, // OVAL_FRAMING_HEIGHT
+      { OvalFramingWidth, -1155249 }, // OVAL_FRAMING_WIDTH
+      { CircularFramingDiameter, -1155248 }, // CIRCULAR_FRAMING_DIAMETER
+      { LinearFramingLength, -1155247 }, // LINEAR_FRAMING_LENGTH
+      { FramingShapeClassification, -1155246 }, // FRAMING_SHAPE_CLASSIFICATION
+      { StiffenerClassification, -1155245 }, // STIFFENER_CLASSIFICATION
+      { FamilySelfOrienting, -1155244 }, // FAMILY_SELF_ORIENTING
+      { CouplerRotationAngle, -1155243 }, // COUPLER_ROTATION_ANGLE
+      { PreferDimSideUiFilter, -1155242 }, // PREFER_DIM_SIDE_UI_FILTER
+      { MultipleAlignmentUiToggle, -1155241 }, // MULTIPLE_ALIGNMENT_UI_TOGGLE
+      { LockAlignmentUiToggle, -1155240 }, // LOCK_ALIGNMENT_UI_TOGGLE
+      { LayerElemBaseExtensionDis, -1155239 }, // LAYER_ELEM_BASE_EXTENSION_DIS
+      { LayerElemTopExtensionDis, -1155238 }, // LAYER_ELEM_TOP_EXTENSION_DIS
+      { LayerElemFunction, -1155237 }, // LAYER_ELEM_FUNCTION
+      { LayerElemMaterials, -1155236 }, // LAYER_ELEM_MATERIALS
+      { LayerElemThickness, -1155235 }, // LAYER_ELEM_THICKNESS
+      { LayerElemAreaComputed, -1155234 }, // LAYER_ELEM_AREA_COMPUTED
+      { LayerElemOffsetFromHost, -1155233 }, // LAYER_ELEM_OFFSET_FROM_HOST
+      { LayerElemVolumeComputed, -1155232 }, // LAYER_ELEM_VOLUME_COMPUTED
+      { LayerTypeMaterials, -1155231 }, // LAYER_TYPE_MATERIALS
+      { LayerTypeThickness, -1155230 }, // LAYER_TYPE_THICKNESS
+      { LayerElemBaseConstraint, -1155229 }, // LAYER_ELEM_BASE_CONSTRAINT
+      { LayerElemTopConstraint, -1155228 }, // LAYER_ELEM_TOP_CONSTRAINT
       { RebarInstanceBarModelDiameter, -1155224 }, // REBAR_INSTANCE_BAR_MODEL_DIAMETER
       { RebarModelBarDiameter, -1155223 }, // REBAR_MODEL_BAR_DIAMETER
       { ViewShowGrids, -1155222 }, // VIEW_SHOW_GRIDS
@@ -28,6 +159,8 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { RebarShapeHookRotationAtStart, -1155203 }, // REBAR_SHAPE_HOOK_ROTATION_AT_START
       { PathOfTravelFromRoom, -1155202 }, // PATH_OF_TRAVEL_FROM_ROOM
       { PathOfTravelToRoom, -1155201 }, // PATH_OF_TRAVEL_TO_ROOM
+      { RbsElecMaxCircuitsDataPanel, -1155152 }, // RBS_ELEC_MAX_CIRCUITS_DATA_PANEL
+      { RbsElecAnalyticalTotalCoincidentLoad, -1155151 }, // RBS_ELEC_ANALYTICAL_TOTAL_COINCIDENT_LOAD
       { RbsElecNumberOfCircuits, -1155150 }, // RBS_ELEC_NUMBER_OF_CIRCUITS
       { SteelElemProfileVolume, -1155148 }, // STEEL_ELEM_PROFILE_VOLUME
       { SteelElemProfileLength, -1155147 }, // STEEL_ELEM_PROFILE_LENGTH
@@ -209,15 +342,27 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { GraphicDisplayOptionsSketchyLines, -1154615 }, // GRAPHIC_DISPLAY_OPTIONS_SKETCHY_LINES
       { NumberPartitionParam, -1154614 }, // NUMBER_PARTITION_PARAM
       { ViewShowHiddenLines, -1154613 }, // VIEW_SHOW_HIDDEN_LINES
+      { RbsElecAnalyticalDownstreamConnectedPhases, -1153556 }, // RBS_ELEC_ANALYTICAL_DOWNSTREAM_CONNECTED_PHASES
+      { RbsElecAnalyticalSecondaryHighLegPhase, -1153555 }, // RBS_ELEC_ANALYTICAL_SECONDARY_HIGH_LEG_PHASE
+      { RbsElecAnalyticalHighLegPhase, -1153554 }, // RBS_ELEC_ANALYTICAL_HIGH_LEG_PHASE
+      { RbsElecAnalyticalConnectedPhase, -1153553 }, // RBS_ELEC_ANALYTICAL_CONNECTED_PHASE
+      { RbsElecAnalyticalNumphases, -1153552 }, // RBS_ELEC_ANALYTICAL_NUMPHASES
+      { RbsElecAnalyticalArea, -1153551 }, // RBS_ELEC_ANALYTICAL_AREA
+      { RbsElecAnalyticalLoadsInSet, -1153550 }, // RBS_ELEC_ANALYTICAL_LOADS_IN_SET
+      { RbsElecAnalyticalLoadSetOnStandby, -1153549 }, // RBS_ELEC_ANALYTICAL_LOAD_SET_ON_STANDBY
+      { RbsElecAnalyticalLoadSetOnDuty, -1153548 }, // RBS_ELEC_ANALYTICAL_LOAD_SET_ON_DUTY
+      { RbsElecDistributionNodeLoadSet, -1153547 }, // RBS_ELEC_DISTRIBUTION_NODE_LOAD_SET
+      { RbsElecDistributionNodeSupplyTo, -1153546 }, // RBS_ELEC_DISTRIBUTION_NODE_SUPPLY_TO
+      { RbsElecAnalyticalFeederLength, -1153545 }, // RBS_ELEC_ANALYTICAL_FEEDER_LENGTH
+      { RbsElecAnalyticalLevelId, -1153544 }, // RBS_ELEC_ANALYTICAL_LEVEL_ID
+      { RbsElecApparentPowerDensity, -1153543 }, // RBS_ELEC_APPARENT_POWER_DENSITY
       { RbsElecDistributionNodeSupplyFrom2, -1153542 }, // RBS_ELEC_DISTRIBUTION_NODE_SUPPLY_FROM2
       { RbsElecDistributionNodeSupplyFrom, -1153541 }, // RBS_ELEC_DISTRIBUTION_NODE_SUPPLY_FROM
-      { RbsElecAnalyticalAreaMeasurement, -1153540 }, // RBS_ELEC_ANALYTICAL_AREA_MEASUREMENT
       { RbsElecDistributionNodeSupplyFrom1, -1153539 }, // RBS_ELEC_DISTRIBUTION_NODE_SUPPLY_FROM1
-      { RbsElecDistributionNodePowerSource, -1153538 }, // RBS_ELEC_DISTRIBUTION_NODE_POWER_SOURCE
+      { RbsElecAnalyticalLoadSetOnTotal, -1153538 }, // RBS_ELEC_ANALYTICAL_LOAD_SET_ON_TOTAL
       { RbsElecAnalyticalLoadNameParam, -1153537 }, // RBS_ELEC_ANALYTICAL_LOAD_NAME_PARAM
       { RbsElecAnalyticalLoadTypeParam, -1153535 }, // RBS_ELEC_ANALYTICAL_LOAD_TYPE_PARAM
-      { RbsElecAnalyticalAreaParam, -1153534 }, // RBS_ELEC_ANALYTICAL_AREA_PARAM
-      { RbsElectricalLoadZoneType, -1153533 }, // RBS_ELECTRICAL_LOAD_ZONE_TYPE
+      { RbsAreaBasedLoadType, -1153533 }, // RBS_AREA_BASED_LOAD_TYPE
       { RbsElecAnalyticalLoadDensity, -1153532 }, // RBS_ELEC_ANALYTICAL_LOAD_DENSITY
       { MepElecZoneEquipmentType, -1153529 }, // MEP_ELEC_ZONE_EQUIPMENT_TYPE
       { MepZoneEquipmentDrawVentilation, -1153528 }, // MEP_ZONE_EQUIPMENT_DRAW_VENTILATION
@@ -242,6 +387,18 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { MepWaterloopChillertype, -1153502 }, // MEP_WATERLOOP_CHILLERTYPE
       { MepWaterloopType, -1153501 }, // MEP_WATERLOOP_TYPE
       { MepAnalyticalLoopName, -1153500 }, // MEP_ANALYTICAL_LOOP_NAME
+      { MepSegmentElementTypename, -1153127 }, // MEP_SEGMENT_ELEMENT_TYPENAME
+      { MepSegmentFamilyname, -1153126 }, // MEP_SEGMENT_FAMILYNAME
+      { MepSegmentSystemorservice, -1153125 }, // MEP_SEGMENT_SYSTEMORSERVICE
+      { MepSegmentLength, -1153124 }, // MEP_SEGMENT_LENGTH
+      { MepAnalyticalElecApparentPowerRating, -1153123 }, // MEP_ANALYTICAL_ELEC_APPARENT_POWER_RATING
+      { MepAnalyticalHydraulicloop, -1153122 }, // MEP_ANALYTICAL_HYDRAULICLOOP
+      { MepAnalyticalCriticalsequence, -1153121 }, // MEP_ANALYTICAL_CRITICALSEQUENCE
+      { MepAnalyticalHeadersegment, -1153120 }, // MEP_ANALYTICAL_HEADERSEGMENT
+      { MepAnalyticalNetwork, -1153119 }, // MEP_ANALYTICAL_NETWORK
+      { MepAnalyticalElecCurrent, -1153118 }, // MEP_ANALYTICAL_ELEC_CURRENT
+      { MepAnalyticalElecVoltage, -1153117 }, // MEP_ANALYTICAL_ELEC_VOLTAGE
+      { MepAnalyticalElecCurrentRating, -1153116 }, // MEP_ANALYTICAL_ELEC_CURRENT_RATING
       { SystemEquipmentSets, -1153115 }, // SYSTEM_EQUIPMENT_SETS
       { MepIgnoreFlowAnalysis, -1153114 }, // MEP_IGNORE_FLOW_ANALYSIS
       { MepAnalyticalLoopBoundaryParam, -1153113 }, // MEP_ANALYTICAL_LOOP_BOUNDARY_PARAM
@@ -528,6 +685,8 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { SheetAssemblyManufacturer, -1150452 }, // SHEET_ASSEMBLY_MANUFACTURER
       { SheetAssemblyModel, -1150451 }, // SHEET_ASSEMBLY_MODEL
       { SheetAssemblyName, -1150450 }, // SHEET_ASSEMBLY_NAME
+      { PipeInsulationThickness, -1150437 }, // PIPE_INSULATION_THICKNESS
+      { DuctInsulationThickness, -1150436 }, // DUCT_INSULATION_THICKNESS
       { RbsReferenceFreesize, -1150435 }, // RBS_REFERENCE_FREESIZE
       { RbsReferenceOverallsize, -1150434 }, // RBS_REFERENCE_OVERALLSIZE
       { RbsReferenceLiningThickness, -1150433 }, // RBS_REFERENCE_LINING_THICKNESS
@@ -745,11 +904,29 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { DividedSurfaceSurfaceArea, -1150050 }, // DIVIDED_SURFACE_SURFACE_AREA
       { RbsElecRoomLightingCalcLuminaireplane, -1144331 }, // RBS_ELEC_ROOM_LIGHTING_CALC_LUMINAIREPLANE
       { LayoutnodeCurvetypeParam, -1142000 }, // LAYOUTNODE_CURVETYPE_PARAM
+      { RbsDistributionsysHlPhaseParam, -1141050 }, // RBS_DISTRIBUTIONSYS_HL_PHASE_PARAM
+      { RbsPipeWallThickness, -1141040 }, // RBS_PIPE_WALL_THICKNESS
+      { MepPipeLowerInvertElevation, -1141033 }, // MEP_PIPE_LOWER_INVERT_ELEVATION
+      { MepPipeUpperInvertElevation, -1141032 }, // MEP_PIPE_UPPER_INVERT_ELEVATION
+      { MepPipeLowerObvertElevation, -1141031 }, // MEP_PIPE_LOWER_OBVERT_ELEVATION
+      { MepPipeUpperObvertElevation, -1141030 }, // MEP_PIPE_UPPER_OBVERT_ELEVATION
+      { MepLowerBottomElevationIncludeInsulation, -1141029 }, // MEP_LOWER_BOTTOM_ELEVATION_INCLUDE_INSULATION
+      { MepLowerTopElevationIncludeInsulation, -1141028 }, // MEP_LOWER_TOP_ELEVATION_INCLUDE_INSULATION
+      { MepUpperBottomElevationIncludeInsulation, -1141027 }, // MEP_UPPER_BOTTOM_ELEVATION_INCLUDE_INSULATION
+      { MepUpperTopElevationIncludeInsulation, -1141026 }, // MEP_UPPER_TOP_ELEVATION_INCLUDE_INSULATION
+      { MepLowerBottomElevation, -1141025 }, // MEP_LOWER_BOTTOM_ELEVATION
+      { MepLowerTopElevation, -1141024 }, // MEP_LOWER_TOP_ELEVATION
+      { MepUpperBottomElevation, -1141023 }, // MEP_UPPER_BOTTOM_ELEVATION
+      { MepUpperTopElevation, -1141022 }, // MEP_UPPER_TOP_ELEVATION
+      { MepLowerCenterlineElevation, -1141021 }, // MEP_LOWER_CENTERLINE_ELEVATION
+      { MepUpperCenterlineElevation, -1141020 }, // MEP_UPPER_CENTERLINE_ELEVATION
+      { FabricationMaterialGauge, -1141018 }, // FABRICATION_MATERIAL_GAUGE
+      { FabricationDuctworkStiffenerSpec, -1141017 }, // FABRICATION_DUCTWORK_STIFFENER_SPEC
       { FabricationPartPatNo, -1141014 }, // FABRICATION_PART_PAT_NO
       { FabricationEndSize, -1141013 }, // FABRICATION_END_SIZE
-      { FabricationBraSize, -1141012 }, // FABRICATION_BRA_SIZE
-      { FabricationSecSize, -1141011 }, // FABRICATION_SEC_SIZE
-      { FabricationPriSize, -1141010 }, // FABRICATION_PRI_SIZE
+      { FabricationBranchSize, -1141012 }, // FABRICATION_BRANCH_SIZE
+      { FabricationSecondarySize, -1141011 }, // FABRICATION_SECONDARY_SIZE
+      { FabricationPrimarySize, -1141010 }, // FABRICATION_PRI_SIZE
       { FabricationChangeServiceParam, -1141009 }, // FABRICATION_CHANGE_SERVICE_PARAM
       { FabricationSetUpDownTagFromBottom, -1141008 }, // FABRICATION_SET_UP_DOWN_TAG_FROM_BOTTOM
       { FabricationInsulationMaterialFinish, -1141007 }, // FABRICATION_INSULATION_MATERIAL_FINISH
@@ -771,11 +948,11 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { FabricationBottomElevationOfPart, -1140991 }, // FABRICATION_BOTTOM_ELEVATION_OF_PART
       { FabricationTopElevationIncludeInsulationOfPart, -1140990 }, // FABRICATION_TOP_ELEVATION_INCLUDE_INSULATION_OF_PART
       { FabricationTopElevationOfPart, -1140989 }, // FABRICATION_TOP_ELEVATION_OF_PART
-      { FabricationCenterlineElevationOfPart, -1140988 }, // FABRICATION_CENTERLINE_ELEVATION_OF_PART
-      { FabricationSpotBottomElevationIncludeInsulationOfPart, -1140987 }, // FABRICATION_SPOT_BOTTOM_ELEVATION_INCLUDE_INSULATION_OF_PART
-      { FabricationSpotBottomElevationOfPart, -1140986 }, // FABRICATION_SPOT_BOTTOM_ELEVATION_OF_PART
-      { FabricationSpotTopElevationIncludeInsulationOfPart, -1140985 }, // FABRICATION_SPOT_TOP_ELEVATION_INCLUDE_INSULATION_OF_PART
-      { FabricationSpotTopElevationOfPart, -1140984 }, // FABRICATION_SPOT_TOP_ELEVATION_OF_PART
+      { MepSpotCenterlineElevation, -1140988 }, // FABRICATION_CENTERLINE_ELEVATION_OF_PART
+      { MepSpotBottomElevationIncludeInsulation, -1140987 }, // FABRICATION_SPOT_BOTTOM_ELEVATION_INCLUDE_INSULATION_OF_PART
+      { MepSpotBottomElevation, -1140986 }, // FABRICATION_SPOT_BOTTOM_ELEVATION_OF_PART
+      { MepSpotTopElevationIncludeInsulation, -1140985 }, // FABRICATION_SPOT_TOP_ELEVATION_INCLUDE_INSULATION_OF_PART
+      { MepSpotTopElevation, -1140984 }, // MEP_SPOT_TOP_ELEVATION
       { FabricationPartDoublewallMaterialArea, -1140983 }, // FABRICATION_PART_DOUBLEWALL_MATERIAL_AREA
       { FabricationSetUpDownTag, -1140982 }, // FABRICATION_SET_UP_DOWN_TAG
       { FabricationPartSheetmetalArea, -1140981 }, // FABRICATION_PART_SHEETMETAL_AREA
@@ -980,6 +1157,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { PhyMaterialParamYoungMod3, -1140302 }, // PHY_MATERIAL_PARAM_YOUNG_MOD3
       { PhyMaterialParamYoungMod2, -1140301 }, // PHY_MATERIAL_PARAM_YOUNG_MOD2
       { PhyMaterialParamYoungMod1, -1140300 }, // PHY_MATERIAL_PARAM_YOUNG_MOD1
+      { PipeVelocityPressure, -1140285 }, // PIPE_VELOCITY_PRESSURE
       { RbsPipeSizeMaximum, -1140284 }, // RBS_PIPE_SIZE_MAXIMUM
       { RbsPipeSizeMinimum, -1140283 }, // RBS_PIPE_SIZE_MINIMUM
       { RbsDuctPressureDrop, -1140282 }, // RBS_DUCT_PRESSURE_DROP
@@ -1045,16 +1223,22 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { RbsPipeFlowParam, -1140213 }, // RBS_PIPE_FLOW_PARAM
       { RbsPipeInnerDiamParam, -1140212 }, // RBS_PIPE_INNER_DIAM_PARAM
       { RbsPipeReynoldsNumberParam, -1140211 }, // RBS_PIPE_REYNOLDS_NUMBER_PARAM
-      { RbsPipeRelativeRoughnessParam, -1140210 }, // RBS_PIPE_RELATIVE_ROUGHNESS_PARAM
+      { RelativeRoughness, -1140210 }, // RELATIVE_ROUGHNESS
       { RbsPipeFlowStateParam, -1140209 }, // RBS_PIPE_FLOW_STATE_PARAM
-      { RbsPipeFrictionFactorParam, -1140208 }, // RBS_PIPE_FRICTION_FACTOR_PARAM
+      { FrictionFactor, -1140208 }, // FRICTION_FACTOR
       { RbsPipeVelocityParam, -1140207 }, // RBS_PIPE_VELOCITY_PARAM
       { RbsPipeFrictionParam, -1140206 }, // RBS_PIPE_FRICTION_PARAM
       { RbsPipePressuredropParam, -1140205 }, // RBS_PIPE_PRESSUREDROP_PARAM
-      { RbsPipeRoughnessParam, -1140204 }, // RBS_PIPE_ROUGHNESS_PARAM
+      { PipeRoughness, -1140204 }, // PIPE_ROUGHNESS
       { RbsPipeMaterialParam, -1140202 }, // RBS_PIPE_MATERIAL_PARAM
       { RbsPipeConnectiontypeParam, -1140201 }, // RBS_PIPE_CONNECTIONTYPE_PARAM
       { RbsPipeClassParam, -1140200 }, // RBS_PIPE_CLASS_PARAM
+      { RbsElecDemandCurrentPhasec, -1140187 }, // RBS_ELEC_DEMAND_CURRENT_PHASEC
+      { RbsElecDemandCurrentPhaseb, -1140186 }, // RBS_ELEC_DEMAND_CURRENT_PHASEB
+      { RbsElecDemandCurrentPhasea, -1140185 }, // RBS_ELEC_DEMAND_CURRENT_PHASEA
+      { RbsElecDemandLoadPhasec, -1140184 }, // RBS_ELEC_DEMAND_LOAD_PHASEC
+      { RbsElecDemandLoadPhaseb, -1140183 }, // RBS_ELEC_DEMAND_LOAD_PHASEB
+      { RbsElecDemandLoadPhasea, -1140182 }, // RBS_ELEC_DEMAND_LOAD_PHASEA
       { RbsElecCircuitSlotIndex, -1140181 }, // RBS_ELEC_CIRCUIT_SLOT_INDEX
       { CircuitWaysParam, -1140180 }, // CIRCUIT_WAYS_PARAM
       { CircuitLoadClassificationAbbreviationParam, -1140179 }, // CIRCUIT_LOAD_CLASSIFICATION_ABBREVIATION_PARAM
@@ -1272,10 +1456,43 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { ConnectorWidth, -1133403 }, // CONNECTOR_WIDTH
       { ConnectorRadius, -1133401 }, // CONNECTOR_RADIUS
       { ConnectorProfileType, -1133400 }, // CONNECTOR_PROFILE_TYPE
+      { Use3dSnapping, -1123513 }, // USE_3D_SNAPPING
+      { ArcElemFixKeepConcentric, -1123512 }, // ARC_ELEM_FIX_KEEP_CONCENTRIC
       { PipingGenderType, -1115974 }, // PIPING_GENDER_TYPE
       { PipingConnectionType, -1115973 }, // PIPING_CONNECTION_TYPE
       { RbsPartType, -1115958 }, // RBS_PART_TYPE
       { StructuralConnectionEditRangesOfApplicability, -1115520 }, // STRUCTURAL_CONNECTION_EDIT_RANGES_OF_APPLICABILITY
+      { WindowtypeIsSchematic, -1114855 }, // WINDOWTYPE_IS_SCHEMATIC
+      { ThermalMaterialSpecificHeatCapacity, -1114854 }, // THERMAL_MATERIAL_SPECIFIC_HEAT_CAPACITY
+      { ThermalMaterialDensity, -1114853 }, // THERMAL_MATERIAL_DENSITY
+      { ThermalMaterialConductivity, -1114852 }, // THERMAL_MATERIAL_CONDUCTIVITY
+      { ThermalMaterialThickness, -1114851 }, // THERMAL_MATERIAL_THICKNESS
+      { ThermalMaterialDescription, -1114850 }, // THERMAL_MATERIAL_DESCRIPTION
+      { ThermalMaterialName, -1114849 }, // THERMAL_MATERIAL_NAME
+      { SpaceComposednameParam, -1114848 }, // SPACE_COMPOSEDNAME_PARAM
+      { SpaceNumberParam, -1114847 }, // SPACE_NUMBER_PARAM
+      { ConstructionIsSchematic, -1114846 }, // CONSTRUCTION_IS_SCHEMATIC
+      { AnalyticalZoneName, -1114845 }, // ANALYTICAL_ZONE_NAME
+      { ZoneDesignCoolTemperature, -1114844 }, // ZONE_DESIGN_COOL_TEMPERATURE
+      { ZoneDesignHeatTemperature, -1114843 }, // ZONE_DESIGN_HEAT_TEMPERATURE
+      { ZoneOutsideAirFlowPerPerson, -1114842 }, // ZONE_OUTSIDE_AIR_FLOW_PER_PERSON
+      { ZoneOutsideAirFlowPerArea, -1114841 }, // ZONE_OUTSIDE_AIR_FLOW_PER_AREA
+      { ZoneAirChangesPerHour, -1114840 }, // ZONE_AIR_CHANGES_PER_HOUR
+      { AnalyticalZone, -1114839 }, // ANALYTICAL_ZONE
+      { SpaceNumberOfPeople, -1114838 }, // SPACE_NUMBER_OF_PEOPLE
+      { SpaceConditionType, -1114837 }, // SPACE_CONDITION_TYPE
+      { SpaceTypeGbxml, -1114836 }, // SPACE_TYPE_GBXML
+      { AnalyticalSurface, -1114835 }, // ANALYTICAL_SURFACE
+      { SurfaceName, -1114834 }, // SURFACE_NAME
+      { OriginatingElementName, -1114833 }, // ORIGINATING_ELEMENT_NAME
+      { WindowTypeName, -1114832 }, // WINDOW_TYPE_NAME
+      { ConstructionName, -1114831 }, // CONSTRUCTION_NAME
+      { AnalyticConstruction, -1114830 }, // ANALYTIC_CONSTRUCTION
+      { Tilt, -1114829 }, // TILT
+      { Azimuth, -1114828 }, // AZIMUTH
+      { AnalyticalAdjacentSpace, -1114827 }, // ANALYTICAL_ADJACENT_SPACE
+      { AnalyticalSpace, -1114826 }, // ANALYTICAL_SPACE
+      { SpaceNameParam, -1114825 }, // SPACE_NAME_PARAM
       { SystemsAnalysisReportFolder, -1114824 }, // SYSTEMS_ANALYSIS_REPORT_FOLDER
       { SystemsAnalysisReportStyle, -1114823 }, // SYSTEMS_ANALYSIS_REPORT_STYLE
       { EnergyAnalysisProjectPhase, -1114822 }, // ENERGY_ANALYSIS_PROJECT_PHASE
@@ -1520,7 +1737,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { RbsLiningThickness, -1114118 }, // RBS_LINING_THICKNESS
       { RbsInsulationThickness, -1114117 }, // RBS_INSULATION_THICKNESS
       { RbsFriction, -1114116 }, // RBS_FRICTION
-      { RbsCurvetypeRoughnessParam, -1114114 }, // RBS_CURVETYPE_ROUGHNESS_PARAM
+      { DuctRoughness, -1114114 }, // DUCT_ROUGHNESS
       { RbsCurvetypeDefaultTransitionParam, -1114113 }, // RBS_CURVETYPE_DEFAULT_TRANSITION_PARAM
       { RbsCurvetypeDefaultCrossParam, -1114112 }, // RBS_CURVETYPE_DEFAULT_CROSS_PARAM
       { RbsCurvetypeDefaultTeeParam, -1114111 }, // RBS_CURVETYPE_DEFAULT_TEE_PARAM
@@ -1582,6 +1799,13 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { WallTaperedExteriorInwardAngle, -1019102 }, // WALL_TAPERED_EXTERIOR_INWARD_ANGLE
       { WallSingleSlantAngleFromVertical, -1019101 }, // WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL
       { WallCrossSection, -1019100 }, // WALL_CROSS_SECTION
+      { IfcImportMaterialName, -1019018 }, // IFC_IMPORT_MATERIAL_NAME
+      { IfcExportPredefinedtypeType, -1019017 }, // IFC_EXPORT_PREDEFINEDTYPE_TYPE
+      { IfcExportPredefinedtype, -1019016 }, // IFC_EXPORT_PREDEFINEDTYPE
+      { IfcExportElementTypeAs, -1019015 }, // IFC_EXPORT_ELEMENT_TYPE_AS
+      { IfcExportElementAs, -1019014 }, // IFC_EXPORT_ELEMENT_AS
+      { IfcExportElementType, -1019013 }, // IFC_EXPORT_ELEMENT_TYPE
+      { IfcExportElement, -1019012 }, // IFC_EXPORT_ELEMENT
       { IfcOrganization, -1019011 }, // IFC_ORGANIZATION
       { IfcApplicationVersion, -1019010 }, // IFC_APPLICATION_VERSION
       { IfcApplicationName, -1019009 }, // IFC_APPLICATION_NAME
@@ -1601,6 +1825,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { StructConnectionBeamEnd, -1018802 }, // STRUCT_CONNECTION_BEAM_END
       { StructConnectionBeamStart, -1018801 }, // STRUCT_CONNECTION_BEAM_START
       { StructConnectionApplyTo, -1018800 }, // STRUCT_CONNECTION_APPLY_TO
+      { LeaderLength, -1018705 }, // LEADER_LENGTH
       { RebarContainerBarType, -1018505 }, // REBAR_CONTAINER_BAR_TYPE
       { ReinforcementVolume, -1018503 }, // REINFORCEMENT_VOLUME
       { ReinEstBarVolume, -1018502 }, // REIN_EST_BAR_VOLUME
@@ -1740,6 +1965,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { RebarSystemLayerSummaryWithSpacing, -1018002 }, // REBAR_SYSTEM_LAYER_SUMMARY_WITH_SPACING
       { RebarSystemLayoutRule, -1018001 }, // REBAR_SYSTEM_LAYOUT_RULE
       { RebarSystemCoverSide, -1018000 }, // REBAR_SYSTEM_COVER_SIDE
+      { EnergyAnalysisCurrentViewOnly, -1017750 }, // ENERGY_ANALYSIS_CURRENT_VIEW_ONLY
       { FabricWireOffset, -1017739 }, // FABRIC_WIRE_OFFSET
       { FabricWireDistance, -1017738 }, // FABRIC_WIRE_DISTANCE
       { FabricWireLength, -1017737 }, // FABRIC_WIRE_LENGTH
@@ -1748,7 +1974,6 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { FabricParamSharedFamilyKey, -1017733 }, // FABRIC_PARAM_SHARED_FAMILY_KEY
       { FabricParamCutByHost, -1017732 }, // FABRIC_PARAM_CUT_BY_HOST
       { BentFabricParamStraightWiresLocation, -1017731 }, // BENT_FABRIC_PARAM_STRAIGHT_WIRES_LOCATION
-      { ConstraintFixedOffset, -1017730 }, // CONSTRAINT_FIXED_OFFSET
       { BentFabricParamBendDirection, -1017729 }, // BENT_FABRIC_PARAM_BEND_DIRECTION
       { FabricParamSpanTagComponentReference, -1017728 }, // FABRIC_PARAM_SPAN_TAG_COMPONENT_REFERENCE
       { FabricParamSpanSymDRight, -1017727 }, // FABRIC_PARAM_SPAN_SYM_D_RIGHT
@@ -1925,7 +2150,6 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { LoadForceFx, -1015010 }, // LOAD_FORCE_FX
       { LoadIsHosted, -1015006 }, // LOAD_IS_HOSTED
       { LoadIsReaction, -1015005 }, // LOAD_IS_REACTION
-      { LoadIsCreatedByApi, -1015004 }, // LOAD_IS_CREATED_BY_API
       { LoadIsUniform, -1015003 }, // LOAD_IS_UNIFORM
       { LoadUseLocalCoordinateSystem, -1015001 }, // LOAD_USE_LOCAL_COORDINATE_SYSTEM
       { LoadCaseId, -1015000 }, // LOAD_CASE_ID
@@ -1934,8 +2158,14 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { SpanDirSymParamBottom, -1014002 }, // SPAN_DIR_SYM_PARAM_BOTTOM
       { SpanDirSymParamTop, -1014001 }, // SPAN_DIR_SYM_PARAM_TOP
       { SpanDirInstParamAngle, -1014000 }, // SPAN_DIR_INST_PARAM_ANGLE
+      { AnalyticalNodeConnectionStatus, -1013457 }, // ANALYTICAL_NODE_CONNECTION_STATUS
+      { AnalyticalMemberRotation, -1013456 }, // ANALYTICAL_MEMBER_ROTATION
+      { AnalyticalPanelThickness, -1013455 }, // ANALYTICAL_PANEL_THICKNESS
+      { AnalyticalElementStructuralRole, -1013453 }, // ANALYTICAL_ELEMENT_STRUCTURAL_ROLE
+      { AnalyticalElementPhysicalAsset, -1013452 }, // ANALYTICAL_ELEMENT_PHYSICAL_ASSET
       { AnalyticalGeometryIsValid, -1013451 }, // ANALYTICAL_GEOMETRY_IS_VALID
       { StructuralAssetParam, -1013450 }, // STRUCTURAL_ASSET_PARAM
+      { AnalyticalElementHasAssociation, -1013449 }, // ANALYTICAL_ELEMENT_HAS_ASSOCIATION
       { GridNetLocationMark, -1013448 }, // GRID_NET_LOCATION_MARK
       { AnalyticalModelCodeChecking, -1013447 }, // ANALYTICAL_MODEL_CODE_CHECKING
       { AnalyticalModelNodesMark, -1013446 }, // ANALYTICAL_MODEL_NODES_MARK
@@ -2115,7 +2345,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { TopographyLinkPath, -1012409 }, // TOPOGRAPHY_LINK_PATH
       { TopographyLinkName, -1012408 }, // TOPOGRAPHY_LINK_NAME
       { BoundaryRadius, -1012407 }, // BOUNDARY_RADIUS
-      { ContourSubcategoryId, -1012405 }, // CONTOUR_SUBCATEGORY_ID
+      { ToposurfaceContourSubcategoryId, -1012405 }, // TOPOSURFACE_CONTOUR_SUBCATEGORY_ID
       { BoundaryBearing, -1012404 }, // BOUNDARY_BEARING
       { BoundaryDistance, -1012403 }, // BOUNDARY_DISTANCE
       { ContourElevationStep, -1012402 }, // CONTOUR_ELEVATION_STEP
@@ -2126,6 +2356,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { ViewerVolumeOfInterestCrop, -1012202 }, // VIEWER_VOLUME_OF_INTEREST_CROP
       { DatumVolumeOfInterest, -1012201 }, // DATUM_VOLUME_OF_INTEREST
       { OrientByView, -1012200 }, // ORIENT_BY_VIEW
+      { VolumeOfInterestHeight, -1012114 }, // VOLUME_OF_INTEREST_HEIGHT
       { RoomPhase, -1012113 }, // ROOM_PHASE
       { RoomPhaseId, -1012112 }, // ROOM_PHASE_ID
       { PhaseSequenceNumber, -1012111 }, // PHASE_SEQUENCE_NUMBER
@@ -2249,17 +2480,11 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { RgbRParam, -1010022 }, // RGB_R_PARAM
       { EllipseYParam, -1010021 }, // ELLIPSE_Y_PARAM
       { EllipseXParam, -1010020 }, // ELLIPSE_X_PARAM
-      { DebugtabDataboundcontrolsdemoColorCombo, -1010019 }, // -1010019
       { GroupnameParam, -1010018 }, // GROUPNAME_PARAM
       { IconIndexParam, -1010017 }, // ICON_INDEX_PARAM
       { ShowIconParam, -1010016 }, // SHOW_ICON_PARAM
-      { DebugtabDataboundcontrolsdemoComboWithNestedInfo, -1010015 }, // -1010015
-      { DebugtabDataboundcontrolsdemoEditablecombo, -1010014 }, // -1010014
-      { DebugtabDataboundcontrolsdemoDouble, -1010013 }, // DEBUGTAB_DATABOUNDCONTROLSDEMO_DOUBLE
-      { DebugtabDataboundcontrolsdemoInteger, -1010012 }, // DEBUGTAB_DATABOUNDCONTROLSDEMO_INTEGER
-      { DebugtabDataboundcontrolsdemoBoolean, -1010011 }, // DEBUGTAB_DATABOUNDCONTROLSDEMO_BOOLEAN
-      { DebugtabDataboundcontrolsdemoEnum, -1010010 }, // DEBUGTAB_DATABOUNDCONTROLSDEMO_ENUM
-      { GenericDepth, -1010003 }, // CASEWORK_DEPTH
+      { GenericDepth, -1010003 }, // GENERIC_DEPTH
+      { AnalyticalMemberSectionType, -1009533 }, // ANALYTICAL_MEMBER_SECTION_TYPE
       { AnalyticalModelEndProjectionOrthogonal, -1009532 }, // ANALYTICAL_MODEL_END_PROJECTION_ORTHOGONAL
       { AnalyticalModelStartProjectionOrthogonal, -1009531 }, // ANALYTICAL_MODEL_START_PROJECTION_ORTHOGONAL
       { AnalyticalLinkReleaseRotationZ, -1009530 }, // ANALYTICAL_LINK_RELEASE_ROTATION_Z
@@ -2348,8 +2573,11 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { DatumBubbleEndn1, -1008002 }, // DATUM_BUBBLE_END_1
       { DatumBubbleEndn2, -1008001 }, // DATUM_BUBBLE_END_2
       { DatumText, -1008000 }, // DATUM_TEXT
+      { CurveIsMultilevel, -1007908 }, // CURVE_IS_MULTILEVEL
+      { CurveBottomLevel, -1007907 }, // CURVE_BASE_LEVEL
+      { CurveTopLevel, -1007906 }, // CURVE_TOP_LEVEL
       { EllipseFocusMrkVisible, -1007905 }, // ELLIPSE_FOCUS_MRK_VISIBLE
-      { ArcWallCntrMrkVisible, -1007900 }, // ARC_CURVE_CNTR_MRK_VISIBLE
+      { ArcWallCntrMrkVisible, -1007900 }, // ARC_WALL_CNTR_MRK_VISIBLE
       { RefTableParamName, -1007851 }, // REF_TABLE_PARAM_NAME
       { RefTableElemName, -1007850 }, // REF_TABLE_ELEM_NAME
       { RbsPanelScheduleSheetAppearanceInstParam, -1007808 }, // RBS_PANEL_SCHEDULE_SHEET_APPEARANCE_INST_PARAM
@@ -2384,6 +2612,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { ImportAdtEntityStyle, -1007732 }, // IMPORT_ADT_ENTITY_STYLE
       { ImportAdtEntityStructType, -1007731 }, // IMPORT_ADT_ENTITY_STRUCT_TYPE
       { ImportAdtEntityType, -1007730 }, // IMPORT_ADT_ENTITY_TYPE
+      { RvtLinkInstanceProjectInformation, -1007729 }, // RVT_LINK_INSTANCE_PROJECT_INFORMATION
       { RvtLinkPhaseMap, -1007728 }, // RVT_LINK_PHASE_MAP
       { RvtLinkReferenceType, -1007727 }, // RVT_LINK_REFERENCE_TYPE
       { RvtLinkFileNameWithoutExt, -1007726 }, // RVT_LINK_FILE_NAME_WITHOUT_EXT
@@ -2392,6 +2621,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { RvtSourceLevel, -1007723 }, // RVT_SOURCE_LEVEL
       { RvtLinkInstanceName, -1007721 }, // RVT_LINK_INSTANCE_NAME
       { GeoLocation, -1007720 }, // GEO_LOCATION
+      { ImportInstanceCuttingInView, -1007707 }, // IMPORT_INSTANCE_CUTTING_IN_VIEW
       { ImportInstanceScale, -1007706 }, // IMPORT_INSTANCE_SCALE
       { ImportBackground, -1007705 }, // IMPORT_BACKGROUND
       { ImportDisplayUnits, -1007704 }, // IMPORT_DISPLAY_UNITS
@@ -2412,6 +2642,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { ColorFillSwatchHeightParam, -1007504 }, // COLOR_FILL_SWATCH_HEIGHT_PARAM
       { ColorFillSwatchWidthParam, -1007503 }, // COLOR_FILL_SWATCH_WIDTH_PARAM
       { ColorFillFilteredParam, -1007502 }, // COLOR_FILL_FILTERED_PARAM
+      { SheetCollection, -1007421 }, // SHEET_COLLECTION
       { SheetGuideGrid, -1007419 }, // SHEET_GUIDE_GRID
       { SheetCurrentRevisionIssued, -1007418 }, // SHEET_CURRENT_REVISION_ISSUED
       { SheetCurrentRevisionIssuedBy, -1007417 }, // SHEET_CURRENT_REVISION_ISSUED_BY
@@ -2534,12 +2765,13 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { LevelElev, -1007102 }, // LEVEL_ELEV
       { LevelName, -1007101 }, // LEVEL_NAME
       { LevelHeadTag, -1007100 }, // LEVEL_HEAD_TAG
+      { SheetCollectionName, -1007071 }, // SHEET_COLLECTION_NAME
       { MultiReferenceAnnotationShowDimensionText, -1007054 }, // MULTI_REFERENCE_ANNOTATION_SHOW_DIMENSION_TEXT
       { MultiReferenceAnnotationDimensionStyle, -1007053 }, // MULTI_REFERENCE_ANNOTATION_DIMENSION_STYLE
       { MultiReferenceAnnotationGroupTagHeads, -1007052 }, // MULTI_REFERENCE_ANNOTATION_GROUP_TAG_HEADS
       { MultiReferenceAnnotationTagType, -1007051 }, // MULTI_REFERENCE_ANNOTATION_TAG_TYPE
       { MultiReferenceAnnotationReferenceCategory, -1007050 }, // MULTI_REFERENCE_ANNOTATION_REFERENCE_CATEGORY
-      { MultiLeaderTagUi, -1007009 }, // MULTI_LEADER_TAG_UI
+      { TagElevationBase, -1007010 }, // TAG_ELEVATION_BASE
       { TagElementCount, -1007008 }, // TAG_ELEMENT_COUNT
       { TagAngleParam, -1007007 }, // TAG_ANGLE_PARAM
       { TagLeaderType, -1007006 }, // TAG_LEADER_TYPE
@@ -2906,6 +3138,31 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { AnalyticalThermalResistance, -1005431 }, // ANALYTICAL_THERMAL_RESISTANCE
       { AnalyticalHeatTransferCoefficient, -1005430 }, // ANALYTICAL_HEAT_TRANSFER_COEFFICIENT
       { ViewDesignOptionsConfig, -1005400 }, // VIEW_DESIGN_OPTIONS_CONFIG
+      { ViewSolarstudyLightingAltitudeText, -1005378 }, // VIEW_SOLARSTUDY_LIGHTING_ALTITUDE_TEXT
+      { ViewSolarstudyLightingAltitudeValue, -1005377 }, // VIEW_SOLARSTUDY_LIGHTING_ALTITUDE_VALUE
+      { ViewSolarstudyLightingAzimuthText, -1005376 }, // VIEW_SOLARSTUDY_LIGHTING_AZIMUTH_TEXT
+      { ViewSolarstudyLightingAzimuthValue, -1005375 }, // VIEW_SOLARSTUDY_LIGHTING_AZIMUTH_VALUE
+      { ViewSolarstudyMultidayDatetimeText, -1005374 }, // VIEW_SOLARSTUDY_MULTIDAY_DATETIME_TEXT
+      { ViewSolarstudyMultidayFrameText, -1005373 }, // VIEW_SOLARSTUDY_MULTIDAY_FRAME_TEXT
+      { ViewSolarstudyMultidayFrameValue, -1005372 }, // VIEW_SOLARSTUDY_MULTIDAY_FRAME_VALUE
+      { ViewSolarstudySingledayDatetimeText, -1005371 }, // VIEW_SOLARSTUDY_SINGLEDAY_DATETIME_TEXT
+      { ViewSolarstudySingledayFrameText, -1005370 }, // VIEW_SOLARSTUDY_SINGLEDAY_FRAME_TEXT
+      { ViewSolarstudySingledayFrameValue, -1005369 }, // VIEW_SOLARSTUDY_SINGLEDAY_FRAME_VALUE
+      { ViewSolarstudyStillTimeText, -1005368 }, // VIEW_SOLARSTUDY_STILL_TIME_TEXT
+      { ViewSolarstudyStillTimeValue, -1005367 }, // VIEW_SOLARSTUDY_STILL_TIME_VALUE
+      { ViewSolarstudyStillDateText, -1005366 }, // VIEW_SOLARSTUDY_STILL_DATE_TEXT
+      { ViewSolarstudyStillDateValue, -1005365 }, // VIEW_SOLARSTUDY_STILL_DATE_VALUE
+      { ViewSolarstudyShadowsIntensityText, -1005360 }, // VIEW_SOLARSTUDY_SHADOWS_INTENSITY_TEXT
+      { ViewSolarstudyShadowsIntensityValue, -1005359 }, // VIEW_SOLARSTUDY_SHADOWS_INTENSITY_VALUE
+      { ViewSolarstudySunIntensityText, -1005358 }, // VIEW_SOLARSTUDY_SUN_INTENSITY_TEXT
+      { ViewSolarstudySunIntensityValue, -1005357 }, // VIEW_SOLARSTUDY_SUN_INTENSITY_VALUE
+      { ViewSolarstudyAnimationSpeedText, -1005356 }, // VIEW_SOLARSTUDY_ANIMATION_SPEED_TEXT
+      { ViewSolarstudyAnimationSpeedValue, -1005355 }, // VIEW_SOLARSTUDY_ANIMATION_SPEED_VALUE
+      { ViewSolarstudyIsLightingStudyType, -1005354 }, // VIEW_SOLARSTUDY_IS_LIGHTING_STUDY_TYPE
+      { ViewSolarstudyIsMultidayStudyType, -1005353 }, // VIEW_SOLARSTUDY_IS_MULTIDAY_STUDY_TYPE
+      { ViewSolarstudyIsSingledayStudyType, -1005352 }, // VIEW_SOLARSTUDY_IS_SINGLEDAY_STUDY_TYPE
+      { ViewSolarstudyIsStillimageStudyType, -1005351 }, // VIEW_SOLARSTUDY_IS_STILLIMAGE_STUDY_TYPE
+      { ViewSolarstudyCurrentStudyTypeIndex, -1005350 }, // VIEW_SOLARSTUDY_CURRENT_STUDY_TYPE_INDEX
       { ViewUnderlayTopId, -1005335 }, // VIEW_UNDERLAY_TOP_ID
       { ViewGraphSunPathSize, -1005334 }, // VIEW_GRAPH_SUN_PATH_SIZE
       { ViewGraphSunPath, -1005333 }, // VIEW_GRAPH_SUN_PATH
@@ -2931,12 +3188,19 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { ViewportAttrLabelTag, -1005250 }, // VIEWPORT_ATTR_LABEL_TAG
       { ViewScaleHavename, -1005231 }, // VIEW_SCALE_HAVENAME
       { ViewScaleCustomname, -1005230 }, // VIEW_SCALE_CUSTOMNAME
+      { ViewerSheetCollection, -1005224 }, // VIEWER_SHEET_COLLECTION
+      { ViewerSheetName, -1005223 }, // VIEWER_SHEET_NAME
+      { ViewReferencingSheetCollection, -1005222 }, // VIEW_REFERENCING_SHEET_COLLECTION
+      { ViewportSheetCollection, -1005221 }, // VIEWPORT_SHEET_COLLECTION
+      { ViewportAttrPreserveTitlePosition, -1005211 }, // VIEWPORT_ATTR_PRESERVE_TITLE_POSITION
+      { ViewportPositioning, -1005210 }, // VIEWPORT_POSITIONING
       { ViewGraphSchedOffGrid, -1005209 }, // VIEW_GRAPH_SCHED_OFF_GRID
       { ViewGraphSchedUnitsFormat, -1005208 }, // VIEW_GRAPH_SCHED_UNITS_FORMAT
       { ViewportSheetName, -1005207 }, // VIEWPORT_SHEET_NAME
       { ViewportSheetNumber, -1005206 }, // VIEWPORT_SHEET_NUMBER
       { ViewportScale, -1005204 }, // VIEWPORT_SCALE
       { ViewportViewName, -1005203 }, // VIEWPORT_VIEW_NAME
+      { ViewportView, -1005202 }, // VIEWPORT_VIEW
       { ViewportDetailNumber, -1005201 }, // VIEWPORT_DETAIL_NUMBER
       { ViewTemplateForSchedule, -1005199 }, // VIEW_TEMPLATE_FOR_SCHEDULE
       { RenderRpcProperties, -1005198 }, // RENDER_RPC_PROPERTIES
@@ -3117,7 +3381,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { BrOrgFolders, -1002006 }, // BR_ORG_FOLDERS
       { SymbolFamilyAndTypeNamesParam, -1002003 }, // SYMBOL_FAMILY_AND_TYPE_NAMES_PARAM
       { SymbolFamilyNameParam, -1002002 }, // ALL_MODEL_FAMILY_NAME
-      { SymbolNameParam, -1002001 }, // SYMBOL_NAME_PARAM
+      { SymbolNameParam, -1002001 }, // ALL_MODEL_TYPE_NAME
       { SymbolIdParam, -1002000 }, // SYMBOL_ID_PARAM
       { StructuralDisplayInHiddenViews, -1001956 }, // STRUCTURAL_DISPLAY_IN_HIDDEN_VIEWS
       { FloorParamSpanDirection, -1001955 }, // FLOOR_PARAM_SPAN_DIRECTION
@@ -3161,6 +3425,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { RevolutionStartAngle, -1001802 }, // REVOLUTION_START_ANGLE
       { ExtrusionEndParam, -1001801 }, // EXTRUSION_END_PARAM
       { ExtrusionStartParam, -1001800 }, // EXTRUSION_START_PARAM
+      { ExtrusionDepthParam, -1001799 }, // EXTRUSION_DEPTH_PARAM
       { ScheduleTypeForBrowser, -1001718 }, // SCHEDULE_TYPE_FOR_BROWSER
       { ScheduleCategory, -1001717 }, // SCHEDULE_CATEGORY
       { FaceroofOffsetParam, -1001716 }, // FACEROOF_OFFSET_PARAM
@@ -3270,7 +3535,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { StructuralStickSymbolLocation, -1001503 }, // STRUCTURAL_STICK_SYMBOL_LOCATION
       { StructuralBeamEndSupport, -1001502 }, // STRUCTURAL_BEAM_END_SUPPORT
       { StructuralBeamStartSupport, -1001501 }, // STRUCTURAL_BEAM_START_SUPPORT
-      { WindowTypeId, -1001405 }, // WINDOW_TYPE_ID
+      { WindowTypeId, -1001405 }, // ALL_MODEL_TYPE_MARK
       { WallSweepOrientation, -1001399 }, // WALL_SWEEP_ORIENTATION
       { StructuralAttachmentEndValueElevation, -1001398 }, // STRUCTURAL_ATTACHMENT_END_VALUE_ELEVATION
       { StructuralAttachmentStartValueElevation, -1001397 }, // STRUCTURAL_ATTACHMENT_START_VALUE_ELEVATION
@@ -3313,16 +3578,16 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { FamilyRoughHeightParam, -1001304 }, // FAMILY_ROUGH_HEIGHT_PARAM
       { FamilyWindowInsetParam, -1001303 }, // FAMILY_WINDOW_INSET_PARAM
       { FamilyThicknessParam, -1001302 }, // GENERIC_THICKNESS
-      { FamilyWidthParam, -1001301 }, // FURNITURE_WIDTH
-      { FamilyHeightParam, -1001300 }, // DOOR_HEIGHT
+      { FamilyWidthParam, -1001301 }, // GENERIC_WIDTH
+      { FamilyHeightParam, -1001300 }, // GENERIC_HEIGHT
       { DoorEvacuationExitType, -1001212 }, // DOOR_EVACUATION_EXIT_TYPE
-      { DoorOperationType, -1001211 }, // WINDOW_OPERATION_TYPE
+      { DoorOperationType, -1001211 }, // DOOR_OPERATION_TYPE
       { DoorFrameMaterial, -1001210 }, // DOOR_FRAME_MATERIAL
       { DoorFrameType, -1001209 }, // DOOR_FRAME_TYPE
-      { DoorFinish, -1001208 }, // CURTAIN_WALL_PANELS_FINISH
+      { DoorFinish, -1001208 }, // GENERIC_FINISH
       { DoorConstructionType, -1001207 }, // GENERIC_CONSTRUCTION_TYPE
       { FireRating, -1001206 }, // FIRE_RATING
-      { DoorCost, -1001205 }, // DOOR_COST
+      { DoorCost, -1001205 }, // ALL_MODEL_COST
       { DoorNumber, -1001203 }, // ALL_MODEL_MARK
       { DpartOriginalCategoryId, -1001140 }, // DPART_ORIGINAL_CATEGORY_ID
       { DpartLayerConstruction, -1001139 }, // DPART_LAYER_CONSTRUCTION
@@ -3353,6 +3618,7 @@ namespace RhinoInside.Revit.External.DB.Schemas
       { WallUserHeightParam, -1001105 }, // WALL_USER_HEIGHT_PARAM
       { WallHeightType, -1001103 }, // WALL_HEIGHT_TYPE
       { WallBaseHeightParam, -1001102 }, // WALL_BASE_HEIGHT_PARAM
+      { ScaleFactorParam, -1001010 }, // SCALE_FACTOR_PARAM
       { AllowAutoEmbed, -1001009 }, // ALLOW_AUTO_EMBED
       { WallAttrRoomBounding, -1001007 }, // WALL_ATTR_ROOM_BOUNDING
       { FunctionParam, -1001006 }, // FUNCTION_PARAM
@@ -3362,4 +3628,3 @@ namespace RhinoInside.Revit.External.DB.Schemas
     };
   }
 }
-#endif
