@@ -16,6 +16,10 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.33" version="v1.33.9347.9430" time="11/11/2025" %}
+
+- Public release with misc improvements and bug fixes listed below
+
 {% include ltr/release-header.html title="v1.33 RC2" version="v1.33.9347.9430" pre_release=true time="08/05/2025" %}
 
 - Miscellaneous improvements and bug fixes
