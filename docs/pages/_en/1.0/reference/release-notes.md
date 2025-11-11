@@ -16,6 +16,10 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.34 RC1" version="v1.34.9439.19982" pre_release=true time="11/11/2025" %}
+
+- Miscellaneous improvements and bug fixes
+
 {% include ltr/release-header.html title="v1.33" version="v1.33.9347.9430" time="11/11/2025" %}
 
 - Public release with misc improvements and bug fixes listed below
@@ -23,7 +27,7 @@ group: Deployment & Configs
 {% include ltr/release-header.html title="v1.33 RC2" version="v1.33.9347.9430" pre_release=true time="08/05/2025" %}
 
 - Miscellaneous improvements and bug fixes
-- 
+
 {% include ltr/release-header.html title="v1.33 RC1" version="v1.33.9328.12948" pre_release=true time="07/16/2025" %}
 
 - Import command now works with file types other than 3DM.
