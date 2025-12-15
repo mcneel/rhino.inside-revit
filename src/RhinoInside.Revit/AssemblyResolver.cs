@@ -368,15 +368,15 @@ namespace RhinoInside.Revit
       if (ExternalAssembliesOnly && !IsExternalReference(assemblyName))
         return default;
 
-      var internalAssembliesOnly = ExternalAssembliesOnly;
+      var externalAssembliesOnly = ExternalAssembliesOnly;
       try
       {
-        internalAssembliesOnly = false;
+        ExternalAssembliesOnly = false;
         return InternalContext.ResolveAssembly(assemblyName);
       }
       finally
       {
-        ExternalAssembliesOnly = internalAssembliesOnly;
+        ExternalAssembliesOnly = externalAssembliesOnly;
       }
     }
     #endregion
