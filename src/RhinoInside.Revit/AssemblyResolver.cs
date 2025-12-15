@@ -355,6 +355,38 @@ namespace RhinoInside.Revit
     static void ActivationGate_Enter(object sender, EventArgs e) => ExternalAssembliesOnly = false;
     static void ActivationGate_Exit(object sender, EventArgs e) => ExternalAssembliesOnly = true;
 
+    static readonly MethodInfo AssemblyGetTypesMethod = typeof(Assembly).GetMethod("GetTypes", BindingFlags.Public | BindingFlags.Instance);
+
+    static bool IsReflectionOnly()
+    {
+      var trace = new StackTrace(1);
+      var frames = trace.GetFrames();
+
+      var callingAssembly = Assembly.GetCallingAssembly();
+
+      // Skip Calling Assembly
+      int f = 0;
+      for (; f < frames.Length; ++f)
+      {
+        var method = frames[f].GetMethod();
+        if (method is null) continue;
+        var frameAssembly = method.DeclaringType?.Assembly ?? method.Module?.Assembly;
+        if (frameAssembly != callingAssembly)
+          break;
+      }
+
+      // Look for Assembly.GetTypes
+      for (; f < frames.Length; ++f)
+      {
+        var method = frames[f].GetMethod();
+        if (method is null) continue;
+        if (method == AssemblyGetTypesMethod)
+          return true;
+      }
+
+      return false;
+    }
+
     static Assembly ExternalContextResolving(System.Runtime.Loader.AssemblyLoadContext loadContext, AssemblyName assemblyName)
     {
       // Resolve this Assembly
@@ -368,15 +400,18 @@ namespace RhinoInside.Revit
       if (ExternalAssembliesOnly && !IsExternalReference(assemblyName))
         return default;
 
-      var internalAssembliesOnly = ExternalAssembliesOnly;
+      if (ExternalAssembliesOnly && IsReflectionOnly())
+        return default;
+
+      var externalAssembliesOnly = ExternalAssembliesOnly;
       try
       {
-        internalAssembliesOnly = false;
+        ExternalAssembliesOnly = false;
         return InternalContext.ResolveAssembly(assemblyName);
       }
       finally
       {
-        ExternalAssembliesOnly = internalAssembliesOnly;
+        ExternalAssembliesOnly = externalAssembliesOnly;
       }
     }
     #endregion
