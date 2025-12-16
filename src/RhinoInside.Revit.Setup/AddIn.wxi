@@ -3,7 +3,7 @@
   
   <Fragment>
 
-    <Property Id="SHARED_COMPONENTS_2026_INSTALLPATH">
+    <Property Id="SHARED_COMPONENTS_2026_INSTALLPATH" Value ="C:\Program Files\Common Files\Autodesk Shared\Components\2026">
       <RegistrySearch Id="Components2026InstallPath"
                       Root="HKLM"
                       Key="SOFTWARE\Autodesk\SharedComponents\2026"
@@ -11,7 +11,7 @@
                       Type="directory" />
     </Property>
 
-    <Property Id="SHARED_COMPONENTS_2026_VERSION">
+    <Property Id="SHARED_COMPONENTS_2026_VERSION" Value="1.4.0">
       <RegistrySearch Id="Components2026Version"
                       Root="HKLM"
                       Key="SOFTWARE\Autodesk\SharedComponents\2026"
