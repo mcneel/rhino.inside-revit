@@ -356,6 +356,8 @@ namespace RhinoInside.Revit
     static void ActivationGate_Exit(object sender, EventArgs e) => ExternalAssembliesOnly = true;
 
     static readonly MethodInfo AssemblyGetTypesMethod = typeof(Assembly).GetMethod("GetTypes", BindingFlags.Public | BindingFlags.Instance);
+    static readonly MethodInfo AssemblyGetExportedTypes = typeof(Assembly).GetMethod("GetExportedTypes", BindingFlags.Public | BindingFlags.Instance);
+    static readonly MethodInfo AssemblyGetForwardedTypes = typeof(Assembly).GetMethod("GetForwardedTypes", BindingFlags.Public | BindingFlags.Instance);
 
     static bool IsReflectionOnly()
     {
@@ -382,6 +384,15 @@ namespace RhinoInside.Revit
         if (method is null) continue;
         if (method == AssemblyGetTypesMethod)
           return true;
+
+        if (method.IsVirtual && method is MethodInfo methodInfo)
+        {
+          var baseDefinition = methodInfo.GetBaseDefinition();
+          if (baseDefinition == AssemblyGetExportedTypes)
+            return true;
+          if (baseDefinition == AssemblyGetForwardedTypes)
+            return true;
+        }
       }
 
       return false;
