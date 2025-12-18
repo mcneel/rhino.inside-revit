@@ -124,13 +124,18 @@ namespace RhinoInside.Revit
         RhinoApp.CommandWindowCaptureEnabled = false;
       }
 
-      FormUtilities.ApplicationName = FormUtilities.ApplicationName.Replace("Rhino ", "Rhino.Inside ");
       Rhino.Runtime.PythonScript.AddRuntimeAssembly(Assembly.GetExecutingAssembly());
 
+      return External.ActivationGate.AddGateWindow(InitMainWindow(), Core.ActivationEvent);
+    }
+
+    private static IntPtr InitMainWindow()
+    {
       MainWindow = (WindowHandle) RhinoApp.MainWindowHandle();
       MainWindow.ExtendedWindowStyles |= ExtendedWindowStyles.AppWindow;
 
-      return External.ActivationGate.AddGateWindow(MainWindow.Handle, Core.ActivationEvent);
+      FormUtilities.ApplicationName = FormUtilities.ApplicationName.Replace("Rhino ", "Rhino.Inside ");
+      return MainWindow.Handle;
     }
 
     internal static bool InitGrasshopper(Assembly assembly)
