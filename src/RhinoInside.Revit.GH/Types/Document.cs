@@ -313,8 +313,8 @@ namespace RhinoInside.Revit.GH.Types
 
     ~Document()
     {
-      if (SwapFolder is object)
-        try { Directory.Delete(SwapFolder.Directory.FullName, recursive: true); } catch { }
+      if (SwapFolder?.Directory.Exists is true)
+        try { SwapFolder.Directory.Delete(recursive: true); } catch { }
     }
 
     static Document()
