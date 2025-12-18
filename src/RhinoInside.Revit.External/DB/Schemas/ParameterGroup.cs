@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static Schemas.ParameterGroup GetGroupType(this Autodesk.Revit.DB.Definition self)
     {
 #if REVIT_2024
-      return self.GetGroupTypeId();
+      return self.GetGroupTypeId() ?? Schemas.ParameterGroup.Empty;
 #elif REVIT_2022
       // Revit 2022 has Definition.GetGroupTypeId defined,
       // but it throws an exception when ParameterGroup is BuiltInParameterGroup.INVALID
