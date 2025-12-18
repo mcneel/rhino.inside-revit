@@ -10,6 +10,11 @@ group: Deployment & Configs
 
 ### WIP
 
+- Fixed #1365: Dynamo Python Node (CPython3) allocates a Rhino license.
+- Fixed #1275: Add shared parameter errors when switching to instance / type.
+- Fixed #1353: Inspect Element error on Pipe Element.
+- Fixed the 'AddTruss' Component to update the type.
+
 ### RC
 
 {% endcapture %}
