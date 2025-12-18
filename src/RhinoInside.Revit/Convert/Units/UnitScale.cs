@@ -340,7 +340,7 @@ namespace RhinoInside.Revit.Convert.Units
 
       double metersPerUnit = self.Ratio.Quotient;
 
-      for (var u = UnitSystem.None; u <= UnitSystem.Parsecs; ++u)
+      for (var u = UnitSystem.None + 1; u <= UnitSystem.Parsecs; ++u)
       {
         var m = metersPerUnitRatio[(int) u].Quotient;
         if (m == metersPerUnit) return u;
