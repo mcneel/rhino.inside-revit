@@ -606,7 +606,22 @@ namespace RhinoInside.Revit.GH.Types
     ERDB.Schemas.ParameterGroup group;
     public ERDB.Schemas.ParameterGroup Group
     {
-      get => group ??= Value?.GetDefinition()?.GetGroupType();
+      get
+      {
+        if (group is null)
+        {
+//#if REVIT_2026
+//          try
+//          {
+//            if (Id is object && Id.TryGetBuiltInParameter(out var builtInParameter))
+//              return group = ARDB.ParameterUtils.GetBuiltInParameterGroupTypeId((ERDB.Schemas.ParameterId)builtInParameter);
+//          }
+//          catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+//#endif
+          group = Value?.GetDefinition()?.GetGroupType();
+        }
+        return group;
+      }
       set
       {
         if (IsReferencedData)
