@@ -18,11 +18,11 @@ group: Deployment & Configs
 
 {% include ltr/release-header.html title="v1.35" version="v1.35.9525.16240" time="01/29/2026" %}
 
+- Public release with misc improvements and bug fixes listed below
 - Fixed #1365: Dynamo Python Node (CPython3) allocates a Rhino license.
 - Fixed #1275: Add shared parameter errors when switching to instance / type.
 - Fixed #1353: Inspect Element error on Pipe Element.
 - Fixed the 'AddTruss' Component to update the type.
-- Public release with misc improvements and bug fixes listed below
 
 {% include ltr/release-header.html title="v1.34" version="v1.34.9525.15935" time="01/29/2026" %}
 
