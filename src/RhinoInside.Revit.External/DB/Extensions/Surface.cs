@@ -13,5 +13,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return true;
 #endif
     }
+
+#if REVIT_2019
+    public static double DistanceTo(this Surface surface, XYZ xyz, out UV uv)
+    {
+      try { surface.Project(xyz, out uv, out var distance); return distance; }
+      catch
+      {
+        uv = null;
+        return double.NaN;
+      }
+    }
+#endif
   }
 }

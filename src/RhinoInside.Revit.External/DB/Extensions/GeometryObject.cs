@@ -98,6 +98,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     #region Length
     public bool Equals(double x, double y) => Euclidean.IsZero1(x - y, Tolerance);
+    private bool Equals(double x, double y, double tolerance) => Euclidean.IsZero1(x - y, tolerance);
     public int GetHashCode(double value) => Math.Round(value / Tolerance).GetHashCode();
     #endregion
 
@@ -105,15 +106,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public bool Equals(UV x, UV y) => Euclidean.IsZero2(x.U - y.U, x.V - y.V, Tolerance);
     public int GetHashCode(UV obj) => CombineHash
     (
-      GetHashCode(obj.U),
-      GetHashCode(obj.V)
+      GetHashCode(obj?.U ?? 0.0),
+      GetHashCode(obj?.V ?? 0.0)
     );
     #endregion
 
     #region BoundingBoxUV
     public bool Equals(BoundingBoxUV x, BoundingBoxUV y)
     {
-      return Default.Equals(x.Min, y.Max);
+      return Default.Equals(x.Min, y.Min) && Default.Equals(x.Max, y.Max);
     }
 
     public int GetHashCode(BoundingBoxUV value) => CombineHash
@@ -421,6 +422,77 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public int GetHashCode(Curve value) => GetHashCode((GeometryObject) value);
     #endregion
 
+    #region Surface
+    public bool Equals(Plane left, Plane right)
+    {
+      if (!Equals(left.Origin, right.Origin)) return false;
+      if (!Equals(left.XVec, right.XVec)) return false;
+      if (!Equals(left.YVec, right.YVec)) return false;
+      return true;
+    }
+
+    public bool Equals(RuledSurface left, RuledSurface right)
+    {
+      var hasFirstProfilePoint = left.HasFirstProfilePoint();
+      if (hasFirstProfilePoint != right.HasFirstProfilePoint()) return false;
+
+      var hasSecondProfilePoint = left.HasSecondProfilePoint();
+      if (hasSecondProfilePoint != right.HasSecondProfilePoint()) return false;
+
+      if (hasFirstProfilePoint)
+      {
+        var firstProfilePoint = left.GetFirstProfilePoint();
+        if (!Equals(firstProfilePoint, right.GetFirstProfilePoint())) return false;
+      }
+      else if (!Equals(left.GetFirstProfileCurve(), right.GetFirstProfileCurve()))
+        return false;
+
+      if (hasSecondProfilePoint)
+      {
+        var secondProfilePoint = left.GetSecondProfilePoint();
+        if (!Equals(secondProfilePoint, right.GetSecondProfilePoint())) return false;
+      }
+      else if (!Equals(left.GetSecondProfileCurve(), right.GetSecondProfileCurve()))
+        return false;
+
+      return true;
+    }
+
+    public bool Equals(Surface left, Surface right)
+    {
+      if (left.MatchesParametricOrientation() != right.MatchesParametricOrientation()) return false;
+
+      switch (left)
+      {
+        case Plane leftPlaneSurface: return right is Plane rightPlaneSurface && Equals(leftPlaneSurface, rightPlaneSurface);
+        case RuledSurface leftRuledSurface: return right is RuledSurface rightRuledSurface && Equals(leftRuledSurface, rightRuledSurface);
+      }
+
+      return false;
+    }
+
+    public int GetHashCode(Surface value) => CombineHash
+    (
+      value.GetType().GetHashCode(),
+#if REVIT_2019
+      GetHashCode(value.DistanceTo(XYZExtension.Zero, out var uv)),
+      GetHashCode(uv),
+#endif
+#if REVIT_2021
+      GetHashCode(value.GetBoundingBoxUV()),
+#endif
+      value.MatchesParametricOrientation().GetHashCode()
+    );
+#endregion
+
+    #region Edge
+    public bool Equals(Edge left, Edge right, Face leftFace, Face rightFace)
+    {
+      //if (!Equals(left.ApproximateLength, right.ApproximateLength, 0.1)) return false;
+      return Equals(left.AsCurveFollowingFace(leftFace), right.AsCurveFollowingFace(rightFace));
+    }
+    #endregion
+
     #region Face
     public bool Equals(Face left, Face right)
     {
@@ -437,7 +509,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var rightEdges = right.EdgeLoops;
       if (leftEdges.Size != rightEdges.Size) return false;
 
-      return Equals(left.Triangulate(), right.Triangulate());
+      if (!Equals(left.GetSurface(), right.GetSurface())) return false;
+
+      for (int l = 0; l < leftEdges.Size; ++l)
+      {
+        var leftTrims = leftEdges.get_Item(l);
+        var rightTrims = rightEdges.get_Item(l);
+        if (leftTrims.Size != rightTrims.Size) return false;
+
+        for (int t = 0; t < leftTrims.Size; ++t)
+        {
+          var leftTrim = leftTrims.get_Item(l);
+          var rightTrim = rightTrims.get_Item(l);
+          if (!Equals(leftTrim, rightTrim, left, right)) return false;
+        }
+      }
+
+      return true;
     }
 
     public int GetHashCode(Face value)
