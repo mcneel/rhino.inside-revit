@@ -158,6 +158,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return element.GetBoundingBoxXYZ()?.ToOutLine();
     }
 
+    public static Outline GetOutline(this Element element, bool boundVertically)
+    {
+      return GetOutline(element, boundVertically, boundVertically);
+    }
+
+    public static Outline GetOutline(this Element element, bool boundBottom, bool boundTop)
+    {
+      var outline = GetOutline(element);
+      if (outline is object)
+      {
+        if (!boundBottom)
+        {
+          var (minX, minY, _) = outline.MinimumPoint;
+          outline.MinimumPoint = new XYZ(minX, minY, -CompoundElementFilter.BoundingBoxLimits);
+        }
+
+        if (!boundTop)
+        {
+          var (maxX, maxY, _) = outline.MaximumPoint;
+          outline.MaximumPoint = new XYZ(maxX, maxY, +CompoundElementFilter.BoundingBoxLimits);
+        }
+      }
+      return outline;
+    }
+
     public static bool HasBoundingBoxXYZ(this Element element)
     {
       using (var bbox = element.GetBoundingBoxXYZ())
