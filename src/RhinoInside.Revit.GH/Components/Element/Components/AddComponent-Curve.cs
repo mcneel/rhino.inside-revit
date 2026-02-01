@@ -249,7 +249,7 @@ namespace RhinoInside.Revit.GH.Components
               {
                 if (Types.GeometryFace.FromReference(doc.Value, reference) is Types.GeometryFace face)
                 {
-                  var brep = face.PolySurface;
+                  var brep = face.TrimmedSurface;
                   if
                   (
                     brep is object &&

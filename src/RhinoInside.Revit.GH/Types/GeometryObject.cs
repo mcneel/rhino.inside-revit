@@ -987,7 +987,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override BoundingBox GetBoundingBox(Transform xform)
     {
-      return PolySurface is Brep brep ?
+      return TrimmedSurface is Brep brep ?
       (
         xform == Transform.Identity ?
         brep.GetBoundingBox(true) :
@@ -995,7 +995,7 @@ namespace RhinoInside.Revit.GH.Types
       ) : NaN.BoundingBox;
     }
 
-    public Brep PolySurface
+    public Brep TrimmedSurface
     {
       get
       {
@@ -1098,12 +1098,12 @@ namespace RhinoInside.Revit.GH.Types
         }
         else if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
         {
-          target = PolySurface is Brep brep && brep.Surfaces.Count == 1 ? (Q) (object) new GH_Surface(brep.Surfaces.FirstOrDefault()) : default;
+          target = TrimmedSurface is Brep brep && brep.Surfaces.Count == 1 ? (Q) (object) new GH_Surface(brep.Surfaces.FirstOrDefault()) : default;
           return target is object;
         }
         else if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
         {
-          target = PolySurface is Brep brep && brep.Surfaces.Count > 0 ? (Q) (object) new GH_Brep(brep) : default;
+          target = TrimmedSurface is Brep brep && brep.Surfaces.Count > 0 ? (Q) (object) new GH_Brep(brep) : default;
           return target is object;
         }
         else if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))

@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       if (bConditions is null) return false;
 
       var loopA = bConditions.GetLoops().First();
-      var loopB = GeometryEncoder.ToCurveLoop( face.PolySurface.Faces.First().OuterLoop.To3dCurve() );
+      var loopB = GeometryEncoder.ToCurveLoop( face.TrimmedSurface.Faces.First().OuterLoop.To3dCurve() );
 
       for (int i = 0; i < loopA.Count(); i++)
       {
