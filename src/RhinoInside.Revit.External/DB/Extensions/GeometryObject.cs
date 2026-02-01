@@ -88,6 +88,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <param name="tolerance"></param>
     /// <returns>A geometry comparer.</returns>
     public static readonly GeometryObjectEqualityComparer Default = new GeometryObjectEqualityComparer(Constant.DefaultTolerance);
+    private static readonly GeometryObjectEqualityComparer UVComparer = new GeometryObjectEqualityComparer(Constant.DefaultTolerance * 1000.0);
 
     /// <summary>
     /// IEqualityComparer for <see cref="{T}"/> that compares geometrically.
@@ -103,18 +104,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region UV
-    public bool Equals(UV x, UV y) => Euclidean.IsZero2(x.U - y.U, x.V - y.V, Tolerance);
+    public bool Equals(UV x, UV y) => Euclidean.IsZero2(x.U - y.U, x.V - y.V, UVComparer.Tolerance);
     public int GetHashCode(UV obj) => CombineHash
     (
-      GetHashCode(obj?.U ?? 0.0),
-      GetHashCode(obj?.V ?? 0.0)
+      UVComparer.GetHashCode(obj?.U ?? 0.0),
+      UVComparer.GetHashCode(obj?.V ?? 0.0)
     );
     #endregion
 
     #region BoundingBoxUV
     public bool Equals(BoundingBoxUV x, BoundingBoxUV y)
     {
-      return Default.Equals(x.Min, y.Min) && Default.Equals(x.Max, y.Max);
+      return Equals(x.Min, y.Min) && Equals(x.Max, y.Max);
     }
 
     public int GetHashCode(BoundingBoxUV value) => CombineHash
