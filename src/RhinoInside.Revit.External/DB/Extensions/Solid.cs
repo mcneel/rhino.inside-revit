@@ -151,23 +151,22 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static IntersectionResult Project(this Solid solid, XYZ point, out Face face)
     {
       // Project on faces
-      var intersection = default(IntersectionResult);
-      (intersection, face) = solid.Faces.Cast<Face>().
+      var faceIntersection = default(IntersectionResult);
+      (faceIntersection, face) = solid.Faces.Cast<Face>().
         Select(x => (Intersection: x.Project(point), Face: x)).
         Where(x => x.Intersection is object).
         OrderBy(x => x.Intersection.Distance).
         FirstOrDefault();
 
-      if (face is object) return intersection;
-
       // Project on edges
-      (intersection, face) = solid.Edges.Cast<Edge>().
+      var edgeIntersection = default(IntersectionResult);
+      (edgeIntersection, face) = solid.Edges.Cast<Edge>().
         Select(x => (Intersection: x.Project(point, out var f), Face: f)).
         Where(x => x.Intersection is object).
         OrderBy(x => x.Intersection.Distance).
         FirstOrDefault();
 
-      return intersection;
+      return (faceIntersection?.Distance ?? double.PositiveInfinity) < (edgeIntersection?.Distance ?? double.PositiveInfinity) ? faceIntersection : edgeIntersection;
     }
 
     /// <summary>
@@ -179,23 +178,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static IntersectionResult Project(this Solid solid, XYZ point)
     {
       // Project on faces
-      var intersection = default(IntersectionResult);
-      intersection = solid.Faces.Cast<Face>().
+      var faceIntersection = solid.Faces.Cast<Face>().
         Select(x => x.Project(point)).
         Where(x => x is object).
         OrderBy(x => x.Distance).
         FirstOrDefault();
-
-      if (intersection is object) return intersection;
 
       // Project on edges
-      intersection = solid.Edges.Cast<Edge>().
+      var edgeIntersection = solid.Edges.Cast<Edge>().
         Select(x => x.Project(point)).
         Where(x => x is object).
         OrderBy(x => x.Distance).
         FirstOrDefault();
 
-      return intersection;
+      return (faceIntersection?.Distance ?? double.PositiveInfinity) < (edgeIntersection?.Distance ?? double.PositiveInfinity) ? faceIntersection : edgeIntersection;
     }
   }
 
@@ -313,6 +309,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         face.ComputeSecondDerivatives(uv);
     }
 
+    #region IsInside
     /// <summary>
     /// Indicates whether the specified point is within this face.
     /// </summary>
@@ -341,6 +338,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         face.IsInside(face.GetBoundingBox().Evaluate(uv), out result) :
         face.IsInside(uv, out result);
     }
+    #endregion
   }
 
   public static class EdgeExtension
