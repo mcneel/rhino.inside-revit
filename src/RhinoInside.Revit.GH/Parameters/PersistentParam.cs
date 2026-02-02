@@ -277,8 +277,8 @@ namespace RhinoInside.Revit.GH.Parameters
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
       Menu_AppendWireDisplay(menu);
-      this.Menu_AppendConnect(menu);
       this.Menu_AppendConvert(menu);
+      this.Menu_AppendConnect(menu);
       Menu_AppendDisconnectWires(menu);
 
       Menu_AppendPreProcessParameter(menu);
