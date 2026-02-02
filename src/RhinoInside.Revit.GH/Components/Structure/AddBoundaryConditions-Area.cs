@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       var loopB = GeometryEncoder.ToCurveLoop( face.TrimmedSurface.Faces.First().OuterLoop.To3dCurve() );
 
       if (loopA.NumberOfCurves() != loopB.NumberOfCurves()) return false;
-      foreach (var (curveA, curveB) in loopA.Zip(loopB))
+      foreach (var (curveA, curveB) in loopA.Zip(loopB, (First, Second) => (First, Second)))
       {
         if (!curveA.AlmostEquals(curveB))
           return false;
