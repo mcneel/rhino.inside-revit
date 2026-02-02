@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       var basisZ = cov.TryGetInverse(out var inverse) ?
                  inverse.GetPrincipalComponent(0D) :
-                 mesh.ComputeMeanNormal().ToUnitXYZ();
+                 mesh.ComputeNetNormal().ToUnitXYZ();
 
       return UnitXYZ.Orthonormalize(basisZ, basisX, out basisZ, out basisX, out basisY);
     }
@@ -97,15 +97,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static XYZ ComputeCentroid(this Mesh mesh) => ComputeCentroid(mesh, 3);
 
     /// <summary>
-    /// Return the mean of all triangle normals
+    /// Returns net normal of this mesh.
     /// </summary>
     /// <remarks>
-    /// In case the mesh is almost planar this will correspond to
-    /// a good approximation of the normal.
+    /// The length of the resulting normal is a good approximation
+    /// of the signed area of this mesh when projected to this normal.
     /// </remarks>
     /// <param name="mesh"></param>
-    /// <returns>The XYZ vector of the mean normal of this mesh.</returns>
-    public static XYZ ComputeMeanNormal(this Mesh mesh)
+    /// <returns>The the sum of all triangle normals divided by 2.</returns>
+    public static XYZ ComputeNetNormal(this Mesh mesh)
     {
       if (mesh.NumTriangles < 1)
         return XYZExtension.Zero;
@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         normalZ.Add(normal.Z);
       }
 
-      return new XYZ(normalX.Value / numTriangles, normalY.Value / numTriangles, normalZ.Value / numTriangles);
+      return new XYZ(normalX.Value * 0.5, normalY.Value * 0.5, normalZ.Value * 0.5);
     }
 
 #if !REVIT_2024
