@@ -797,6 +797,52 @@ namespace RhinoInside.Revit.GH.Types
         new GeometryCurve(document, reference) : null;
     }
 
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      return Curve is Curve curve ?
+      (
+        xform == Transform.Identity ?
+        curve.GetBoundingBox(true) :
+        curve.GetBoundingBox(xform)
+      ) : NaN.BoundingBox;
+    }
+
+    #region Properties
+    public override string DisplayName
+    {
+      get
+      {
+        var value = base.Value;
+        string visibility;
+        switch (value?.Visibility)
+        {
+          case null: visibility = string.Empty; break;
+          case ARDB.Visibility.Visible: visibility = string.Empty; break;
+          default: visibility = $"{value.Visibility} "; break;
+        }
+
+        var typeName = base.DisplayName;
+        if (value is ARDB.Edge edge)
+        {
+          typeName = "Edge";
+          value = edge.AsCurve();
+        }
+
+        switch (value)
+        {
+          case null: return $"Null {typeName}";
+          case ARDB.Arc _: return $"{visibility}Arc {typeName}";
+          case ARDB.CylindricalHelix _: return $"{visibility}Helix {typeName}";
+          case ARDB.Ellipse _: return $"{visibility}Ellipse {typeName}";
+          case ARDB.HermiteSpline _: return $"{visibility}Hermite {typeName}";
+          case ARDB.Line _: return $"{visibility}Line {typeName}";
+          case ARDB.NurbSpline _: return $"{visibility}NURBS {typeName}";
+          case ARDB.Curve _: return $"{visibility}Unknown {typeName}";
+          default: return "Curve";
+        }
+      }
+    }
+
     public Curve Curve
     {
       get
@@ -810,60 +856,6 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return _Wires?.FirstOrDefault();
-      }
-    }
-
-    public override BoundingBox GetBoundingBox(Transform xform)
-    {
-      return Curve is Curve curve ?
-      (
-        xform == Transform.Identity ?
-        curve.GetBoundingBox(true) :
-        curve.GetBoundingBox(xform)
-      ) : NaN.BoundingBox;
-    }
-
-    #region IGH_PreviewData
-    void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
-    {
-      if (Curve is Curve curve)
-        args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
-    }
-    #endregion
-
-    #region Properties
-    public override string DisplayName
-    {
-      get
-      {
-        var value = base.Value;
-        string visibility;
-        switch (value?.Visibility)
-        {
-          case null:                    visibility = string.Empty; break;
-          case ARDB.Visibility.Visible: visibility = string.Empty; break;
-          default:                      visibility = $"{value.Visibility} "; break;
-        }
-
-        var typeName = base.DisplayName;
-        if (value is ARDB.Edge edge)
-        {
-          typeName = "Edge";
-          value = edge.AsCurve();
-        }
-
-        switch (value)
-        {
-          case null:                    return $"Null {typeName}";
-          case ARDB.Arc _:              return $"{visibility}Arc {typeName}";
-          case ARDB.CylindricalHelix _: return $"{visibility}Helix {typeName}";
-          case ARDB.Ellipse _:          return $"{visibility}Ellipse {typeName}";
-          case ARDB.HermiteSpline _:    return $"{visibility}Hermite {typeName}";
-          case ARDB.Line _:             return $"{visibility}Line {typeName}";
-          case ARDB.NurbSpline _:       return $"{visibility}NURBS {typeName}";
-          case ARDB.Curve _:            return $"{visibility}Unknown {typeName}";
-          default:                      return "Curve";
-        }
       }
     }
 
@@ -894,6 +886,35 @@ namespace RhinoInside.Revit.GH.Types
         return default;
       }
     }
+
+    public double Length => Curve?.GetLength() ?? double.NaN;
+
+    public Point3d Position => Location.Origin;
+
+    public Plane Location
+    {
+      get
+      {
+        if (Value?.TryGetLocation(out var origin, out var basisX, out var basisY) is true)
+        {
+          var plane = new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
+          if (HasReferenceTransform) plane.Transform(ReferenceTransform);
+          return plane;
+        }
+
+        return NaN.Plane;
+      }
+    }
+
+    public Vector3d HandOrientation => Location.XAxis;
+    #endregion
+
+    #region IGH_PreviewData
+    void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (Curve is Curve curve)
+        args.Pipeline.DrawCurve(curve, args.Color, args.Thickness);
+    }
     #endregion
 
     #region Casting
@@ -909,6 +930,26 @@ namespace RhinoInside.Revit.GH.Types
       else if (typeof(Q).IsAssignableFrom(typeof(ARDB.Edge)))
       {
         target = (Q) (object) (base.Value as ARDB.Edge);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Number)))
+      {
+        target = (Q) (object) new GH_Number(Length);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
+      {
+        target = (Q) (object) new GH_Point(Position);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Vector)))
+      {
+        target = (Q) (object) new GH_Vector(HandOrientation);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
+      {
+        target = (Q) (object) new GH_Plane(Location);
         return true;
       }
       else if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
@@ -987,77 +1028,6 @@ namespace RhinoInside.Revit.GH.Types
         new GeometryFace(document, reference) : null;
     }
 
-    public Material Material => Value is ARDB.Face face ?
-      face.MaterialElementId.IsValid() ? GetElement<Material>(face.MaterialElementId) : new Material() :
-      null;
-
-    public double Area
-    {
-      get
-      {
-        if (Value?.Triangulate() is ARDB.Mesh mesh)
-        {
-          if (HasReferenceTransform)
-          {
-            var area = mesh.ComputeSurfaceArea(out var _, out var normal);
-            var vector = normal.ToVector3d();
-            vector.Unitize();
-            vector *= area;
-            vector.Transform(ReferenceTransform);
-            return vector.Length;
-          }
-          else return mesh.ComputeSurfaceArea();
-        }
-
-        return double.NaN;
-      }
-    }
-
-    public Plane Location
-    {
-      get
-      {
-        if(Value?.TryGetLocation(out var origin, out var basisX, out var basisY) is true)
-        {
-          var plane = new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
-          if (HasReferenceTransform) plane.Transform(ReferenceTransform);
-          return plane;
-        }
-
-        return NaN.Plane;
-      }
-    }
-
-    public Point3d Position
-    {
-      get
-      {
-        if (Value?.Triangulate().ComputeCentroid(2) is ARDB.XYZ centroid)
-        {
-          var point = centroid.ToPoint3d();
-          if (HasReferenceTransform) point.Transform(ReferenceTransform);
-          return point;
-        }
-
-        return NaN.Point3d;
-      }
-    }
-
-    public Vector3d WorkPlaneOrientation
-    {
-      get
-      {
-        if (Value?.Triangulate().ComputeNetNormal() is ARDB.XYZ normal)
-        {
-          var vector = normal.ToVector3d();
-          if (HasReferenceTransform) vector.Transform(ReferenceTransform);
-          return vector;
-        }
-
-        return NaN.Vector3d;
-      }
-    }
-
     public override BoundingBox GetBoundingBox(Transform xform)
     {
       return TrimmedSurface is Brep brep ?
@@ -1066,6 +1036,41 @@ namespace RhinoInside.Revit.GH.Types
         brep.GetBoundingBox(true) :
         brep.GetBoundingBox(xform)
       ) : NaN.BoundingBox;
+    }
+
+    #region Properties
+    public override string DisplayName
+    {
+      get
+      {
+        var value = base.Value;
+        string visibility;
+        switch (value?.Visibility)
+        {
+          case null: visibility = string.Empty; break;
+          case ARDB.Visibility.Visible: visibility = string.Empty; break;
+          default: visibility = $"{value.Visibility} "; break;
+        }
+
+        switch (value)
+        {
+          case null: return "Null Face";
+          case ARDB.ConicalFace _: return $"{visibility}Conical Face";
+          case ARDB.CylindricalFace _: return $"{visibility}Cylindrical Face";
+          case ARDB.HermiteFace _: return $"{visibility}Hermite Face";
+          case ARDB.PlanarFace _: return $"{visibility}Planar Face";
+          case ARDB.RevolvedFace _: return $"{visibility}Revolved Face";
+          case ARDB.RuledFace _: return $"{visibility}Ruled Face";
+          case ARDB.Face face:
+
+#if REVIT_2021
+            using (var surface = face.GetSurface())
+              if (surface is ARDB.OffsetSurface) return $"{visibility}Offset Face";
+#endif
+            return $"{visibility}Unknown Face";
+          default: return "Face";
+        }
+      }
     }
 
     public Brep UntrimmedSurface
@@ -1097,6 +1102,78 @@ namespace RhinoInside.Revit.GH.Types
         return null;
       }
     }
+
+    public double Area
+    {
+      get
+      {
+        if (Value?.Triangulate() is ARDB.Mesh mesh)
+        {
+          if (HasReferenceTransform)
+          {
+            var area = mesh.ComputeSurfaceArea(out var _, out var normal);
+            var vector = normal.ToVector3d();
+            vector.Unitize();
+            vector *= area;
+            vector.Transform(ReferenceTransform);
+            return vector.Length;
+          }
+          else return mesh.ComputeSurfaceArea();
+        }
+
+        return double.NaN;
+      }
+    }
+
+    public Point3d Position
+    {
+      get
+      {
+        if (Value?.Triangulate().ComputeCentroid(2) is ARDB.XYZ centroid)
+        {
+          var point = centroid.ToPoint3d();
+          if (HasReferenceTransform) point.Transform(ReferenceTransform);
+          return point;
+        }
+
+        return NaN.Point3d;
+      }
+    }
+
+    public Plane Location
+    {
+      get
+      {
+        if(Value?.TryGetLocation(out var origin, out var basisX, out var basisY) is true)
+        {
+          var plane = new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
+          if (HasReferenceTransform) plane.Transform(ReferenceTransform);
+          return plane;
+        }
+
+        return NaN.Plane;
+      }
+    }
+
+    public Vector3d WorkPlaneOrientation
+    {
+      get
+      {
+        if (Value?.Triangulate().ComputeNetNormal() is ARDB.XYZ normal)
+        {
+          var vector = normal.ToVector3d();
+          if (HasReferenceTransform) vector.Transform(ReferenceTransform);
+          return vector;
+        }
+
+        return NaN.Vector3d;
+      }
+    }
+
+    public Material Material => Value is ARDB.Face face ?
+      face.MaterialElementId.IsValid() ? GetElement<Material>(face.MaterialElementId) : new Material() :
+      null;
+    #endregion
 
     #region IGH_PreviewData
     protected Curve[] Edges
@@ -1252,41 +1329,5 @@ namespace RhinoInside.Revit.GH.Types
 
       return base.CastFrom(source);
     }
-
-    #region Properties
-    public override string DisplayName
-    {
-      get
-      {
-        var value = base.Value;
-        string visibility;
-        switch (value?.Visibility)
-        {
-          case null:                    visibility = string.Empty; break;
-          case ARDB.Visibility.Visible: visibility = string.Empty; break;
-          default:                      visibility = $"{value.Visibility} "; break;
-        }
-
-        switch (value)
-        {
-          case null:                    return "Null Face";
-          case ARDB.ConicalFace _:      return $"{visibility}Conical Face";
-          case ARDB.CylindricalFace _:  return $"{visibility}Cylindrical Face";
-          case ARDB.HermiteFace _:      return $"{visibility}Hermite Face";
-          case ARDB.PlanarFace _:       return $"{visibility}Planar Face";
-          case ARDB.RevolvedFace _:     return $"{visibility}Revolved Face";
-          case ARDB.RuledFace _:        return $"{visibility}Ruled Face";
-          case ARDB.Face face:
-
-#if REVIT_2021
-          using(var surface = face.GetSurface())
-          if (surface is ARDB.OffsetSurface) return $"{visibility}Offset Face";
-#endif
-                                        return $"{visibility}Unknown Face";
-          default:                      return "Face";
-        }
-      }
-    }
-    #endregion
   }
 }

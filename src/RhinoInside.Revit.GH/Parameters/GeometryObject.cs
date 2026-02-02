@@ -218,7 +218,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI methods
     protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
     (
-      new string[] { "Box", "Curve", "Line Style", "Category" }
+      new string[] { "Number", "Point", "Vector", "Plane", "Box", "Curve", "Line Style", "Category" }
     );
 
     protected override GH_GetterResult Prompt_Plural(ref List<Types.GeometryCurve> value)
