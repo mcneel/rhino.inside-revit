@@ -279,7 +279,7 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI methods
     protected override IEnumerable<string> ConvertsTo => base.ConvertsTo.Concat
     (
-      new string[] { "Box", "Surface", "Brep", "Mesh", "Line Style", "Category", "Material" }
+      new string[] { "Number", "Point", "Vector", "Plane", "Box", "Surface", "Brep", "Mesh", "Line Style", "Category", "Material" }
     );
 
     static ARDB.Reference FixReference(ARDB.Document document, ARDB.Reference reference)

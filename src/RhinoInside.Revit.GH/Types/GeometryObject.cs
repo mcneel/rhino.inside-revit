@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Rhino;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Rhino;
 using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
@@ -911,15 +911,21 @@ namespace RhinoInside.Revit.GH.Types
         target = (Q) (object) (base.Value as ARDB.Edge);
         return true;
       }
-      if (Curve is Curve curve)
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
+      {
+        if (Value?.TryGetLocation(out var origin, out var xDir, out var yDir) is true)
+        {
+          var plane = new Plane(origin.ToPoint3d(), xDir.Direction.ToVector3d(), yDir.Direction.ToVector3d());
+          if (HasReferenceTransform) plane.Transform(ReferenceTransform);
+          target = (Q) (object) new GH_Plane(plane);
+        }
+        else target = default;
+        return true;
+      }
+      else if (Curve is Curve curve)
       {
         var tol = GeometryTolerance.Model;
-        if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
-        {
-          target = curve.TryGetPlane(out var plane, tol.VertexTolerance) ? (Q) (object) new GH_Plane(plane) : default;
-          return target is object;
-        }
-        else if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
+        if (typeof(Q).IsAssignableFrom(typeof(GH_Line)))
         {
           target = curve.TryGetLine(out var line, tol.VertexTolerance) ? (Q) (object) new GH_Line(line) : default;
           return target is object;
@@ -985,6 +991,73 @@ namespace RhinoInside.Revit.GH.Types
       face.MaterialElementId.IsValid() ? GetElement<Material>(face.MaterialElementId) : new Material() :
       null;
 
+    public double Area
+    {
+      get
+      {
+        if (Value?.Triangulate() is ARDB.Mesh mesh)
+        {
+          if (HasReferenceTransform)
+          {
+            var area = mesh.ComputeSurfaceArea(out var _, out var normal);
+            var vector = normal.ToVector3d();
+            vector.Unitize();
+            vector *= area;
+            vector.Transform(ReferenceTransform);
+            return vector.Length;
+          }
+          else return mesh.ComputeSurfaceArea();
+        }
+
+        return double.NaN;
+      }
+    }
+
+    public Plane Location
+    {
+      get
+      {
+        if(Value?.TryGetLocation(out var origin, out var basisX, out var basisY) is true)
+        {
+          var plane = new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
+          if (HasReferenceTransform) plane.Transform(ReferenceTransform);
+          return plane;
+        }
+
+        return NaN.Plane;
+      }
+    }
+
+    public Point3d Position
+    {
+      get
+      {
+        if (Value?.Triangulate().ComputeCentroid(2) is ARDB.XYZ centroid)
+        {
+          var point = centroid.ToPoint3d();
+          if (HasReferenceTransform) point.Transform(ReferenceTransform);
+          return point;
+        }
+
+        return NaN.Point3d;
+      }
+    }
+
+    public Vector3d WorkPlaneOrientation
+    {
+      get
+      {
+        if (Value?.Triangulate().ComputeNetNormal() is ARDB.XYZ normal)
+        {
+          var vector = normal.ToVector3d();
+          if (HasReferenceTransform) vector.Transform(ReferenceTransform);
+          return vector;
+        }
+
+        return NaN.Vector3d;
+      }
+    }
+
     public override BoundingBox GetBoundingBox(Transform xform)
     {
       return TrimmedSurface is Brep brep ?
@@ -993,6 +1066,22 @@ namespace RhinoInside.Revit.GH.Types
         brep.GetBoundingBox(true) :
         brep.GetBoundingBox(xform)
       ) : NaN.BoundingBox;
+    }
+
+    public Brep UntrimmedSurface
+    {
+      get
+      {
+        if (Value?.ToSurface(out var parametricOrientation) is Surface surface)
+        {
+          var brep = surface.ToBrep();
+          if (!parametricOrientation) brep.Flip();
+          if (HasReferenceTransform) brep.Transform(ReferenceTransform);
+          return brep;
+        }
+
+        return null;
+      }
     }
 
     public Brep TrimmedSurface
@@ -1083,22 +1172,31 @@ namespace RhinoInside.Revit.GH.Types
         target = (Q) (object) (IsValid ? Value : null);
         return true;
       }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Number)))
+      {
+        target = (Q) (object) new GH_Number(Area);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
+      {
+        target = (Q) (object) new GH_Point(Position);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Vector)))
+      {
+        target = (Q) (object) new GH_Vector(WorkPlaneOrientation);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
+      {
+        target = (Q) (object) new GH_Plane(Location);
+        return true;
+      }
       else if (Value is ARDB.Face face)
       {
-        if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
+        if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
         {
-          if (face is ARDB.PlanarFace planarFace)
-          {
-            var plane = new Plane(planarFace.Origin.ToPoint3d(), planarFace.XVector.ToVector3d(), planarFace.YVector.ToVector3d());
-            if (HasReferenceTransform) plane.Transform(ReferenceTransform);
-            target = (Q) (object) new GH_Plane(plane);
-          }
-          else target = default;
-          return true;
-        }
-        else if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
-        {
-          target = TrimmedSurface is Brep brep && brep.Surfaces.Count == 1 ? (Q) (object) new GH_Surface(brep.Surfaces.FirstOrDefault()) : default;
+          target = UntrimmedSurface is Brep brep && brep.Surfaces.Count > 0 ? (Q) (object) new GH_Brep(brep) : default;
           return target is object;
         }
         else if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
@@ -1108,9 +1206,8 @@ namespace RhinoInside.Revit.GH.Types
         }
         else if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
         {
-          if (_Meshes is object)
+          if (face.Triangulate()?.ToMesh() is Mesh m)
           {
-            var m = new Mesh(); m.Append(_Meshes);
             target = (Q) (object) new GH_Mesh(m);
           }
           else target = default;

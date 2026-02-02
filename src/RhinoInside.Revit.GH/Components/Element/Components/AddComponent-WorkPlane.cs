@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           Name = "Work Plane",
           NickName = "WP",
-          Description = $"Work Plane.{OS.NewLine}Face references are also accepted.",
+          Description = $"Work Plane.{OS.NewLine}Element or face references are also accepted.",
           Optional = true
         }, ParamRelevance.Primary
       ),
