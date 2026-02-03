@@ -192,8 +192,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool IsKindOf<T>(this Reference reference, Document doc) where T : APIObject
     {
-      var elementType = typeof(T).IsAssignableFrom(typeof(Element));
-      var geometryType = typeof(T).IsAssignableFrom(typeof(GeometryObject));
+      var elementType = typeof(Element).IsAssignableFrom(typeof(T));
+      var geometryType = typeof(GeometryObject).IsAssignableFrom(typeof(T));
 
       if (!elementType && !geometryType)
         return false;
