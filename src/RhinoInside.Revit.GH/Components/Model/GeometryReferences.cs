@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
@@ -6,9 +7,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Geometry
 {
-  using External.DB.Extensions;
   using Convert.Geometry;
-  using External.DB;
+  using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.14", updated: "1.15")]
   public class ElementGeometryReferences : ZuiComponent
@@ -88,9 +88,9 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       (
         new Parameters.GeometryCurve()
         {
-          Name = "Lines",
-          NickName = "L",
-          Description = "List of element line references",
+          Name = "Curves",
+          NickName = "C",
+          Description = "List of element curve references",
           Access = GH_ParamAccess.list
         },ParamRelevance.Primary
       ),
@@ -98,8 +98,8 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
     public override void AddedToDocument(GH_Document document)
     {
-      if (Params.Output<IGH_Param>("Curves") is IGH_Param curves)
-        curves.Name = "Edges";
+      if (Params.Output<IGH_Param>("Lines") is IGH_Param curves)
+        curves.Name = "Curves";
 
       base.AddedToDocument(document);
     }
@@ -121,7 +121,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           Params.TrySetDataList(DA, "Edges", () =>
             geometry.GetEdgeReferences(element.Value).Select(element.GetGeometryObjectFromReference<Types.GeometryCurve>));
 
-          Params.TrySetDataList(DA, "Lines", () =>
+          Params.TrySetDataList(DA, "Curves", () =>
             geometry.GetLineReferences(element.Value).Select(element.GetGeometryObjectFromReference<Types.GeometryCurve>));
         }
       }
@@ -129,13 +129,13 @@ namespace RhinoInside.Revit.GH.Components.Geometry
   }
 
   [ComponentVersion(introduced: "1.15")]
-  public class ElementPointReferences : ZuiComponent
+  public class CurvePointReferences : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("6388CFC0-E31E-4A16-8088-A7BBB9587442");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => string.Empty;
 
-    public ElementPointReferences() : base
+    public CurvePointReferences() : base
     (
       name: "Curve Point References",
       nickname: "CP-References",
@@ -188,6 +188,121 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
       Params.TrySetData(DA, "Start", () => curve.StartPoint);
       Params.TrySetData(DA, "End", () => curve.EndPoint);
+    }
+  }
+
+  class EdgeFaceReferences : ZuiComponent
+  {
+    public override Guid ComponentGuid => new Guid("8F9DEA82-2A13-466E-9A43-9B79C023E896");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    protected override string IconTag => string.Empty;
+
+    public EdgeFaceReferences() : base
+    (
+      name: "Edge Face References",
+      nickname: "EF-References",
+      description: "Get face references of given edge.",
+      category: "Revit",
+      subCategory: "Model"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GeometryCurve()
+        {
+          Name = "Edge",
+          NickName = "E",
+          Description = "Edge to extract adjacent faces",
+        }
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GeometryFace()
+        {
+          Name = "Left",
+          NickName = "L",
+          Description = "Left face",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GeometryPoint()
+        {
+          Name = "Right",
+          NickName = "R",
+          Description = "Right face",
+        }
+      ),
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Params.GetData(DA, "Edge", out Types.GeometryCurve curve)) return;
+
+      Params.TrySetData(DA, "Start", () => curve.LeftFace);
+      Params.TrySetData(DA, "End", () => curve.RightFace);
+    }
+  }
+
+  class FaceEdgeReferences : ZuiComponent
+  {
+    public override Guid ComponentGuid => new Guid("F653D38F-E692-4120-BE0E-F3F8DCEBD368");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    protected override string IconTag => string.Empty;
+
+    public FaceEdgeReferences() : base
+    (
+      name: "Face Edge References",
+      nickname: "FE-References",
+      description: "Get edge references of given face.",
+      category: "Revit",
+      subCategory: "Model"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GeometryFace()
+        {
+          Name = "Face",
+          NickName = "F",
+          Description = "Face to extract edges",
+        }
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GeometryCurve()
+        {
+          Name = "Edges",
+          NickName = "E",
+          Description = "Face edges",
+          Access = GH_ParamAccess.tree
+        }
+      ),
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Params.GetData(DA, "Face", out Types.GeometryFace face)) return;
+
+      Params.TrySetDataTree(DA, "Edges", () => face.EdgeLoops);
     }
   }
 
@@ -245,89 +360,6 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         var element = Types.Element.FromReference(geometry.ReferenceDocument, geometry.GetReference());
         return element.Value.GetGeneratingElementIds(geometry.Value).Select(x => element.GetElement<Types.Element>(x));
       });
-    }
-  }
-
-  class ReferenceIntersector : ZuiComponent
-  {
-    public override Guid ComponentGuid => new Guid("60F89F09-9391-4AE6-B9C6-75AB9F4879FE");
-    public override GH_Exposure Exposure => GH_Exposure.quarternary;
-    protected override string IconTag => string.Empty;
-
-    public ReferenceIntersector() : base
-    (
-      name: "Reference Intersector",
-      nickname: "R-Intersector",
-      description: "Get the elements that intersect to the input ray reference.",
-      category: "Revit",
-      subCategory: "Model"
-    )
-    { }
-
-    protected override ParamDefinition[] Inputs => inputs;
-    static readonly ParamDefinition[] inputs =
-    {
-      new ParamDefinition
-      (
-        new Parameters.View3D()
-        {
-          Name = "View",
-          NickName = "V",
-          Description = "View where perform the test.",
-        }
-      ),
-      new ParamDefinition
-      (
-        new Param_Line()
-        {
-          Name = "Ray",
-          NickName = "R",
-          Description = "Ray to test with.",
-        }
-      ),
-      new ParamDefinition
-      (
-        new Parameters.ElementFilter()
-        {
-          Name = "Filter",
-          NickName = "F",
-          Description = "Element Filter.",
-          Optional = true
-        }, ParamRelevance.Primary
-      ),
-    };
-
-    protected override ParamDefinition[] Outputs => outputs;
-    static readonly ParamDefinition[] outputs =
-    {
-      new ParamDefinition
-      (
-        new Parameters.GeometryObject()
-        {
-          Name = "Elements",
-          NickName = "E",
-          Description = "Element references",
-          Access = GH_ParamAccess.list
-        }
-      ),
-    };
-
-    protected override void TrySolveInstance(IGH_DataAccess DA)
-    {
-      if (!Params.GetData(DA, "View", out Types.View3D view)) return;
-      if (!Params.GetData(DA, "Ray", out Rhino.Geometry.Line? line)) return;
-      if (!Params.TryGetData(DA, "Filter", out Types.ElementFilter filter)) return;
-
-      using (var isector = new ARDB.ReferenceIntersector(filter?.Value ?? CompoundElementFilter.ElementHasBoundingBoxFilter, ARDB.FindReferenceTarget.Element, view.Value))
-      {
-        var result = isector.Find(line.Value.From.ToXYZ(), line.Value.Direction.ToXYZ());
-        Params.TrySetDataList
-        (
-          DA, "Elements",
-          () => result.OrderBy(x => x.Proximity).
-          Select(x => view.GetGeometryObjectFromReference<Types.GeometryElement>(x.GetReference()))
-        );
-      }
     }
   }
 }

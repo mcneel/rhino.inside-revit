@@ -10,6 +10,8 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added 'Query References' component.
+
 ### RC
 
 {% endcapture %}

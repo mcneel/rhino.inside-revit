@@ -189,5 +189,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
       catch (Autodesk.Revit.Exceptions.ArgumentNullException e) { throw new ArgumentNullException(e.Message, e); }
       catch (Autodesk.Revit.Exceptions.ArgumentException e)     { throw new FormatException(e.Message, e); }
     }
+
+    public static bool IsKindOf<T>(this Reference reference, Document doc) where T : APIObject
+    {
+      var elementType = typeof(T).IsAssignableFrom(typeof(Element));
+      var geometryType = typeof(T).IsAssignableFrom(typeof(GeometryObject));
+
+      if (!elementType && !geometryType)
+        return false;
+
+      var element = doc.GetElement(reference.ElementId);
+      if (element is RevitLinkInstance link)
+      {
+        element = link.GetLinkDocument()?.GetElement(reference.LinkedElementId);
+        reference = reference.CreateReferenceInLink(link);
+      }
+
+      if (elementType)
+        return element is T;
+
+      return element?.GetGeometryObjectFromReference(reference) is T;
+    }
   }
 }

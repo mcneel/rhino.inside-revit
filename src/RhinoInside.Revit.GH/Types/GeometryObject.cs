@@ -332,6 +332,9 @@ namespace RhinoInside.Revit.GH.Types
           return new GeometryFace(document, reference);
 
 #if REVIT_2018
+        case ARDB.ElementReferenceType.REFERENCE_TYPE_MESH:
+          return new GeometryMesh(document, reference);
+
         case ARDB.ElementReferenceType.REFERENCE_TYPE_SUBELEMENT:
           return new GeometrySubelement(document, reference);
 #endif
@@ -943,6 +946,55 @@ namespace RhinoInside.Revit.GH.Types
         return default;
       }
     }
+    //public GeometryPoint StartPoint
+    //{
+    //  get
+    //  {
+    //    if (base.Value is ARDB.Edge edge && edge.GetEndPointReference(CurveEnd.Start) is ARDB.Reference edgeReference)
+    //      return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(edgeReference)) as GeometryPoint;
+
+    //    if (base.Value is ARDB.Curve curve && curve.GetEndPointReference(CurveEnd.Start) is ARDB.Reference curveReference)
+    //      return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(curveReference)) as GeometryPoint;
+
+    //    return default;
+    //  }
+    //}
+
+    //public GeometryPoint EndPoint
+    //{
+    //  get
+    //  {
+    //    if (base.Value is ARDB.Edge edge && edge.GetEndPointReference(CurveEnd.End) is ARDB.Reference edgeReference)
+    //      return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(edgeReference)) as GeometryPoint;
+
+    //    if (base.Value is ARDB.Curve curve && curve.GetEndPointReference(CurveEnd.End) is ARDB.Reference curveReference)
+    //      return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(curveReference)) as GeometryPoint;
+
+    //    return default;
+    //  }
+    //}
+
+    public GeometryFace LeftFace
+    {
+      get
+      {
+        if (base.Value is ARDB.Edge edge && edge.GetFace(0) is ARDB.Face face)
+          return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(face.Reference)) as GeometryFace;
+
+        return default;
+      }
+    }
+
+    public GeometryFace RightFace
+    {
+      get
+      {
+        if (base.Value is ARDB.Edge edge && edge.GetFace(1) is ARDB.Face face)
+          return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(face.Reference)) as GeometryFace;
+
+        return default;
+      }
+    }
 
     public double Length => Curve?.GetLength() ?? double.NaN;
 
@@ -1164,6 +1216,28 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public GeometryCurve[][] EdgeLoops
+    {
+      get
+      {
+        if (base.Value is ARDB.Face face)
+        {
+          var loops = face.EdgeLoops;
+          var edgeLoops = new GeometryCurve[loops.Size][];
+
+          for (int l = 0; l < edgeLoops.Length; ++l)
+          {
+            var loop = loops.get_Item(l);
+            edgeLoops[l] = loop.Cast<ARDB.Edge>().Select(x => GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(x.Reference)) as GeometryCurve).ToArray();
+          }
+
+          return edgeLoops;
+        }
+
+        return default;
+      }
+    }
+
     public Mesh Mesh
     {
       get
@@ -1182,38 +1256,16 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value?.Triangulate() is ARDB.Mesh mesh)
-        {
-          if (HasReferenceTransform)
-          {
-            var area = mesh.ComputeSurfaceArea(out var _, out var normal);
-            var vector = normal.ToVector3d();
-            vector.Unitize();
-            vector *= area * GeometryDecoder.ModelScaleFactor * GeometryDecoder.ModelScaleFactor;
-            vector.Transform(ReferenceTransform);
-            return vector.Length;
-          }
-          else return mesh.ComputeSurfaceArea();
-        }
+        if (Value is ARDB.Face face)
+          return face.Area;
 
         return double.NaN;
       }
     }
 
-    public Point3d Position
-    {
-      get
-      {
-        if (Value?.Triangulate().ComputeCentroid(2) is ARDB.XYZ centroid)
-        {
-          var point = centroid.ToPoint3d();
-          if (HasReferenceTransform) point.Transform(ReferenceTransform);
-          return point;
-        }
+    public Point3d Position => Location.Origin;
 
-        return NaN.Point3d;
-      }
-    }
+    public Vector3d WorkPlaneOrientation => Location.Normal;
 
     public Plane Location
     {
@@ -1231,22 +1283,6 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return _Location.Value;
-      }
-    }
-
-    public Vector3d WorkPlaneOrientation
-    {
-      get
-      {
-        if (Value?.Triangulate().ComputeNetNormal() is ARDB.XYZ normal)
-        {
-          var vector = normal.ToVector3d();
-          vector *= GeometryDecoder.ModelScaleFactor * GeometryDecoder.ModelScaleFactor;
-          if (HasReferenceTransform) vector.Transform(ReferenceTransform);
-          return vector;
-        }
-
-        return NaN.Vector3d;
       }
     }
 
@@ -1362,7 +1398,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
       {
-        target = Mesh is Mesh mesh ? (Q) (object) new GH_Mesh(Mesh) : default;
+        target = Mesh is Mesh mesh ? (Q) (object) new GH_Mesh(mesh) : default;
         return true;
       }
       else if (typeof(Q).IsAssignableFrom(typeof(Material)))
@@ -1399,6 +1435,200 @@ namespace RhinoInside.Revit.GH.Types
       {
         case ARDB.Element element:
           if (element.GetDefaultReference() is ARDB.Reference reference && reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE)
+          {
+            SetValue(element.Document, reference);
+            return true;
+          }
+          break;
+      }
+
+      return base.CastFrom(source);
+    }
+    #endregion
+  }
+
+  [Name("Mesh")]
+  public class GeometryMesh : GeometryObject, IGH_PreviewData
+  {
+    public override object ScriptVariable() => base.Value;
+
+    public new ARDB.Mesh Value => base.Value as ARDB.Mesh;
+
+    public GeometryMesh() { }
+    public GeometryMesh(ARDB.Document doc, ARDB.Reference reference) : base(doc, reference) { }
+
+    public static new GeometryMesh FromReference(ARDB.Document document, ARDB.Reference reference)
+    {
+      return reference?.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_MESH ?
+        new GeometryMesh(document, reference) : null;
+    }
+
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      return Mesh is Mesh mesh ?
+      (
+        xform == Transform.Identity ?
+        mesh.GetBoundingBox(true) :
+        mesh.GetBoundingBox(xform)
+      ) : NaN.BoundingBox;
+    }
+
+    #region Properties
+    public override string DisplayName
+    {
+      get
+      {
+        var value = base.Value;
+        string visibility;
+        switch (value?.Visibility)
+        {
+          case null: visibility = string.Empty; break;
+          case ARDB.Visibility.Visible: visibility = string.Empty; break;
+          default: visibility = $"{value.Visibility} "; break;
+        }
+
+        switch (value)
+        {
+          case null: return "Null Mesh";
+          default: return $"{visibility}Mesh";
+        }
+      }
+    }
+
+    public Mesh Mesh
+    {
+      get
+      {
+        if (_Meshes is null)
+        {
+          if (Value?.ToMesh() is Mesh mesh)
+          {
+            if (HasReferenceTransform) mesh.Transform(ReferenceTransform);
+            _Meshes = new Mesh[] { mesh };
+          }
+          else _Meshes = Array.Empty<Mesh>();
+        }
+
+        return _Meshes.FirstOrDefault();
+      }
+    }
+
+    public double Area
+    {
+      get
+      {
+        if (Value is ARDB.Mesh mesh)
+          return mesh.ComputeSurfaceArea() * GeometryDecoder.ModelScaleFactor * GeometryDecoder.ModelScaleFactor;
+
+        return double.NaN;
+      }
+    }
+
+    public Point3d Position => Location.Origin;
+
+    public Vector3d WorkPlaneOrientation => Location.Normal;
+
+    public Plane Location
+    {
+      get
+      {
+        if (_Location is null)
+        {
+          if (Value?.TryGetLocation(out var origin, out var basisX, out var basisY) is true)
+          {
+            var plane = new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
+            if (HasReferenceTransform) plane.Transform(ReferenceTransform);
+            _Location = plane;
+          }
+          else _Location = NaN.Plane;
+        }
+
+        return _Location.Value;
+      }
+    }
+
+    public Material Material => Value is ARDB.Mesh mesh ?
+      mesh.MaterialElementId.IsValid() ? GetElement<Material>(mesh.MaterialElementId) : new Material() :
+      null;
+    #endregion
+
+    #region IGH_PreviewData
+    void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (!CentralSettings.PreviewMeshEdges) return;
+      if (Mesh is Mesh mesh)
+      {
+        args.Pipeline.DrawMeshWires(mesh, args.Color, mesh.Ngons.Count == 0 ? args.Thickness : 1);
+      }
+    }
+
+    void IGH_PreviewData.DrawViewportMeshes(GH_PreviewMeshArgs args)
+    {
+      if (Mesh is Mesh mesh)
+      {
+        args.Pipeline.DrawMeshShaded(mesh, args.Material);
+      }
+    }
+    #endregion
+
+    #region Casting
+    public override bool CastTo<Q>(out Q target)
+    {
+      if (base.CastTo(out target)) return true;
+
+      if (typeof(Q).IsAssignableFrom(typeof(ARDB.Reference)))
+      {
+        target = (Q) (object) (IsValid ? GetReference() : null);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(ARDB.Face)))
+      {
+        target = (Q) (object) (IsValid ? Value : null);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Number)))
+      {
+        target = (Q) (object) new GH_Number(Area);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
+      {
+        target = (Q) (object) new GH_Point(Position);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Vector)))
+      {
+        target = (Q) (object) new GH_Vector(WorkPlaneOrientation);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
+      {
+        target = (Q) (object) new GH_Plane(Location);
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
+      {
+        target = Mesh is Mesh mesh ? (Q) (object) new GH_Mesh(mesh) : default;
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(Material)))
+      {
+        target = (Q) (object) Material;
+        return true;
+      }
+
+      return false;
+    }
+
+    public override bool CastFrom(object source)
+    {
+      if (source is IGH_Goo goo)
+        source = goo.ScriptVariable();
+
+      switch (source)
+      {
+        case ARDB.Element element:
+          if (element.GetDefaultReference() is ARDB.Reference reference && reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_MESH)
           {
             SetValue(element.Document, reference);
             return true;
