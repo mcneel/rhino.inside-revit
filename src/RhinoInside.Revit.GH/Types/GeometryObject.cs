@@ -1103,6 +1103,20 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public Mesh Mesh
+    {
+      get
+      {
+        if (Value?.Triangulate().ToMesh() is Mesh mesh)
+        {
+          if (HasReferenceTransform) mesh.Transform(ReferenceTransform);
+          return mesh;
+        }
+
+        return null;
+      }
+    }
+
     public double Area
     {
       get
@@ -1114,7 +1128,7 @@ namespace RhinoInside.Revit.GH.Types
             var area = mesh.ComputeSurfaceArea(out var _, out var normal);
             var vector = normal.ToVector3d();
             vector.Unitize();
-            vector *= area;
+            vector *= area * GeometryDecoder.ModelScaleFactor * GeometryDecoder.ModelScaleFactor;
             vector.Transform(ReferenceTransform);
             return vector.Length;
           }
@@ -1162,6 +1176,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value?.Triangulate().ComputeNetNormal() is ARDB.XYZ normal)
         {
           var vector = normal.ToVector3d();
+          vector *= GeometryDecoder.ModelScaleFactor * GeometryDecoder.ModelScaleFactor;
           if (HasReferenceTransform) vector.Transform(ReferenceTransform);
           return vector;
         }
@@ -1235,6 +1250,7 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
+    #region Casting
     public override bool CastTo<Q>(out Q target)
     {
       if (base.CastTo(out target)) return true;
@@ -1269,27 +1285,20 @@ namespace RhinoInside.Revit.GH.Types
         target = (Q) (object) new GH_Plane(Location);
         return true;
       }
-      else if (Value is ARDB.Face face)
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
       {
-        if (typeof(Q).IsAssignableFrom(typeof(GH_Surface)))
-        {
-          target = UntrimmedSurface is Brep brep && brep.Surfaces.Count > 0 ? (Q) (object) new GH_Brep(brep) : default;
-          return target is object;
-        }
-        else if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
-        {
-          target = TrimmedSurface is Brep brep && brep.Surfaces.Count > 0 ? (Q) (object) new GH_Brep(brep) : default;
-          return target is object;
-        }
-        else if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
-        {
-          if (face.Triangulate()?.ToMesh() is Mesh m)
-          {
-            target = (Q) (object) new GH_Mesh(m);
-          }
-          else target = default;
-          return true;
-        }
+        target = UntrimmedSurface is Brep brep ? (Q) (object) new GH_Surface(brep) : default;
+        return target is object;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Brep)))
+      {
+        target = TrimmedSurface is Brep brep? (Q) (object) new GH_Brep(brep) : default;
+        return target is object;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(GH_Mesh)))
+      {
+        target = Mesh is Mesh mesh ? (Q) (object) new GH_Mesh(Mesh) : default;
+        return true;
       }
       else if (ReferenceDocument is ARDB.Document referenceDocument && GetReference() is ARDB.Reference planeReference)
       {
@@ -1329,5 +1338,6 @@ namespace RhinoInside.Revit.GH.Types
 
       return base.CastFrom(source);
     }
+    #endregion
   }
 }
