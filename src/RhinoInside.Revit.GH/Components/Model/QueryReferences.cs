@@ -54,8 +54,8 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       (
         new Param_Number()
         {
-          Name = "Radius",
-          NickName = "R",
+          Name = "Distance",
+          NickName = "D",
           Description = "Max distance from ray start point to test with.",
           Optional = true
         }, ParamRelevance.Primary
@@ -142,13 +142,13 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     {
       if (!Params.GetData(DA, "View", out Types.View3D view)) return;
       if (!Params.GetData(DA, "Ray", out Rhino.Geometry.Line? line)) return;
-      if (Params.GetData(DA, "Radius", out double? radius) && double.IsNaN(radius.Value)) return;
+      if (Params.GetData(DA, "Distance", out double? distance) && double.IsNaN(distance.Value)) return;
       if (Params.GetData(DA, "Limit", out int? limit) && limit == 0) return;
       if (!Params.TryGetData(DA, "Filter", out Types.ElementFilter filter)) return;
 
       limit ??= int.MaxValue;
-      radius ??= double.PositiveInfinity;
-      radius = GeometryEncoder.ToInternalLength(radius.Value);
+      distance ??= double.PositiveInfinity;
+      distance = GeometryEncoder.ToInternalLength(distance.Value);
 
       var referenceTarget = 0;
       if (Params.IndexOfOutputParam("Elements") >=0) referenceTarget |= (int) ARDB.FindReferenceTarget.Element;
@@ -169,13 +169,13 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       {
         IEnumerable<ARDB.Reference> result = Array.Empty<ARDB.Reference>();
         var origin = line.Value.From.ToXYZ();
-        var direction = radius < 0.0 ? -line.Value.Direction.ToXYZ() : line.Value.Direction.ToXYZ();
+        var direction = distance < 0.0 ? -line.Value.Direction.ToXYZ() : line.Value.Direction.ToXYZ();
 
         if (limit < 0)
         {
           result = intersector.Find(origin, direction).
               OrderByDescending(x => x.Proximity).
-              SkipWhile(x => !double.IsInfinity(radius.Value) && Math.Abs(radius.Value) <= x.Proximity).
+              SkipWhile(x => !double.IsInfinity(distance.Value) && Math.Abs(distance.Value) <= x.Proximity).
               Select(x => x.GetReference()).
               ToArray();
         }
@@ -183,7 +183,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         {
           if (intersector.FindNearest(origin, direction) is ARDB.ReferenceWithContext nearest)
           {
-            if (Math.Abs(radius.Value) >= nearest.Proximity)
+            if (Math.Abs(distance.Value) >= nearest.Proximity)
               result = new ARDB.Reference[] { nearest.GetReference() };
           }
         }
@@ -191,7 +191,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         {
           result = intersector.Find(origin, direction).
               OrderBy(x => x.Proximity).
-              TakeWhile(x => double.IsInfinity(radius.Value) || Math.Abs(radius.Value) >= x.Proximity).
+              TakeWhile(x => double.IsInfinity(distance.Value) || Math.Abs(distance.Value) >= x.Proximity).
               Select(x => x.GetReference()).
               ToArray();
         }
