@@ -423,19 +423,13 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_PreviewData
     Element _Element;
-    private Element Element => _Element ?? (_Element = Element.FromReference(ReferenceDocument, GetReference()));
+    private Element Element => _Element ??= Element.FromReference(ReferenceDocument, GetReference());
 
     void IGH_PreviewData.DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Element is IGH_PreviewData preview)
       {
-        var hasTransform = HasReferenceTransform;
-        try
-        {
-          if (hasTransform) args.Pipeline.PushModelTransform(args.Pipeline.ModelTransform * ReferenceTransform);
-          preview.DrawViewportWires(args);
-        }
-        finally { if (hasTransform) args.Pipeline.PopModelTransform(); }
+        preview.DrawViewportWires(args);
       }
       else if (IsValid)
       {
@@ -448,13 +442,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Element is IGH_PreviewData preview)
       {
-        var hasTransform = HasReferenceTransform;
-        try
-        {
-          if (hasTransform) args.Pipeline.PushModelTransform(args.Pipeline.ModelTransform * ReferenceTransform);
-          preview.DrawViewportMeshes(args);
-        }
-        finally { if (hasTransform) args.Pipeline.PopModelTransform(); }
+        preview.DrawViewportMeshes(args);
       }
     }
     #endregion
