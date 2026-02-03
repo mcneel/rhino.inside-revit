@@ -286,5 +286,10 @@ namespace RhinoInside.Revit.GH.Types
     {
       return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
     }
+
+    internal GeometryElement GetGeometryElementFromReference(ARDB.Reference reference)
+    {
+      return GeometryObject.FromLinkElementId(ReferenceDocument, GetAbsoluteReference(reference).ToLinkElementId()) as GeometryElement;
+    }
   }
 }

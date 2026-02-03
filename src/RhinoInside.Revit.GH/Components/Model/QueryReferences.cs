@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
@@ -8,6 +9,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Geometry
 {
   using Convert.Geometry;
+  using External.DB;
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.36")]
@@ -146,6 +148,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
       limit ??= int.MaxValue;
       radius ??= double.PositiveInfinity;
+      radius = GeometryEncoder.ToInternalLength(radius.Value);
 
       var referenceTarget = 0;
       if (Params.IndexOfOutputParam("Elements") >=0) referenceTarget |= (int) ARDB.FindReferenceTarget.Element;
@@ -156,22 +159,29 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       if (referenceTarget == 0) return;
       if (!Enum.IsDefined(typeof(ARDB.FindReferenceTarget), referenceTarget)) referenceTarget = (int) ARDB.FindReferenceTarget.All;
 
-      using (var isector = new ARDB.ReferenceIntersector(filter?.Value ?? new ARDB.VisibleInViewFilter(view.Document, view.Id), (ARDB.FindReferenceTarget) referenceTarget, view.Value))
+      using (var intersector = new ARDB.ReferenceIntersector
+      (
+        CompoundElementFilter.ElementHasBoundingBoxFilter.Union(filter?.Value),
+        (ARDB.FindReferenceTarget) referenceTarget,
+        view.Value)
+        { FindReferencesInRevitLinks = ExploreLinkedModels }
+      )
       {
         IEnumerable<ARDB.Reference> result = Array.Empty<ARDB.Reference>();
+        var origin = line.Value.From.ToXYZ();
+        var direction = radius < 0.0 ? -line.Value.Direction.ToXYZ() : line.Value.Direction.ToXYZ();
 
         if (limit < 0)
         {
-          result = isector.Find(line.Value.From.ToXYZ(), radius < 0.0 ? -line.Value.Direction.ToXYZ() : line.Value.Direction.ToXYZ()).
+          result = intersector.Find(origin, direction).
               OrderByDescending(x => x.Proximity).
-              SkipWhile(x => !double.IsInfinity(radius.Value) && Math.Abs(radius.Value) >= x.Proximity).
-              Take(limit.Value).
+              SkipWhile(x => !double.IsInfinity(radius.Value) && Math.Abs(radius.Value) <= x.Proximity).
               Select(x => x.GetReference()).
               ToArray();
         }
         else if (limit == 1)
         {
-          if (isector.FindNearest(line.Value.From.ToXYZ(), line.Value.Direction.ToXYZ()) is ARDB.ReferenceWithContext nearest)
+          if (intersector.FindNearest(origin, direction) is ARDB.ReferenceWithContext nearest)
           {
             if (Math.Abs(radius.Value) >= nearest.Proximity)
               result = new ARDB.Reference[] { nearest.GetReference() };
@@ -179,10 +189,9 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         }
         else if (limit > 1)
         {
-          result = isector.Find(line.Value.From.ToXYZ(), line.Value.Direction.ToXYZ()).
+          result = intersector.Find(origin, direction).
               OrderBy(x => x.Proximity).
               TakeWhile(x => double.IsInfinity(radius.Value) || Math.Abs(radius.Value) >= x.Proximity).
-              Take(limit.Value).
               Select(x => x.GetReference()).
               ToArray();
         }
@@ -193,14 +202,17 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         (
           DA, "Elements",
           () => result.
-          Where(x => x.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE).
-          Select(x => view.GetGeometryObjectFromReference<Types.GeometryElement>(x))
+          Where(x => intersector.FindReferencesInRevitLinks || x.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE).
+          Select(view.GetGeometryElementFromReference).
+          Distinct().
+          Take(Math.Abs(limit.Value))
         );
         Params.TrySetDataList
         (
           DA, "Faces",
           () => result.
           Where(x => x.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE).
+          Take(Math.Abs(limit.Value)).
           Select(x => view.GetGeometryObjectFromReference<Types.GeometryFace>(x))
         );
         Params.TrySetDataList
@@ -209,6 +221,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           () => result.
           Where(x => x.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR).
           Where(x => (referenceTarget & (int)ARDB.FindReferenceTarget.Curve) == 0 || x.IsKindOf<ARDB.Edge>(view.ReferenceDocument)).
+          Take(Math.Abs(limit.Value)).
           Select(x => view.GetGeometryObjectFromReference<Types.GeometryCurve>(x))
         );
         Params.TrySetDataList
@@ -216,6 +229,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           DA, "Meshes",
           () => result.
           Where(x => x.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_MESH).
+          Take(Math.Abs(limit.Value)).
           Select(x => view.GetGeometryObjectFromReference<Types.GeometryMesh>(x))
         );
         Params.TrySetDataList
@@ -224,9 +238,43 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           () => result.
           Where(x => x.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR).
           Where(x => (referenceTarget & (int) ARDB.FindReferenceTarget.Edge) == 0 || !x.IsKindOf<ARDB.Edge>(view.ReferenceDocument)).
+          Take(Math.Abs(limit.Value)).
           Select(x => view.GetGeometryObjectFromReference<Types.GeometryCurve>(x))
         );
       }
     }
+
+    protected override void AfterSolveInstance()
+    {
+      base.AfterSolveInstance();
+      Message = ExploreLinkedModels ? "Explore Links" : string.Empty;
+    }
+
+    #region UI
+    public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalMenuItems(menu);
+
+      Menu_AppendSeparator(menu);
+      Menu_AppendItem(menu, "Explore linked models", IncludeLinkedElementsClicked, true, ExploreLinkedModels);
+    }
+
+    private bool ExploreLinkedModels
+    {
+      get => GetValue(nameof(ExploreLinkedModels), true);
+      set
+      {
+        if (ExploreLinkedModels == value) return;
+        SetValue(nameof(ExploreLinkedModels), value);
+      }
+    }
+
+    void IncludeLinkedElementsClicked(object sender, EventArgs e)
+    {
+      RecordUndoEvent("Toggle explore linked models");
+      ExploreLinkedModels = !ExploreLinkedModels;
+      ExpireSolution(true);
+    }
+    #endregion
   }
 }
