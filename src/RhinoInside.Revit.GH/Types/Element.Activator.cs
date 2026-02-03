@@ -79,6 +79,7 @@ namespace RhinoInside.Revit.GH.Types
             case ARDB.Structure.StructuralType.UnknownFraming: return new StructuralFraming(familyInstance);
           }
           if (Panel.IsValidElement(element)) return new Panel(familyInstance);
+          if (MassInstance.IsValidElement(element)) return new MassInstance(familyInstance);
           break;
 
         case ARDB.FamilySymbol familySymbol:

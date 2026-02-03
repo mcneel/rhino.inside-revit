@@ -1,10 +1,8 @@
 using System;
 using System.Linq;
-using Autodesk.Revit.DB.Structure;
 using Grasshopper.Kernel;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Structure
@@ -95,7 +93,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             face
           );
 
-          DA.SetData(_BoundaryConditions_, new AreaBoundaryConditions(boundaryConditions));
+          DA.SetData(_BoundaryConditions_, new Types.AreaBoundaryConditions(boundaryConditions));
           return boundaryConditions;
         }
       );
@@ -108,13 +106,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
       var loopA = bConditions.GetLoops().First();
       var loopB = GeometryEncoder.ToCurveLoop( face.TrimmedSurface.Faces.First().OuterLoop.To3dCurve() );
 
-      for (int i = 0; i < loopA.Count(); i++)
+      if (loopA.NumberOfCurves() != loopB.NumberOfCurves()) return false;
+      foreach (var (curveA, curveB) in loopA.Zip(loopB, (First, Second) => (First, Second)))
       {
-        if (!(loopA.ElementAt(i).IsSameKindAs(loopB.ElementAt(i)) &&
-          loopA.ElementAt(i).AlmostEquals(loopB.ElementAt(i))))
-        {
+        if (!curveA.AlmostEquals(curveB))
           return false;
-        }
       }
 
       return true;
@@ -122,11 +118,13 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     ARDB.Structure.BoundaryConditions Create(ARDB.Document doc, Types.GeometryFace face)
     {
-      var bConditions = doc.Create.NewAreaBoundaryConditions(face.GetReference(),
-                                                             TranslationRotationValue.Fixed, 0.0,
-                                                             TranslationRotationValue.Fixed, 0.0,
-                                                             TranslationRotationValue.Fixed, 0.0);
-      return bConditions;
+      return doc.Create.NewAreaBoundaryConditions
+      (
+        face.GetReference(),
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0,
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0,
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0
+      );
     }
 
     ARDB.Structure.BoundaryConditions Reconstruct
