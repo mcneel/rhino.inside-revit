@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     {
       if (!Params.GetData(DA, "View", out Types.View3D view)) return;
       if (!Params.GetData(DA, "Ray", out Rhino.Geometry.Line? line)) return;
-      if (Params.GetData(DA, "Radius", out double? radius) == double.IsNaN(radius.Value)) return;
+      if (Params.GetData(DA, "Radius", out double? radius) && double.IsNaN(radius.Value)) return;
       if (Params.GetData(DA, "Limit", out int? limit) && limit == 0) return;
       if (!Params.TryGetData(DA, "Filter", out Types.ElementFilter filter)) return;
 
