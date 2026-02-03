@@ -129,13 +129,13 @@ namespace RhinoInside.Revit.GH.Components.Geometry
   }
 
   [ComponentVersion(introduced: "1.15")]
-  public class ElementPointReferences : ZuiComponent
+  public class CurvePointReferences : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("6388CFC0-E31E-4A16-8088-A7BBB9587442");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => string.Empty;
 
-    public ElementPointReferences() : base
+    public CurvePointReferences() : base
     (
       name: "Curve Point References",
       nickname: "CP-References",
@@ -188,6 +188,123 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
       Params.TrySetData(DA, "Start", () => curve.StartPoint);
       Params.TrySetData(DA, "End", () => curve.EndPoint);
+    }
+  }
+
+  [ComponentVersion(introduced: "1.36")]
+  class EdgeFaceReferences : ZuiComponent
+  {
+    public override Guid ComponentGuid => new Guid("8F9DEA82-2A13-466E-9A43-9B79C023E896");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    protected override string IconTag => string.Empty;
+
+    public EdgeFaceReferences() : base
+    (
+      name: "Edge Face References",
+      nickname: "EF-References",
+      description: "Get face references of given edge.",
+      category: "Revit",
+      subCategory: "Model"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GeometryCurve()
+        {
+          Name = "Edge",
+          NickName = "E",
+          Description = "Edge to extract adjacent faces",
+        }
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GeometryFace()
+        {
+          Name = "Left",
+          NickName = "L",
+          Description = "Left face",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GeometryPoint()
+        {
+          Name = "Right",
+          NickName = "R",
+          Description = "Right face",
+        }
+      ),
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Params.GetData(DA, "Edge", out Types.GeometryCurve curve)) return;
+
+      Params.TrySetData(DA, "Start", () => curve.LeftFace);
+      Params.TrySetData(DA, "End", () => curve.RightFace);
+    }
+  }
+
+  [ComponentVersion(introduced: "1.36")]
+  class FaceEdgeReferences : ZuiComponent
+  {
+    public override Guid ComponentGuid => new Guid("F653D38F-E692-4120-BE0E-F3F8DCEBD368");
+    public override GH_Exposure Exposure => GH_Exposure.quarternary;
+    protected override string IconTag => string.Empty;
+
+    public FaceEdgeReferences() : base
+    (
+      name: "Face Edge References",
+      nickname: "FE-References",
+      description: "Get edge references of given face.",
+      category: "Revit",
+      subCategory: "Model"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GeometryFace()
+        {
+          Name = "Face",
+          NickName = "F",
+          Description = "Face to extract edges",
+        }
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GeometryCurve()
+        {
+          Name = "Edges",
+          NickName = "E",
+          Description = "Face edges",
+          Access = GH_ParamAccess.tree
+        }
+      ),
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Params.GetData(DA, "Face", out Types.GeometryFace face)) return;
+
+      Params.TrySetDataTree(DA, "Edges", () => face.EdgeLoops);
     }
   }
 

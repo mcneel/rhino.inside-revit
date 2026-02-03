@@ -920,11 +920,11 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (GetReference() is ARDB.Reference reference)
-        {
-          var stableRepresentation = reference.ConvertToStableRepresentation(ReferenceDocument);
-          return new GeometryPoint(ReferenceDocument, ARDB.Reference.ParseFromStableRepresentation(ReferenceDocument, $"{stableRepresentation}/0"));
-        }
+        if (base.Value is ARDB.Edge edge && edge.GetEndPointReference(CurveEnd.Start) is ARDB.Reference edgeReference)
+          return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(edgeReference)) as GeometryPoint;
+
+        if (base.Value is ARDB.Curve curve && curve.GetEndPointReference(CurveEnd.Start) is ARDB.Reference curveReference)
+          return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(curveReference)) as GeometryPoint;
 
         return default;
       }
@@ -934,11 +934,33 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (GetReference() is ARDB.Reference reference)
-        {
-          var stableRepresentation = reference.ConvertToStableRepresentation(ReferenceDocument);
-          return new GeometryPoint(ReferenceDocument, ARDB.Reference.ParseFromStableRepresentation(ReferenceDocument, $"{stableRepresentation}/1"));
-        }
+        if (base.Value is ARDB.Edge edge && edge.GetEndPointReference(CurveEnd.End) is ARDB.Reference edgeReference)
+          return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(edgeReference)) as GeometryPoint;
+
+        if (base.Value is ARDB.Curve curve && curve.GetEndPointReference(CurveEnd.End) is ARDB.Reference curveReference)
+          return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(curveReference)) as GeometryPoint;
+
+        return default;
+      }
+    }
+
+    public GeometryFace LeftFace
+    {
+      get
+      {
+        if (base.Value is ARDB.Edge edge && edge.GetFace(0) is ARDB.Face face)
+          return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(face.Reference)) as GeometryFace;
+
+        return default;
+      }
+    }
+
+    public GeometryFace RightFace
+    {
+      get
+      {
+        if (base.Value is ARDB.Edge edge && edge.GetFace(1) is ARDB.Face face)
+          return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(face.Reference)) as GeometryFace;
 
         return default;
       }
@@ -1161,6 +1183,28 @@ namespace RhinoInside.Revit.GH.Types
         }
 
         return null;
+      }
+    }
+
+    public GeometryCurve[][] EdgeLoops
+    {
+      get
+      {
+        if (base.Value is ARDB.Face face)
+        {
+          var loops = face.EdgeLoops;
+          var edgeLoops = new GeometryCurve[loops.Size][];
+
+          for (int l = 0; l < edgeLoops.Length; ++l)
+          {
+            var loop = loops.get_Item(l);
+            edgeLoops[l] = loop.Cast<ARDB.Edge>().Select(x => GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(x.Reference)) as GeometryCurve).ToArray();
+          }
+
+          return edgeLoops;
+        }
+
+        return default;
       }
     }
 
