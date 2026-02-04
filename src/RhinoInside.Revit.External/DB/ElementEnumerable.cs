@@ -224,7 +224,19 @@ namespace RhinoInside.Revit.External.DB
         case ElementCategoryFilter category: return !category.CategoryId.IsValid() || category.CategoryId.IsBuiltInId();
         case ElementMulticategoryFilter category: return category.GetCategoryIds().All(x => !x.IsValid() || x.IsBuiltInId());
         case ElementIsCurveDrivenFilter _: return true;
+        case ElementParameterFilter parameter: return parameter.GetRules().All
+        (
+          x =>
+          x is FilterStringRule ||
+          x is FilterInverseRule ||
+          x is FilterIntegerRule ||
+          (x is FilterCategoryRule category && category.GetCategories().All(x => !x.IsValid() || x.IsBuiltInId()))
+        );
+#if REVIT_2019
+        case ElementLogicalFilter logical: return logical.GetFilters().All(IsDocumentAgnosticFilter);
+#endif
       }
+
       return false;
     }
 
