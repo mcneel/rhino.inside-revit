@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components.Families
   using External.DB;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.4")]
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryFamilies : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("B6C377BA-BC46-495C-8250-F09DB0219C91");
@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Families
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ElementKind>>("Kind", "K", "Kind to match", defaultValue: ElementKind.System | ElementKind.Component, optional: true),
       ParamDefinition.Create<Parameters.Category>                     ("Category", "C",  optional: true),
       ParamDefinition.Create<Param_String>                            ("Family Name", "FN", optional: true),
@@ -80,46 +80,49 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Kind", out Types.ElementKind kind)) return;
       if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
       if (!Params.TryGetData(DA, "Family Name", out string familyName)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      if (category?.AssertValidModel(model) != false || category.Id.IsBuiltInId() || !category.Id.IsValid())
       {
-        var elementCollector = collector.WherePasses(ElementFilter);
+        using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+        {
+          var elementCollector = collector.WherePasses(ElementFilter);
 
-        if (kind is object)
-          elementCollector = elementCollector.WherePasses(CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true));
+          if (kind is object)
+            elementCollector = elementCollector.WherePasses(CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true));
 
-        if (category is object)
-          elementCollector = elementCollector.WhereCategoryIdEqualsTo(category.Id);
+          if (category is object)
+            elementCollector = elementCollector.WhereCategoryIdEqualsTo(category.Id);
 
-        if (filter is object)
-          elementCollector = elementCollector.WherePasses(filter);
+          if (filter is object)
+            elementCollector = elementCollector.WherePasses(filter, model.ModelInstance.Value);
 
-        if (TryGetFilterStringParam(ARDB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref familyName, out var nameFilter))
-          elementCollector = elementCollector.WherePasses(nameFilter);
+          if (TryGetFilterStringParam(ARDB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref familyName, out var nameFilter))
+            elementCollector = elementCollector.WherePasses(nameFilter);
 
-        var familiesSet = new HashSet<ARDB.ElementType>
-        (
-          elementCollector.
-          TakeWhileIsNotEscapeKeyDown(this).
-          Cast<ARDB.ElementType>(),
-          default(FamilyNameComparer)
-        );
+          var familiesSet = new HashSet<ARDB.ElementType>
+          (
+            elementCollector.
+            TakeWhileIsNotEscapeKeyDown(this).
+            Cast<ARDB.ElementType>(),
+            default(FamilyNameComparer)
+          );
 
-        var families = familyName is null ?
-          familiesSet :
-          familiesSet.Where(x => x.FamilyName.IsSymbolNameLike(familyName));
+          var families = familyName is null ?
+            familiesSet :
+            familiesSet.Where(x => x.FamilyName.IsSymbolNameLike(familyName));
 
-        DA.SetDataList
-        (
-          "Families",
-          families.
-          Select(x => x.FamilyName)
-        );
+          DA.SetDataList
+          (
+            "Families",
+            families.
+            Select(x => x.FamilyName)
+          );
+        }
       }
     }
 

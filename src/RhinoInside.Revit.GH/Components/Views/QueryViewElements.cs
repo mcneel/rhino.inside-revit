@@ -7,8 +7,8 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
+  using External.DB;
   using External.DB.Extensions;
-  using RhinoInside.Revit.External.DB;
 
   [ComponentVersion(introduced: "1.16")]
   public class QueryViewElements : ElementCollectorComponent
@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         (
           "Elements",
           elementCollector.
-          Select(Types.Element.FromElement).
+          Select(view.GetElement<Types.Element>).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }
@@ -163,8 +163,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         (
           "Elements",
           elementCollector.
-          Select(Types.GraphicalElement.FromElement).
-          OfType<Types.GraphicalElement>().
+          Select(view.GetElement<Types.GraphicalElement>).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

@@ -545,6 +545,7 @@ namespace RhinoInside.Revit.GH
       var added    = e.GetAddedElementIds().AsReadOnlyElementIdSet();
       var deleted  = e.GetDeletedElementIds().AsReadOnlyElementIdSet();
       var modified = e.GetModifiedElementIds().AsReadOnlyElementIdSet();
+      if (document.IsLinked) return;
 
       if (added.Count > 0 || deleted.Count > 0 || modified.Count > 0)
       {

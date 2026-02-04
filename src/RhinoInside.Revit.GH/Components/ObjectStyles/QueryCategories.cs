@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.21")]
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryCategories : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("D150E40E-0970-4683-B517-038F8BA8B0D8");
@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryDiscipline>>("Discipline", "D", "Category discipline", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Param_Enum<Types.CategoryType>>("Type", "T", "Category type", ARDB.CategoryType.Model, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Category>("Parent", "P", "Parent category", optional: true, relevance: ParamRelevance.Occasional),
@@ -76,9 +76,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
+      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Discipline", out ERDB.CategoryDiscipline? discipline)) return;
       if (!Params.TryGetData(DA, "Type", out ARDB.CategoryType? type)) return;
       if (!Params.TryGetData(DA, "Parent", out Types.Category parent)) return;
@@ -90,51 +88,52 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       if (!Params.TryGetData(DA, "Has Material Quantities", out bool? hasMaterialQuantities)) return;
       if (!Params.TryGetData(DA, "Cuttable", out bool? cuttable)) return;
 
-      if(!(parent?.Document is null || doc.Equals(parent.Document)))
-        throw new System.ArgumentException("Wrong Document.", nameof(parent));
-
-      IEnumerable<ARDB.Category> categories = doc.GetCategories(parent?.Id);
-
-      if (discipline.HasValue)
-        categories = categories.Where(x => (x.CategoryDiscipline() & discipline) != ERDB.CategoryDiscipline.None);
-
-      if (type.HasValue)
-        categories = categories.Where(x => x.CategoryType == type);
-
-      if (isSubcategory.HasValue)
-        categories = categories.Where(x => x.Parent is object == isSubcategory.Value);
-
-      if (allowsSubcategories.HasValue)
-        categories = categories.Where(x => x.CanAddSubcategory == allowsSubcategories);
-
-      if (allowsParameters.HasValue)
-        categories = categories.Where(x => x.AllowsBoundParameters == allowsParameters);
-
-      if (hasMaterialQuantities.HasValue)
-        categories = categories.Where(x => x.HasMaterialQuantities == hasMaterialQuantities);
-
-      if (cuttable.HasValue)
-        categories = categories.Where(x => x.IsCuttable == cuttable);
-
-      if (name is object)
+      if (parent?.AssertValidModel(model) != false || parent.Id.IsBuiltInId() || !parent.Id.IsValid())
       {
-        if (parent?.Id is null)
-          categories = categories.Where(x => x.FullName().IsSymbolNameLike(name));
-        else
-          categories = categories.Where(x => x.Name.IsSymbolNameLike(name));
+        IEnumerable<ARDB.Category> categories = model.ModelDocument.Value.GetCategories(parent?.Id);
+
+        if (discipline.HasValue)
+          categories = categories.Where(x => (x.CategoryDiscipline() & discipline) != ERDB.CategoryDiscipline.None);
+
+        if (type.HasValue)
+          categories = categories.Where(x => x.CategoryType == type);
+
+        if (isSubcategory.HasValue)
+          categories = categories.Where(x => x.Parent is object == isSubcategory.Value);
+
+        if (allowsSubcategories.HasValue)
+          categories = categories.Where(x => x.CanAddSubcategory == allowsSubcategories);
+
+        if (allowsParameters.HasValue)
+          categories = categories.Where(x => x.AllowsBoundParameters == allowsParameters);
+
+        if (hasMaterialQuantities.HasValue)
+          categories = categories.Where(x => x.HasMaterialQuantities == hasMaterialQuantities);
+
+        if (cuttable.HasValue)
+          categories = categories.Where(x => x.IsCuttable == cuttable);
+
+        if (name is object)
+        {
+          if (parent?.Id is null)
+            categories = categories.Where(x => x.FullName().IsSymbolNameLike(name));
+          else
+            categories = categories.Where(x => x.Name.IsSymbolNameLike(name));
+        }
+
+        if (visibleInUI.HasValue)
+          categories = categories.Where(x => x.IsVisibleInUI() == visibleInUI);
+
+        DA.SetDataList
+        (
+          "Categories",
+          categories.
+          Select(x => new Types.Category(x)).
+          AtModel(model).
+          TakeWhileIsNotEscapeKeyDown(this).
+          OrderBy(x => x.Id.ToValue())
+        );
       }
-
-      if (visibleInUI.HasValue)
-        categories = categories.Where(x => x.IsVisibleInUI() == visibleInUI);
-
-      DA.SetDataList
-      (
-        "Categories",
-        categories.
-        Select(x => new Types.Category(x)).
-        TakeWhileIsNotEscapeKeyDown(this).
-        OrderBy(x => x.Id.ToValue())
-      );
     }
   }
 }

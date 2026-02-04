@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB;
 using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
@@ -12,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
   using ARDB_AnalyticalElement = ARDB.Structure.AnalyticalModel;
 #endif
 
-  [ComponentVersion(introduced: "1.27")]
+  [ComponentVersion(introduced: "1.27", updated: "1.36")]
   public class QueryAnalyticalElements : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("1D518EBF-D75D-4D9C-B962-9907352DF89A");
@@ -34,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.AnalyticalStructuralRole>>
       (
         name: "Structural Role",
@@ -71,19 +72,17 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
+      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Structural Role", out ARDB.Structure.AnalyticalStructuralRole? structuralRole)) return;
       if (!Params.TryGetData(DA, "Analyze As", out ARDB.Structure.AnalyzeAs? analyzeAs)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          elementsCollector = elementsCollector.WherePasses(filter);
+          elementsCollector = elementsCollector.WherePasses(filter, model.ModelInstance.Value);
 
 #if REVIT_2023
         if (structuralRole is object)
@@ -92,7 +91,14 @@ namespace RhinoInside.Revit.GH.Components.Walls
         if (analyzeAs is object)
           elementsCollector = elementsCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS, (int) analyzeAs);
 
-        Params.TrySetDataList(DA, "Analytical Elements",   () => collector.Select(Types.AnalyticalElement.FromElement).TakeWhileIsNotEscapeKeyDown(this));
+        DA.SetDataList
+        (
+          "Analytical Elements",
+          elementsCollector.
+          Select(Types.AnalyticalElement.FromElement).
+          AtModel(model).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

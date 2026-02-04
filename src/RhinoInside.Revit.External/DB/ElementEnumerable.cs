@@ -3,6 +3,8 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
+using Autodesk.Revit.DB.Mechanical;
 
 namespace RhinoInside.Revit.External.DB
 {
@@ -66,7 +68,7 @@ namespace RhinoInside.Revit.External.DB
     {
       Document = document;
       ViewId = viewId;
-      LinkId = linkId;
+      LinkId = linkId ?? ElementIdExtension.Invalid;
     }
 
     internal override FilteredElementCollector GetCollector()
@@ -89,7 +91,7 @@ namespace RhinoInside.Revit.External.DB
       }
       else if (Document.GetElement(ViewId) is View view && view.IsModelView())
       {
-        if (LinkId is null)
+        if (!LinkId.IsValid())
         {
           return new FilteredElementCollector(Document, ViewId);
         }
@@ -121,7 +123,7 @@ namespace RhinoInside.Revit.External.DB
           var modelClipBox = view.GetModelClipBox();
           if (modelClipBox.GetPlaneEquations(out var modelClipPlanes, Numerical.Tolerance.Default))
           {
-            if (LinkId is object)
+            if (LinkId.IsValid())
             {
               if
               (
@@ -206,6 +208,41 @@ namespace RhinoInside.Revit.External.DB
 
   public static class ElementEnumerable
   {
+    private static bool IsDocumentAgnosticFilter(ElementFilter filter)
+    {
+      switch (filter)
+      {
+        case ElementIsElementTypeFilter _: return true;
+        case ElementClassFilter _: return true;
+        case ElementMulticlassFilter _: return true;
+        case AreaFilter _: return true;
+        case AreaTagFilter _: return true;
+        case RoomFilter _: return true;
+        case RoomTagFilter _: return true;
+        case SpaceFilter _: return true;
+        case SpaceTagFilter _: return true;
+        case ElementCategoryFilter category: return !category.CategoryId.IsValid() || category.CategoryId.IsBuiltInId();
+        case ElementMulticategoryFilter category: return category.GetCategoryIds().All(x => !x.IsValid() || x.IsBuiltInId());
+        case ElementIsCurveDrivenFilter _: return true;
+      }
+      return false;
+    }
+
+    internal static void AssertIsValidFiler(this ElementFilter filter, RevitLinkInstance instance)
+    {
+      if (instance is object)
+      {
+        if (!IsDocumentAgnosticFilter(filter))
+          throw new System.ComponentModel.WarningException("Complex filtering is not supported on linked models.");
+      }
+    }
+
+    internal static FilteredElementCollector WherePasses(this FilteredElementCollector source, ElementFilter filter, RevitLinkInstance instance)
+    {
+      AssertIsValidFiler(filter, instance);
+      return source.WherePasses(filter);
+    }
+
     public static IEnumerable<Element> CollectElements(this Document document) => new DocumentCollector(document);
     public static IEnumerable<Element> CollectElements(this View view) => new DocumentCollector(view.Document, view.Id);
     public static IEnumerable<Element> CollectElements(this View view, ElementId linkId) => new DocumentCollector(view.Document, view.Id, linkId);

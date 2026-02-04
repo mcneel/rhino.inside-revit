@@ -69,6 +69,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     }
   }
 
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryElements : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("0F7DA57E-6C05-4DD0-AABF-69E42DF38859");
@@ -91,7 +92,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item),
       ParamDefinition.Create<Param_Integer>("Limit", "L", $"Max number of Elements to query for.{OS.NewLine}For an unlimited query remove this parameter.", defaultValue: 100, GH_ParamAccess.item, relevance: ParamRelevance.Primary),
     };
@@ -105,14 +106,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out var model)) return;
       if (!Params.GetData(DA, "Filter", out Types.ElementFilter filter, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Limit", out int? limit, x => x >= 0)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
       {
         var elementCollector = collector.WherePasses(ElementFilter).
-          WherePasses(filter.Value);
+          WherePasses(filter.Value, model.ModelInstance.Value);
 
         var _Elements_ = Params.IndexOfOutputParam("Elements");
         if
@@ -125,6 +126,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
             return elements.
               Select(Types.Element.FromElement).
+              AtModel(model).
               TakeWhileIsNotEscapeKeyDown(this);
           }) &&
           limit <= (Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_))?.Count ?? 0)
@@ -146,6 +148,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     }
   }
 
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryGraphicalElements : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("79DAEA3A-13A3-49BF-8BEB-AA28E3BE4515");
@@ -165,8 +168,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.View>("View", "V", "View", GH_ParamAccess.item),
-      //ParamDefinition.Create<Parameters.GraphicalElement>("Link", "L", "Linked Model", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Secondary),
       ParamDefinition.Create<Parameters.Category>("Categories", "C", "Category", GH_ParamAccess.list, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
     };
@@ -179,13 +182,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
-      if (!Params.TryGetData(DA, "Link", out Types.RevitLinkInstance link, x => x.IsValid)) return;
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
+      if (view.AssertValidModel(model))
       {
-        var elementCollector = view.Value.CollectElements(link?.Id);
+        var elementCollector = view.Value.CollectElements(model.ModelInstance.Id);
 
         if (categories is object)
         {
@@ -215,28 +219,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
         if (filter is object)
           elementCollector = elementCollector.WherePassFilter(filter);
 
-        if (link is object)
-        {
-          DA.SetDataList
-          (
-            "Elements",
-            elementCollector.
-            Select(x => Types.GraphicalElement.FromLinkElement(link.Value, Types.GraphicalElement.FromElement(x))).
-            OfType<Types.GraphicalElement>().
-            TakeWhileIsNotEscapeKeyDown(this)
-          );
-        }
-        else
-        {
-          DA.SetDataList
-          (
-            "Elements",
-            elementCollector.
-            Select(Types.GraphicalElement.FromElement).
-            OfType<Types.GraphicalElement>().
-            TakeWhileIsNotEscapeKeyDown(this)
-          );
-        }
+        DA.SetDataList
+        (
+          "Elements",
+          elementCollector.
+          OfType<Types.GraphicalElement>().
+          AtModel(model).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

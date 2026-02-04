@@ -60,8 +60,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
         (
           "Title Blocks",
           elementCollector.
-          Select(Types.FamilyInstance.FromElement).
-          OfType<Types.FamilyInstance>().
+          Select(sheet.GetElement<Types.FamilyInstance>).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

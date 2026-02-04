@@ -7,14 +7,15 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Documents
 {
+  using External.DB;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.4")]
-  public class DocumentLinks : ElementCollectorComponent
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
+  public class QueryRevitModels : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("EBCCFDD8-9F3B-44F4-A209-72D06C8082A5");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override string IconTag => "L";
+    protected override string IconTag => "M";
     protected override ARDB.ElementFilter ElementFilter => External.DB.CompoundElementFilter.Union
     (
       new ARDB.ElementClassFilter(typeof(ARDB.RevitLinkInstance)),
@@ -29,10 +30,10 @@ namespace RhinoInside.Revit.GH.Components.Documents
     }
     #endregion
 
-    public DocumentLinks() : base
+    public QueryRevitModels() : base
     (
-      name: "Query Revit Links",
-      nickname: "Links",
+      name: "Query Revit Models",
+      nickname: "Models",
       description: "Gets Revit linked models into given document",
       category: "Revit",
       subCategory: "Document"
@@ -42,30 +43,60 @@ namespace RhinoInside.Revit.GH.Components.Documents
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Param_String>("Name", "N", "Revit linked model name", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.ModelInstance>("Model", "M", "Revit model", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Param_String>("Name", "N", "Revit linked model instance name", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true, relevance: ParamRelevance.Occasional)
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.GraphicalElement>("Links", "L", "Revit linked models that are linked into given document", GH_ParamAccess.list, relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Parameters.Document>("Documents", "D", "Revit documents that are linked into given document", GH_ParamAccess.list, relevance: ParamRelevance.Primary)
+      new ParamDefinition
+      (
+        new Parameters.Document()
+        {
+          Name = "Document",
+          NickName = "DOC",
+          Description = "Revit model document",
+          DataMapping = GH_DataMapping.Graft
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.ModelInstance()
+        {
+          Name = "Links",
+          NickName = "L",
+          Description = "Revit linked models to the given model",
+          Access = GH_ParamAccess.list
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Document()
+        {
+          Name = "Documents",
+          NickName = "LD",
+          Description = "Revit linked documents to the given model",
+          Access = GH_ParamAccess.list
+        }, ParamRelevance.Occasional
+      )
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out var model)) return;
+      Params.TrySetData(DA, "Document", () => model.ModelDocument);
+
       Params.TryGetData(DA, "Name", out string name);
       Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
       {
         var linksCollector = collector.OfClass(typeof(ARDB.RevitLinkInstance));
 
         if (filter is object)
-          linksCollector = linksCollector.WherePasses(filter);
+          linksCollector = linksCollector.WherePasses(filter, model.ModelInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.RVT_LINK_INSTANCE_NAME, ref name, out var nameFilter))
           linksCollector = linksCollector.WherePasses(nameFilter);

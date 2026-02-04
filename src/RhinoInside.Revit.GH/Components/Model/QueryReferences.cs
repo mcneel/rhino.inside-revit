@@ -13,11 +13,14 @@ namespace RhinoInside.Revit.GH.Components.Geometry
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.36")]
-  public class QueryReferences : ZuiComponent
+  public class QueryReferences : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("60F89F09-9391-4AE6-B9C6-75AB9F4879FE");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => string.Empty;
+
+    static readonly ARDB.ElementFilter elementFilter = CompoundElementFilter.ElementHasBoundingBoxFilter;
+    protected override ARDB.ElementFilter ElementFilter => elementFilter;
 
     public QueryReferences() : base
     (
@@ -54,8 +57,8 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       (
         new Param_Number()
         {
-          Name = "Radius",
-          NickName = "R",
+          Name = "Distance",
+          NickName = "D",
           Description = "Max distance from ray start point to test with.",
           Optional = true
         }, ParamRelevance.Primary
@@ -142,13 +145,13 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     {
       if (!Params.GetData(DA, "View", out Types.View3D view)) return;
       if (!Params.GetData(DA, "Ray", out Rhino.Geometry.Line? line)) return;
-      if (Params.GetData(DA, "Radius", out double? radius) && double.IsNaN(radius.Value)) return;
+      if (Params.GetData(DA, "Distance", out double? distance) && double.IsNaN(distance.Value)) return;
       if (Params.GetData(DA, "Limit", out int? limit) && limit == 0) return;
       if (!Params.TryGetData(DA, "Filter", out Types.ElementFilter filter)) return;
 
       limit ??= int.MaxValue;
-      radius ??= double.PositiveInfinity;
-      radius = GeometryEncoder.ToInternalLength(radius.Value);
+      distance ??= double.PositiveInfinity;
+      distance = GeometryEncoder.ToInternalLength(distance.Value);
 
       var referenceTarget = 0;
       if (Params.IndexOfOutputParam("Elements") >=0) referenceTarget |= (int) ARDB.FindReferenceTarget.Element;
@@ -169,13 +172,13 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       {
         IEnumerable<ARDB.Reference> result = Array.Empty<ARDB.Reference>();
         var origin = line.Value.From.ToXYZ();
-        var direction = radius < 0.0 ? -line.Value.Direction.ToXYZ() : line.Value.Direction.ToXYZ();
+        var direction = distance < 0.0 ? -line.Value.Direction.ToXYZ() : line.Value.Direction.ToXYZ();
 
         if (limit < 0)
         {
           result = intersector.Find(origin, direction).
               OrderByDescending(x => x.Proximity).
-              SkipWhile(x => !double.IsInfinity(radius.Value) && Math.Abs(radius.Value) <= x.Proximity).
+              SkipWhile(x => !double.IsInfinity(distance.Value) && Math.Abs(distance.Value) <= x.Proximity).
               Select(x => x.GetReference()).
               ToArray();
         }
@@ -183,7 +186,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         {
           if (intersector.FindNearest(origin, direction) is ARDB.ReferenceWithContext nearest)
           {
-            if (Math.Abs(radius.Value) >= nearest.Proximity)
+            if (Math.Abs(distance.Value) >= nearest.Proximity)
               result = new ARDB.Reference[] { nearest.GetReference() };
           }
         }
@@ -191,7 +194,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         {
           result = intersector.Find(origin, direction).
               OrderBy(x => x.Proximity).
-              TakeWhile(x => double.IsInfinity(radius.Value) || Math.Abs(radius.Value) >= x.Proximity).
+              TakeWhile(x => double.IsInfinity(distance.Value) || Math.Abs(distance.Value) >= x.Proximity).
               Select(x => x.GetReference()).
               ToArray();
         }
@@ -248,6 +251,42 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     {
       base.AfterSolveInstance();
       Message = ExploreLinkedModels ? "Explore Links" : string.Empty;
+    }
+
+    public override bool NeedsToBeExpired(ARDB.Document document, ISet<ARDB.ElementId> added, ISet<ARDB.ElementId> deleted, ISet<ARDB.ElementId> modified)
+    {
+      // Check if the change is on a document this component is querying.
+      if (!MayNeedToBeExpired(document))
+        return false;
+
+      // Check inputs with persistent data
+      if (base.NeedsToBeExpired(document, added, deleted, modified))
+        return true;
+
+      foreach (var output in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
+      {
+        if (output.NeedsToBeExpired(document, added, deleted, modified))
+          return true;
+      }
+
+      if (Params.Input<Parameters.View3D>("View") is Parameters.View3D views)
+      {
+        var ids = new List<ARDB.ElementId>(added.Count + deleted.Count + modified.Count);
+        ids.AddRange(added);
+        ids.AddRange(deleted);
+        ids.AddRange(modified);
+        foreach (var view in views.VolatileData.AllData(true).OfType<Types.View>().Where(x => document.Equals(x.Document)))
+        {
+          using (var collector = new ARDB.FilteredElementCollector(view.Document, view.Id))
+          {
+            collector.WherePasses(CompoundElementFilter.ExclusionFilter(ids, inverted: true));
+            if (collector.Any())
+              return true;
+          }
+        }
+      }
+
+      return false;
     }
 
     #region UI

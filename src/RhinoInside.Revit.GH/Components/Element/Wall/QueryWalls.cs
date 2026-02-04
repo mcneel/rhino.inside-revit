@@ -5,6 +5,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryWalls : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("118F5744-292F-4BEC-9213-8073219D8563");
@@ -25,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.WallSystemFamily>>
       (
         name: "Wall System Family",
@@ -49,8 +50,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
 
       // grab wall system family from input
       var wallKind = ARDB.WallKind.Unknown;
@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
         return;
 
       // collect wall instances based on the given wallkind
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
       {
         var wallsCollector = collector.WherePasses(ElementFilter);
         var walls = wallsCollector.Cast<ARDB.Wall>();
@@ -72,7 +72,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
         (
           "Walls",
           walls.
-          Select(Types.Element.FromElement).
+          Select(x => new Types.Wall(x)).
+          AtModel(model).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

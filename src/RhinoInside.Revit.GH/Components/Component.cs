@@ -400,6 +400,7 @@ namespace RhinoInside.Revit.GH.Components
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, argument.Message, argument.Value as Rhino.Geometry.GeometryBase);
           break;
 
+        case System.ComponentModel.WarningException _:
         case Exceptions.RuntimeException _:
           if (!AbortOnContinuableException)
           {

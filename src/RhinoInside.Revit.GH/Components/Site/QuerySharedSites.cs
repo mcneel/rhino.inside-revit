@@ -7,6 +7,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Site
 {
+  using External.DB;
+
+  [ComponentVersion(introduced: "1.0", updated:"1.36")]
   public class QueryProjectLocations : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("62641279-D4CE-4F93-8430-BD342BE123AB");
@@ -35,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Shared site name", optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
     };
@@ -48,18 +51,16 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
+      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
       {
         var sitesCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          sitesCollector = sitesCollector.WherePasses(filter);
+          sitesCollector = sitesCollector.WherePasses(filter, model.ModelInstance.Value);
 
         var sites = collector.Cast<ARDB.ProjectLocation>();
 
@@ -71,6 +72,7 @@ namespace RhinoInside.Revit.GH.Components.Site
           "Shared Sites",
           sites.
           Select(x => new Types.ProjectLocation(x)).
+          AtModel(model).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

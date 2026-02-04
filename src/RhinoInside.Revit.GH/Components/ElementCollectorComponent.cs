@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
@@ -36,8 +37,8 @@ namespace RhinoInside.Revit.GH.Components
 
     protected bool MayNeedToBeExpired(ARDB.Document document)
     {
-      if (Params.Input<Parameters.Document>("Document") is Parameters.Document Document)
-        return Document.VolatileData.AllData(true).Cast<Types.Document>().Select(x => x.Value).Contains(document);
+      if (Params.Input<Parameters.ModelInstance>(_Model_) is Parameters.ModelInstance model)
+        return model.VolatileData.AllData(true).OfType<Types.Document>().Select(x => x.Value).Where(x => !x.IsLinked).Contains(document);
 
       if (Parameters.Document.TryGetCurrentDocument(this, out var currentDocument))
         return document.Equals(currentDocument.Value);
@@ -66,20 +67,26 @@ namespace RhinoInside.Revit.GH.Components
         if (added.Any(x => filter.PassesFilter(document, x)))
           return true;
 
-        if (modified.Any(x => filter.PassesFilter(document, x)))
-          return true;
-
         if (deleted.Count > 0)
         {
           foreach (var param in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
           {
-            if (param.NeedsToBeExpired(document, ElementIdExtension.EmptySet, deleted, ElementIdExtension.EmptySet))
+            if (param.NeedsToBeExpired(document, ElementIdExtension.EmptySet, deleted, modified))
               return true;
           }
         }
       }
 
       return false;
+    }
+
+    static readonly string _Model_ = "Model";
+    public override void AddedToDocument(GH_Document document)
+    {
+      if (Params.Input<Parameters.Document>("Document") is IGH_Param model)
+        model.Name = _Model_;
+
+      base.AddedToDocument(document);
     }
 
     protected static bool TryGetFilterIntegerParam(ARDB.BuiltInParameter paramId, int pattern, out ARDB.ElementFilter filter)
@@ -167,6 +174,36 @@ namespace RhinoInside.Revit.GH.Components
 
       filter = new ARDB.ElementParameterFilter(rule, false);
       return true;
+    }
+  }
+
+  public static class ElementEnumeratorExtensions
+  {
+    public static IEnumerable<T> Cast<T>(this IEnumerable<ARDB.Element> elements) where T : Types.Element
+    {
+      foreach (var element in elements)
+        yield return (T) Types.Element.FromElement(element);
+    }
+
+    public static IEnumerable<T> OfType<T>(this IEnumerable<ARDB.Element> elements) where T : Types.Element
+    {
+      foreach (var element in elements)
+        yield return Types.Element.FromElement(element) as T;
+    }
+
+    internal static IEnumerable<T> AtModel<T>(this IEnumerable<T> elements, Types.IGH_ModelInstance model) where T : Types.Element
+    {
+      switch (model)
+      {
+        case null:
+        case Types.Document _:
+          return elements;
+
+        case Types.RevitLinkInstance _:
+          return elements.Select(x => (T) Types.Element.FromLinkElement(model.ModelInstance.Value, x));
+      }
+
+      return Array.Empty<T>();
     }
   }
 }

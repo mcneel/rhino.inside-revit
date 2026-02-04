@@ -7,6 +7,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Materials
 {
+  using External.DB;
+
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryMaterials : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("94AF13C1-CE70-46B5-9103-24B46E2F7375");
@@ -36,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition (new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Class", "C", "Material class", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Material name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary)
@@ -50,17 +53,17 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out var model)) return;
       Params.TryGetData(DA, "Class", out string @class);
       Params.TryGetData(DA, "Name", out string name);
       Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
       {
         var materialsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          materialsCollector = materialsCollector.WherePasses(filter);
+          materialsCollector = materialsCollector.WherePasses(filter, model.ModelInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.MATERIAL_NAME, ref name, out var nameFilter))
           materialsCollector = materialsCollector.WherePasses(nameFilter);
@@ -78,6 +81,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
           "Materials",
           materials.
           Select(x => new Types.Material(x)).
+          AtModel(model).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }
