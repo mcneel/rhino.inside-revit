@@ -189,6 +189,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       if (view.AssertValidModel(model))
       {
+        if (filter?.IsEmpty() is true) return;
         var elementCollector = view.Value.CollectElements(model.ModelInstance.Id);
 
         if (categories is object)
@@ -217,7 +218,10 @@ namespace RhinoInside.Revit.GH.Components.Elements
         }
 
         if (filter is object)
+        {
+          filter.AssertIsValidFiler(model.ModelInstance.Value);
           elementCollector = elementCollector.WherePassFilter(filter);
+        }
 
         DA.SetDataList
         (
