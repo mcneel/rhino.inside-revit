@@ -13,11 +13,14 @@ namespace RhinoInside.Revit.GH.Components.Geometry
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.36")]
-  public class QueryReferences : ZuiComponent
+  public class QueryReferences : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("60F89F09-9391-4AE6-B9C6-75AB9F4879FE");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => string.Empty;
+
+    static readonly ARDB.ElementFilter elementFilter = CompoundElementFilter.ElementHasBoundingBoxFilter;
+    protected override ARDB.ElementFilter ElementFilter => elementFilter;
 
     public QueryReferences() : base
     (
@@ -248,6 +251,42 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     {
       base.AfterSolveInstance();
       Message = ExploreLinkedModels ? "Explore Links" : string.Empty;
+    }
+
+    public override bool NeedsToBeExpired(ARDB.Document document, ISet<ARDB.ElementId> added, ISet<ARDB.ElementId> deleted, ISet<ARDB.ElementId> modified)
+    {
+      // Check if the change is on a document this component is querying.
+      if (!MayNeedToBeExpired(document))
+        return false;
+
+      // Check inputs with persistent data
+      if (base.NeedsToBeExpired(document, added, deleted, modified))
+        return true;
+
+      foreach (var output in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
+      {
+        if (output.NeedsToBeExpired(document, added, deleted, modified))
+          return true;
+      }
+
+      if (Params.Input<Parameters.View3D>("View") is Parameters.View3D views)
+      {
+        var ids = new List<ARDB.ElementId>(added.Count + deleted.Count + modified.Count);
+        ids.AddRange(added);
+        ids.AddRange(deleted);
+        ids.AddRange(modified);
+        foreach (var view in views.VolatileData.AllData(true).OfType<Types.View>().Where(x => document.Equals(x.Document)))
+        {
+          using (var collector = new ARDB.FilteredElementCollector(view.Document, view.Id))
+          {
+            collector.WherePasses(CompoundElementFilter.ExclusionFilter(ids, inverted: true));
+            if (collector.Any())
+              return true;
+          }
+        }
+      }
+
+      return false;
     }
 
     #region UI

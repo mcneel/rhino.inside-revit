@@ -158,18 +158,18 @@ namespace RhinoInside.Revit.GH.Components.Elements
     }
   }
 
-  [ComponentVersion(introduced: "1.10")]
+  [ComponentVersion(introduced: "1.10", updated:"1.36")]
   public class NamesakeElement : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("1FEE04EF-A3DA-44F4-B114-486724C92AB6");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter(inverted: true);
 
     public NamesakeElement() : base
     (
       name: "Namesake Element",
       nickname: "Namesake",
-      description: "Get namesake element on a diferent document",
+      description: "Get namesake element on a different model",
       category: "Revit",
       subCategory: "Element"
     )
@@ -180,11 +180,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       new ParamDefinition
       (
-        new Parameters.Document()
+        new Parameters.ModelInstance()
         {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document to query on",
+          Name = "Model",
+          NickName = "M",
+          Description = "Target model",
         }
       ),
       new ParamDefinition
@@ -203,15 +203,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       new ParamDefinition
       (
-        new Parameters.Element()
-        {
-          Name = "Element",
-          NickName = "E",
-          Description = "Namesake Element",
-        }
-      ),
-      new ParamDefinition
-      (
         new Param_String()
         {
           Name = "Name",
@@ -220,21 +211,29 @@ namespace RhinoInside.Revit.GH.Components.Elements
         },
         ParamRelevance.Secondary
       ),
+      new ParamDefinition
+      (
+        new Parameters.Element()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Namesake Element",
+        }
+      ),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
-
+      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
       var namesake = Types.Element.FromElementId
       (
-        doc,
-        doc.LookupElement(element.Document, element.Id)
+        model.ModelDocument.Value,
+        model.ModelDocument.Value.LookupElement(element.Document, element.Id)
       );
-      DA.SetData("Element", namesake);
       Params.TrySetData(DA, "Name", () => namesake.Nomen);
+      DA.SetData("Element", namesake.AtModel(model));
     }
   }
 }

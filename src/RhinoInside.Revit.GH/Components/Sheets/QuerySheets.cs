@@ -6,9 +6,10 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Sheets
 {
+  using External.DB;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.2")]
+  [ComponentVersion(introduced: "1.2", updated:"1.36")]
   public class QuerySheets : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("97c8cb27-955f-44cf-948d-dfbde285cd7a");
@@ -28,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_Boolean>("Placeholder", "PH", "Sheet is placeholder", false, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Sheet Number", "NUM", "Sheet number", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Sheet Name", "N", "Sheet name", GH_ParamAccess.item, optional: true),
@@ -46,8 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
 
       bool IsPlaceholder = false;
       var _IsPlaceholder_ = Params.IndexOfInputParam("Placeholder");
@@ -66,19 +66,20 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       var _IsScheduled_ = Params.IndexOfInputParam("Appears In Sheet List");
       bool nofilterIsScheduled = (!DA.GetData(_IsScheduled_, ref IsScheduled) && Params.Input[_IsScheduled_].DataType == GH_ParamData.@void);
 
-      var Assembly = default(Types.AssemblyInstance);
+      var assembly = default(Types.AssemblyInstance);
       var _Assembly_ = Params.IndexOfInputParam("Assembly");
-      bool noFilterAssembly = (!DA.GetData(_Assembly_, ref Assembly) && Params.Input[_Assembly_].DataType == GH_ParamData.@void);
+      bool noFilterAssembly = (!DA.GetData(_Assembly_, ref assembly) && Params.Input[_Assembly_].DataType == GH_ParamData.@void);
+      assembly = model.ModelDocument.AssertNamesakeElement(assembly) as Types.AssemblyInstance;
 
       ARDB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
       {
         var sheetsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          sheetsCollector = sheetsCollector.WherePasses(filter);
+          sheetsCollector = sheetsCollector.WherePasses(filter, model.ModelInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.SHEET_NUMBER, ref number, out var sheetNumberFilter))
           sheetsCollector = sheetsCollector.WherePasses(sheetNumberFilter);
@@ -92,7 +93,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
         if (!nofilterIsScheduled)
           sheetsCollector = sheetsCollector.WhereParameterEqualsTo(ARDB.BuiltInParameter.SHEET_SCHEDULED, IsScheduled ? 1 : 0);
 
-        if (!noFilterAssembly && TryGetFilterElementIdParam(ARDB.BuiltInParameter.VIEW_ASSOCIATED_ASSEMBLY_INSTANCE_ID, Assembly?.Id ?? ARDB.ElementId.InvalidElementId, out var assemblyFilter))
+        if (!noFilterAssembly && TryGetFilterElementIdParam(ARDB.BuiltInParameter.VIEW_ASSOCIATED_ASSEMBLY_INSTANCE_ID, assembly?.Id ?? ARDB.ElementId.InvalidElementId, out var assemblyFilter))
           sheetsCollector = sheetsCollector.WherePasses(assemblyFilter);
 
         var sheets = sheetsCollector.Cast<ARDB.ViewSheet>();
@@ -114,6 +115,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           "Sheets",
           sheets.
           Select(x => new Types.ViewSheet(x)).
+          AtModel(model).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

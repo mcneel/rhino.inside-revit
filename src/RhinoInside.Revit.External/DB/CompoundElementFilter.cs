@@ -428,6 +428,21 @@ namespace RhinoInside.Revit.External.DB
       ElementHasBoundingBoxFilter.Union(ElementClassFilter(typeof(DatumPlane)))
     );
 
+    public static ElementFilter ElevationIntersectsFilter(double min, double max, double tolerance)
+    {
+      if (double.IsNaN(min)) min = -BoundingBoxLimits;
+      if (double.IsNaN(max)) min = +BoundingBoxLimits;
+
+      min = Math.Max(min, -BoundingBoxLimits);
+      max = Math.Min(max, +BoundingBoxLimits);
+
+      var _min = new XYZ(-BoundingBoxLimits, -BoundingBoxLimits, Math.Min(min, max));
+      var _max = new XYZ(+BoundingBoxLimits, +BoundingBoxLimits, Math.Max(min, max));
+
+      using (var outline = new Outline(_min, _max))
+        return new BoundingBoxIntersectsFilter(outline, tolerance, max > min);
+    }
+
     public static ElementFilter BoundingBoxIntersectsFilter(Outline outline, double tolerance, bool inverted)
     {
       if (outline.IsEmpty)

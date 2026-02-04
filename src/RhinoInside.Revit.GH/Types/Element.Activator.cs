@@ -5,6 +5,7 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using System.Linq;
   using Convert.Geometry;
   using External.DB.Extensions;
 
@@ -263,6 +264,21 @@ namespace RhinoInside.Revit.GH.Types
           new ARDB.LinkElementId(reference.ElementId, reference.LinkedElementId) :
           new ARDB.LinkElementId(reference.ElementId)
       );
+    }
+
+    internal Element AtModel(IGH_ModelInstance model)
+    {
+      switch (model)
+      {
+        case null:
+        case Document _:
+          return this;
+
+        case RevitLinkInstance _:
+          return Element.FromLinkElement(model.ModelInstance.Value, this);
+      }
+
+      return null;
     }
 
     static readonly Dictionary<Type, Func<ARDB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<ARDB.Element, Element>>()

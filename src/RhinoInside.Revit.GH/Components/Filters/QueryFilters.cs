@@ -7,7 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Filters
 {
-  [ComponentVersion(introduced: "1.0", updated: "1.12")]
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryFilters : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("B7B1740B-0721-49C8-92F5-057775DA9792");
@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition (new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Filter name", GH_ParamAccess.item, optional: true),
     };
 
@@ -58,13 +58,12 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
 
       string name = null;
       DA.GetData("Name", ref name);
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
       {
         var filtersCollector = collector.WherePasses(ElementFilter);
 
@@ -73,8 +72,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
         if (!string.IsNullOrEmpty(name))
           filters = filters.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList("Rule-based Filters", filters.OfType<ARDB.ParameterFilterElement>());
-        DA.SetDataList("Selection Filters", filters.OfType<ARDB.SelectionFilterElement>());
+        DA.SetDataList("Rule-based Filters", filters.OfType<ARDB.ParameterFilterElement>().Select(x => new Types.ParameterFilterElement(x)).AtModel(model));
+        DA.SetDataList("Selection Filters", filters.OfType<ARDB.SelectionFilterElement>().Select(x => new Types.SelectionFilterElement(x)).AtModel(model));
       }
     }
   }

@@ -7,6 +7,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
+  using External.DB;
+
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryLineStyles : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("54082395-7160-4563-B289-215AFDD33A7F");
@@ -35,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition (new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Line style name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional)
     };
@@ -48,22 +51,24 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
 
       string name = null;
       DA.GetData("Name", ref name);
 
       Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
-      using (var categories = doc.Settings.Categories)
+      using (var categories = model.ModelDocument.Value.Settings.Categories)
       {
         var styles = categories.
           get_Item(ARDB.BuiltInCategory.OST_Lines).SubCategories.Cast<ARDB.Category>().
           Select(x => x.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection));
 
         if (filter is object)
-          styles = styles.Where(x => filter.PassesFilter(x));
+        {
+          filter.AssertIsValidFiler(model.ModelInstance.Value);
+          styles = styles.Where(filter.PassesFilter);
+        }
 
         if (name is object)
           styles = styles.Where(x => x.Name == name);
@@ -73,6 +78,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
           "Styles",
           styles.
           Select(x => new Types.GraphicsStyle(x)).
+          AtModel(model).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

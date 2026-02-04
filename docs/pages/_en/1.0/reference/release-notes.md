@@ -10,6 +10,7 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added support for linked elements on query components.
 - Added 'Query References' component.
 
 ### RC

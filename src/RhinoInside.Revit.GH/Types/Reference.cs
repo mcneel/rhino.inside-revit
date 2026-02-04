@@ -276,7 +276,6 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-
     internal T GetElementFromReference<T>(ARDB.Reference reference) where T : Element
     {
       return Element.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
@@ -290,6 +289,18 @@ namespace RhinoInside.Revit.GH.Types
     internal GeometryElement GetGeometryElementFromReference(ARDB.Reference reference)
     {
       return GeometryObject.FromLinkElementId(ReferenceDocument, GetAbsoluteReference(reference).ToLinkElementId()) as GeometryElement;
+    }
+
+    internal bool AssertValidModel(IGH_ModelInstance model)
+    {
+      switch (model)
+      {
+        case null: return false;
+        case RevitLinkInstance instance: return instance.ReferenceDocument.Equals(ReferenceDocument);
+        case ProjectDocument project: return project.Value.Equals(ReferenceDocument);
+      }
+
+      throw new Exceptions.RuntimeArgumentException("Model", "Invalid Document");
     }
   }
 }

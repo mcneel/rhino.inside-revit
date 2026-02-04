@@ -7,7 +7,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Phasing
 {
-  [ComponentVersion(introduced: "1.2")]
+  using External.DB;
+
+  [ComponentVersion(introduced: "1.2", updated:"1.36")]
   public class QueryPhases : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("91E4D3E1-883A-44D9-A3D2-B836967869E1");
@@ -37,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.Phasing
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Phase name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional)
     };
@@ -50,18 +52,16 @@ namespace RhinoInside.Revit.GH.Components.Phasing
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
+      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out var model)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
       {
         var phasesCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          phasesCollector = phasesCollector.WherePasses(filter);
+          phasesCollector = phasesCollector.WherePasses(filter, model.ModelInstance.Value);
 
         if (name is object && TryGetFilterStringParam(ARDB.BuiltInParameter.PHASE_NAME, ref name, out var nameFilter))
           phasesCollector = phasesCollector.WherePasses(nameFilter);
@@ -77,6 +77,7 @@ namespace RhinoInside.Revit.GH.Components.Phasing
           phases.
           Select(x => new Types.Phase(x)).
           OrderBy(x => x.SequenceNumber).
+          AtModel(model).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }
