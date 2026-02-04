@@ -46,6 +46,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
+      if (filter?.IsEmpty() is true) return;
 
       using (var collector = new ARDB.FilteredElementCollector(view.Document, view.Id))
       {

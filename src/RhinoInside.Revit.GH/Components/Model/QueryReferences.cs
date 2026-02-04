@@ -148,6 +148,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       if (Params.GetData(DA, "Distance", out double? distance) && double.IsNaN(distance.Value)) return;
       if (Params.GetData(DA, "Limit", out int? limit) && limit == 0) return;
       if (!Params.TryGetData(DA, "Filter", out Types.ElementFilter filter)) return;
+      if (filter?.Value.IsEmpty() is true) return;
 
       limit ??= int.MaxValue;
       distance ??= double.PositiveInfinity;
@@ -164,7 +165,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
       using (var intersector = new ARDB.ReferenceIntersector
       (
-        CompoundElementFilter.ElementHasBoundingBoxFilter.Union(filter?.Value),
+        CompoundElementFilter.ElementHasBoundingBoxFilter.Intersect(filter?.Value),
         (ARDB.FindReferenceTarget) referenceTarget,
         view.Value)
         { FindReferencesInRevitLinks = ExploreLinkedModels }
