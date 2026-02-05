@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.External.DB
     {
       if (ViewId is null)
       {
-        if (LinkId is null)
+        if (!LinkId.IsValid())
         {
           return new FilteredElementCollector(Document);
         }

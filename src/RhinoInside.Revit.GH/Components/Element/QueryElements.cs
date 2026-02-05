@@ -187,7 +187,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      if (view.AssertValidModel(model))
+      if (view.AssertValidModel(model, acceptLinked: true))
       {
         if (filter?.IsEmpty() is true) return;
         var elementCollector = view.Value.CollectElements(model.ModelInstance.Id);

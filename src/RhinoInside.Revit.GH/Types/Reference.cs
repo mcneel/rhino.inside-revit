@@ -265,7 +265,7 @@ namespace RhinoInside.Revit.GH.Types
       if (element is object)
       {
         if (IsLinked && Document.IsEquivalent(element.Document))
-          return (T) Element.FromLinkElement(ReferenceDocument.GetElement(ReferenceId) as ARDB.RevitLinkInstance, element);
+          return (T) element.AsLinked(ReferenceDocument.GetElement(ReferenceId) as ARDB.RevitLinkInstance);
 
         if (element.Document is object && !ReferenceDocument.IsEquivalent(element.Document))
           throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid Document");
@@ -291,13 +291,13 @@ namespace RhinoInside.Revit.GH.Types
       return GeometryObject.FromLinkElementId(ReferenceDocument, GetAbsoluteReference(reference).ToLinkElementId()) as GeometryElement;
     }
 
-    internal bool AssertValidModel(IGH_ModelInstance model)
+    internal bool AssertValidModel(IGH_ModelInstance model, bool acceptLinked = false)
     {
       switch (model)
       {
         case null: return false;
-        case RevitLinkInstance instance: return instance.ReferenceDocument.Equals(ReferenceDocument);
-        case ProjectDocument project: return project.Value.Equals(ReferenceDocument);
+        case Document document: return document.Value.Equals(Document);
+        case RevitLinkInstance instance: return instance.ModelDocument.Equals(Document) || (acceptLinked && instance.ReferenceDocument.Equals(ReferenceDocument));
       }
 
       throw new Exceptions.RuntimeArgumentException("Model", "Invalid Document");

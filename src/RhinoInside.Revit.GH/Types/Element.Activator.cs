@@ -199,22 +199,27 @@ namespace RhinoInside.Revit.GH.Types
       return new Element(element);
     }
 
-    internal static Element FromLinkElement(ARDB.RevitLinkInstance link, Element element)
+    internal Element AsLinked(ARDB.RevitLinkInstance link)
     {
-      var linkedElementId = ERDB.ReferenceId.Parse(element.ReferenceUniqueId, element.ReferenceDocument);
-      linkedElementId = new ERDB.ReferenceId
-      (
-        new ERDB.GeometryObjectId(link.Id.ToValue(), new int[] { 0 }, ERDB.GeometryObjectType.RVTLINK, link.GetTypeId().ToValue()),
-        linkedElementId.Element
-      );
+      if (link?.GetLinkDocument()?.Equals(Document) is true)
+      {
+        var linkedElementId = ERDB.ReferenceId.Parse(ReferenceUniqueId, ReferenceDocument);
+        linkedElementId = new ERDB.ReferenceId
+        (
+          new ERDB.GeometryObjectId(link.Id.ToValue(), new int[] { 0 }, ERDB.GeometryObjectType.RVTLINK, link.GetTypeId().ToValue()),
+          linkedElementId.Element
+        );
 
-      var doc = link.Document;
-      element.ReferenceUniqueId = linkedElementId.ToString(doc);
-      element.ReferenceDocumentId = doc.GetPersistentGUID();
-      element._ReferenceDocument = doc;
-      element._ReferenceId = link.Id;
-      if(element is GraphicalElement) element.ReferenceTransform =  link.GetTransform().ToTransform();
-      return element;
+        var doc = link.Document;
+        ReferenceUniqueId = linkedElementId.ToString(doc);
+        ReferenceDocumentId = doc.GetPersistentGUID();
+        _ReferenceDocument = doc;
+        _ReferenceId = link.Id;
+        if (this is GraphicalElement) ReferenceTransform = link.GetTransform().ToTransform();
+        return this;
+      }
+
+      return null;
     }
 
     public static Element FromElementId(ARDB.Document doc, ARDB.ElementId id)
@@ -248,7 +253,7 @@ namespace RhinoInside.Revit.GH.Types
         FromElement(link.GetLinkDocument()?.GetElement(id.LinkedElementId)) is Element element
       )
       {
-        return FromLinkElement(link, element);
+        return element.AsLinked(link);
       }
 
       return default;
@@ -271,11 +276,8 @@ namespace RhinoInside.Revit.GH.Types
       switch (model)
       {
         case null:
-        case Document _:
-          return this;
-
-        case RevitLinkInstance _:
-          return Element.FromLinkElement(model.ModelInstance.Value, this);
+        case Document _: return this;
+        case RevitLinkInstance instance: return AsLinked(instance.Value);
       }
 
       return null;
