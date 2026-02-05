@@ -219,7 +219,7 @@ namespace RhinoInside.Revit.GH.Types
         return this;
       }
 
-      return null;
+      throw new Exceptions.RuntimeArgumentException(nameof(link), "Invalid link instance.");
     }
 
     public static Element FromElementId(ARDB.Document doc, ARDB.ElementId id)

@@ -236,7 +236,7 @@ namespace RhinoInside.Revit.GH.Types
           return GetElement<T>(id.HostElementId);
 
         if (IsLinked && id.LinkInstanceId.IsValid() && id.LinkInstanceId != ReferenceId)
-          throw new Exceptions.RuntimeArgumentException(nameof(id), $"Invalid Document");
+          throw new Exceptions.RuntimeArgumentException(nameof(id), "Invalid Document");
 
         return (T) Element.FromLinkElementId(ReferenceDocument, id);
       }
@@ -252,7 +252,7 @@ namespace RhinoInside.Revit.GH.Types
           return (T) Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, element.Id));
 
         if (!ReferenceDocument.IsEquivalent(element.Document))
-          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid Document");
+          throw new Exceptions.RuntimeArgumentException(nameof(element), "Invalid Document");
 
         return (T) Element.FromElement(element);
       }
@@ -268,7 +268,7 @@ namespace RhinoInside.Revit.GH.Types
           return (T) element.AsLinked(ReferenceDocument.GetElement(ReferenceId) as ARDB.RevitLinkInstance);
 
         if (element.Document is object && !ReferenceDocument.IsEquivalent(element.Document))
-          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid Document");
+          throw new Exceptions.RuntimeArgumentException(nameof(element), "Invalid Document");
 
         return element;
       }
