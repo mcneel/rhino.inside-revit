@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_GenericObject>("Id", "ID", "Element Id or UniqueId to look for", defaultValue: -1),
     };
 
@@ -40,32 +40,39 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ParamDefinition.Create<Parameters.Element>("Element", "E", string.Empty),
     };
 
+    public override void AddedToDocument(GH_Document document)
+    {
+      if (Params.Input<Parameters.Document>("Document") is IGH_Param model)
+        model.Name = "Model";
+
+      base.AddedToDocument(document);
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out var model)) return;
       if (!Params.GetData(DA, "Id", out Grasshopper.Kernel.Types.IGH_Goo goo)) return;
 
       switch (goo)
       {
-        case Types.Reference id:
-          if (doc.IsEquivalent(id.ReferenceDocument))
-            DA.SetData("Element", Types.Element.FromReference(id.ReferenceDocument, id.GetReference()));
+        case Types.Element element:
+          DA.SetData("Element", Types.Element.FromElementId(model.ModelDocument.Value, element.Id).AtModel(model));
+          return;
 
-          else if (doc.IsEquivalent(id.Document))
-            DA.SetData("Element", Types.Element.FromElementId(id.Document, id.Id));
-
+        case Types.Reference reference:
+          DA.SetData("Element", Types.Element.FromElementId(model.ModelDocument.Value, reference.Id).AtModel(model));
           return;
 
         case Types.CategoryId c:
-          DA.SetData("Element", Types.Category.FromElementId(doc, new ARDB.ElementId(c.Value)));
+          DA.SetData("Element", Types.Category.FromElementId(model.ModelDocument.Value, new ARDB.ElementId(c.Value)).AtModel(model));
           return;
 
         case Types.ParameterId p:
-          DA.SetData("Element", Types.ParameterKey.FromElementId(doc, new ARDB.ElementId(p.Value)));
+          DA.SetData("Element", Types.ParameterKey.FromElementId(model.ModelDocument.Value, new ARDB.ElementId(p.Value)).AtModel(model));
           return;
       }
 
-      DA.SetData("Element", Types.Element.FromValue(doc, goo.ScriptVariable()));
+      DA.SetData("Element", Types.Element.FromValue(model.ModelInstance.Document ?? model.ModelDocument.Value, goo.ScriptVariable())?.AtModel(model));
     }
   }
 
