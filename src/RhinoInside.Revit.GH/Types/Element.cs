@@ -74,12 +74,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    protected override void ResetValue()
-    {
-      SubInvalidateGraphics();
-      base.ResetValue();
-    }
-
     protected override object FetchValue()
     {
       LoadReferencedData();
@@ -206,15 +200,6 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    protected internal void InvalidateGraphics()
-    {
-      Debug.Assert(Document.IsModifiable);
-
-      SubInvalidateGraphics();
-    }
-
-    protected virtual void SubInvalidateGraphics() { }
-
     protected T SetElement<T>(Element element) where T : ARDB.Element
     {
       if (element?.IsValid is true)
@@ -289,6 +274,12 @@ namespace RhinoInside.Revit.GH.Types
           return false;
 
         target = (Q) (object) element;
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(Category)))
+      {
+        target = (Q) (object) Category;
         return true;
       }
 

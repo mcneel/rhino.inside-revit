@@ -195,7 +195,6 @@ namespace RhinoInside.Revit.GH.Components
     {
       switch (model)
       {
-        case null:
         case Types.Document _: return elements;
         case Types.RevitLinkInstance instance: return elements.Select(x => (T) x.AsLinked(instance.Value));
       }

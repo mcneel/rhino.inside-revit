@@ -51,6 +51,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override void SubInvalidateGraphics()
     {
       using (_GeometryPreview) _GeometryPreview = null;
+      _MeshingParameters = null;
 
       base.SubInvalidateGraphics();
     }

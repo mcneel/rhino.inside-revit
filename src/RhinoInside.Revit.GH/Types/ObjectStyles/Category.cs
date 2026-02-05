@@ -38,15 +38,6 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
           case CategoryId catId:        source = (ARDB.BuiltInCategory) catId.Value; break;
-          case GraphicsStyle style:     source = style.Value; break;
-          case GeometryObject geometry:
-            if (geometry.IsValid)
-            {
-              SetValue(geometry.Document, geometry.GraphicsStyle.Value?.GraphicsStyleCategory.Id ?? ElementIdExtension.Invalid);
-              return true;
-            }
-            return false;
-          case Element element:         SetValue(element.Document, element.Category?.Id ?? ElementIdExtension.Invalid); return element.IsValid;
           default:                      source = goo.ScriptVariable(); break;
         }
       }
@@ -830,6 +821,11 @@ namespace RhinoInside.Revit.GH.Types
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.GraphicsStyle)))
       {
         target = (Q) (object) Value;
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(Category)))
+      {
+        target = (Q) (object) Category;
         return true;
       }
 
