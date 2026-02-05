@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
+      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out Types.IGH_ModelInstance model)) return;
       if (!Params.TryGetData(DA, "Discipline", out ERDB.CategoryDiscipline? discipline)) return;
       if (!Params.TryGetData(DA, "Type", out ARDB.CategoryType? type)) return;
       if (!Params.TryGetData(DA, "Parent", out Types.Category parent)) return;
