@@ -1,6 +1,6 @@
 using System;
-using System.Linq;
 using System.Drawing;
+using System.Linq;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
@@ -164,6 +164,12 @@ namespace RhinoInside.Revit.GH.Types
     public abstract ARDB.ElementId ReferenceId { get; }
 
     public bool IsLinked => ReferenceDocument is object && !ReferenceDocument.IsEquivalent(Document);
+    internal IGH_ModelInstance Model => IsLinked ?
+      RevitLinkInstance.FromElementId(ReferenceDocument, ReferenceId) as IGH_ModelInstance :
+      Types.Document.FromValue(Document);
+    public string UniqueId =>
+      Document is ARDB.Document document && External.DB.ReferenceId.TryParse(ReferenceUniqueId, out var referenceId, ReferenceDocument) ?
+      referenceId.Element.ToString(document) : default;
     #endregion
 
     #region Reference Transform
@@ -183,14 +189,37 @@ namespace RhinoInside.Revit.GH.Types
 
     ModelTransform _ReferenceTransform = ModelTransform.Identity;
     protected bool HasReferenceTransform => _ReferenceTransform != ModelTransform.Identity;
-    protected void ResetReferenceTransform() => _ReferenceTransform = ModelTransform.Identity;
+    protected void ResetReferenceTransform()
+    {
+      _ReferenceTransform = ModelTransform.Identity;
+      InvalidateGraphics();
+    }
 
     public Rhino.Geometry.Transform ReferenceTransform
     {
       get => _ReferenceTransform.Value;
-      protected set => _ReferenceTransform = new ModelTransform(value);
+      protected set
+      {
+        _ReferenceTransform = new ModelTransform(value);
+        InvalidateGraphics();
+      }
     }
     public Rhino.Geometry.Transform ElementTransform => _ReferenceTransform.Inverse;
+    #endregion
+
+    #region DcoumentObject
+    protected override void ResetValue()
+    {
+      InvalidateGraphics();
+      base.ResetValue();
+    }
+
+    protected internal void InvalidateGraphics()
+    {
+      SubInvalidateGraphics();
+    }
+
+    protected virtual void SubInvalidateGraphics() { }
     #endregion
 
     public Reference() { }
@@ -236,7 +265,7 @@ namespace RhinoInside.Revit.GH.Types
           return GetElement<T>(id.HostElementId);
 
         if (IsLinked && id.LinkInstanceId.IsValid() && id.LinkInstanceId != ReferenceId)
-          throw new Exceptions.RuntimeArgumentException(nameof(id), $"Invalid Document");
+          throw new Exceptions.RuntimeArgumentException(nameof(id), "Invalid Document");
 
         return (T) Element.FromLinkElementId(ReferenceDocument, id);
       }
@@ -252,7 +281,7 @@ namespace RhinoInside.Revit.GH.Types
           return (T) Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, element.Id));
 
         if (!ReferenceDocument.IsEquivalent(element.Document))
-          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid Document");
+          throw new Exceptions.RuntimeArgumentException(nameof(element), "Invalid Document");
 
         return (T) Element.FromElement(element);
       }
@@ -268,7 +297,7 @@ namespace RhinoInside.Revit.GH.Types
           return (T) element.AsLinked(ReferenceDocument.GetElement(ReferenceId) as ARDB.RevitLinkInstance);
 
         if (element.Document is object && !ReferenceDocument.IsEquivalent(element.Document))
-          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid Document");
+          throw new Exceptions.RuntimeArgumentException(nameof(element), "Invalid Document");
 
         return element;
       }

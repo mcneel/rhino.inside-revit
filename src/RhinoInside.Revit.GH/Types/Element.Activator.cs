@@ -199,29 +199,6 @@ namespace RhinoInside.Revit.GH.Types
       return new Element(element);
     }
 
-    internal Element AsLinked(ARDB.RevitLinkInstance link)
-    {
-      if (link?.GetLinkDocument()?.Equals(Document) is true)
-      {
-        var linkedElementId = ERDB.ReferenceId.Parse(ReferenceUniqueId, ReferenceDocument);
-        linkedElementId = new ERDB.ReferenceId
-        (
-          new ERDB.GeometryObjectId(link.Id.ToValue(), new int[] { 0 }, ERDB.GeometryObjectType.RVTLINK, link.GetTypeId().ToValue()),
-          linkedElementId.Element
-        );
-
-        var doc = link.Document;
-        ReferenceUniqueId = linkedElementId.ToString(doc);
-        ReferenceDocumentId = doc.GetPersistentGUID();
-        _ReferenceDocument = doc;
-        _ReferenceId = link.Id;
-        if (this is GraphicalElement) ReferenceTransform = link.GetTransform().ToTransform();
-        return this;
-      }
-
-      return null;
-    }
-
     public static Element FromElementId(ARDB.Document doc, ARDB.ElementId id)
     {
       if (doc is null || id is null)
@@ -271,16 +248,73 @@ namespace RhinoInside.Revit.GH.Types
       );
     }
 
-    internal Element AtModel(IGH_ModelInstance model)
+    public Element AtModel(IGH_ModelInstance model)
     {
-      switch (model)
+      if (IsEmpty) return this;
+      if (model is Document document)
       {
-        case null:
-        case Document _: return this;
-        case RevitLinkInstance instance: return AsLinked(instance.Value);
+        if (!IsLinked && document.Value.IsEquivalent(Document)) return this;
+        return document.GetNamesakeElement(this);
+      }
+      else if (model is RevitLinkInstance link)
+      {
+        if (IsLinked && ReferenceId == link.Id)
+          return this;
+
+        if (link.Value.GetLinkDocument() is ARDB.Document linkedDocument)
+        {
+          if (linkedDocument.Equals(Document) is true)
+          {
+            var element = MemberwiseClone() as Element;
+            element.InvalidateGraphics();
+            return element.AsLinked(link.Value);
+          }
+          else
+          {
+            return link.ModelDocument.GetNamesakeElement(this)?.AsLinked(link.Value);
+          }
+        }
       }
 
       return null;
+    }
+
+    private Element AsUnlinked()
+    {
+      if (IsLinked)
+      {
+        InvalidateGraphics();
+        ReferenceUniqueId = UniqueId;
+        ReferenceDocumentId = Document?.GetPersistentGUID() ?? Guid.Empty;
+        _ReferenceDocument = Document;
+        _ReferenceId = Id;
+        return this;
+      }
+
+      throw new Exceptions.RuntimeArgumentException(nameof(IsLinked), "Invalid link instance.");
+    }
+
+    internal Element AsLinked(ARDB.RevitLinkInstance link)
+    {
+      if (link?.GetLinkDocument()?.Equals(Document) is true)
+      {
+        var linkedElementId = ERDB.ReferenceId.Parse(ReferenceUniqueId, ReferenceDocument);
+        linkedElementId = new ERDB.ReferenceId
+        (
+          new ERDB.GeometryObjectId(link.Id.ToValue(), new int[] { 0 }, ERDB.GeometryObjectType.RVTLINK, link.GetTypeId().ToValue()),
+          linkedElementId.Element
+        );
+
+        var doc = link.Document;
+        ReferenceUniqueId = linkedElementId.ToString(doc);
+        ReferenceDocumentId = doc.GetPersistentGUID();
+        _ReferenceDocument = doc;
+        _ReferenceId = link.Id;
+        if (this is GraphicalElement) ReferenceTransform = link.GetTransform().ToTransform();
+        return this;
+      }
+
+      throw new Exceptions.RuntimeArgumentException(nameof(link), "Invalid link instance.");
     }
 
     static readonly Dictionary<Type, Func<ARDB.Element, Element>> ActivatorDictionary = new Dictionary<Type, Func<ARDB.Element, Element>>()

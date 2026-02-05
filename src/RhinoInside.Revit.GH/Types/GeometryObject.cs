@@ -64,6 +64,11 @@ namespace RhinoInside.Revit.GH.Types
 
         return true;
       }
+      else if (typeof(Q).IsAssignableFrom(typeof(Category)))
+      {
+        target = (Q) (object) GraphicsStyle.Category;
+        return true;
+      }
       else if (typeof(Q).IsAssignableFrom(typeof(GraphicsStyle)))
       {
         target = (Q) (object) GraphicsStyle;
@@ -132,12 +137,6 @@ namespace RhinoInside.Revit.GH.Types
       return default;
     }
 
-    protected override void ResetValue()
-    {
-      (this as IGH_PreviewMeshData).DestroyPreviewMeshes();
-      base.ResetValue();
-    }
-
     protected void SetValue(ARDB.Document document, ARDB.Reference reference)
     {
       ResetValue();
@@ -156,6 +155,12 @@ namespace RhinoInside.Revit.GH.Types
 
         _Reference = reference;
       }
+    }
+
+    protected override void SubInvalidateGraphics()
+    {
+      (this as IGH_PreviewMeshData).DestroyPreviewMeshes();
+      base.SubInvalidateGraphics();
     }
     #endregion
 
