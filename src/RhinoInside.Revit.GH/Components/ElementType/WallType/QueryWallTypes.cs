@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
+      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out Types.IGH_ModelInstance model)) return;
 
       var wallKind = ARDB.WallKind.Unknown;
       DA.GetData("Family", ref wallKind);

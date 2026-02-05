@@ -224,7 +224,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
+      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out Types.IGH_ModelInstance model)) return;
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
       var namesake = Types.Element.FromElementId

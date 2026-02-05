@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.TryGetData(DA, "Model", out Types.IGH_ModelInstance model, x => x.IsValid)) return;
+      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out Types.IGH_ModelInstance model)) return;
 
       bool IsPlaceholder = false;
       var _IsPlaceholder_ = Params.IndexOfInputParam("Placeholder");
