@@ -5,7 +5,6 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using System.Linq;
   using Convert.Geometry;
   using External.DB.Extensions;
 
@@ -202,19 +201,20 @@ namespace RhinoInside.Revit.GH.Types
 
     internal static Element FromLinkElement(ARDB.RevitLinkInstance link, Element element)
     {
-      using (var linkedElementReference = ARDB.Reference.ParseFromStableRepresentation(element.ReferenceDocument, element.ReferenceUniqueId))
-      {
-        using (var elementReference = linkedElementReference.CreateLinkReference(link))
-        {
-          var doc = link.Document;
-          element.ReferenceDocumentId = doc.GetPersistentGUID();
-          element.ReferenceUniqueId = elementReference.ConvertToPersistentRepresentation(doc);
-          element._ReferenceDocument = doc;
-          element._ReferenceId = link.Id;
-          if(element is GraphicalElement) element.ReferenceTransform =  link.GetTransform().ToTransform();
-          return element;
-        }
-      }
+      var linkedElementId = ERDB.ReferenceId.Parse(element.ReferenceUniqueId, element.ReferenceDocument);
+      linkedElementId = new ERDB.ReferenceId
+      (
+        new ERDB.GeometryObjectId(link.Id.ToValue(), new int[] { 0 }, ERDB.GeometryObjectType.RVTLINK, link.GetTypeId().ToValue()),
+        linkedElementId.Element
+      );
+
+      var doc = link.Document;
+      element.ReferenceUniqueId = linkedElementId.ToString(doc);
+      element.ReferenceDocumentId = doc.GetPersistentGUID();
+      element._ReferenceDocument = doc;
+      element._ReferenceId = link.Id;
+      if(element is GraphicalElement) element.ReferenceTransform =  link.GetTransform().ToTransform();
+      return element;
     }
 
     public static Element FromElementId(ARDB.Document doc, ARDB.ElementId id)
