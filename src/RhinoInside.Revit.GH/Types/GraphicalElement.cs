@@ -306,7 +306,7 @@ namespace RhinoInside.Revit.GH.Types
         try
         {
           var plane = Location;
-          if (!plane.IsValid || !plane.Origin.IsValid)
+          if (!plane.IsValid)
             return false;
 
           target = (Q) (object) new GH_Plane(plane);
@@ -565,7 +565,7 @@ namespace RhinoInside.Revit.GH.Types
               if (bbox.IsValid)
               {
                 // If we have nothing better, the center of the BoundingBox will do the job.
-                origin = BoundingBox.Center;
+                origin = bbox.Center;
                 axis = Vector3d.XAxis;
                 perp = Vector3d.YAxis;
               }
