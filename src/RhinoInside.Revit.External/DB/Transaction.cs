@@ -534,7 +534,7 @@ namespace RhinoInside.Revit.External.DB
     /// VB : Using scope [As CommittableScope] = document.CommitScope()
     /// </para>
     /// <para>
-    /// Pyhton: with document.CommitScope() as scope:
+    /// Python: with document.CommitScope() as scope:
     /// </para>
     /// </remarks>
     public static CommittableScope CommitScope(this Document document)
@@ -556,7 +556,7 @@ namespace RhinoInside.Revit.External.DB
     /// VB : Using document.RollBackScope()
     /// </para>
     /// <para>
-    /// Pyhton: with document.RollBackScope() :
+    /// Python: with document.RollBackScope() :
     /// </para>
     /// </remarks>
     public static IDisposable RollBackScope(this Document document)
