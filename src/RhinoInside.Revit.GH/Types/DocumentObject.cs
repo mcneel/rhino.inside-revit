@@ -1,9 +1,9 @@
 using System;
 using System.ComponentModel;
 using System.Reflection;
-using Rhino.Geometry;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -119,6 +119,9 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (value)
       {
+        case Rhino.Geometry.Transform transform:
+          return (T) (object) (transform * xform);
+
         case Rhino.Geometry.Vector3d vector:
           vector.Transform(xform);
           return (T) (object) vector;
@@ -127,11 +130,20 @@ namespace RhinoInside.Revit.GH.Types
           point.Transform(xform);
           return (T) (object) point;
 
+        case Rhino.Geometry.Line line:
+          return (T) (object) (line.Transform(xform) ? line : NaN.Line);
+
         case Rhino.Geometry.Plane plane:
           return (T) (object) (plane.Transform(xform) ? plane : NaN.Plane);
 
-        case Rhino.Geometry.Transform transform:
-          return (T) (object) (transform * xform);
+        case Rhino.Geometry.Circle circle:
+          return (T) (object) (circle.Transform(xform) ? circle : NaN.Circle);
+
+        case Rhino.Geometry.Arc arc:
+          return (T) (object) (arc.Transform(xform) ? arc : NaN.Arc);
+
+        case Rhino.Geometry.Rectangle3d rectangle:
+          return (T) (object) (rectangle.Transform(xform) ? rectangle : NaN.Rectangle);
 
         case Rhino.Geometry.Box box:
           return (T) (object) (box.Transform(xform) ? box : NaN.Box);
