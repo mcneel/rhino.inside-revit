@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.GH.Types
       if (IsReferencedData)
         return Value;
 
-      if (CastTo(out ARDB.ExternalDefinitionCreationOptions external))
+      if (ConvertTo(out ARDB.ExternalDefinitionCreationOptions external))
         return external;
 
       return null;
@@ -200,7 +200,7 @@ namespace RhinoInside.Revit.GH.Types
       return base.CastFrom(source);
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(GH_Guid)))
       {
@@ -255,7 +255,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return base.CastTo(out target);
+      return base.ConvertTo(out target);
     }
 
     new class Proxy : Element.Proxy
@@ -1066,7 +1066,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.Parameter)))
       {

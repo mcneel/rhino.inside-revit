@@ -297,7 +297,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       ERDB.ParameterScope parameterScope
     )
     {
-      if (key.CastTo(out ARDB.ExternalDefinitionCreationOptions options))
+      if (key.ConvertTo(out ARDB.ExternalDefinitionCreationOptions options))
       {
         using (options)
         {
@@ -365,7 +365,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     {
       if (key.GUID.HasValue)
       {
-        if (key.CastTo(out ARDB.ExternalDefinitionCreationOptions options))
+        if (key.ConvertTo(out ARDB.ExternalDefinitionCreationOptions options))
         {
           using (options)
           {

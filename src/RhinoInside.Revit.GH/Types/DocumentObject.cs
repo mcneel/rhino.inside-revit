@@ -60,7 +60,14 @@ namespace RhinoInside.Revit.GH.Types
 
     IGH_GooProxy IGH_Goo.EmitProxy() => default;
     public virtual bool CastFrom(object source) => false;
-    public virtual bool CastTo<Q>(out Q target)
+
+    bool IGH_Goo.CastTo<Q>(out Q target)
+    {
+      if (!ConvertTo(out target)) return false;
+      target = TransformTo(target);
+      return true;
+    }
+    public virtual bool ConvertTo<Q>(out Q target)
     {
       if (this is IConvertible)
       {
@@ -98,6 +105,53 @@ namespace RhinoInside.Revit.GH.Types
     bool GH_IO.GH_ISerializable.Read(GH_IReader reader) => Read(reader);
     protected virtual bool Write(GH_IWriter writer) => false;
     protected virtual bool Read(GH_IReader reader) => false;
+    #endregion
+
+    #region Transform
+    internal virtual T TransformFrom<T>(T value) => value;
+    internal virtual T TransformTo<T>(T value) => value;
+
+    protected static T TransformData<T>(T value, Transform xform)
+    {
+      if (value is null) return default;
+
+      switch (value)
+      {
+        case Rhino.Geometry.Vector3d vector:
+          vector.Transform(xform);
+          return (T) (object) vector;
+
+        case Rhino.Geometry.Point3d point:
+          point.Transform(xform);
+          return (T) (object) point;
+
+        case Rhino.Geometry.Plane plane:
+          return (T) (object) (plane.Transform(xform) ? plane : NaN.Plane);
+
+        case Rhino.Geometry.Transform transform:
+          return (T) (object) (transform * xform);
+
+        case Rhino.Geometry.Box box:
+          return (T) (object) (box.Transform(xform) ? box : NaN.Box);
+
+        case Rhino.Geometry.GeometryBase geometry:
+          return (T) (object) (geometry.Transform(xform) ? geometry : null);
+
+        case GH_Vector gh_vector:
+          gh_vector.Value.Transform(xform);
+          return (T) (object) gh_vector;
+
+        case GH_Transform gh_transform:
+          gh_transform.CompoundTransforms.Add(new Grasshopper.Kernel.Types.Transforms.Generic(xform));
+          return (T) (object) gh_transform;
+
+        case IGH_GeometricGoo geometricGoo:
+          geometricGoo.Transform(xform);
+          return (T) (object) geometricGoo;
+      }
+
+      return value;
+    }
     #endregion
 
     protected DocumentObject() { }

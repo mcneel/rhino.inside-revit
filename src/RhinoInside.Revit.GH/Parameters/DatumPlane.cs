@@ -121,7 +121,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
           level = data as TOutput;
           if (level is null)
-            return data.CastTo(out level);
+            return data.ConvertTo(out level);
         }
 
         return true;
@@ -168,7 +168,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
           level = data as TOutput;
           if (level is null)
-            return data.CastTo(out level);
+            return data.ConvertTo(out level);
         }
 
         return true;

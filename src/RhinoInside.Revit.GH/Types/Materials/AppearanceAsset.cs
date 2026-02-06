@@ -20,9 +20,9 @@ namespace RhinoInside.Revit.GH.Types
     public AppearanceAssetElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public AppearanceAssetElement(ARDB.AppearanceAssetElement asset) : base(asset) { }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo<Q>(out target))
+      if (base.ConvertTo<Q>(out target))
         return true;
 #if REVIT_2018
       if (typeof(Q).IsAssignableFrom(typeof(Grasshopper.Kernel.Types.GH_Material)))

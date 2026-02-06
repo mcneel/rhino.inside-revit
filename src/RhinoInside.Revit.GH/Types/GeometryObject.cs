@@ -39,9 +39,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_Goo
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo<Q>(out target)) return true;
+      if (base.ConvertTo<Q>(out target)) return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.GeometryObject)))
       {
@@ -482,9 +482,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Casting
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target)) return true;
+      if (base.ConvertTo(out target)) return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.GeometryElement)))
       {
@@ -577,9 +577,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Casting
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target)) return true;
+      if (base.ConvertTo(out target)) return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.GeometryElement)))
       {
@@ -784,9 +784,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Casting
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target)) return true;
+      if (base.ConvertTo(out target)) return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.Point)))
       {
@@ -1024,9 +1024,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Casting
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target)) return true;
+      if (base.ConvertTo(out target)) return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.Curve)))
       {
@@ -1345,9 +1345,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Casting
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target)) return true;
+      if (base.ConvertTo(out target)) return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.Reference)))
       {
@@ -1565,9 +1565,9 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Casting
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target)) return true;
+      if (base.ConvertTo(out target)) return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.Reference)))
       {

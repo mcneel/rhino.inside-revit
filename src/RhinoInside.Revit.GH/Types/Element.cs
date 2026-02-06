@@ -257,9 +257,9 @@ namespace RhinoInside.Revit.GH.Types
       return SetValue(source as ARDB.Element);
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target))
+      if (base.ConvertTo(out target))
         return true;
 
       var element = Value;

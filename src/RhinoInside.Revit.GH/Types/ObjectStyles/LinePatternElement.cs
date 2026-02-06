@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
 #if RHINO_8
       if (typeof(Q).IsAssignableFrom(typeof(ModelLinetype)))
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 #endif
 
-      return base.CastTo(out target);
+      return base.ConvertTo(out target);
     }
     #endregion
 

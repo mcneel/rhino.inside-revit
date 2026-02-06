@@ -28,9 +28,9 @@ namespace RhinoInside.Revit.GH.Types
     protected FilterElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     protected FilterElement(ARDB.FilterElement value) : base(value) { }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target))
+      if (base.ConvertTo(out target))
         return true;
 
       if (IsValid)

@@ -1006,10 +1006,9 @@ namespace RhinoInside.Revit.GH.Types
               context.Material = element.Category?.Material;
 
               var location = Location;
-              var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
-              if (ToModelInstanceDefinition(idMap, worldToElement, element, geometry) is ModelInstanceDefinition definition)
+              if (ToModelInstanceDefinition(idMap, Transform.PlaneToPlane(location, Plane.WorldXY), element, geometry) is ModelInstanceDefinition definition)
               {
-                var elementToWorld = Transform.PlaneToPlane(Plane.WorldXY, location);
+                var elementToWorld = Transform.PlaneToPlane(Plane.WorldXY, TransformTo(location));
                 var attributes = ModelObject.Cast(new GH_InstanceReference(new InstanceReferenceGeometry(Guid.Empty, elementToWorld), definition)).ToAttributes();
                 attributes.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
                 attributes.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;
