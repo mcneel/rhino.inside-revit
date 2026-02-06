@@ -13,6 +13,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (view is null)
         throw new ArgumentNullException(nameof(view));
 
+      if (view.Document.IsLinked)
+        return false;
+
       using (var uiDocument = new UIDocument(view.Document))
       {
         if (uiDocument.GetOpenUIViews().FirstOrDefault(x => x.ViewId == view.Id) is UIView uiView)
@@ -29,6 +32,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (view is null)
         throw new ArgumentNullException(nameof(view));
+
+      if (view.Document.IsLinked)
+        return false;
 
       using (var uiDoc = new UIDocument(view.Document))
         return uiDoc.GetOpenUIViews().Any(x => x.ViewId == view.Id);
