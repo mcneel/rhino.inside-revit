@@ -310,7 +310,7 @@ namespace RhinoInside.Revit.GH.Types
         ReferenceDocumentId = doc.GetPersistentGUID();
         _ReferenceDocument = doc;
         _ReferenceId = link.Id;
-        if (this is GraphicalElement) ReferenceTransform = link.GetTransform().ToTransform();
+        if (this is GraphicalElement || this is View) ReferenceTransform = link.GetTransform().ToTransform();
         return this;
       }
 

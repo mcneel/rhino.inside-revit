@@ -386,7 +386,7 @@ namespace RhinoInside.Revit.GH.Types
     public FamilySymbol(ARDB.FamilySymbol elementType) : base(elementType) { }
 
     #region IGH_Goo
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
 #if RHINO_8
       if (typeof(Q).IsAssignableFrom(typeof(ModelInstanceDefinition)))
@@ -396,7 +396,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 #endif
 
-      return base.CastTo(out target);
+      return base.ConvertTo(out target);
     }
     #endregion
 

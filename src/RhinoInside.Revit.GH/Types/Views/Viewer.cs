@@ -34,9 +34,9 @@ namespace RhinoInside.Revit.GH.Types
         throw new ArgumentException("Invalid Element", nameof(element));
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target))
+      if (base.ConvertTo(out target))
         return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(View)))

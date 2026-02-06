@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.ElementId)))
       {
@@ -205,6 +205,17 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     public Rhino.Geometry.Transform ElementTransform => _ReferenceTransform.Inverse;
+
+    internal sealed override T TransformFrom<T>(T value)
+    {
+      if (value is null) return default;
+      return HasReferenceTransform ? TransformData(value, ElementTransform) : base.TransformTo(value);
+    }
+    internal sealed override T TransformTo<T>(T value)
+    {
+      if (value is null) return default;
+      return HasReferenceTransform ? TransformData(value, ReferenceTransform) : base.TransformTo(value);
+    }
     #endregion
 
     #region DcoumentObject

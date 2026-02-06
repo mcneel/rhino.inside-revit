@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
           type = data as TOutput;
           if (type is null)
-            return data.CastTo(out type);
+            return data.ConvertTo(out type);
         }
 
         return true;

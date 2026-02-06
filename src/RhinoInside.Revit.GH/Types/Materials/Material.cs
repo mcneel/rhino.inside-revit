@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Types
     public Material(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public Material(ARDB.Material value) : base(value) { }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       switch (source)
       {
@@ -39,12 +39,12 @@ namespace RhinoInside.Revit.GH.Types
           break;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo<Q>(out target))
+      if (base.ConvertTo<Q>(out target))
         return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(Grasshopper.Kernel.Types.GH_Colour)))

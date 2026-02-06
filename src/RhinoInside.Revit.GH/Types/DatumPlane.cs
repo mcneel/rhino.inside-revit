@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Types
     public Level(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public Level(ARDB.Level level) : base(level) { }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       var value = source;
 
@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
     public override BoundingBox GetBoundingBox(Transform xform) => NaN.BoundingBox;

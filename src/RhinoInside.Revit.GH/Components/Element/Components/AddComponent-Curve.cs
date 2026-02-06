@@ -203,7 +203,7 @@ namespace RhinoInside.Revit.GH.Components
                 if
                 (
                   !(workPlane is Types.GeometryFace) &&
-                  workPlane.CastTo(out Types.GraphicalElement graphicalElement) &&
+                  workPlane.ConvertTo(out Types.GraphicalElement graphicalElement) &&
                   !(graphicalElement is Types.DatumPlane)
                 )
                 {

@@ -142,10 +142,6 @@ namespace RhinoInside.Revit.GH.Types
 
     ARDB.ElementId _ReferenceId = ARDB.ElementId.InvalidElementId;
     public override ARDB.ElementId ReferenceId => _ReferenceId;
-
-    public string UniqueId =>
-      Document is ARDB.Document document && ERDB.ReferenceId.TryParse(ReferenceUniqueId, out var referenceId, ReferenceDocument) ?
-      referenceId.Element.ToString(document) : default;
     #endregion
 
     #region IGH_ReferencedData
@@ -237,7 +233,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Casters
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is IGH_Goo goo)
         source = goo.ScriptVariable();
@@ -257,9 +253,9 @@ namespace RhinoInside.Revit.GH.Types
       return SetValue(source as ARDB.Element);
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target))
+      if (base.ConvertTo(out target))
         return true;
 
       var element = Value;

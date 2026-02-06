@@ -28,9 +28,9 @@ namespace RhinoInside.Revit.GH.Types
 
     internal static readonly ARDB.ElementId SolidId = ElementIdExtension.FromValue((int) External.DB.BuiltInLinePattern.Solid);
 
-    public sealed override bool CastFrom(object source)
+    public sealed override bool ConvertFrom(object source)
     {
-      if (base.CastFrom(source))
+      if (base.ConvertFrom(source))
         return true;
 
       var document = Revit.ActiveDBDocument;
@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
 #if RHINO_8
       if (typeof(Q).IsAssignableFrom(typeof(ModelLinetype)))
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 #endif
 
-      return base.CastTo(out target);
+      return base.ConvertTo(out target);
     }
     #endregion
 
