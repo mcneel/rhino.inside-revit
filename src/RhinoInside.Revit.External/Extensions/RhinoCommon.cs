@@ -14,8 +14,16 @@ namespace Rhino.Geometry
     public static readonly Point3d Point3d = new Point3d(Value, Value, Value);
     public static readonly Vector3d Vector3d = new Vector3d(Value, Value, Value);
     public static readonly Plane Plane = new Plane(Point3d, Vector3d, Vector3d);
+    public static readonly Rectangle3d Rectangle = new Rectangle3d(NaN.Plane, Interval, Interval);
     public static readonly BoundingBox BoundingBox = new BoundingBox(Point3d, Point3d);
-    public static readonly Box Box = new Box(Plane, BoundingBox);
+    public static readonly Box Box = new Box(Plane, Interval, Interval, Interval);
+    public static readonly Transform Transform = new Transform()
+    {
+      M00 = Value, M01 = Value, M02 = Value, M03 = Value,
+      M10 = Value, M11 = Value, M12 = Value, M13 = Value,
+      M20 = Value, M21 = Value, M22 = Value, M23 = Value,
+      M30 = Value, M31 = Value, M32 = Value, M33 = Value,
+    };
   }
 
   readonly struct EpsilonEqualityComparer :
