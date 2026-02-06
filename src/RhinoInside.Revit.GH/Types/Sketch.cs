@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Types
     public Sketch() : base() { }
     public Sketch(ARDB.Sketch sketch) : base(sketch) { }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is Element element)
       {
@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
     #region IGH_PreviewData

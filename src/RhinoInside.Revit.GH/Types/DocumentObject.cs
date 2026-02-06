@@ -59,7 +59,9 @@ namespace RhinoInside.Revit.GH.Types
     public virtual object ScriptVariable() => Value;
 
     IGH_GooProxy IGH_Goo.EmitProxy() => default;
-    public virtual bool CastFrom(object source) => false;
+
+    bool IGH_Goo.CastFrom(object source) => ConvertFrom(TransformFrom(source));
+    public virtual bool ConvertFrom(object source) => false;
 
     bool IGH_Goo.CastTo<Q>(out Q target)
     {

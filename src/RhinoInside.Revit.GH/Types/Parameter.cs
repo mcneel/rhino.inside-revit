@@ -142,9 +142,9 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-    public sealed override bool CastFrom(object source)
+    public sealed override bool ConvertFrom(object source)
     {
-      if (base.CastFrom(source))
+      if (base.ConvertFrom(source))
         return true;
 
       var document = Revit.ActiveDBDocument;
@@ -197,7 +197,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
     public override bool ConvertTo<Q>(out Q target)
@@ -1055,7 +1055,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_Goo
     public override bool IsValid => base.IsValid && Value is object;
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is ARDB.Parameter parameter)
       {

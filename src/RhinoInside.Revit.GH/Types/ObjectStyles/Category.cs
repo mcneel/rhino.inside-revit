@@ -28,9 +28,9 @@ namespace RhinoInside.Revit.GH.Types
     public override bool IsValid => (Id?.TryGetBuiltInCategory(out var _) == true) || base.IsValid;
     public override object ScriptVariable() => APIObject;
 
-    public sealed override bool CastFrom(object source)
+    public sealed override bool ConvertFrom(object source)
     {
-      if (base.CastFrom(source))
+      if (base.ConvertFrom(source))
         return true;
 
       if (source is IGH_Goo goo)
@@ -791,9 +791,9 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
-      if (base.CastFrom(source))
+      if (base.ConvertFrom(source))
         return true;
 
       if (source is Category category)

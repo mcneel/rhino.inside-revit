@@ -495,7 +495,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is IGH_Goo goo)
         source = goo.ScriptVariable();
@@ -511,7 +511,7 @@ namespace RhinoInside.Revit.GH.Types
           break;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
     #endregion
   }
@@ -590,7 +590,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is IGH_Goo goo)
         source = goo.ScriptVariable();
@@ -606,7 +606,7 @@ namespace RhinoInside.Revit.GH.Types
           break;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
     #endregion
   }
@@ -1097,7 +1097,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is IGH_Goo goo)
         source = goo.ScriptVariable();
@@ -1113,7 +1113,7 @@ namespace RhinoInside.Revit.GH.Types
           break;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
     #endregion
   }
@@ -1419,7 +1419,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is IGH_Goo goo)
         source = goo.ScriptVariable();
@@ -1435,7 +1435,7 @@ namespace RhinoInside.Revit.GH.Types
           break;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
     #endregion
   }
@@ -1613,7 +1613,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is IGH_Goo goo)
         source = goo.ScriptVariable();
@@ -1629,7 +1629,7 @@ namespace RhinoInside.Revit.GH.Types
           break;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
     #endregion
   }

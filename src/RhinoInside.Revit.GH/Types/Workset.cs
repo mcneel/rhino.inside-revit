@@ -118,7 +118,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       var value = source;
 
@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
     public override bool ConvertTo<Q>(out Q target)

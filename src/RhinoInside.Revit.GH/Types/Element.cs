@@ -237,7 +237,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Casters
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is IGH_Goo goo)
         source = goo.ScriptVariable();

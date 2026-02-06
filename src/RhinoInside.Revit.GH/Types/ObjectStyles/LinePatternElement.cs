@@ -28,9 +28,9 @@ namespace RhinoInside.Revit.GH.Types
 
     internal static readonly ARDB.ElementId SolidId = ElementIdExtension.FromValue((int) External.DB.BuiltInLinePattern.Solid);
 
-    public sealed override bool CastFrom(object source)
+    public sealed override bool ConvertFrom(object source)
     {
-      if (base.CastFrom(source))
+      if (base.ConvertFrom(source))
         return true;
 
       var document = Revit.ActiveDBDocument;

@@ -38,12 +38,12 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is Document doc)
         return SetValue(doc.Value.OwnerFamily);
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
   }
 }
