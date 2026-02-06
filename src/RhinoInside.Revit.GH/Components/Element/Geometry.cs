@@ -23,18 +23,14 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     protected ElementGeometryComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected bool TryGetCommonDocument(IEnumerable<Types.Element> elements, out ARDB.Document document)
+    protected bool TryGetCommonModel(IEnumerable<Types.Element> elements, out Types.IGH_ModelInstance model)
     {
-      document = default;
+      model = default;
       foreach (var element in elements)
       {
         if (element is null) continue;
-        if (document is null) document = element.Document;
-        else if (element.Document is object && !document.Equals(element.Document))
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input elements should be from the same document");
-          return false;
-        }
+        if (model is null) model = element.Model;
+        else if (!model.Equals(element.Model)) return false;
       }
 
       return true;
@@ -73,7 +69,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
     protected void SolveGeometry
     (
-      ARDB.Document doc,
+      Types.IGH_ModelInstance model,
       IList<Types.Element> include,
       IList<Types.Element> exclude,
       ARDB.Options options,
@@ -81,6 +77,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       GH_Path geometriesPath, out GH_Structure<IGH_GeometricGoo> geometries
     )
     {
+      var doc = model.ModelDocument.Value;
       elements = elementsPath is object ? new GH_Structure<Types.Element>() : default;
       geometries = new GH_Structure<IGH_GeometricGoo>();
 
@@ -97,6 +94,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         {
           SolveGeometry
           (
+            model,
             include.Select(x => x?.Value),
             visibleInViewFilter,
             options,
@@ -109,6 +107,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
     void SolveGeometry
     (
+      Types.IGH_ModelInstance model,
       IEnumerable<ARDB.Element> include,
       ARDB.VisibleInViewFilter visibleInViewFilter,
       ARDB.Options options,
@@ -117,6 +116,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       int level = 0
     )
     {
+      var modelTransform = model.ModelInstance.Value?.GetTransform().ToTransform() ?? default(Transform?);
       var index = level;
       {
         var elePath = elements is object ? elementsPath.AppendElement(index) : default;
@@ -161,7 +161,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         {
           // Extract the geometry
           var geometryBase = new List<GeometryBase>();
-          if (false != ExtractGeometry(element, options, geometryBase))
+          if (false != ExtractGeometry(modelTransform, element, options, geometryBase))
           {
             geometries.AppendRange(geometryBase.Select(ToGeometricGoo), geoPath);
 
@@ -181,7 +181,8 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
               SolveGeometry
               (
-                dependents.Select(x => element.Document.GetElement(x)).
+                model,
+                dependents.Select(element.Document.GetElement).
                 Where
                 (
                   x =>
@@ -203,6 +204,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
     static bool? ExtractGeometry
     (
+      Transform? xform,
       ARDB.Element element, ARDB.Options options,
       List<GeometryBase> list
     )
@@ -234,7 +236,8 @@ namespace RhinoInside.Revit.GH.Components.Geometry
                 return false;
               }
             ).
-            Where(x => !x.IsNullOrEmpty())
+            Where(x => !x.IsNullOrEmpty()).
+            Select(x => { if(xform.HasValue) x.Transform(xform.Value); return x; })
           );
         }
 
@@ -244,7 +247,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
     protected void SolveAttributes
     (
-      ARDB.Document doc,
+      Types.IGH_ModelInstance model,
       GH_Structure<IGH_GeometricGoo> geometries,
       GH_Structure<Types.Category> categories,
       GH_Structure<Types.Material> materials
@@ -252,6 +255,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     {
       if (categories is object || materials is object)
       {
+        var doc = model.ModelDocument.Value;
         foreach (var path in geometries.Paths)
         {
           var branch = geometries.get_Branch(path);
@@ -269,7 +273,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
                 else
                 {
                   geometryBase.TryGetUserString(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY.ToString(), out ARDB.ElementId categoryId);
-                  categoriesList.Add(new Types.Category(doc, categoryId));
+                  categoriesList.Add(new Types.Category(doc, categoryId).AtModel(model) as Types.Category);
                 }
               }
 
@@ -279,7 +283,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
                 else
                 {
                   geometryBase.TryGetUserString(ARDB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out ARDB.ElementId materialId);
-                  materialsList.Add(new Types.Material(doc, materialId));
+                  materialsList.Add(new Types.Material(doc, materialId).AtModel(model) as Types.Material);
                 }
               }
             }
@@ -451,8 +455,13 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
       if (!Params.TryGetData(DA, "Detail Level", out ARDB.ViewDetailLevel? detailLevel)) return;
-      if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()), out var doc)) return;
+      if (!TryGetCommonModel(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()), out var model))
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input elements should be from the same model");
+        return;
+      }
 
+      var doc = model.ModelDocument.Value;
       var scope = default(IDisposable);
       if (elements.Any(x => x?.Value is ARDB.FamilySymbol { IsActive: false }))
       {
@@ -464,7 +473,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
           doc.Regenerate();
         }
-        catch { scope.Dispose(); }
+        catch { scope.Dispose(); scope = null; }
       }
 
       using (scope)
@@ -474,7 +483,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
         SolveGeometry
         (
-          doc, elements, exclude, options,
+          model, elements, exclude, options,
           _Elements_ < 0 ? default : DA.ParameterTargetPath(_Elements_), out var Elements,
           DA.ParameterTargetPath(_Geometry_), out var Geometry
         );
@@ -485,7 +494,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         var _Materials_ = Params.IndexOfOutputParam("Materials");
         var Materials = _Materials_ >= 0 ? new GH_Structure<Types.Material>() : default;
 
-        SolveAttributes(doc, Geometry, Categories, Materials);
+        SolveAttributes(model, Geometry, Categories, Materials);
 
         if (Elements   is object) DA.SetDataTree(_Elements_,   Elements);
                                   DA.SetDataTree(_Geometry_,   Geometry);
@@ -600,15 +609,20 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       if (!Params.GetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       if (!Params.TryGetDataList(DA, "Exclude", out IList<Types.Element> exclude)) return;
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
-      if (!TryGetCommonDocument(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()).Append(view), out var doc)) return;
+      if (!TryGetCommonModel(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()).Append(view), out var model))
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"All input elements should be from the same document as {view}");
+        return;
+      }
 
+      var doc = model.ModelDocument.Value;
       using (var options = new ARDB.Options() { View = view.Value })
       {
         var _Elements_ = Params.IndexOfOutputParam("Elements");
         var _Geometry_ = Params.IndexOfOutputParam("Geometry");
         SolveGeometry
         (
-          doc, elements, exclude, options,
+          model, elements, exclude, options,
           _Elements_ < 0 ? default : DA.ParameterTargetPath(_Elements_), out var Elements,
           DA.ParameterTargetPath(_Geometry_), out var Geometry
         );
@@ -619,7 +633,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         var _Materials_ = Params.IndexOfOutputParam("Materials");
         var Materials = _Materials_ >= 0 ? new GH_Structure<Types.Material>() : default;
 
-        SolveAttributes(doc, Geometry, Categories, Materials);
+        SolveAttributes(model, Geometry, Categories, Materials);
 
         if (Elements   is object) DA.SetDataTree(_Elements_,   Elements);
                                   DA.SetDataTree(_Geometry_,   Geometry);
