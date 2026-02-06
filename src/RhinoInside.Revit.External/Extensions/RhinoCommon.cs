@@ -14,7 +14,10 @@ namespace Rhino.Geometry
     public static readonly Point3d Point3d = new Point3d(Value, Value, Value);
     public static readonly Vector3d Vector3d = new Vector3d(Value, Value, Value);
     public static readonly Plane Plane = new Plane(Point3d, Vector3d, Vector3d);
-    public static readonly Rectangle3d Rectangle = new Rectangle3d(NaN.Plane, Interval, Interval);
+    public static readonly Line Line = new Line(Point3d, Point3d);
+    public static readonly Rectangle3d Rectangle = new Rectangle3d(Plane, Interval, Interval);
+    public static readonly Circle Circle = new Circle(Plane, Value);
+    public static readonly Arc Arc = new Arc(Circle, Interval);
     public static readonly BoundingBox BoundingBox = new BoundingBox(Point3d, Point3d);
     public static readonly Box Box = new Box(Plane, Interval, Interval, Interval);
     public static readonly Transform Transform = new Transform()

@@ -744,7 +744,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (element is object)
       {
-        if (element.Document.Equals(Value)) return element;
+        if (!(element.Document?.Equals(Value) is false)) return element;
         return Element.FromElementId(Value, Value.LookupElement(element.Document, element.Id));
       }
 
