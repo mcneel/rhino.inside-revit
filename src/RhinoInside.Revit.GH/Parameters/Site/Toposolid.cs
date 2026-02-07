@@ -32,11 +32,12 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
+#if REVIT_2025
       var create = Menu_AppendItem(menu, $"Set new {TypeName}");
-
       Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.Toposolid, "Toposolid");
+#endif
     }
-    #endregion
+#endregion
   }
 #endif
-}
+    }
