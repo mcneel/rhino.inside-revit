@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
@@ -31,13 +30,12 @@ namespace RhinoInside.Revit.GH.Parameters
       new string[] { "Mesh", }
     );
 
-    //protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
-    //{
-    //  var create = Menu_AppendItem(menu, $"Set new {TypeName}");
+    protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
+    {
+      var create = Menu_AppendItem(menu, $"Set new {TypeName}");
 
-    //  Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.Toposurface, "Toposurface");
-    //  Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.Subregion, "Region");
-    //}
+      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.Toposolid, "Toposolid");
+    }
     #endregion
   }
 #endif
