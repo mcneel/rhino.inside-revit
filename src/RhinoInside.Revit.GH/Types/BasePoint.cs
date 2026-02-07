@@ -181,8 +181,12 @@ namespace RhinoInside.Revit.GH.Types
     protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
+#if REVIT_2021
+      return element is ARDB_InternalOrigin;
+#else
       return element is ARDB_InternalOrigin &&
              element.Category?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_IOS_GeoSite;
+#endif
     }
 
     public InternalOrigin() { }
