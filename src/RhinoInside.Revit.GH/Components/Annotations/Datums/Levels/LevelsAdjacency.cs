@@ -58,13 +58,13 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
         if (!Params.TryGetDataList(DA, "Elevations", out IList<Types.ProjectElevation> elevations)) return;
         if (elevations is null) elevations = levels.Select(x => new Types.ProjectElevation(x)).ToArray();
 
-        levels = levels.
+        var sorted = levels.
           Where(x => x?.IsValid is true).
           OrderBy(x => x.Elevation).
           Distinct(default(ElevationComparer)).
           ToArray();
 
-        Params.TrySetDataList(DA, "Levels", () => levels);
+        Params.TrySetDataList(DA, "Levels", () => sorted);
 
         var above = Params.IndexOfOutputParam("Above") >= 0 ? new List<Types.Level>(elevations.Count) : null;
         var closest = Params.IndexOfOutputParam("Closest") >= 0 ? new List<Types.Level>(elevations.Count) : null;
@@ -74,17 +74,23 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
         {
           foreach (var elevation in elevations)
           {
-            if (elevation?.IsElevation(out var z) is true)
+            if (sorted.Length > 0 && elevation?.IsElevation(out var z) is true)
             {
-              var index = Array.BinarySearch(levels.ToArray(), z, default(ElevationComparer));
+              var index = Array.BinarySearch(sorted, z, default(ElevationComparer));
               if (index < 0) index = ~index;
-              if (index >= levels.Count) index = levels.Count - 1;
+              if (index >= sorted.Length) index = sorted.Length - 1;
 
-              if (index > 0 && z - levels[index - 1].Elevation < levels[index].Elevation - z) index--;
+              if (index > 0 && z - sorted[index - 1].Elevation < sorted[index].Elevation - z) index--;
 
-              above?.Add(z < levels[index].Elevation ? levels[index] : index < levels.Count - 1 ? levels[index + 1] : new Types.Level());
-              closest?.Add(levels[index]);
-              below?.Add(z > levels[index].Elevation ? levels[index] : index > 0 ? levels[index - 1] : new Types.Level());
+              above?.Add(z < sorted[index].Elevation ? sorted[index] : index < sorted.Length - 1 ? sorted[index + 1] : new Types.Level());
+              closest?.Add(sorted[index]);
+              below?.Add(z > sorted[index].Elevation ? sorted[index] : index > 0 ? sorted[index - 1] : new Types.Level());
+            }
+            else
+            {
+              above?.Add(null);
+              closest?.Add(null);
+              below?.Add(null);
             }
           }
 

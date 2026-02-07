@@ -35,6 +35,7 @@ namespace RhinoInside.Revit.GH.Parameters
       (
         new ARDB.BuiltInCategory[]
         {
+          ARDB.BuiltInCategory.OST_CoordinateSystem,  // Internal Origin
           ARDB.BuiltInCategory.OST_IOS_GeoSite,       // Internal Origin
           ARDB.BuiltInCategory.OST_ProjectBasePoint,  // Project Base Point
           ARDB.BuiltInCategory.OST_SharedBasePoint    // Survey Point
