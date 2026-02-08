@@ -107,8 +107,6 @@ namespace RhinoInside.Revit.GH.Parameters
     #region UI
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
     protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
-    protected override GH_GetterResult Prompt_Singular(ref Types.IGH_ModelInstance value) => GH_GetterResult.cancel;
-    protected override GH_GetterResult Prompt_Plural(ref List<Types.IGH_ModelInstance> values) => GH_GetterResult.cancel;
     #endregion
   }
 }

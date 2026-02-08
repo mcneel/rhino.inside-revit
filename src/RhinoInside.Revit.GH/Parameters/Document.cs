@@ -81,26 +81,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return DA.GetData(_Document_, ref document);
     }
 
-    internal static bool TryGetStructuralSettings(Types.Document document, out ARDB.Structure.StructuralSettings settings)
-    {
-      try
-      {
-        if (document?.Value is ARDB.Document doc)
-        {
-          settings = ARDB.Structure.StructuralSettings.GetStructuralSettings(doc);
-          return settings.BoundaryConditionFamilySymbolFixed.IsValid();
-        }
-      }
-      catch { }
-
-      settings = null;
-      return false;
-    }
-
     #region UI
-    protected override GH_GetterResult Prompt_Singular(ref Types.IGH_Document value) => GH_GetterResult.cancel;
-    protected override GH_GetterResult Prompt_Plural(ref List<Types.IGH_Document> values) => GH_GetterResult.cancel;
-
     static ARDB.DocumentType GetDocumentType(ARDB.Document doc)
     {
       if (doc.IsFamilyDocument)
