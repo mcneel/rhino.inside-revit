@@ -71,6 +71,7 @@ namespace RhinoInside.Revit.External.UI.Extensions
       {
         switch (postableCommand)
         {
+#if REVIT_2019
 #if REVIT_2022
           case PostableCommand.NewProject: break;
           case PostableCommand.NewFamily: break;
@@ -79,6 +80,7 @@ namespace RhinoInside.Revit.External.UI.Extensions
           case PostableCommand.NewFamilyFile: break;
 #endif
           case PostableCommand.NewConceptualMass: break;
+#endif
           case PostableCommand.OpenRevitFile: break;
           default: return false;
         }
