@@ -205,6 +205,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override void ResetValue()
     {
       _FullName = default;
+      _CategoryDiscipline = default;
       _CategoryType = default;
       _IsTagCategory = default;
       _IsSubcategory = default;
@@ -235,16 +236,19 @@ namespace RhinoInside.Revit.GH.Types
     public Category(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public Category(ARDB.Category value) : base(value.Document(), value?.Id ?? ARDB.ElementId.InvalidElementId)
     {
+      if (value is null) return;
+
       // Only cache values that can not change.
-      if (Id.IsBuiltInId()) _FullName = value?.FullName();
-      _CategoryType = value?.CategoryType;
-      _IsTagCategory = value?.IsTagCategory;
-      _IsSubcategory = value?.Parent is object;
-      _IsVisibleInUI = value?.IsVisibleInUI();
-      _CanAddSubcategory = value?.CanAddSubcategory;
-      _AllowsBoundParameters = value?.AllowsBoundParameters;
-      _HasMaterialQuantities = value?.HasMaterialQuantities;
-      _IsCuttable = value?.IsCuttable;
+      if (Id.IsBuiltInId()) _FullName = value.FullName();
+      _CategoryDiscipline = value.CategoryDiscipline();
+      _CategoryType = value.CategoryType;
+      _IsTagCategory = value.IsTagCategory;
+      _IsSubcategory = value.Parent is object;
+      _IsVisibleInUI = value.IsVisibleInUI();
+      _CanAddSubcategory = value.CanAddSubcategory;
+      _AllowsBoundParameters = value.AllowsBoundParameters;
+      _HasMaterialQuantities = value.HasMaterialQuantities;
+      _IsCuttable = value.IsCuttable;
     }
 
     public static Category FromCategory(ARDB.Category category)
@@ -586,10 +590,10 @@ namespace RhinoInside.Revit.GH.Types
     public string FullName => _FullName ?? (APIObject?.FullName() ?? BuiltInCategory?.FullName(localized: true));
 
     ERDB.CategoryDiscipline? _CategoryDiscipline;
-    public ERDB.CategoryDiscipline CategoryDiscipline => _CategoryDiscipline ?? (_CategoryDiscipline = APIObject?.CategoryDiscipline() ?? BuiltInCategory?.CategoryDiscipline()) ?? ERDB.CategoryDiscipline.None;
+    public ERDB.CategoryDiscipline CategoryDiscipline => _CategoryDiscipline ??= APIObject?.CategoryDiscipline() ?? BuiltInCategory?.CategoryDiscipline() ?? ERDB.CategoryDiscipline.None;
 
     ARDB.CategoryType? _CategoryType;
-    public ARDB.CategoryType CategoryType => _CategoryType ?? (_CategoryType = APIObject?.CategoryType ?? BuiltInCategory?.CategoryType()) ?? ARDB.CategoryType.Invalid;
+    public ARDB.CategoryType CategoryType => _CategoryType ??= APIObject?.CategoryType ?? BuiltInCategory?.CategoryType() ?? ARDB.CategoryType.Invalid;
 
     public Category Parent => _IsSubcategory == false ? null :
       APIObject is object ? FromCategory(APIObject.Parent) :
@@ -603,30 +607,30 @@ namespace RhinoInside.Revit.GH.Types
       Select(FromCategory);
 
     bool? _IsTagCategory;
-    public bool? IsTagCategory => _IsTagCategory ?? (_IsTagCategory = APIObject?.IsTagCategory ?? BuiltInCategory?.IsTagCategory());
+    public bool? IsTagCategory => _IsTagCategory ??= APIObject?.IsTagCategory ?? BuiltInCategory?.IsTagCategory();
 
     bool? _IsSubcategory;
-    public bool? IsSubcategory => _IsSubcategory ?? (_IsSubcategory =
+    public bool? IsSubcategory => _IsSubcategory ??=
     (
       APIObject is object ? APIObject.Parent is object :
       BuiltInCategory is object ? BuiltInCategory.Value.Parent() != ARDB.BuiltInCategory.INVALID :
       default(bool?)
-    ));
+    );
 
     bool? _IsVisibleInUI;
-    public bool? IsVisibleInUI => _IsVisibleInUI ?? (_IsVisibleInUI = APIObject?.IsVisibleInUI() ?? BuiltInCategory?.IsVisibleInUI());
+    public bool? IsVisibleInUI => _IsVisibleInUI ??= APIObject?.IsVisibleInUI() ?? BuiltInCategory?.IsVisibleInUI();
 
     bool? _CanAddSubcategory;
-    public bool? CanAddSubcategory => _CanAddSubcategory ?? (_CanAddSubcategory = APIObject?.CanAddSubcategory ?? BuiltInCategory?.CanAddSubcategory());
+    public bool? CanAddSubcategory => _CanAddSubcategory ??= APIObject?.CanAddSubcategory ?? BuiltInCategory?.CanAddSubcategory();
 
     bool? _AllowsBoundParameters;
-    public bool? AllowsBoundParameters => _AllowsBoundParameters ?? (_AllowsBoundParameters = APIObject?.AllowsBoundParameters ?? BuiltInCategory?.AllowsBoundParameters());
+    public bool? AllowsBoundParameters => _AllowsBoundParameters ??= APIObject?.AllowsBoundParameters ?? BuiltInCategory?.AllowsBoundParameters();
 
     bool? _HasMaterialQuantities;
-    public bool? HasMaterialQuantities => _HasMaterialQuantities ?? (_HasMaterialQuantities = APIObject?.HasMaterialQuantities ?? BuiltInCategory?.HasMaterialQuantities());
+    public bool? HasMaterialQuantities => _HasMaterialQuantities ??= APIObject?.HasMaterialQuantities ?? BuiltInCategory?.HasMaterialQuantities();
 
     bool? _IsCuttable;
-    public bool? IsCuttable => _IsCuttable ?? (_IsCuttable = APIObject?.IsCuttable ?? BuiltInCategory?.IsCuttable());
+    public bool? IsCuttable => _IsCuttable ??= APIObject?.IsCuttable ?? BuiltInCategory?.IsCuttable();
     #endregion
 
     #region Object Style
