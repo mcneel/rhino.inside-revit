@@ -138,11 +138,6 @@ namespace RhinoInside.Revit.GH.Parameters
       Where(x => x.IsValid);
 
     #region UI
-    protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
-    protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
-    protected override GH_GetterResult Prompt_Plural(ref List<T> values) => GH_GetterResult.cancel;
-    protected override GH_GetterResult Prompt_Singular(ref T value) => GH_GetterResult.cancel;
-
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalMenuItems(menu);

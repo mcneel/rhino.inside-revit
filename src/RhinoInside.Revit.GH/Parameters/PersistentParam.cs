@@ -356,6 +356,12 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected virtual void Menu_AppendPostProcessParameter(ToolStripDropDown menu) { }
 
+    protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
+    protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
+
+    protected override GH_GetterResult Prompt_Singular(ref T value) => GH_GetterResult.cancel;
+    protected override GH_GetterResult Prompt_Plural(ref List<T> values) => GH_GetterResult.cancel;
+
     protected override bool Prompt_ManageCollection(GH_Structure<T> values)
     {
       foreach (var item in values.AllData(true))

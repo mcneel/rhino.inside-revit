@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Types
   public class BoundaryConditions : GeometricElement
   {
     protected override Type ValueType => typeof(ARDB.Structure.BoundaryConditions);
-    protected virtual string BoundaryConditionsState => default;
+    protected virtual string State => default;
 
     public new ARDB.Structure.BoundaryConditions Value => base.Value as ARDB.Structure.BoundaryConditions;
 
@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected Rhino.Display.PointStyle GetPointStyle()
     {
-      switch (BoundaryConditionsState)
+      switch (State)
       {
         default:
         case "Fixed": return Rhino.Display.PointStyle.Square;
@@ -30,14 +30,13 @@ namespace RhinoInside.Revit.GH.Types
         case "User": return Rhino.Display.PointStyle.Asterisk;
       }
     }
-
   }
 
   [Kernel.Attributes.Name("Point Boundary Conditions")]
   public class PointBoundaryConditions : BoundaryConditions
   {
     protected override Type ValueType => typeof(PointBoundaryConditions);
-    protected override string BoundaryConditionsState => Value.get_Parameter(ARDB.BuiltInParameter.BOUNDARY_PARAM_PRESET).AsValueString();
+    protected override string State => Value.get_Parameter(ARDB.BuiltInParameter.BOUNDARY_PARAM_PRESET).AsValueString();
     public PointBoundaryConditions() { }
     public PointBoundaryConditions(ARDB.Structure.BoundaryConditions boundaryConditions) : base(boundaryConditions) { }
 
@@ -49,7 +48,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
       if (Value.Point.ToPoint3d() is Point3d position)
-        args.Pipeline.DrawPoint(position, this.GetPointStyle(), CentralSettings.PreviewPointRadius, args.Color);
+        args.Pipeline.DrawPoint(position, GetPointStyle(), CentralSettings.PreviewPointRadius, args.Color);
     }
     #endregion
   }
@@ -60,7 +59,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(LineBoundaryConditions);
     public LineBoundaryConditions() { }
     public LineBoundaryConditions(ARDB.Structure.BoundaryConditions boundaryConditions) : base(boundaryConditions) { }
-    protected override string BoundaryConditionsState => Value.get_Parameter(ARDB.BuiltInParameter.BOUNDARY_PARAM_PRESET_LINEAR).AsValueString();
+    protected override string State => Value.get_Parameter(ARDB.BuiltInParameter.BOUNDARY_PARAM_PRESET_LINEAR).AsValueString();
 
     #region Location
     public override Curve Curve => Value?.GetCurve().ToCurve();
@@ -71,11 +70,11 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value?.GetCurve().ToCurve() is Curve curve)
       {
-        var segments = (int) Math.Ceiling(curve.GetLength() / (ARDB.Structure.StructuralSettings.GetStructuralSettings(Revit.ActiveUIApplication.ActiveUIDocument.Document).BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits));
+        var segments = (int) Math.Ceiling(curve.GetLength() / (ARDB.Structure.StructuralSettings.GetStructuralSettings(Document).BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits));
         curve.DivideByCount(segments, true, out Point3d[] points);
 
         if (points != null)
-          args.Pipeline.DrawPoints(points, this.GetPointStyle(), CentralSettings.PreviewPointRadius, args.Color);
+          args.Pipeline.DrawPoints(points, GetPointStyle(), CentralSettings.PreviewPointRadius, args.Color);
       }
     }
     #endregion
@@ -87,7 +86,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(AreaBoundaryConditions);
     public AreaBoundaryConditions() { }
     public AreaBoundaryConditions(ARDB.Structure.BoundaryConditions boundaryConditions) : base(boundaryConditions) { }
-    protected override string BoundaryConditionsState => Value.get_Parameter(ARDB.BuiltInParameter.BOUNDARY_PARAM_PRESET_AREA).AsValueString();
+    protected override string State => Value.get_Parameter(ARDB.BuiltInParameter.BOUNDARY_PARAM_PRESET_AREA).AsValueString();
 
     #region Location
     public override Brep TrimmedSurface
@@ -105,14 +104,13 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (GeometryDecoder.ToCurve(Value?.GetLoops().First()) is Curve curve)
       {
-        var segments = (int) Math.Ceiling(curve.GetLength() / (ARDB.Structure.StructuralSettings.GetStructuralSettings(Revit.ActiveUIApplication.ActiveUIDocument.Document).BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits));
-        curve.DivideByCount(segments, true, out Point3d[] points);
+        var segments = (int) Math.Ceiling(curve.GetLength() / (ARDB.Structure.StructuralSettings.GetStructuralSettings(Document).BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits));
+        curve.DivideByCount(segments, true, out var points);
 
         if (points != null)
-          args.Pipeline.DrawPoints(points, this.GetPointStyle(), CentralSettings.PreviewPointRadius, args.Color);
+          args.Pipeline.DrawPoints(points, GetPointStyle(), CentralSettings.PreviewPointRadius, args.Color);
       }
     }
     #endregion
   }
 }
-
