@@ -14,11 +14,15 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("EF2EFE84-8B2E-4613-A352-B1CE95671238");
     protected override string IconTag => string.Empty;
 
+    internal static readonly string DefaultName = "Model";
+    internal static readonly string DefaultNickName = "M";
+    internal static readonly string DefaultDescription = "Contains a collection of Revit models";
+
     public ModelInstance() : base
     (
-      name: "Model",
-      nickname: "M",
-      description: "Contains a collection of Revit models",
+      name: DefaultName,
+      nickname: DefaultName,
+      description: DefaultDescription,
       category: "Params",
       subcategory: "Revit"
     )
@@ -35,15 +39,17 @@ namespace RhinoInside.Revit.GH.Parameters
       return null;
     }
 
-    public static bool TryGetOrCurrent(IGH_Component component, IGH_DataAccess DA, string name, out Types.IGH_ModelInstance model)
+    public static bool GetModelOrCurrentDocument(IGH_Component component, IGH_DataAccess DA, out Types.IGH_ModelInstance model)
     {
-      var _Document_ = name is null ? -1 : component.Params.IndexOfInputParam(name);
+      model = default;
+
+      var _Model_ = component.Params.IndexOfInputParam(DefaultName);
       if
       (
-        _Document_ < 0 ||
+        _Model_ < 0 || // Not present
         (
-          component.Params.Input[_Document_].SourceCount == 0 &&
-          component.Params.Input[_Document_].DataType == GH_ParamData.@void
+          component.Params.Input[_Model_].SourceCount == 0 &&  // Not connected
+          component.Params.Input[_Model_].VolatileData.IsEmpty // Not persistent data
         )
       )
       {
@@ -52,10 +58,11 @@ namespace RhinoInside.Revit.GH.Parameters
           model = instance;
           return true;
         }
+
+        return false;
       }
 
-      model = default;
-      return DA.GetData(_Document_, ref model);
+      return DA.GetData(_Model_, ref model);
     }
 
     #region IGH_ReferenceParam

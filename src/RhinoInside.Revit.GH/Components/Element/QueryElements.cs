@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out var model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrentDocument(this, DA, out var model)) return;
       if (!Params.GetData(DA, "Id", out Grasshopper.Kernel.Types.IGH_Goo goo)) return;
 
       switch (goo)
@@ -113,7 +113,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out var model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrentDocument(this, DA, out var model)) return;
       if (!Params.GetData(DA, "Filter", out Types.ElementFilter filter, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Limit", out int? limit, x => x >= 0)) return;
 
@@ -189,7 +189,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out Types.IGH_ModelInstance model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrentDocument(this, DA, out var model)) return;
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;

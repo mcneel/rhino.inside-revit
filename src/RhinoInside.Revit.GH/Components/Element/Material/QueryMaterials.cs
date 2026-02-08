@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out var model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrentDocument(this, DA, out var model)) return;
       Params.TryGetData(DA, "Class", out string @class);
       Params.TryGetData(DA, "Name", out string name);
       Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);

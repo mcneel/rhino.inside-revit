@@ -163,7 +163,7 @@ namespace RhinoInside.Revit.GH.Types
     public abstract ARDB.Document ReferenceDocument { get; }
     public abstract ARDB.ElementId ReferenceId { get; }
 
-    public bool IsLinked => ReferenceDocument is object && !ReferenceDocument.IsEquivalent(Document);
+    public bool IsLinked => !ReferenceDocument.IsEquivalent(Document);
     internal IGH_ModelInstance Model => IsLinked ?
       RevitLinkInstance.FromElementId(ReferenceDocument, ReferenceId) as IGH_ModelInstance :
       Types.Document.FromValue(Document);

@@ -253,17 +253,29 @@ namespace RhinoInside.Revit.GH.Types
       if (IsEmpty) return this;
       if (model is Document document)
       {
-        if (!IsLinked && document.Value.IsEquivalent(Document)) return this;
-        return document.GetNamesakeElement(this);
+        if (document.Value.IsEquivalent(Document))
+        {
+          if (!IsLinked)
+            return this;
+
+          var element = MemberwiseClone() as Element;
+          element.InvalidateGraphics();
+          return element.AsUnlinked();
+        }
+        else
+        {
+          // Namesake Element
+          return FromElementId(document.Value, document.Value.LookupElement(Document, Id));
+        }
       }
       else if (model is RevitLinkInstance link)
       {
-        if (IsLinked && ReferenceId == link.Id)
+        if (ReferenceId == link.Id && IsLinked)
           return this;
 
         if (link.Value.GetLinkDocument() is ARDB.Document linkedDocument)
         {
-          if (linkedDocument.Equals(Document) is true)
+          if (linkedDocument.Equals(Document))
           {
             var element = MemberwiseClone() as Element;
             element.InvalidateGraphics();
@@ -271,7 +283,8 @@ namespace RhinoInside.Revit.GH.Types
           }
           else
           {
-            return link.ModelDocument.GetNamesakeElement(this)?.AsLinked(link.Value);
+            // Namesake Element
+            return FromElementId(linkedDocument, linkedDocument.LookupElement(Document, Id)).AsLinked(link.Value);
           }
         }
       }

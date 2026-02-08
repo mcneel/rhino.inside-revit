@@ -86,8 +86,8 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.ModelInstance>("Model", "M", relevance: ParamRelevance.Secondary),
-      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "New current Shared Site", optional: true, relevance: ParamRelevance.Tertiary),
+      ParamDefinition.Create<Parameters.ModelInstance>("Model", "M", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "New current Shared Site", optional: true, relevance: ParamRelevance.Secondary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -110,7 +110,7 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out var model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrentDocument(this, DA, out var model)) return;
       var doc = model.ModelDocument.Value;
 
       if (Params.GetData(DA, "Shared Site", out Types.ProjectLocation location, x => x.IsValid))

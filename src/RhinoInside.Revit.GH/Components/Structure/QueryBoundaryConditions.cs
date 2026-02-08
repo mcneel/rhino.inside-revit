@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out Types.IGH_ModelInstance model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrentDocument(this, DA, out var model)) return;
       if (!Params.TryGetData(DA, "Type", out ARDB.Structure.BoundaryConditionsType? type)) return;
 
       using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
