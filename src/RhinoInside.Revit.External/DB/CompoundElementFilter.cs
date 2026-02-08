@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.External.DB
   {
     #region Implementation Details
     /// <summary>
-    /// ElementFilter used internaly to skip certain internal elements 
+    /// ElementFilter used internally to skip certain internal elements 
     /// </summary>
     /// <param name="doc">May be useful in the future to exclude certain elements</param>
     /// <returns></returns>
@@ -27,8 +27,10 @@ namespace RhinoInside.Revit.External.DB
     }
 
     internal const double BoundingBoxLimits = 1e+9;
-    public static ElementFilter ElementHasBoundingBoxFilter { get; } = new BoundingBoxIsInsideFilter(new Outline(new XYZ(-BoundingBoxLimits, -BoundingBoxLimits, -BoundingBoxLimits), new XYZ(+BoundingBoxLimits, +BoundingBoxLimits, +BoundingBoxLimits)));
+    public static ElementFilter ElementHasBoundingBoxFilter { get; } = new BoundingBoxIsInsideFilter(new Outline(new XYZ(-BoundingBoxLimits, -BoundingBoxLimits, -BoundingBoxLimits), new XYZ(+BoundingBoxLimits, +BoundingBoxLimits, +BoundingBoxLimits)), inverted: false);
+    public static ElementFilter ElementHasNoBoundingBoxFilter { get; } = new BoundingBoxIsInsideFilter(new Outline(new XYZ(-BoundingBoxLimits, -BoundingBoxLimits, -BoundingBoxLimits), new XYZ(+BoundingBoxLimits, +BoundingBoxLimits, +BoundingBoxLimits)), inverted: true);
     public static ElementFilter ElementHasCategoryFilter { get; } = new ElementCategoryFilter(BuiltInCategory.INVALID, inverted: true);
+    public static ElementFilter ElementHasNoCategoryFilter { get; } = new ElementCategoryFilter(BuiltInCategory.INVALID, inverted: false);
     private static ElementFilter ElementIsElementTypeFilterInstance { get; } = new ElementIsElementTypeFilter(inverted: false);
     private static ElementFilter ElementIsNotElementTypeFilterInstance { get; } = new ElementIsElementTypeFilter(inverted: true);
     private static ElementFilter ElementIsViewSpecific { get; } = new ElementOwnerViewFilter(ElementIdExtension.Invalid, inverted: true);

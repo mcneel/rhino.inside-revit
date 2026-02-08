@@ -8,6 +8,7 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
+  using External.DB;
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.0", updated: "1.36")]
@@ -15,6 +16,18 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
   {
     public override Guid ComponentGuid => new Guid("D150E40E-0970-4683-B517-038F8BA8B0D8");
     public override GH_Exposure Exposure => GH_Exposure.primary;
+
+    private static readonly ARDB.ElementFilter GraphicsStyleFilter = CompoundElementFilter.ElementClassFilter(typeof(ARDB.GraphicsStyle));
+    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.Empty;
+
+    private static ISet<ARDB.ElementId> ToGraphicsStyleCategoryIdSet(ARDB.Document document, ISet<ARDB.ElementId> ids)
+    {
+      if (ids.Count == 0) return ids;
+      return ids.
+        Where(x => GraphicsStyleFilter.PassesFilter(document, x)).
+        Select(x => (document.GetElement(x) as ARDB.GraphicsStyle).GraphicsStyleCategory.Id).
+        ToReadOnlyElementIdSet();
+    }
 
     protected override bool MayNeedToBeExpired
     (
@@ -30,11 +43,13 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       if (modified.Any(x => x.IsCategoryId(document)))
         return true;
 
-      if (deleted.Any())
+      var styles = ToGraphicsStyleCategoryIdSet(document, modified);
+
+      if (deleted.Count > 0 || styles.Count > 0)
       {
         foreach (var param in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
         {
-          if (param.NeedsToBeExpired(document, ElementIdExtension.EmptySet, deleted, ElementIdExtension.EmptySet))
+          if (param.NeedsToBeExpired(document, ElementIdExtension.EmptySet, deleted, styles))
             return true;
         }
       }

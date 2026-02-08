@@ -12,6 +12,7 @@ group: Deployment & Configs
 
 - Added support for linked elements on query components.
 - Added 'Query References' component.
+- Added 'Query Namesake Element' component.
 
 ### RC
 

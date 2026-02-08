@@ -159,15 +159,15 @@ namespace RhinoInside.Revit.GH.Components.Elements
   }
 
   [ComponentVersion(introduced: "1.10", updated:"1.36")]
-  public class NamesakeElement : ElementCollectorComponent
+  public class QueryNamesakeElement : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("1FEE04EF-A3DA-44F4-B114-486724C92AB6");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter(inverted: true);
+    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.Universe;
 
-    public NamesakeElement() : base
+    public QueryNamesakeElement() : base
     (
-      name: "Namesake Element",
+      name: "Query Namesake Element",
       nickname: "Namesake",
       description: "Get namesake element on a different model",
       category: "Revit",
@@ -219,7 +219,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           NickName = "E",
           Description = "Namesake Element",
         }
-      ),
+      )
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
