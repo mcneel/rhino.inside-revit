@@ -224,16 +224,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out Types.IGH_ModelInstance model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
-      var namesake = Types.Element.FromElementId
-      (
-        model.ModelDocument.Value,
-        model.ModelDocument.Value.LookupElement(element.Document, element.Id)
-      );
-      Params.TrySetData(DA, "Name", () => namesake.Nomen);
-      DA.SetData("Element", namesake.AtModel(model));
+      if (element.AtModel(model) is Types.Element namesake)
+      {
+        Params.TrySetData(DA, "Name", () => namesake.Nomen);
+        DA.SetData("Element", namesake);
+      }
     }
   }
 }

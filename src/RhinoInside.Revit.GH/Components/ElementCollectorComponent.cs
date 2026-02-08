@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected bool MayNeedToBeExpired(ARDB.Document document)
     {
-      if (Params.Input<Parameters.ModelInstance>(_Model_) is Parameters.ModelInstance model)
+      if (Params.Input<Parameters.ModelInstance>(Parameters.ModelInstance.DefaultName) is Parameters.ModelInstance model)
         return model.VolatileData.AllData(true).OfType<Types.Document>().Select(x => x.Value).Where(x => !x.IsLinked).Contains(document);
 
       if (Parameters.Document.TryGetCurrentDocument(this, out var currentDocument))
@@ -80,11 +80,14 @@ namespace RhinoInside.Revit.GH.Components
       return false;
     }
 
-    static readonly string _Model_ = "Model";
     public override void AddedToDocument(GH_Document document)
     {
       if (Params.Input<Parameters.Document>("Document") is IGH_Param model)
-        model.Name = _Model_;
+      {
+        model.Name = Parameters.ModelInstance.DefaultName;
+        model.NickName = Parameters.ModelInstance.DefaultNickName;
+        model.Description = Parameters.ModelInstance.DefaultDescription;
+      }
 
       base.AddedToDocument(document);
     }

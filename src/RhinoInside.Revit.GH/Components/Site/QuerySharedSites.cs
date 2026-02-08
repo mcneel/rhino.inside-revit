@@ -17,14 +17,6 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override string IconTag => "⌖";
     protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.ProjectLocation));
 
-    #region UI
-    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
-    {
-      base.AppendAdditionalComponentMenuItems(menu);
-      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.Location, "Open Location…");
-    }
-    #endregion
-
     public QueryProjectLocations() : base
     (
       name: "Query Shared Sites",
@@ -40,7 +32,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     {
       new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Shared site name", optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true, relevance: ParamRelevance.Primary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -51,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out Types.IGH_ModelInstance model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
@@ -77,5 +69,13 @@ namespace RhinoInside.Revit.GH.Components.Site
         );
       }
     }
+
+    #region UI
+    protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+    {
+      base.AppendAdditionalComponentMenuItems(menu);
+      menu.AppendPostableCommand(Autodesk.Revit.UI.PostableCommand.Location, "Open Location…");
+    }
+    #endregion
   }
 }

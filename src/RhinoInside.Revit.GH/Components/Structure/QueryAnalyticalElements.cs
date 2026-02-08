@@ -72,7 +72,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out Types.IGH_ModelInstance model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
       if (!Params.TryGetData(DA, "Structural Role", out ARDB.Structure.AnalyticalStructuralRole? structuralRole)) return;
       if (!Params.TryGetData(DA, "Analyze As", out ARDB.Structure.AnalyzeAs? analyzeAs)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;

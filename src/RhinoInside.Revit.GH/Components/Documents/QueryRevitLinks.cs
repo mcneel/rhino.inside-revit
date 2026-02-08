@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.TryGetOrCurrent(this, DA, "Model", out var model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
       Params.TrySetData(DA, "Document", () => model.ModelDocument);
 
       Params.TryGetData(DA, "Name", out string name);
