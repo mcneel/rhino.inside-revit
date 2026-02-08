@@ -316,7 +316,7 @@ namespace RhinoInside.Revit.GH.Parameters
               {
                 await External.ActivationGate.Yield();
 
-                if (uiDocument.TryGetRevitCommandId(ARUI.PostableCommand.TypeProperties, out var TypePropertiesId))
+                if (uiDocument.Application.TryGetRevitCommandId(ARUI.PostableCommand.TypeProperties, out var TypePropertiesId))
                 {
                   var selection = uiDocument.Selection;
                   var current = selection.GetElementIds();

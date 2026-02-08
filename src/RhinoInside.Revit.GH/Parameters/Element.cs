@@ -183,7 +183,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected ToolStripMenuItem Menu_AppendPromptNew(ToolStrip menu, ARUI.PostableCommand postableCommand, string text = default)
     {
       var activeApp = Revit.ActiveUIApplication;
-      var postable = activeApp.ActiveUIDocument.TryGetRevitCommandId(postableCommand, out var commandId);
+      var postable = activeApp.TryGetRevitCommandId(postableCommand, out var commandId);
 
       return Menu_AppendItem
       (
