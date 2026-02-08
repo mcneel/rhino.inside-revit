@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
   using CT = CategoryType;
   using CD = CategoryDiscipline;
   
-  public partial class BuiltInCategoryExtension
+  public partial class BuiltInCategories
   {
     static readonly Definition[] _Definitions = new Definition[]
     {

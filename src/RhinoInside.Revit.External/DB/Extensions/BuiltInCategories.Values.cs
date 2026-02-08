@@ -5,10 +5,10 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  public static partial class BuiltInCategoryExtension
+  public static partial class BuiltInCategories
   {
 #if REVIT_2020
-    private static readonly SortedSet<BuiltInCategory> _BuiltInCategories =
+    private static readonly SortedSet<BuiltInCategory> _Values =
       new SortedSet<BuiltInCategory>
       (
         Enum.GetValues(typeof(BuiltInCategory)).
@@ -949,13 +949,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       BuiltInCategory.OST_IOSRegenerationFailure,
     };
 
-    public static readonly SortedSet<BuiltInCategory> _BuiltInCategories =
+    public static readonly SortedSet<BuiltInCategory> _Values =
       new SortedSet<BuiltInCategory>(validBuiltInCategories);
 #endif
 
     /// <summary>
     /// Set of valid <see cref="Autodesk.Revit.DB.BuiltInCategory"/> enum values.
     /// </summary>
-    public static IReadOnlyCollection<BuiltInCategory> BuiltInCategories => _BuiltInCategories;
+    public static IReadOnlyCollection<BuiltInCategory> Values => _Values;
   }
 }

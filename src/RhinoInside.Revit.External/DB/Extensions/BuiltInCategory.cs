@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
-  public static partial class BuiltInCategoryExtension
+  public static partial class BuiltInCategories
   {
     static Document _HiddenInUIBuiltInCategoriesDocument;
     static BuiltInCategory[] _HiddenInUIBuiltInCategories;
@@ -16,11 +15,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// Set of hidden <see cref="Autodesk.Revit.DB.BuiltInCategory"/> enum values.
     /// </summary>
     /// <param name="document"></param>
-    public static IReadOnlyCollection<BuiltInCategory> GetHiddenInUIBuiltInCategories(Document document)
+    public static IReadOnlyCollection<BuiltInCategory> GetHiddenInUIBuiltInCategories(this Document document)
     {
       if (!document.IsEquivalent(_HiddenInUIBuiltInCategoriesDocument))
       {
-        _HiddenInUIBuiltInCategories = BuiltInCategories.Where(x => document.GetCategory(x)?.IsVisibleInUI() != true).ToArray();
+        _HiddenInUIBuiltInCategories = Values.Where(x => document.GetCategory(x)?.IsVisibleInUI() != true).ToArray();
         _HiddenInUIBuiltInCategoriesDocument = document;
       }
 
@@ -35,7 +34,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsValid(this BuiltInCategory value)
     {
       if (-3000000 < (int) value && (int) value < -2000000)
-        return _BuiltInCategories.Contains(value);
+        return _Values.Contains(value);
 
       return false;
     }
@@ -144,7 +143,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       static IEnumerable<Definition> GetDefinitions(Document document)
       {
-        return BuiltInCategories.Select(bic => ToDefinition(bic, document)).
+        return Values.Select(bic => ToDefinition(bic, document)).
           OrderBy(x => x.CategoryType).
           ThenBy(x => x.IsTagCategory).
           ThenBy(x => (x.Parent.IsValid() ? x.Parent : x.Id).ToString()).
@@ -333,7 +332,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           writer.Close();
         }
 #else
-        foreach (var bic in BuiltInCategories)
+        foreach (var bic in Values)
         {
           if(BuiltInCategory.INVALID == (Schemas.CategoryId) bic)
             Debug.WriteLine($"{bic}");
