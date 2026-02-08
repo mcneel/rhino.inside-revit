@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         else
         {
           // Default category filtering
-          var hiddenCategories = BuiltInCategoryExtension.GetHiddenInUIBuiltInCategories(view.Document).ToList();
+          var hiddenCategories = view.Document.GetHiddenInUIBuiltInCategories().ToList();
           hiddenCategories.Add(ARDB.BuiltInCategory.OST_SectionBox);  // 'Section Boxes' has little sense here!?!?
           hiddenCategories.Add(ARDB.BuiltInCategory.INVALID);         // `ScheduleSheetInstance` Viewer has no Category, so we filter here
 
@@ -147,7 +147,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         else
         {
           // Default category filtering
-          var hiddenCategories = BuiltInCategoryExtension.GetHiddenInUIBuiltInCategories(view.Document).
+          var hiddenCategories = view.Document.GetHiddenInUIBuiltInCategories().
             Append(ARDB.BuiltInCategory.INVALID). // `ScheduleSheetInstance` Viewer has no Category, so we filter here
             ToList();
 

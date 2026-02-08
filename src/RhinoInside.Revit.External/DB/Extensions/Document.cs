@@ -743,7 +743,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (BuiltInCategoriesWithParametersDocument?.IsValidObject != true || !doc.IsEquivalent(BuiltInCategoriesWithParametersDocument))
       {
         BuiltInCategoriesWithParametersDocument = doc;
-        BuiltInCategoriesWithParameters = BuiltInCategoryExtension.BuiltInCategories.Where
+        BuiltInCategoriesWithParameters = BuiltInCategories.Values.Where
         (
           bic =>
           {
