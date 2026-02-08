@@ -18,16 +18,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
     public override GH_Exposure Exposure => GH_Exposure.primary;
 
     private static readonly ARDB.ElementFilter GraphicsStyleFilter = CompoundElementFilter.ElementClassFilter(typeof(ARDB.GraphicsStyle));
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.Union
-    (
-      GraphicsStyleFilter,
-      CompoundElementFilter.Intersect
-      (
-        CompoundElementFilter.ElementIsElementTypeFilter(inverted: true),
-        CompoundElementFilter.ElementHasNoCategoryFilter,
-        CompoundElementFilter.ElementHasNoBoundingBoxFilter
-      )
-    );
+    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.Empty;
 
     private static ISet<ARDB.ElementId> ToGraphicsStyleCategoryIdSet(ARDB.Document document, ISet<ARDB.ElementId> ids)
     {
