@@ -110,7 +110,7 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrentDocument(this, DA, out var model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
       var doc = model.ModelDocument.Value;
 
       if (Params.GetData(DA, "Shared Site", out Types.ProjectLocation location, x => x.IsValid))

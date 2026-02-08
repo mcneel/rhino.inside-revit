@@ -773,7 +773,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
       if (!Params.TryGetData(DA, "Overwrite", out bool? overwrite)) return;
       if (!overwrite.HasValue) overwrite = false;
       if (!Params.TryGetData(DA, "Overwrite Parameters", out bool? overwriteParameters)) return;
@@ -785,24 +785,24 @@ namespace RhinoInside.Revit.GH.Components.Families
       var updateGeometry = !(!DA.GetDataList("Geometry", geometry) && Params.Input[Params.IndexOfInputParam("Geometry")].SourceCount == 0);
 
       var templatePath = string.Empty;
-      if (!doc.TryGetFamily(name, out var family, categoryId))
+      if (!doc.Value.TryGetFamily(name, out var family, categoryId))
       {
         var useTemplate = categoryId?.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Mass;
         if (!useTemplate)
         {
-          if (doc.IsFamilyDocument && doc.OwnerFamily.FamilyPlacementType == ARDB.FamilyPlacementType.ViewBased)
+          if (doc.Value.IsFamilyDocument && doc.Value.OwnerFamily.FamilyPlacementType == ARDB.FamilyPlacementType.ViewBased)
             useTemplate = true;
         }
         
         if (!Params.TryGetData(DA, "Template", out templatePath)) return;
         if (templatePath is object || useTemplate)
         {
-          templatePath = templatePath ?? GetDefaultTemplatePath(doc, categoryId);
+          templatePath = templatePath ?? GetDefaultTemplatePath(doc.Value, categoryId);
 
           if (!Path.HasExtension(templatePath))
             templatePath += ".rft";
 
-          if (FindTemplatePath(doc, ref templatePath, out var pathWasRelative))
+          if (FindTemplatePath(doc.Value, ref templatePath, out var pathWasRelative))
           {
             if (pathWasRelative)
               AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Using template file from '{templatePath}'");
@@ -815,15 +815,15 @@ namespace RhinoInside.Revit.GH.Components.Families
         }
         else
         {
-          using (var transaction = NewTransaction(doc))
+          using (var transaction = NewTransaction(doc.Value))
           {
             transaction.Start(Name);
 
-            family = doc.CreateWorkPlaneBasedSymbol(name).Family;
+            family = doc.Value.CreateWorkPlaneBasedSymbol(name).Family;
             overwrite = true;
             updateGeometry = true;
 
-            CommitTransaction(doc, transaction);
+            CommitTransaction(doc.Value, transaction);
           }
         }
       }
@@ -834,7 +834,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       {
         try
         {
-          if((family is null ? doc.Application.NewFamilyDocument(templatePath) : doc.EditFamily(family)) is var familyDoc)
+          if((family is null ? doc.Value.Application.NewFamilyDocument(templatePath) : doc.Value.EditFamily(family)) is var familyDoc)
           {
             try
             {
@@ -882,9 +882,9 @@ namespace RhinoInside.Revit.GH.Components.Families
                         {
                           switch (geo)
                           {
-                            case Rhino.Geometry.Mesh mesh: hasVoids |= Add(doc, familyDoc, mesh, meshes); break;
-                            case Rhino.Geometry.Brep brep: hasVoids |= Add(doc, familyDoc, brep, forms); break;
-                            case Rhino.Geometry.Curve curve: Add(doc, familyDoc, curve, planesSet, curves); break;
+                            case Rhino.Geometry.Mesh mesh: hasVoids |= Add(doc.Value, familyDoc, mesh, meshes); break;
+                            case Rhino.Geometry.Brep brep: hasVoids |= Add(doc.Value, familyDoc, brep, forms); break;
+                            case Rhino.Geometry.Curve curve: Add(doc.Value, familyDoc, curve, planesSet, curves); break;
                             default:
                               if (geo is object)
                                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{geo.GetType().Name} is not supported and will be ignored");
@@ -903,7 +903,7 @@ namespace RhinoInside.Revit.GH.Components.Families
                       using (var hosts = new ARDB.FilteredElementCollector(familyDoc).OfClass(typeof(ARDB.HostObject)))
                       {
                         if (hosts.FirstOrDefault(x => x is ARDB.Wall || x is ARDB.Ceiling) is ARDB.HostObject host)
-                          Add(doc, familyDoc, loops, host, openings);
+                          Add(doc.Value, familyDoc, loops, host, openings);
                         else
                           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "No suitable host object is been found");
                       }
@@ -918,7 +918,7 @@ namespace RhinoInside.Revit.GH.Components.Families
                 CommitTransaction(familyDoc, transaction);
               }
 
-              family = familyDoc.LoadFamily(doc, new FamilyLoadOptions(overwrite is true, overwriteParameters is true));
+              family = familyDoc.LoadFamily(doc.Value, new FamilyLoadOptions(overwrite is true, overwriteParameters is true));
             }
             finally
             {
@@ -927,16 +927,16 @@ namespace RhinoInside.Revit.GH.Components.Families
 
             if (updateName)
             {
-              using (var transaction = NewTransaction(doc))
+              using (var transaction = NewTransaction(doc.Value))
               {
                 transaction.Start(Name);
                 try { family.Name = name; }
                 catch (Autodesk.Revit.Exceptions.ArgumentException e) { AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, e.Message); }
 
-                if (doc.GetElement(family.GetFamilySymbolIds().First()) is ARDB.FamilySymbol symbol)
+                if (doc.Value.GetElement(family.GetFamilySymbolIds().First()) is ARDB.FamilySymbol symbol)
                   symbol.Name = name;
 
-                CommitTransaction(doc, transaction);
+                CommitTransaction(doc.Value, transaction);
               }
             }
           }

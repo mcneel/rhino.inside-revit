@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrentDocument(this, DA, out var model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
       if (!Params.TryGetData(DA, "Scope", out Types.ParameterScope scope, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => x is object)) return;
       if (!Params.TryGetData(DA, "Type", out Types.ParameterType type, x => x.IsValid)) return;

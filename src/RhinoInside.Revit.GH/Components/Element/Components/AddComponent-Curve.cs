@@ -137,7 +137,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
       if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Type", out Types.FamilySymbol type)) return;
       if (!Params.TryGetData(DA, "Work Plane", out Types.GeometryObject workPlane)) return;

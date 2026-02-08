@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrentDocument(this, DA, out var model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
       if (!Params.TryGetData(DA, "Revision Number", out string number)) return;
       if (!Params.TryGetData(DA, "Revision Sequence", out int? sequence)) return;
       if (!Params.TryGetData(DA, "Revision Date", out string date)) return;

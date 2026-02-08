@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Parameters
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("EF2EFE84-8B2E-4613-A352-B1CE95671238");
-    protected override string IconTag => string.Empty;
+    protected override string IconTag => DefaultNickName;
 
     internal static readonly string DefaultName = "Model";
     internal static readonly string DefaultNickName = "M";
@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return null;
     }
 
-    public static bool GetModelOrCurrentDocument(IGH_Component component, IGH_DataAccess DA, out Types.IGH_ModelInstance model)
+    public static bool GetModelOrCurrent(IGH_Component component, IGH_DataAccess DA, out Types.IGH_ModelInstance model)
     {
       model = default;
 

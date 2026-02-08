@@ -55,12 +55,12 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
       if (!Params.TryGetData(DA, "Path", out string filePath)) return;
       if (!Params.TryGetData(DA, "Overwrite", out bool? overwrite)) return;
       if (!Params.TryGetData(DA, "Compact", out bool? compact)) return;
       if (!Params.TryGetData(DA, "Backups", out int? backups)) return;
-      if (Params.TryGetData(DA, "View", out Types.View view) && view?.Document.IsEquivalent(doc) is false)
+      if (Params.TryGetData(DA, "View", out Types.View view) && view?.Document.IsEquivalent(doc.Value) is false)
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"View '{view.Value.Title}' is not a valid view in document {doc.Title}");
         return;
@@ -80,7 +80,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
               if (view is object)
                 saveOptions.PreviewViewId = view.Id;
 
-              doc.Save(saveOptions);
+              doc.Value.Save(saveOptions);
             }
 
             Params.TrySetData(DA, "Document", () => doc);
@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
           else
           {
             if (!wasSaved && overwrite is true)
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Document '{doc.GetName()}' is never being saved before, please specify a valid Path.");
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Document '{doc.Name}' is never being saved before, please specify a valid Path.");
             else
             {
               Params.TrySetData(DA, "Document", () => doc);
@@ -108,8 +108,8 @@ namespace RhinoInside.Revit.GH.Components.Documents
           {
             if (!Path.HasExtension(filePath))
             {
-              if (doc.IsFamilyDocument) filePath += ".rfa";
-              else                      filePath += ".rvt";
+              if (doc is Types.FamilyDocument) filePath += ".rfa";
+              else                             filePath += ".rvt";
             }
 
             var exist = File.Exists(filePath);
@@ -123,7 +123,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
                 if (view is object)
                   saveAsOptions.PreviewViewId = view.Id;
 
-                doc.SaveAs(filePath, saveAsOptions);
+                doc.Value.SaveAs(filePath, saveAsOptions);
                 Params.TrySetData(DA, "Document", () => doc);
                 Params.TrySetData(DA, "Path", () => filePath);
                 Params.TrySetData(DA, "Written", () => true);

@@ -152,7 +152,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
       if (!Parameters.Document.TryGetStructuralSettings(doc, out var settings)) return;
       else Params.TrySetData(DA, _StructuralSettings_, () => settings);
 

@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrentDocument(this, DA, out var model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
 
       var viewFamily = ARDB.ViewFamily.Invalid;
       DA.GetData("View Family", ref viewFamily);

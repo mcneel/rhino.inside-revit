@@ -80,7 +80,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrentDocument(this, DA, out var model)) return;
+      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
       if (!Params.TryGetData(DA, "Kind", out Types.ElementKind kind)) return;
       if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
       if (!Params.TryGetData(DA, "Family Name", out string familyName)) return;
