@@ -641,7 +641,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       switch (set)
       {
         case ParameterClass.Any:
-          return BuiltInParameterExtension.BuiltInParameters.
+          return BuiltInParameters.Values.
             Select
             (
               x =>
@@ -655,7 +655,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             OrderBy(x => x.Id.ToValue());
 
         case ParameterClass.BuiltIn:
-          return BuiltInParameterExtension.BuiltInParameters.
+          return BuiltInParameters.Values.
             Select
             (
               x =>
@@ -697,7 +697,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             OrderBy(x => x.Id.ToValue());
 
         case ParameterClass.BuiltIn:
-          return BuiltInParameterExtension.BuiltInParameterMap.TryGetValue(name, out var parameters) ?
+          return BuiltInParameters.TryGetByStringLocalized(name, out var parameters) ?
             parameters.Select(element.get_Parameter).Where(x => x?.Definition is object) :
             Enumerable.Empty<Parameter>();
 
