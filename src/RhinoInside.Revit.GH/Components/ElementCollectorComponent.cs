@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
     protected ElementCollectorComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected virtual ARDB.ElementFilter ElementFilter { get; } = default;
+    protected abstract ARDB.ElementFilter ElementFilter { get; }
     public override bool NeedsToBeExpired
     (
       ARDB.Document document,

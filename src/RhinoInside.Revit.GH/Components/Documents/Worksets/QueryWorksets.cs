@@ -8,12 +8,15 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Worksets
 {
+  using External.DB;
+
   [ComponentVersion(introduced: "1.2", updated:"1.36")]
   public class QueryWorksets : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("311316BA-81C7-495C-8A20-B7974091D6B1");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => "Q";
+    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.Empty;
 
     public override bool NeedsToBeExpired
     (
