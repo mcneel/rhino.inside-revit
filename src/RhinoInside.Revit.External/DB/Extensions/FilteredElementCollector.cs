@@ -1,38 +1,41 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
   internal readonly struct ReadOnlyElementIdSet : ISet<ElementId>
   {
-    readonly ICollection<ElementId> collection;
-    internal ReadOnlyElementIdSet(ICollection<ElementId> source) => collection = source;
+    readonly ICollection<ElementId> Values;
+    internal ReadOnlyElementIdSet(ICollection<ElementId> source)
+    {
+      Values = (source is ReadOnlyElementIdSet set) ? set.Values : source;
+    }
 
     public static readonly ReadOnlyElementIdSet Empty = new ReadOnlyElementIdSet(Array.Empty<ElementId>());
 
     #region IEnumerable
-    public IEnumerator<ElementId> GetEnumerator() => collection.GetEnumerator();
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => collection.GetEnumerator();
+    public IEnumerator<ElementId> GetEnumerator() => Values.GetEnumerator();
+    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => Values.GetEnumerator();
     #endregion
 
     #region ICollection
-    public int Count => collection.Count;
+    public int Count => Values.Count;
     bool ICollection<ElementId>.IsReadOnly => true;
 
     public bool Contains(ElementId item)
     {
-      if (collection is List<ElementId> list)
+      if (Values is List<ElementId> list)
         return list.BinarySearch(item, ElementIdComparer.NoNullsAscending) >= 0;
 
-      if (collection is ElementId[] array)
+      if (Values is ElementId[] array)
         return Array.BinarySearch(array, item, ElementIdComparer.NoNullsAscending) >= 0;
 
-      return collection.Contains(item);
+      return Values.Contains(item);
     }
 
-    public void CopyTo(ElementId[] array, int arrayIndex) => collection.CopyTo(array, arrayIndex);
+    public void CopyTo(ElementId[] array, int arrayIndex) => Values.CopyTo(array, arrayIndex);
 
     void ICollection<ElementId>.Add(ElementId item) => throw new InvalidOperationException("Collection is read-only");
     bool ICollection<ElementId>.Remove(ElementId item) => throw new InvalidOperationException("Collection is read-only");
@@ -52,14 +55,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (other is null)
         throw new ArgumentNullException(nameof(other));
 
-      if (other is ICollection<ElementId> otherCollection)
-        return otherCollection.Count < Count;
-
-      if (collection is ISet<ElementId> set)
+      if (Values is ISet<ElementId> set)
         return set.IsSubsetOf(other);
 
-      var (unique, mising) = CompareItems(other, breakOnMissing: false);
-      return unique == Count && mising >= 0;
+      if (other is ICollection<ElementId> otherCollection && otherCollection.Count < Count)
+        return false;
+
+      var (unique, missing) = CompareItems(other, breakOnMissing: false);
+      return unique == Count && missing >= 0;
     }
 
     public bool IsSupersetOf(IEnumerable<ElementId> other)
@@ -67,11 +70,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (other is null)
         throw new ArgumentNullException(nameof(other));
 
-      if (other is ICollection<ElementId> otherCollection)
-        return Count < otherCollection.Count;
-
-      if (collection is ISet<ElementId> set)
+      if (Values is ISet<ElementId> set)
         return set.IsSupersetOf(other);
+
+      if (other is ICollection<ElementId> otherCollection && Count < otherCollection.Count)
+        return false;
 
       return other.All(Contains);
     }
@@ -81,14 +84,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (other is null)
         throw new ArgumentNullException(nameof(other));
 
+      if (Values is ISet<ElementId> set)
+        return set.IsProperSubsetOf(other);
+
       if (Count == 0 && other is ICollection<ElementId> otherCollection)
         return otherCollection.Count > 0;
 
-      if (collection is ISet<ElementId> set)
-        return set.IsProperSubsetOf(other);
-
-      var (unique, mising) = CompareItems(other, breakOnMissing: false);
-      return unique == Count && mising > 0;
+      var (unique, missing) = CompareItems(other, breakOnMissing: false);
+      return unique == Count && missing > 0;
     }
 
     public bool IsProperSupersetOf(IEnumerable<ElementId> other)
@@ -96,14 +99,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (other is null)
         throw new ArgumentNullException(nameof(other));
 
+      if (Values is ISet<ElementId> set)
+        return set.IsProperSupersetOf(other);
+
       if (other is ICollection<ElementId> otherCollection && otherCollection.Count == 0)
         return Count > 0;
 
-      if (collection is ISet<ElementId> set)
-        return set.IsProperSupersetOf(other);
-
-      var (unique, mising) = CompareItems(other, breakOnMissing: true);
-      return unique < Count && mising == 0;
+      var (unique, missing) = CompareItems(other, breakOnMissing: true);
+      return unique < Count && missing == 0;
     }
 
     public bool Overlaps(IEnumerable<ElementId> other)
@@ -111,11 +114,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (other is null)
         throw new ArgumentNullException(nameof(other));
 
+      if (Values is ISet<ElementId> set)
+        return set.Overlaps(other);
+
       if (Count == 0)
         return false;
-
-      if (collection is ISet<ElementId> set)
-        return set.Overlaps(other);
 
       return other.Any(Contains);
     }
@@ -126,7 +129,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         throw new ArgumentNullException(nameof(other));
 
       // If both are a sorted IList then each element should match on the same position.
-      if (other is ReadOnlyElementIdSet otherSet && otherSet.collection is IList<ElementId> otherList && collection is IList<ElementId> thisList)
+      if (other is ReadOnlyElementIdSet otherSet && otherSet.Values is IList<ElementId> otherList && Values is IList<ElementId> thisList)
       {
         if (thisList.Count != otherList.Count) return false;
 
@@ -143,23 +146,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (other is ICollection<ElementId> otherCollection && otherCollection.Count != Count)
         return false;
 
-      if (collection is ISet<ElementId> set)
+      if (Values is ISet<ElementId> set)
         return set.SetEquals(other);
 
-      var (unique, mising) = CompareItems(other, breakOnMissing: true);
-      return unique == Count && mising == 0;
+      var (unique, missing) = CompareItems(other, breakOnMissing: true);
+      return unique == Count && missing == 0;
     }
 
     private int IndexOf(ElementId item)
     {
-      if (collection is List<ElementId> list)
+      if (Values is List<ElementId> list)
         return list.BinarySearch(item, ElementIdComparer.NoNullsAscending);
 
-      if (collection is ElementId[] array)
+      if (Values is ElementId[] array)
         return Array.BinarySearch(array, item, ElementIdComparer.NoNullsAscending);
 
       var index = 0;
-      foreach (var id in collection)
+      foreach (var id in Values)
       {
         if (id == item) return index;
         index++;
@@ -226,6 +229,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       return new ReadOnlyElementIdSet(collector.ToElementIds());
     }
+
+    /// <summary>
+    /// FilteredElementCollector that fires an Autodesk.Revit.Exceptions.ArgumentException.
+    /// </summary>
+    /// <param name="document"></param>
+    /// <returns></returns>
+    internal static FilteredElementCollector Invalid(Document document) => new FilteredElementCollector(document, ElementIdExtension.Invalid);
+
+    /// <summary>
+    /// FilteredElementCollector that contains no element.
+    /// </summary>
+    /// <param name="document"></param>
+    /// <returns></returns>
+    public static FilteredElementCollector Empty(Document document) => new FilteredElementCollector(document).WherePasses(CompoundElementFilter.Empty);
+
+    /// <summary>
+    /// FilteredElementCollector that contains all elements.
+    /// </summary>
+    /// <param name="document"></param>
+    /// <returns></returns>
+    public static FilteredElementCollector Universe(Document document) => new FilteredElementCollector(document).WherePasses(CompoundElementFilter.Universe);
 
     public static FilteredElementCollector WhereElementIsKindOf(this FilteredElementCollector collector, Type type)
     {

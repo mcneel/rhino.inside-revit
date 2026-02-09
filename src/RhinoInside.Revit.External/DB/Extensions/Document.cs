@@ -494,32 +494,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static IList<Element> GetNamesakeElements(this Document doc, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
     {
-      var enumerable = Enumerable.Empty<Element>();
-
       if (string.IsNullOrWhiteSpace(name))
-        return enumerable.ToList();
+        return Array.Empty<Element>();
 
+      var enumerable = Enumerable.Empty<Element>();
       var nomenParameter = ElementExtension.GetNomenParameter(type);
-      using (var elementCollector = new FilteredElementCollector(doc))
+      using (var collector = new FilteredElementCollector(doc))
       {
         var isElementType = typeof(ElementType).IsAssignableFrom(type);
-        var collector =
-          (isElementType ? elementCollector.WhereElementIsElementType() : elementCollector.WhereElementIsNotElementType()).
+        var elements =
+          (isElementType ? collector.WhereElementIsElementType() : collector.WhereElementIsNotElementType()).
           WhereCategoryIdEqualsTo(categoryId).
           WhereElementIsKindOf(type);
 
         if(nomenParameter != BuiltInParameter.INVALID)
-          collector = collector.WhereParameterBeginsWith(nomenParameter, name);
+          elements = elements.WhereParameterBeginsWith(nomenParameter, name);
 
         if (string.IsNullOrWhiteSpace(parentName))
         {
-          enumerable = collector;
+          enumerable = elements;
         }
         else
         {
           if (isElementType)
           {
-            enumerable = collector.
+            enumerable = elements.
               WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
               Cast<ElementType>().Where(x => x.FamilyName.Equals(parentName, ElementNaming.ComparisonType));
           }
@@ -527,15 +526,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             if (Enum.TryParse(parentName, out ViewType viewType))
             {
-              enumerable = collector.
-                Cast<View>().Where(x => !x.IsTemplate && x.ViewType == viewType);
+              enumerable = elements.Cast<View>().Where
+              (
+                x => !x.IsTemplate && x.ViewType == viewType
+              );
             }
           }
           else if (typeof(FillPatternElement).IsAssignableFrom(type))
           {
             if (Enum.TryParse(parentName, out FillPatternTarget target))
             {
-              enumerable = collector.Cast<FillPatternElement>().Where
+              enumerable = elements.Cast<FillPatternElement>().Where
               (
                 x =>
                 {

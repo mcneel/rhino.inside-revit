@@ -1,7 +1,7 @@
 using System;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.DB.Mechanical;
@@ -68,50 +68,31 @@ namespace RhinoInside.Revit.External.DB
     {
       Document = document;
       ViewId = viewId;
-      LinkId = linkId ?? ElementIdExtension.Invalid;
+      LinkId = linkId;
     }
 
     internal override FilteredElementCollector GetCollector()
     {
       if (ViewId is null)
       {
-        if (!LinkId.IsValid())
+        if (LinkId is null)
         {
           return new FilteredElementCollector(Document);
         }
-        else if (Document.GetElement(LinkId) is RevitLinkInstance link && link.GetLinkDocument() is Document linkDocument)
+      }
+      else if (Document.GetElement(ViewId) is View view)
+      {
+        if (LinkId is null)
         {
-          return new FilteredElementCollector(linkDocument);
+          return view.GetVisibleElementsCollector();
         }
         else
-        {
-          // This is here to fire an Autodesk.Revit.Exceptions.ArgumentException.
-          return new FilteredElementCollector(Document, ElementIdExtension.Invalid);
-        }
-      }
-      else if (Document.GetElement(ViewId) is View view && view.IsModelView())
-      {
-        if (!LinkId.IsValid())
-        {
-          return new FilteredElementCollector(Document, ViewId);
-        }
-        else if
-        (
-          view.CollectElements().WherePassFilter
-          (
-            CompoundElementFilter.Intersect
-            (
-              CompoundElementFilter.ElementClassFilter(typeof(RevitLinkInstance)),
-              CompoundElementFilter.ExclusionFilter(new ElementId[] { LinkId }, inverted: true)
-            )
-          ).FirstOrDefault() is RevitLinkInstance
-        )
         {
           return view.GetVisibleElementsCollector(LinkId);
         }
       }
 
-      return new FilteredElementCollector(Document).WherePasses(CompoundElementFilter.Empty);
+      return FilteredElementCollectorExtension.Invalid(Document);
     }
 
     internal override Predicate<Element> Pass
