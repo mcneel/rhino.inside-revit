@@ -283,6 +283,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
     #endregion
 
+    #region Outline
     /// <summary>
     /// The bounds of the view in paper space (in pixels).
     /// </summary>
@@ -404,193 +405,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           return default;
       }
     }
-
-    static ElementFilter GetViewRangeFilter(this View view, bool clipped = false)
-    {
-      if (view is ViewPlan viewPlan)
-      {
-        var interval = viewPlan.GetViewRangeInterval();
-        if (interval.Left.IsEnabled || interval.Right.IsEnabled)
-        {
-          return CompoundElementFilter.BoundingBoxIntersectsFilter
-          (
-            new Outline
-            (
-              new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, interval.Left),
-              new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, interval.Right)
-            ),
-            view.Document.Application.VertexTolerance,
-            clipped
-          );
-        }
-      }
-
-      return default;
-    }
-
-    static ElementFilter GetUnderlayFilter(this View view, bool clipped = false)
-    {
-      var bottomId = view.get_Parameter(BuiltInParameter.VIEW_UNDERLAY_BOTTOM_ID)?.AsElementId() ?? ElementId.InvalidElementId;
-      if (bottomId == ElementId.InvalidElementId) return default;
-
-      var topId  = view.get_Parameter(BuiltInParameter.VIEW_UNDERLAY_TOP_ID   )?.AsElementId() ?? ElementId.InvalidElementId;
-      var bottom = (view.Document.GetElement(bottomId) as Level)?.ProjectElevation ?? -CompoundElementFilter.BoundingBoxLimits;
-      var top    = (view.Document.GetElement(topId   ) as Level)?.ProjectElevation ?? +CompoundElementFilter.BoundingBoxLimits;
-
-      if (bottom != -CompoundElementFilter.BoundingBoxLimits || top != +CompoundElementFilter.BoundingBoxLimits)
-      {
-        return CompoundElementFilter.BoundingBoxIntersectsFilter
-        (
-          new Outline
-          (
-            new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, bottom),
-            new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, top)
-          ),
-          view.Document.Application.VertexTolerance,
-          clipped
-        );
-      }
-
-      return default;
-    }
-
-    public static ElementFilter GetModelFilter(this View view, bool clipped = false)
-    {
-      if (view is ViewSheet || view is ViewDrafting || view.ViewType == ViewType.Legend)
-        return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty; // No model elements here
-
-      var filter = clipped ?
-      CompoundElementFilter.Intersect(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped)) :
-      CompoundElementFilter.Union(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped));
-
-      var modelClipBox = view.GetModelClipBox();
-      if (modelClipBox.Enabled)
-        filter = CompoundElementFilter.Intersect(filter, CompoundElementFilter.BoundingBoxIntersectsFilter(modelClipBox.ToOutLine(), view.Document.Application.VertexTolerance, clipped));
-
-      return filter;
-    }
-
-    public static ElementFilter GetModelClipFilter(this View view, bool clipped = false)
-    {
-      var filter = default(ElementFilter);
-
-      if (view.IsModelView())
-      {
-        filter = GetModelFilter(view, clipped);
-      }
-      else if (view is TableView table)
-      {
-        if (table.TargetId.IsValid())
-          return CompoundElementFilter.ExclusionFilter(table.TargetId, inverted: true);
-
-        if (view is ViewSchedule viewSchedule && viewSchedule.Definition is ScheduleDefinition definition)
-          return new ElementCategoryFilter(definition.CategoryId, clipped);
-
-        return CompoundElementFilter.Universe;
-      }
-      else if (view is ImageView)
-      {
-        return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty;
-      }
-      else
-      {
-        switch (view.ViewType)
-        {
-          case ViewType.ProjectBrowser:
-          case ViewType.SystemBrowser:
-            return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty;
-
-          case ViewType.Report:
-          case ViewType.CostReport:
-          case ViewType.LoadsReport:
-          case ViewType.PresureLossReport:
-          case ViewType_SystemsAnalysisReport:
-            return clipped ? CompoundElementFilter.Empty : CompoundElementFilter.Universe;
-        }
-
-        return CompoundElementFilter.Empty;
-      }
-
-      return filter;
-    }
-
-    public static ElementFilter GetClipFilter(this View view, bool clipped = false)
-    {
-      var modelClipFilter = GetModelClipFilter(view, clipped);
-      var annotationClipFilter = CompoundElementFilter.Union
-      (
-        new ElementOwnerViewFilter(view.Id, clipped),
-        new ElementClassFilter(typeof(DatumPlane))
-      );
-
-      return clipped ?
-        CompoundElementFilter.Intersect(modelClipFilter, annotationClipFilter) :
-        CompoundElementFilter.Union    (modelClipFilter, annotationClipFilter);
-    }
-
-    public static ElementFilter GetElementCategoryFilter(this View view, CategoryType categoryType)
-    {
-      var categories = view.Document.Settings.Categories.Cast<Category>().Where
-      (
-        x =>
-        {
-          if (x.CategoryType != categoryType) return false;
-          switch (categoryType)
-          {
-            case CategoryType.Model:
-              switch (x.Id.ToBuiltInCategory())
-              {
-                case BuiltInCategory.OST_ImportObjectStyles: if (view.AreImportCategoriesHidden) return false; break;
-                case BuiltInCategory.OST_PointClouds: if (view.ArePointCloudsHidden) return false; break;
-              }
-              break;
-
-            case CategoryType.Annotation:
-              if (view.AreAnnotationCategoriesHidden) return false; break;
-
-            case CategoryType.AnalyticalModel:
-              if (view.AreAnalyticalModelCategoriesHidden) return false; break;
-          }
-          if (!view.CanCategoryBeHidden(x.Id) || view.GetCategoryHidden(x.Id)) return false;
-          return true;
-        }
-      ).
-      Select(x => x.Id).
-      ToArray();
-
-      return new ElementMulticategoryFilter(categories);
-    }
-
-    public static ElementFilter GetElementVisibilityFilter(this View view, Document document = null, bool hidden = false)
-    {
-      var filters = new List<ElementFilter>();
-
-      var viewDocument = view.Document;
-      if (!viewDocument.IsFamilyDocument && view.AreGraphicsOverridesAllowed())
-      {
-        var linked = document is object && !document.Equals(viewDocument);
-        foreach (var filterId in view.GetFilters())
-        {
-          // Skip filters that do not hide elements
-          if (hidden == view.GetFilterVisibility(filterId)) continue;
-
-          switch (viewDocument.GetElement(filterId))
-          {
-            case SelectionFilterElement selectionFilterElement:
-              if (!linked)
-                filters.Add(CompoundElementFilter.ExclusionFilter(selectionFilterElement.GetElementIds(), inverted: true));
-              break;
-
-            case ParameterFilterElement parameterFilterElement:
-              filters.Add(parameterFilterElement.ToElementFilter());
-              break;
-          }
-        }
-      }
-
-      return filters.Count > 0 ? CompoundElementFilter.Union(filters) : default;
-    }
-
+    #endregion
 
     #region Viewer
     public static ViewOrientation3D GetSavedOrientation(this View view)
@@ -748,34 +563,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
     #endregion
 
-    #region ViewSection
-    static int IndexOfViewSection(ElevationMarker marker, ElementId viewId)
-    {
-      if (marker.HasElevations())
-      {
-        for (int i = 0; i < marker.MaximumViewCount; ++i)
-        {
-          if (marker.GetViewId(i) == viewId)
-            return i;
-        }
-      }
-
-      return -1;
-    }
-
-    public static ElevationMarker GetElevationMarker(this ViewSection viewSection)
-    {
-      using (var collector = new FilteredElementCollector(viewSection.Document))
-      {
-        return collector.
-          OfCategory(BuiltInCategory.OST_Elev).
-          OfClass(typeof(ElevationMarker)).
-          OfType<ElevationMarker>().
-          FirstOrDefault(x => IndexOfViewSection(x, viewSection.Id) >= 0);
-      }
-    }
-    #endregion
-
     #region Phasing
     public static void SetDefaultPhaseFilter(this View view, bool lastPhase = true)
     {
@@ -807,88 +594,436 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region FilteredElementCollector
-    public static FilteredElementCollector GetVisibleElementsCollector(this View view, ElementId linkId = default)
+    public static T GetVisibleElement<T>(this View view, ElementId id) where T : Element
     {
-      if (!linkId.IsValid())
+      // Check it exists and is of the expected type
+      if (view.Document.GetElement(id) is T element)
+      {
+        // Check if is visible in the view.
+        if(view.GetVisibleElements(new ElementId[] { element.Id }).Contains(element.Id))
+          return element;
+      }
+
+      return null;
+    }
+
+    public static FilteredElementCollector GetVisibleElementsCollector(this View view)
+    {
+      if (FilteredElementCollector.IsViewValidForElementIteration(view.Document, view.Id))
         return new FilteredElementCollector(view.Document, view.Id);
 
-#if REVIT_2024
-      return new FilteredElementCollector(view.Document, view.Id, linkId);
-#else
-      if
-      (
-        FilteredElementCollector.IsViewValidForElementIteration(view.Document, view.Id) &&
-        view.Document.GetElement(linkId) is RevitLinkInstance link &&
-        link.GetLinkDocument() is Document linkDocument
-      )
-      {
-        var linkedElementIds = default(ICollection<ElementId>);
-        using (linkDocument.RollBackScope())
-        {
-          link.GetTransform().TryGetInverse(out var inverse);
-          var offset = inverse.OfPoint(XYZExtension.Zero);
+      return FilteredElementCollectorExtension.Empty(view.Document);
+    }
 
-          var elementsToCopy = new HashSet<ElementId>(default(ElementIdEqualityComparer)) { view.Id };
-          if (view.GenLevel?.Id is ElementId genLevelId && genLevelId.IsValid()) elementsToCopy.Add(genLevelId);
-          if (view is ViewPlan viewPlanSource)
+    public static FilteredElementCollector GetVisibleElementsCollector(this View view, ElementId linkId)
+    {
+      if (linkId is null)
+        throw new ArgumentNullException(nameof(linkId));
+
+      if (FilteredElementCollector.IsViewValidForElementIteration(view.Document, view.Id))
+      {
+#if REVIT_2024
+        return new FilteredElementCollector(view.Document, view.Id, linkId);
+#else
+        // If link instance is visible in view.
+        if
+        (
+          view.GetVisibleElement<RevitLinkInstance>(linkId) is RevitLinkInstance link &&
+          link.GetLinkDocument() is Document linkDocument
+        )
+        {
+          var linkedElementIds = default(ICollection<ElementId>);
+          using (linkDocument.RollBackScope())
           {
-            using (var viewRange = viewPlanSource.GetViewRange())
+            link.GetTransform().TryGetInverse(out var inverse);
+            var offset = inverse.OfPoint(XYZExtension.Zero);
+
+            var elementsToCopy = new HashSet<ElementId>(default(ElementIdEqualityComparer)) { view.Id };
+            if (view.GenLevel?.Id is ElementId genLevelId && genLevelId.IsValid()) elementsToCopy.Add(genLevelId);
+            if (view is ViewPlan viewPlanSource)
             {
-              for (var plane = PlanViewPlane.CutPlane; plane <= PlanViewPlane.UnderlayBottom; ++plane)
+              using (var viewRange = viewPlanSource.GetViewRange())
               {
-                var levelId = viewRange.GetLevelId(plane);
-                if (levelId.IsBuiltInId()) continue;
-                elementsToCopy.Add(levelId);
+                for (var plane = PlanViewPlane.CutPlane; plane <= PlanViewPlane.UnderlayBottom; ++plane)
+                {
+                  var levelId = viewRange.GetLevelId(plane);
+                  if (levelId.IsBuiltInId()) continue;
+                  elementsToCopy.Add(levelId);
+                }
+              }
+
+              var underlayBaseLevelId = viewPlanSource.GetUnderlayBaseLevel();
+              if (!underlayBaseLevelId.IsBuiltInId()) elementsToCopy.Add(underlayBaseLevelId);
+              var underlayTopLevelId = viewPlanSource.GetUnderlayTopLevel();
+              if (!underlayTopLevelId.IsBuiltInId()) elementsToCopy.Add(underlayTopLevelId);
+            }
+
+            // Inverse transform copied elements.
+            var copiedElementIds = view.Document.CopyElements(elementsToCopy, linkDocument);
+            foreach (var copiedElement in copiedElementIds.Values.Select(linkDocument.GetElement))
+            {
+              switch (copiedElement)
+              {
+                case View copiedView:
+
+                  if (copiedView is View3D view3D)
+                  {
+                    if (view3D.IsLocked) view3D.Unlock();
+                    if (view3D.IsSectionBoxActive) view3D.SetSectionBox(inverse.OfBoundingBoxXYZ(view3D.GetSectionBox()));
+                  }
+
+                  copiedView.SetLocation
+                  (
+                    inverse.OfPoint(copiedView.Origin),
+                    inverse.OfVector(copiedView.RightDirection).ToUnitXYZ(),
+                    inverse.OfVector(copiedView.UpDirection).ToUnitXYZ()
+                  );
+
+                  break;
+
+                case Level copiedLevel:
+                  copiedLevel.Elevation += offset.Z;
+                  break;
               }
             }
 
-            var underlayBaseLevelId = viewPlanSource.GetUnderlayBaseLevel();
-            if (!underlayBaseLevelId.IsBuiltInId()) elementsToCopy.Add(underlayBaseLevelId);
-            var underlayTopLevelId = viewPlanSource.GetUnderlayTopLevel();
-            if (!underlayTopLevelId.IsBuiltInId()) elementsToCopy.Add(underlayTopLevelId);
+            linkDocument.Regenerate();
+
+            using (var collector = new FilteredElementCollector(linkDocument, copiedElementIds[view.Id]))
+              linkedElementIds = collector.ToElementIds();
           }
 
-          // Inverse transform copied elements.
-          var copiedElementIds = view.Document.CopyElements(elementsToCopy, linkDocument);
-          foreach (var copiedElement in copiedElementIds.Values.Select(x => linkDocument.GetElement(x)))
-          {
-            switch (copiedElement)
-            {
-              case View copiedView:
+          return new FilteredElementCollector(linkDocument, linkedElementIds);
+        }
+#endif
+      }
 
-                if (copiedView is View3D view3D)
+      return FilteredElementCollectorExtension.Empty(view.Document);
+    }
+    #endregion
+
+    #region ElementFilter
+    static ElementFilter GetViewRangeFilter(this View view, bool clipped = false)
+    {
+      if (view is ViewPlan viewPlan)
+      {
+        var interval = viewPlan.GetViewRangeInterval();
+        if (interval.Left.IsEnabled || interval.Right.IsEnabled)
+        {
+          return CompoundElementFilter.BoundingBoxIntersectsFilter
+          (
+            new Outline
+            (
+              new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, interval.Left),
+              new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, interval.Right)
+            ),
+            view.Document.Application.VertexTolerance,
+            clipped
+          );
+        }
+      }
+
+      return default;
+    }
+
+    static ElementFilter GetUnderlayFilter(this View view, bool clipped = false)
+    {
+      var bottomId = view.get_Parameter(BuiltInParameter.VIEW_UNDERLAY_BOTTOM_ID)?.AsElementId() ?? ElementId.InvalidElementId;
+      if (bottomId == ElementId.InvalidElementId) return default;
+
+      var topId = view.get_Parameter(BuiltInParameter.VIEW_UNDERLAY_TOP_ID)?.AsElementId() ?? ElementId.InvalidElementId;
+      var bottom = (view.Document.GetElement(bottomId) as Level)?.ProjectElevation ?? -CompoundElementFilter.BoundingBoxLimits;
+      var top = (view.Document.GetElement(topId) as Level)?.ProjectElevation ?? +CompoundElementFilter.BoundingBoxLimits;
+
+      if (bottom != -CompoundElementFilter.BoundingBoxLimits || top != +CompoundElementFilter.BoundingBoxLimits)
+      {
+        return CompoundElementFilter.BoundingBoxIntersectsFilter
+        (
+          new Outline
+          (
+            new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, bottom),
+            new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, top)
+          ),
+          view.Document.Application.VertexTolerance,
+          clipped
+        );
+      }
+
+      return default;
+    }
+
+    public static ElementFilter GetModelFilter(this View view, bool clipped = false)
+    {
+      if (view is ViewSheet || view is ViewDrafting || view.ViewType == ViewType.Legend)
+        return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty; // No model elements here
+
+      var filter = clipped ?
+      CompoundElementFilter.Intersect(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped)) :
+      CompoundElementFilter.Union(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped));
+
+      var modelClipBox = view.GetModelClipBox();
+      filter = CompoundElementFilter.Intersect
+      (
+        filter,
+        modelClipBox.Enabled && view.CropBoxActive ?
+        CompoundElementFilter.BoundingBoxIntersectsFilter(modelClipBox.ToOutLine(), view.Document.Application.VertexTolerance, clipped):
+        CompoundElementFilter.ElementHasBoundingBoxFilter
+      );
+
+      return filter;
+    }
+
+    public static ElementFilter GetModelClipFilter(this View view, bool clipped = false)
+    {
+      var filter = default(ElementFilter);
+
+      if (view.IsModelView())
+      {
+        filter = GetModelFilter(view, clipped);
+      }
+      else if (view is TableView table)
+      {
+        if (table.TargetId.IsValid())
+          return CompoundElementFilter.ExclusionFilter(table.TargetId, inverted: true);
+
+        if (view is ViewSchedule viewSchedule && viewSchedule.Definition is ScheduleDefinition definition)
+          return new ElementCategoryFilter(definition.CategoryId, clipped);
+
+        return CompoundElementFilter.Universe;
+      }
+      else if (view is ImageView)
+      {
+        return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty;
+      }
+      else
+      {
+        switch (view.ViewType)
+        {
+          case ViewType.ProjectBrowser:
+          case ViewType.SystemBrowser:
+            return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty;
+
+          case ViewType.Report:
+          case ViewType.CostReport:
+          case ViewType.LoadsReport:
+          case ViewType.PresureLossReport:
+          case ViewType_SystemsAnalysisReport:
+            return clipped ? CompoundElementFilter.Empty : CompoundElementFilter.Universe;
+        }
+
+        return CompoundElementFilter.Empty;
+      }
+
+      return filter;
+    }
+
+    public static ElementFilter GetClipFilter(this View view, bool clipped = false)
+    {
+      var modelClipFilter = GetModelClipFilter(view, clipped);
+      var annotationClipFilter = CompoundElementFilter.Union
+      (
+        new ElementOwnerViewFilter(view.Id, clipped),
+        new ElementClassFilter(typeof(DatumPlane)),
+        new ElementClassFilter(typeof(RevitLinkInstance))
+      );
+
+      return clipped ?
+        CompoundElementFilter.Intersect(modelClipFilter, annotationClipFilter) :
+        CompoundElementFilter.Union(modelClipFilter, annotationClipFilter);
+    }
+
+    public static ElementFilter GetElementCategoryFilter(this View view, CategoryType categoryType)
+    {
+      var categories = view.Document.Settings.Categories.Cast<Category>().Where
+      (
+        x =>
+        {
+          if (x.CategoryType != categoryType) return false;
+          switch (categoryType)
+          {
+            case CategoryType.Model:
+              switch (x.Id.ToBuiltInCategory())
+              {
+                case BuiltInCategory.OST_ImportObjectStyles: if (view.AreImportCategoriesHidden) return false; break;
+                case BuiltInCategory.OST_PointClouds: if (view.ArePointCloudsHidden) return false; break;
+              }
+              break;
+
+            case CategoryType.Annotation:
+              if (view.AreAnnotationCategoriesHidden) return false; break;
+
+            case CategoryType.AnalyticalModel:
+              if (view.AreAnalyticalModelCategoriesHidden) return false; break;
+          }
+          if (!view.CanCategoryBeHidden(x.Id) || view.GetCategoryHidden(x.Id)) return false;
+          return true;
+        }
+      ).
+      Select(x => x.Id).
+      ToArray();
+
+      return new ElementMulticategoryFilter(categories);
+    }
+
+    public static ElementFilter GetElementVisibilityFilter(this View view, Document document = null, bool hidden = false)
+    {
+      var filters = new List<ElementFilter>();
+
+      var viewDocument = view.Document;
+      if (!viewDocument.IsFamilyDocument && view.AreGraphicsOverridesAllowed())
+      {
+        var linked = document is object && !document.Equals(viewDocument);
+        foreach (var filterId in view.GetFilters())
+        {
+          // Skip filters that do not hide elements
+          if (hidden == view.GetFilterVisibility(filterId)) continue;
+
+          switch (viewDocument.GetElement(filterId))
+          {
+            case SelectionFilterElement selectionFilterElement:
+              if (!linked)
+                filters.Add(CompoundElementFilter.ExclusionFilter(selectionFilterElement.GetElementIds(), inverted: true));
+              break;
+
+            case ParameterFilterElement parameterFilterElement:
+              filters.Add(parameterFilterElement.ToElementFilter());
+              break;
+          }
+        }
+      }
+
+      return filters.Count > 0 ? CompoundElementFilter.Union(filters) : default;
+    }
+
+    internal static ISet<ElementId> GetVisibleElements(this View view, ICollection<ElementId> ids)
+    {
+      if (ids.Count > 0 && FilteredElementCollector.IsViewValidForElementIteration(view.Document, view.Id))
+      {
+        var viewDocument = view.Document;
+        var viewId = view.Id;
+
+        if (view.GetClipFilter(clipped: false) is ElementFilter clipFilter)
+        {
+          using (var collector = new FilteredElementCollector(viewDocument, ids))
+            ids = collector.WherePasses(clipFilter).ToElementIds();
+        }
+
+        if (ids.Count > 0)
+        {
+          var documentIsWorkshared = viewDocument.IsWorkshared;
+          var modelClipBox = view.GetModelClipBox();
+          var isModelClipped = modelClipBox.GetPlaneEquations(out var modelClipPlanes, Numerical.Tolerance.Default);
+          var annotationClipBox = view.GetAnnotationClipBox();
+          var isAnnotationClipped = annotationClipBox.GetPlaneEquations(out var annotationClipPlanes, Numerical.Tolerance.Default);
+          var areViewGraphicsOverridesAllowed = view.AreGraphicsOverridesAllowed();
+          var isCategoryTypeHidden = new bool[]
+          {
+            true,
+            view.AreModelCategoriesHidden,
+            view.AreAnnotationCategoriesHidden,
+            false, // ??
+            false, // ??
+            view.AreAnalyticalModelCategoriesHidden,
+            view.AreImportCategoriesHidden,
+            view.ArePointCloudsHidden
+          };
+
+          var visibleIds = new List<ElementId>(ids.Count);
+          var viewPhaseFilter = ((view.get_Parameter(BuiltInParameter.VIEW_PHASE_FILTER)?.AsElement()) as PhaseFilter);
+          var viewPhase = view.get_Parameter(BuiltInParameter.VIEW_PHASE)?.AsElementId() ?? ElementIdExtension.Invalid;
+
+          using (var elementVisibilityFilter = view.GetElementVisibilityFilter(viewDocument, hidden: true))
+          {
+            foreach (var elementValue in ids.Select(viewDocument.GetElement))
+            {
+              var elementCategory = elementValue.Category;
+              if (elementCategory is null) continue;
+
+              var elementCategoryType = 0;
+              {
+                switch (elementValue)
                 {
-                  if (view3D.IsLocked) view3D.Unlock();
-                  if (view3D.IsSectionBoxActive) view3D.SetSectionBox(inverse.OfBoundingBoxXYZ(view3D.GetSectionBox()));
+                  case ImportInstance _:           elementCategoryType = 6;      break;
+                  case PointCloudInstance _:       elementCategoryType = 7;      break;
+                  default: elementCategoryType = (int)  elementCategory.CategoryType; break;
                 }
 
-                copiedView.SetLocation
-                (
-                  inverse.OfPoint(copiedView.Origin),
-                  inverse.OfVector(copiedView.RightDirection).ToUnitXYZ(),
-                  inverse.OfVector(copiedView.UpDirection).ToUnitXYZ()
-                );
+                if (isCategoryTypeHidden[(int) elementCategoryType]) continue;
+              }
 
-                break;
+              if (documentIsWorkshared && !view.IsWorksetVisible(elementValue.WorksetId)) continue;
 
-              case Level copiedLevel:
-                copiedLevel.Elevation += offset.Z;
-                break;
+              if (elementValue.ViewSpecific)
+              {
+                if (elementValue.OwnerViewId != viewId) continue;
+                if (isAnnotationClipped && elementCategoryType == (int) CategoryType.Annotation)
+                {
+                  if (elementValue.get_BoundingBox(view) is BoundingBoxXYZ bbox)
+                  {
+                    var bboxMin = bbox.Transform.OfPoint(bbox.Min);
+                    var bboxMax = bbox.Transform.OfPoint(bbox.Max);
+
+                    if (annotationClipPlanes.X.Min?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
+                    if (annotationClipPlanes.X.Max?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
+                    if (annotationClipPlanes.Y.Min?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
+                    if (annotationClipPlanes.Y.Max?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
+                  }
+                  else continue;
+                }
+              }
+              else
+              {
+                if (viewPhaseFilter is object && viewPhase.IsValid() && elementValue.HasPhases())
+                {
+                  var status = elementValue.GetPhaseStatus(viewPhase);
+                  if (status != ElementOnPhaseStatus.None)
+                  {
+                    var presentation = viewPhaseFilter.GetPhaseStatusPresentation(status);
+                    if (presentation == PhaseStatusPresentation.DontShow) continue;
+                  }
+                }
+
+                if (isModelClipped)
+                {
+                  if (elementValue.get_BoundingBox(view) is BoundingBoxXYZ bbox)
+                  {
+                    var bboxMin = bbox.Transform.OfPoint(bbox.Min);
+                    var bboxMax = bbox.Transform.OfPoint(bbox.Max);
+
+                    if (modelClipPlanes.X.Min?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
+                    if (modelClipPlanes.X.Max?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
+                    if (modelClipPlanes.Y.Min?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
+                    if (modelClipPlanes.Y.Max?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
+                    if (modelClipPlanes.Z.Min?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
+                    if (modelClipPlanes.Z.Max?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
+                  }
+                  else continue;
+                }
+              }
+
+              if (areViewGraphicsOverridesAllowed)
+              {
+                if (view.GetCategoryHidden(elementCategory.Id)) continue;
+                if (elementValue.IsHidden(view)) continue;
+                if (elementVisibilityFilter?.PassesFilter(elementValue) is true) continue;
+              }
+
+              visibleIds.Add(elementValue.Id);
             }
           }
 
-          linkDocument.Regenerate();
-
-          using (var collector = new FilteredElementCollector(linkDocument, copiedElementIds[view.Id]))
-            linkedElementIds = collector.ToElementIds();
+          if (visibleIds.Count > 0)
+          {
+            using (var filter = CompoundElementFilter.ExclusionFilter(visibleIds, inverted: true))
+            using (var collector = new FilteredElementCollector(viewDocument, viewId).WherePasses(filter))
+            {
+              return collector.ToReadOnlyElementIdSet();
+            }
+          }
         }
-
-        return new FilteredElementCollector(linkDocument, linkedElementIds);
       }
 
-      // This is here to fire an Autodesk.Revit.Exceptions.ArgumentException.
-      return new FilteredElementCollector(view.Document, ElementIdExtension.Invalid);
-#endif
+      return ElementIdExtension.EmptySet;
     }
     #endregion
   }
@@ -925,6 +1060,35 @@ namespace RhinoInside.Revit.External.DB.Extensions
       else level = level.Document.GetElement(levelId) as Level;
 
       return new BoundingValue(level.ProjectElevation + viewRange.GetOffset(plane));
+    }
+  }
+
+  public static class ViewSectionExtension
+  {
+    static int IndexOfViewSection(ElevationMarker marker, ElementId viewId)
+    {
+      if (marker.HasElevations())
+      {
+        for (int i = 0; i < marker.MaximumViewCount; ++i)
+        {
+          if (marker.GetViewId(i) == viewId)
+            return i;
+        }
+      }
+
+      return -1;
+    }
+
+    public static ElevationMarker GetElevationMarker(this ViewSection viewSection)
+    {
+      using (var collector = new FilteredElementCollector(viewSection.Document))
+      {
+        return collector.
+          OfCategory(BuiltInCategory.OST_Elev).
+          OfClass(typeof(ElevationMarker)).
+          OfType<ElevationMarker>().
+          FirstOrDefault(x => IndexOfViewSection(x, viewSection.Id) >= 0);
+      }
     }
   }
 }

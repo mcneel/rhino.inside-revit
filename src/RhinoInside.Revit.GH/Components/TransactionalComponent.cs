@@ -6,9 +6,9 @@ using System.Linq;
 using System.Windows.Forms;
 using Autodesk.Revit.UI.Events;
 using GH_IO.Serialization;
+using Grasshopper.GUI;
 using Grasshopper.GUI.Canvas;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 using OS = System.Environment;
@@ -19,7 +19,6 @@ namespace RhinoInside.Revit.GH.Components
   using Convert.Geometry;
   using ElementTracking;
   using External.DB.Extensions;
-  using Grasshopper.GUI;
 
   class TransactionalComponentFailuresPreprocessor : ARDB.IFailuresPreprocessor
   {
@@ -456,7 +455,13 @@ namespace RhinoInside.Revit.GH.Components
 
     ERDB.TransactionChain chain;
 
-    public ARDB.TransactionStatus StartTransaction(ARDB.Document document) => chain.Start(document);
+    public ARDB.TransactionStatus StartTransaction(ARDB.Document document)
+    {
+      if (document.IsLinked)
+        throw new InvalidOperationException($"Document '{document.GetName()}' is a linked file.{OS.NewLine}Only primary documents (projects or families) are editable.");
+
+      return chain.Start(document);
+    }
 
     protected ARDB.TransactionStatus CommitTransaction()
     {

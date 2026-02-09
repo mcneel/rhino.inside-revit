@@ -52,15 +52,6 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.BuiltInCategory bic:  categoryId = new ARDB.ElementId(bic); break;
         case ARDB.ElementId id:         categoryId = id; break;
         case ARDB.Category c:           SetValue(c.Document(), c.Id); return true;
-        case ARDB.GraphicsStyle s:      SetValue(s.Document, s.GraphicsStyleCategory.Id); return true;
-        case ARDB.Family f:             SetValue(f.Document, f.FamilyCategoryId); return true;
-        case ARDB.Element e:
-          if(e.Category is ARDB.Category category)
-            SetValue(e.Document, category.Id);
-          else
-            SetValue(default, ARDB.ElementId.InvalidElementId);
-
-          return true;
         case string n:
           if (!DBXS.CategoryId.TryParse(n, null, out var cid)) return false;
           categoryId = new ARDB.ElementId(cid);
@@ -200,7 +191,8 @@ namespace RhinoInside.Revit.GH.Types
     #region DocumentObject
     public override string DisplayName => FullName ?? base.DisplayName;
 
-    internal ARDB.Category APIObject => IsReferencedDataLoaded ? Document.GetCategory(Id) : default;
+    internal ARDB.Category APIObject => IsReferencedDataLoaded ?
+      (IsLinked ? ReferenceDocument : Document).GetCategory(Id) : default;
 
     protected override void ResetValue()
     {
@@ -795,6 +787,21 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public Category GraphicsStyleCategory
+    {
+      get
+      {
+        if (Value is ARDB.GraphicsStyle style)
+        {
+          return style.GraphicsStyleCategory is ARDB.Category category ?
+            GetElement(Category.FromCategory(category)) :
+            new Category();
+        }
+
+        return default;
+      }
+    }
+
     public override bool ConvertFrom(object source)
     {
       if (base.ConvertFrom(source))
@@ -829,7 +836,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (typeof(Q).IsAssignableFrom(typeof(Category)))
       {
-        target = (Q) (object) Category;
+        target = (Q) (object) GraphicsStyleCategory;
         return true;
       }
 

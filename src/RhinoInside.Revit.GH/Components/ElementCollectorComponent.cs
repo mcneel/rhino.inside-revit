@@ -54,26 +54,29 @@ namespace RhinoInside.Revit.GH.Components
       ISet<ARDB.ElementId> modified
     )
     {
-      var elementFilter = ElementFilter;
-      var _Filter_ = Params.IndexOfInputParam("Filter");
-      var filters = _Filter_ < 0 ?
-                    Enumerable.Empty<ARDB.ElementFilter>() :
-                    Params.Input[_Filter_].VolatileData.AllData(true).
-                    OfType<Types.ElementFilter>().
-                    Select(x => CompoundElementFilter.Intersect(elementFilter, x.Value));
-
-      foreach (var filter in filters.Any() ? filters : new ARDB.ElementFilter[] { elementFilter })
+      if (added.Count > 0)
       {
-        if (added.Any(x => filter.PassesFilter(document, x)))
-          return true;
+        var elementFilter = ElementFilter;
+        var _Filter_ = Params.IndexOfInputParam("Filter");
+        var filters = _Filter_ < 0 ?
+                      Array.Empty<ARDB.ElementFilter>() :
+                      Params.Input[_Filter_].VolatileData.AllData(true).
+                      OfType<Types.ElementFilter>().
+                      Select(x => CompoundElementFilter.Intersect(elementFilter, x.Value));
 
-        if (deleted.Count > 0)
+        foreach (var filter in filters.Any() ? filters : new ARDB.ElementFilter[] { elementFilter })
         {
-          foreach (var param in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
-          {
-            if (param.NeedsToBeExpired(document, ElementIdExtension.EmptySet, deleted, modified))
-              return true;
-          }
+          if (added.Any(x => filter.PassesFilter(document, x)))
+            return true;
+        }
+      }
+
+      if (deleted.Count > 0 || modified.Count > 0)
+      {
+        foreach (var param in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
+        {
+          if (param.NeedsToBeExpired(document, ElementIdExtension.EmptySet, deleted, modified))
+            return true;
         }
       }
 

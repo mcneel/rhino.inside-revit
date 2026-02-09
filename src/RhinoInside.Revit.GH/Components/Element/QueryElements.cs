@@ -197,7 +197,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (view.AssertValidModel(model, acceptLinked: true))
       {
         if (filter?.IsEmpty() is true) return;
-        var elementCollector = view.Value.CollectElements(model.ModelInstance.Id);
+        var elementCollector = model is Types.RevitLinkInstance link ?
+                               view.Value.CollectElements(link.Id) :
+                               view.Value.CollectElements();
 
         if (categories is object)
         {

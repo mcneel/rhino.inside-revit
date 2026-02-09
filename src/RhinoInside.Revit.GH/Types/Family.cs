@@ -38,12 +38,47 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public Category FamilyCategory
+    {
+      get
+      {
+        if (Value is ARDB.Family family)
+        {
+          var familyCategory = family.FamilyCategory;
+          if
+          (
+            familyCategory is null &&
+            family.GetFamilySymbolIds().FirstOrDefault() is ARDB.ElementId typeId &&
+            family.Document.GetElement(typeId) is ARDB.ElementType type
+          )
+            familyCategory = type.Category;
+
+          return familyCategory is ARDB.Category category ?
+            GetElement(Category.FromCategory(category)) :
+            new Category();
+        }
+
+        return default;
+      }
+    }
+
     public override bool ConvertFrom(object source)
     {
       if (source is Document doc)
         return SetValue(doc.Value.OwnerFamily);
 
       return base.ConvertFrom(source);
+    }
+
+    public override bool ConvertTo<Q>(out Q target)
+    {
+      if (typeof(Q).IsAssignableFrom(typeof(Category)))
+      {
+        target = (Q) (object) FamilyCategory;
+        return true;
+      }
+
+      return base.ConvertTo(out target);
     }
   }
 }
