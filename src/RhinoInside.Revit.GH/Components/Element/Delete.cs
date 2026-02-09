@@ -415,12 +415,12 @@ namespace RhinoInside.Revit.GH.Components.Elements.Obsolete
                              ToList();
 
       
-      var options = new External.DB.TransactionHandlingOptions
+      var options = new ERDB.TransactionHandlingOptions
       {
         FailuresPreprocessor = CreateFailuresPreprocessor()
       };
 
-      using (var chain = new External.DB.TransactionChain(options, Name))
+      using (var chain = new ERDB.TransactionChain(options, Name))
       {
         foreach (var group in elementsToDelete)
         {
