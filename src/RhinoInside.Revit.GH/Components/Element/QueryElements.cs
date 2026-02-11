@@ -100,26 +100,26 @@ namespace RhinoInside.Revit.GH.Components.Elements
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item),
-      ParamDefinition.Create<Param_Integer>("Limit", "L", $"Max number of Elements to query for.{OS.NewLine}For an unlimited query remove this parameter.", defaultValue: 100, GH_ParamAccess.item, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter"),
+      ParamDefinition.Create<Param_Integer>("Limit", "L", $"Max number of Elements to query for.{OS.NewLine}Negative values give last elements in reverse order.{OS.NewLine}{OS.NewLine}For an unlimited query remove this parameter.", defaultValue: 1, relevance: ParamRelevance.Primary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
       ParamDefinition.Create<Parameters.Element>("Elements", "E", "Elements list", GH_ParamAccess.list, relevance: ParamRelevance.Primary),
-      ParamDefinition.Create<Param_Integer>("Count", "C", $"Elements count.{OS.NewLine}For a more performant way of knowing how many elements this query returns remove the Elements output.", GH_ParamAccess.item, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Integer>("Count", "C", $"Elements count.{OS.NewLine}For a more performant way of knowing how many elements this query returns remove the Elements output.", relevance: ParamRelevance.Primary),
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.GetData(DA, "Filter", out Types.ElementFilter filter, x => x.IsValid)) return;
-      if (!Params.TryGetData(DA, "Limit", out int? limit, x => x >= 0)) return;
+      if (!Params.TryGetData(DA, "Limit", out int? limit)) return;
 
       using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
-        var elementCollector = collector.WherePasses(ElementFilter).
+        var elements = collector.WherePasses(ElementFilter).
           WherePasses(filter.Value, source.SourceInstance.Value);
 
         var _Elements_ = Params.IndexOfOutputParam("Elements");
@@ -127,30 +127,30 @@ namespace RhinoInside.Revit.GH.Components.Elements
         (
           Params.TrySetDataList(DA, "Elements", () =>
           {
-            var elements = limit.HasValue ?
-              elementCollector.Take(limit.Value) :
-              elementCollector;
-
             return elements.
               Select(Types.Element.FromElement).
               FromSource(source).
+              Take(limit ?? int.MaxValue).
               TakeWhileIsNotEscapeKeyDown(this);
           }) &&
-          limit <= (Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_))?.Count ?? 0)
+          limit.HasValue &&
+          Math.Abs(limit.Value) <= (Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_))?.Count ?? 0)
         )
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"'{Params.Output[_Elements_].NickName}' output is limited to {limit.Value} elements.{OS.NewLine}Increase or remove 'Limit' input parameter to retreive more elements.");
+          var message = string.Empty;
+          if (limit == 0) message = "no elements";
+          else if (limit == +1) message = "only the first element";
+          else if (limit == -1) message = "only the last element";
+          else if (limit > 0) message = $"only the first {Math.Abs(limit.Value)} elements";
+          else if(limit < 0) message = $"only the last {Math.Abs(limit.Value)} elements";
+
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"'{Params.Output[_Elements_].NickName}' output is limited to return {message}.{OS.NewLine}Increase or remove 'Limit' input parameter to retreive more elements.");
         }
 
-        Params.TrySetData
-        (
-          DA,
-          "Count",
-          () =>
-            _Elements_ < 0 || limit.HasValue ?
-            elementCollector.GetElementCount() :
-            Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_)).Count
-        );
+        Params.TrySetData(DA, "Count", () =>
+          _Elements_ < 0 || limit.HasValue ?
+          elements.Count() :
+          Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_)).Count);
       }
     }
   }
@@ -197,7 +197,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (view.AssertValidElementSource(source, acceptLinked: true))
       {
         if (filter?.IsEmpty() is true) return;
-        var elementCollector = source is Types.RevitLinkInstance link ?
+        var elements = source is Types.RevitLinkInstance link ?
                                view.Value.CollectElements(link.Id) :
                                view.Value.CollectElements();
 
@@ -208,7 +208,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
             Select(x => x.Id).
             ToList();
 
-          elementCollector = elementCollector.WherePassFilter
+          elements = elements.WherePasses
           (
             CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
           );
@@ -220,7 +220,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           hiddenCategories.Add(ARDB.BuiltInCategory.OST_SectionBox);  // 'Section Boxes' has little sense here!?!?
           hiddenCategories.Add(ARDB.BuiltInCategory.INVALID);         // `ScheduleSheetInstance` Viewer has no Category, so we filter here
 
-          elementCollector = elementCollector.WherePassFilter
+          elements = elements.WherePasses
           (
             new ARDB.ElementMulticategoryFilter(hiddenCategories, inverted: true)
           );
@@ -229,13 +229,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
         if (filter is object)
         {
           filter.AssertIsValidFiler(source.SourceInstance.Value);
-          elementCollector = elementCollector.WherePassFilter(filter);
+          elements = elements.WherePasses(filter);
         }
 
         DA.SetDataList
         (
           "Elements",
-          elementCollector.
+          elements.
           OfType<Types.GraphicalElement>().
           FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)

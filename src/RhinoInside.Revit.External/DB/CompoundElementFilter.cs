@@ -312,7 +312,7 @@ namespace RhinoInside.Revit.External.DB
       Empty = 0,
       Quick = 1,
       Logical = 2,
-      Slow = 4,
+      Slow = 8,
       Universe = int.MaxValue
     }
 
@@ -332,17 +332,17 @@ namespace RhinoInside.Revit.External.DB
 
     private static FilterCost GetFilterCost(this ElementLogicalFilter logical)
     {
-      return FilterCost.Logical;
-
       // Documentation says Revit is already reordering operators
       // So we don't need a more complex implementation
       //
-      //var filters = logical.GetFilters();
-      //int cost = 0;
-      //for (int f = 0; f < filters.Count; ++f)
-      //  cost += (int) filters[f].GetFilterCost();
+      //return FilterCost.Logical;
 
-      //return (FilterCost) cost;
+      var filters = logical.GetFilters();
+      int cost = (int) FilterCost.Logical;
+      for (int f = 0; f < filters.Count; ++f)
+        cost += (int) filters[f].GetFilterCost();
+
+      return (FilterCost) cost;
     }
 
     public static ElementFilter Union(this ElementFilter self, ElementFilter other)
@@ -367,7 +367,7 @@ namespace RhinoInside.Revit.External.DB
       if (filters.Count == 1) return filters[0] ?? Empty;
 
       var list = new List<ElementFilter>(filters.Count);
-      foreach (var filter in filters.Distinct())
+      foreach (var filter in filters.OrderBy(GetFilterCost))
       {
         if (ReferenceEquals(filter, Universe)) return Universe;
         if (ReferenceEquals(filter, Empty)) continue;
@@ -402,7 +402,7 @@ namespace RhinoInside.Revit.External.DB
       if (filters.Count == 1) return filters[0] ?? Empty;
 
       var list = new List<ElementFilter>(filters.Count);
-      foreach (var filter in filters.Distinct())
+      foreach (var filter in filters.OrderBy(GetFilterCost))
       {
         if (ReferenceEquals(filter, Empty)) return Empty;
         if (ReferenceEquals(filter, Universe)) continue;

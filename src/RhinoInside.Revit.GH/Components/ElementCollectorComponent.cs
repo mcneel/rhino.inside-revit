@@ -194,13 +194,30 @@ namespace RhinoInside.Revit.GH.Components
     public static IEnumerable<T> OfType<T>(this IEnumerable<ARDB.Element> elements) where T : Types.Element
     {
       foreach (var element in elements)
-        yield return Types.Element.FromElement(element) as T;
+      {
+        if(Types.Element.FromElement(element) is T result)
+          yield return result;
+      }
     }
 
     public static IEnumerable<T> FromSource<T>(this IEnumerable<T> elements, Types.IGH_ElementSource source) where T : Types.Element
     {
       foreach (var element in elements)
         yield return (T) element?.FromSource(source);
+    }
+
+    public static IEnumerable<T> Take<T>(this IEnumerable<T> source, int count) where T : Types.Element
+    {
+      if (count < 0) source = source.Reverse();
+
+      switch (count)
+      {
+        case int.MinValue: return source;
+        case -int.MaxValue: return source;
+        case 0: return Array.Empty<T>();
+        case int.MaxValue: return source;
+        default: return Enumerable.Take(source, Math.Abs(count));
+      }
     }
   }
 }
