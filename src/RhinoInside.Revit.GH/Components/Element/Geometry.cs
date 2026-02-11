@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       {
         if (element is null) continue;
         if (source is null) source = element.Source;
-        else if (!source.Equals(element.Source)) return false;
+        else if (!Equals(source, element.Source)) return false;
       }
 
       return true;
