@@ -613,10 +613,28 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           return AppearanceAssetElement.GetAppearanceAssetElementByName(target, asset.Name)?.Id ?? ElementIdExtension.Invalid;
         }
+        else if (element is LinePatternElement linePattern)
+        {
+          return LinePatternElement.GetLinePatternElementByName(target, linePattern.Name)?.Id ?? ElementIdExtension.Invalid;
+        }
         else if (element is FillPatternElement fillPattern)
         {
           using (var pattern = fillPattern.GetFillPattern())
             return FillPatternElement.GetFillPatternElementByName(target, pattern.Target, fillPattern.Name)?.Id ?? ElementIdExtension.Invalid;
+        }
+        else if (element is GraphicsStyle graphicsStyle)
+        {
+          using (var collector = new FilteredElementCollector(target))
+          {
+            return collector.WhereElementIsNotElementType().
+              WhereElementIsKindOf(typeof(GraphicsStyle)).
+              WhereCategoryIdEqualsTo(ElementIdExtension.Invalid).
+              Cast<GraphicsStyle>().
+              Where(x => x.GraphicsStyleType == graphicsStyle.GraphicsStyleType).
+              Where(x => x.Name.Equals(nomen, ElementNaming.ComparisonType)).
+              Select(x => x.Id).
+              FirstOrDefault() ?? ElementIdExtension.Invalid;
+          }
         }
         else
         {

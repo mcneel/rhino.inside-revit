@@ -427,7 +427,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     // `Element.Name` does not always access the true denomination of the element.
     //
     // In cases like `ViewSheet` the true denomination is the "Sheet Number" parameter.
-    // Denomination is used here as the element property that identifies it univocaly on the UI.
+    // Denomination is used here as the element property that identifies it univocally on the UI.
     // Is the property that produce a "Name" collision in case is duplicated.
     //
     // In other cases like 'Design Options' the Name parameter may come decorated
@@ -438,7 +438,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (element is null) return false;
 
-      using (element.Document.RollBackScope())
+      var document = element.Document;
+      if (document.IsLinked) return false;
+
+      using (document.RollBackScope())
       {
         try { element.SetElementNomen(Guid.NewGuid().ToString("N")); }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }

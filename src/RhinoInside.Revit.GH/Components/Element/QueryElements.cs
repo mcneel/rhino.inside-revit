@@ -72,7 +72,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           return;
       }
 
-      DA.SetData("Element", Types.Element.FromValue(source.SourceInstance.Document ?? source.SourceDocument.Value, goo.ScriptVariable())?.FromSource(source));
+      DA.SetData("Element", Types.Element.FromValue(source.SourceDocument.Value, goo.ScriptVariable())?.FromSource(source));
     }
   }
 
