@@ -460,6 +460,14 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input elements should be from the same document");
         return;
       }
+      if (source is null)
+      {
+        Params.TrySetDataTree(DA, "Elements", () => default(Types.Element[][]));
+        Params.TrySetDataTree(DA, "Geometry", () => default(IGH_GeometricGoo[][]));
+        Params.TrySetDataTree(DA, "Categories", () => default(Types.Category[][]));
+        Params.TrySetDataTree(DA, "Materials", () => default(Types.Material[][]));
+        return;
+      }
 
       var doc = source.SourceDocument.Value;
       var scope = default(IDisposable);
@@ -612,6 +620,14 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       if (!TryGetCommonElementSource(elements.Concat(exclude ?? Enumerable.Empty<Types.Element>()).Append(view), out var source))
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"All input elements should be from the same document as {view}");
+        return;
+      }
+      if (source is null)
+      {
+        Params.TrySetDataTree(DA, "Elements", () => default(Types.Element[][]));
+        Params.TrySetDataTree(DA, "Geometry", () => default(IGH_GeometricGoo[][]));
+        Params.TrySetDataTree(DA, "Categories", () => default(Types.Category[][]));
+        Params.TrySetDataTree(DA, "Materials", () => default(Types.Material[][]));
         return;
       }
 
