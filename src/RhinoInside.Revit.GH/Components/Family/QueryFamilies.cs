@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Families
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ElementKind>>("Kind", "K", "Kind to match", defaultValue: ElementKind.System | ElementKind.Component, optional: true),
       ParamDefinition.Create<Parameters.Category>                     ("Category", "C",  optional: true),
       ParamDefinition.Create<Param_String>                            ("Family Name", "FN", optional: true),
@@ -80,15 +80,15 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Kind", out Types.ElementKind kind)) return;
       if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
       if (!Params.TryGetData(DA, "Family Name", out string familyName)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      if (category?.AssertValidModel(model) != false || category.Id.IsBuiltInId() || !category.Id.IsValid())
+      if (category?.AssertValidElementSource(source) != false || category.Id.IsBuiltInId() || !category.Id.IsValid())
       {
-        using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+        using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
         {
           var elementCollector = collector.WherePasses(ElementFilter);
 
@@ -99,7 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Families
             elementCollector = elementCollector.WhereCategoryIdEqualsTo(category.Id);
 
           if (filter is object)
-            elementCollector = elementCollector.WherePasses(filter, model.ModelInstance.Value);
+            elementCollector = elementCollector.WherePasses(filter, source.SourceInstance.Value);
 
           if (TryGetFilterStringParam(ARDB.BuiltInParameter.SYMBOL_FAMILY_NAME_PARAM, ref familyName, out var nameFilter))
             elementCollector = elementCollector.WherePasses(nameFilter);

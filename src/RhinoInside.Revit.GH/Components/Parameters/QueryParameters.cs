@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ParameterScope>>("Scope", "S", "Parameter scope", optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Parameter name", optional: true),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ParameterType>>("Type", "T", "Parameter type", optional: true),
@@ -70,13 +70,13 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Scope", out Types.ParameterScope scope, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => x is object)) return;
       if (!Params.TryGetData(DA, "Type", out Types.ParameterType type, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Group", out Types.ParameterGroup group, x => x.IsValid)) return;
 
-      var parameters = model.ModelDocument.Value.GetParameterDefinitions
+      var parameters = source.SourceDocument.Value.GetParameterDefinitions
       (
         scope is object ? scope.Value :
         ERDB.ParameterScope.Instance | ERDB.ParameterScope.Type | ERDB.ParameterScope.Global
@@ -98,8 +98,8 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       (
         "Parameter",
         parameters.
-        Select(x => new Types.ParameterKey(model.ModelDocument.Value, x)).
-        AtModel(model).
+        Select(x => new Types.ParameterKey(source.SourceDocument.Value, x)).
+        FromSource(source).
         TakeWhileIsNotEscapeKeyDown(this)
       );
     }

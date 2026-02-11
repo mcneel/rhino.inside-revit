@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Fill pattern name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.Param_Enum<Types.FillPatternTarget>>("Type", "T", "Fill pattern type", defaultValue: ARDB.FillPatternTarget.Drafting, GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional)
@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
 
       string name = null;
       DA.GetData("Name", ref name);
@@ -60,12 +60,12 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
       Params.TryGetData(DA, "Type", out ARDB.FillPatternTarget? type);
       Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var patternsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          patternsCollector = patternsCollector.WherePasses(filter, model.ModelInstance.Value);
+          patternsCollector = patternsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         var patterns = collector.Cast<ARDB.FillPatternElement>().Select(x => new Types.FillPatternElement(x));
 
@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
         (
           "Fill Patterns",
           patterns.
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

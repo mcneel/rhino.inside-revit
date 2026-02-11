@@ -164,8 +164,8 @@ namespace RhinoInside.Revit.GH.Types
     public abstract ARDB.ElementId ReferenceId { get; }
 
     public bool IsLinked => !ReferenceDocument.IsEquivalent(Document);
-    internal IGH_ModelInstance Model => IsLinked ?
-      RevitLinkInstance.FromElementId(ReferenceDocument, ReferenceId) as IGH_ModelInstance :
+    internal IGH_ElementSource Source => IsLinked ?
+      RevitLinkInstance.FromElementId(ReferenceDocument, ReferenceId) as IGH_ElementSource :
       Types.Document.FromValue(Document);
     public string UniqueId =>
       Document is ARDB.Document document && External.DB.ReferenceId.TryParse(ReferenceUniqueId, out var referenceId, ReferenceDocument) ?
@@ -331,13 +331,13 @@ namespace RhinoInside.Revit.GH.Types
       return GeometryObject.FromLinkElementId(ReferenceDocument, GetAbsoluteReference(reference).ToLinkElementId()) as GeometryElement;
     }
 
-    internal bool AssertValidModel(IGH_ModelInstance model, bool acceptLinked = false)
+    internal bool AssertValidElementSource(IGH_ElementSource source, bool acceptLinked = false)
     {
-      switch (model)
+      switch (source)
       {
         case null: return false;
         case Document document: return document.Value.Equals(Document);
-        case RevitLinkInstance instance: return instance.ModelDocument.Equals(Document) || (acceptLinked && instance.ReferenceDocument.Equals(ReferenceDocument));
+        case RevitLinkInstance instance: return instance.SourceDocument.Equals(Document) || (acceptLinked && instance.ReferenceDocument.Equals(ReferenceDocument));
       }
 
       throw new Exceptions.RuntimeArgumentException("Source", "Invalid source model");

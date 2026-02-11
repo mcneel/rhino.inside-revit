@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Design Option name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional),
     };
@@ -53,16 +53,16 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var optionsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          optionsCollector = optionsCollector.WherePasses(filter, model.ModelInstance.Value);
+          optionsCollector = optionsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (name is object && TryGetFilterStringParam(ARDB.BuiltInParameter.OPTION_SET_NAME, ref name, out var nameFilter))
           optionsCollector = optionsCollector.WherePasses(nameFilter);
@@ -77,7 +77,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
           "Design Option Sets",
           options.
           Select(x => new Types.DesignOptionSet(x)).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }
@@ -115,7 +115,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Element>("Design Option Set", "DOS", string.Empty, GH_ParamAccess.item, optional:true),
       ParamDefinition.Create<Param_String>("Name", "N", "Design Option name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Boolean>("Primary", "P", "Design Option is primary", GH_ParamAccess.item, optional: true),
@@ -130,20 +130,20 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Design Option Set", out Types.DesignOptionSet set)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Primary", out bool? primary)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      if (set?.AssertValidModel(model) != false)
+      if (set?.AssertValidElementSource(source) != false)
       {
-        using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+        using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
         {
           var optionsCollector = collector.WherePasses(ElementFilter);
 
           if (filter is object)
-            optionsCollector = optionsCollector.WherePasses(filter, model.ModelInstance.Value);
+            optionsCollector = optionsCollector.WherePasses(filter, source.SourceInstance.Value);
 
           if (set is object && TryGetFilterElementIdParam(ARDB.BuiltInParameter.OPTION_SET_ID, set.Id, out var optionSetFilter))
             optionsCollector = optionsCollector.WherePasses(optionSetFilter);
@@ -174,7 +174,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
             "Design Options",
             options.
             Select(x => new Types.DesignOption(x)).
-            AtModel(model).
+            FromSource(source).
             TakeWhileIsNotEscapeKeyDown(this)
           );
         }

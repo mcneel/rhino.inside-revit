@@ -248,10 +248,10 @@ namespace RhinoInside.Revit.GH.Types
       );
     }
 
-    public Element AtModel(IGH_ModelInstance model)
+    public Element FromSource(IGH_ElementSource source)
     {
       if (IsEmpty) return this;
-      if (model is Document document)
+      if (source is Document document)
       {
         if (document.Value.IsEquivalent(Document))
         {
@@ -268,7 +268,7 @@ namespace RhinoInside.Revit.GH.Types
           return FromElementId(document.Value, document.Value.LookupElement(Document, Id));
         }
       }
-      else if (model is RevitLinkInstance link)
+      else if (source is RevitLinkInstance link)
       {
         if (ReferenceId == link.Id && IsLinked)
           return this;

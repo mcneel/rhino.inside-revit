@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Type Name", "N", "Assembly type name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true),
     };
@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
 
       string name = null;
       DA.GetData("Type Name", ref name);
@@ -49,12 +49,12 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       ARDB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var assemblyCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          assemblyCollector = assemblyCollector.WherePasses(filter, model.ModelInstance.Value);
+          assemblyCollector = assemblyCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var assemblyNameFilter))
           assemblyCollector = assemblyCollector.WherePasses(assemblyNameFilter);
@@ -69,7 +69,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
           "Assemblies",
           assemblies.
           Select(x => new Types.AssemblyInstance(x)).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

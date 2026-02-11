@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Level name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Interval>("Elevation", "E", "Level elevation interval along z-axis", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Structural", "S", "Level is structural", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
@@ -47,19 +47,19 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Elevation", out Interval? elevation, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Structural", out bool? structural)) return;
       if (!Params.TryGetData(DA, "Building Story", out bool? buildingStory)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var levelsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          levelsCollector = levelsCollector.WherePasses(filter, model.ModelInstance.Value);
+          levelsCollector = levelsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (name is string && TryGetFilterStringParam(ARDB.BuiltInParameter.DATUM_TEXT, ref name, out var nameFilter))
           levelsCollector = levelsCollector.WherePasses(nameFilter);
@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
         if (elevation.HasValue)
         {
           elevation = elevation.Value.InHostUnits();
-          if (model.ModelInstance.Value is ARDB.RevitLinkInstance instance) elevation -= instance.GetTransform().Origin.Z;
+          if (source.SourceInstance.Value is ARDB.RevitLinkInstance instance) elevation -= instance.GetTransform().Origin.Z;
           levels = levels.Where(x => elevation.Value.IncludesParameter(x.GetElevation(), false));
         }
 
@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
           "Levels",
           levels.
           Select(x => new Types.Level(x)).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

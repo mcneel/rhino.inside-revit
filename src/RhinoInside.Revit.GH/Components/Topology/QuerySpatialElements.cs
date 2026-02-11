@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Param_Point()
@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Param_Point()
@@ -225,7 +225,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Point", out Point3d? point)) return;
       if (!Params.TryGetData(DA, "Placed", out bool? placed)) return;
       if (!Params.TryGetData(DA, "Number", out string number)) return;
@@ -242,12 +242,12 @@ namespace RhinoInside.Revit.GH.Components.Topology
       }
 
       var tol = GeometryTolerance.Model;
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          elementsCollector = elementsCollector.WherePasses(filter, model.ModelInstance.Value);
+          elementsCollector = elementsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.ROOM_NUMBER, ref number, out var numberFilter))
           elementsCollector = elementsCollector.WherePasses(numberFilter);
@@ -296,7 +296,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
           );
         }
 
-        DA.SetDataList("Areas", areas.AtModel(model).TakeWhileIsNotEscapeKeyDown(this));
+        DA.SetDataList("Areas", areas.FromSource(source).TakeWhileIsNotEscapeKeyDown(this));
       }
     }
   }
@@ -323,7 +323,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Param_String()
@@ -363,12 +363,12 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Gross Building", out bool? gross)) return;
 
       var tol = GeometryTolerance.Model;
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);
 
@@ -383,7 +383,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (!string.IsNullOrEmpty(name))
           areas = areas.Where(x => x.Nomen.IsSymbolNameLike(name));
 
-        DA.SetDataList("Area Schemes", areas.AtModel(model).TakeWhileIsNotEscapeKeyDown(this));
+        DA.SetDataList("Area Schemes", areas.FromSource(source).TakeWhileIsNotEscapeKeyDown(this));
       }
     }
   }
@@ -424,7 +424,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Point", out Point3d? point)) return;
       var xyz = point.HasValue ? point.Value.ToXYZ() : default;
       if (!Params.TryGetData(DA, "Placed", out bool? placed)) return;
@@ -433,7 +433,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       if (!Params.TryGetData(DA, "Level", out Types.Level level)) return;
       if (!Params.TryGetData(DA, "Phase", out Types.Phase phase)) return;
       if (phase is null && Params.IndexOfInputParam("Phase") < 0)
-        phase = new Types.Phase(model.ModelDocument.Value.Phases.Cast<ARDB.Phase>().LastOrDefault());
+        phase = new Types.Phase(source.SourceDocument.Value.Phases.Cast<ARDB.Phase>().LastOrDefault());
       if (!Params.TryGetData(DA, "Enclosed", out bool? enclosed)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
@@ -444,7 +444,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       }
 
       var tol = GeometryTolerance.Model;
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);
 
@@ -452,7 +452,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
           elementsCollector = elementsCollector.WherePasses(new ARDB.BoundingBoxContainsPointFilter(xyz));
 
         if (filter is object)
-          elementsCollector = elementsCollector.WherePasses(filter, model.ModelInstance.Value);
+          elementsCollector = elementsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.ROOM_NUMBER, ref number, out var numberFilter))
           elementsCollector = elementsCollector.WherePasses(numberFilter);
@@ -483,7 +483,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (xyz is object)
           rooms = rooms.Where(room => room.Value.IsPointInRoom(xyz));
 
-        DA.SetDataList("Rooms",rooms.AtModel(model).TakeWhileIsNotEscapeKeyDown(this));
+        DA.SetDataList("Rooms",rooms.FromSource(source).TakeWhileIsNotEscapeKeyDown(this));
       }
     }
   }
@@ -524,7 +524,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Point", out Point3d? point)) return;
       var xyz = point.HasValue ? point.Value.ToXYZ() : default;
       if (!Params.TryGetData(DA, "Placed", out bool? placed)) return;
@@ -533,7 +533,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       if (!Params.TryGetData(DA, "Level", out Types.Level level)) return;
       if (!Params.TryGetData(DA, "Phase", out Types.Phase phase)) return;
       if (phase is null && Params.IndexOfInputParam("Phase") < 0)
-        phase = new Types.Phase(model.ModelDocument.Value.Phases.Cast<ARDB.Phase>().LastOrDefault());
+        phase = new Types.Phase(source.SourceDocument.Value.Phases.Cast<ARDB.Phase>().LastOrDefault());
       if (!Params.TryGetData(DA, "Enclosed", out bool? enclosed)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
@@ -544,7 +544,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       }
 
       var tol = GeometryTolerance.Model;
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);
 
@@ -552,7 +552,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
           elementsCollector = elementsCollector.WherePasses(new ARDB.BoundingBoxContainsPointFilter(xyz));
 
         if (filter is object)
-          elementsCollector = elementsCollector.WherePasses(filter, model.ModelInstance.Value);
+          elementsCollector = elementsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.ROOM_NUMBER, ref number, out var numberFilter))
           elementsCollector = elementsCollector.WherePasses(numberFilter);
@@ -583,7 +583,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (xyz is object)
           spaces = spaces.Where(room => room.Value.IsPointInSpace(xyz));
 
-        DA.SetDataList("Spaces", spaces.AtModel(model).TakeWhileIsNotEscapeKeyDown(this));
+        DA.SetDataList("Spaces", spaces.FromSource(source).TakeWhileIsNotEscapeKeyDown(this));
       }
     }
   }

@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Shared site name", optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true, relevance: ParamRelevance.Primary),
     };
@@ -43,16 +43,16 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var sitesCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          sitesCollector = sitesCollector.WherePasses(filter, model.ModelInstance.Value);
+          sitesCollector = sitesCollector.WherePasses(filter, source.SourceInstance.Value);
 
         var sites = collector.Cast<ARDB.ProjectLocation>();
 
@@ -64,7 +64,7 @@ namespace RhinoInside.Revit.GH.Components.Site
           "Shared Sites",
           sites.
           Select(x => new Types.ProjectLocation(x)).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

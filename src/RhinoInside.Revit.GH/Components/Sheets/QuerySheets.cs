@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_Boolean>("Placeholder", "PH", "Sheet is placeholder", false, GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Sheet Number", "NUM", "Sheet number", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Sheet Name", "N", "Sheet name", GH_ParamAccess.item, optional: true),
@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
 
       bool IsPlaceholder = false;
       var _IsPlaceholder_ = Params.IndexOfInputParam("Placeholder");
@@ -69,17 +69,17 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       var assembly = default(Types.AssemblyInstance);
       var _Assembly_ = Params.IndexOfInputParam("Assembly");
       bool noFilterAssembly = (!DA.GetData(_Assembly_, ref assembly) && Params.Input[_Assembly_].DataType == GH_ParamData.@void);
-      assembly = model.ModelDocument.AssertNamesakeElement(assembly) as Types.AssemblyInstance;
+      assembly = source.SourceDocument.AssertNamesakeElement(assembly) as Types.AssemblyInstance;
 
       ARDB.ElementFilter filter = null;
       DA.GetData("Filter", ref filter);
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var sheetsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          sheetsCollector = sheetsCollector.WherePasses(filter, model.ModelInstance.Value);
+          sheetsCollector = sheetsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.SHEET_NUMBER, ref number, out var sheetNumberFilter))
           sheetsCollector = sheetsCollector.WherePasses(sheetNumberFilter);
@@ -115,7 +115,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           "Sheets",
           sheets.
           Select(x => new Types.ViewSheet(x)).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

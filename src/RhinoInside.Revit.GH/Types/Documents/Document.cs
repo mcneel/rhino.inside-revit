@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.UI.Extensions;
 
   [Kernel.Attributes.Name("Document")]
-  public interface IGH_Document : IGH_ModelInstance, IEquatable<IGH_Document>
+  public interface IGH_Document : IGH_ElementSource, IEquatable<IGH_Document>
   {
     Guid DocumentId { get; }
 
@@ -271,11 +271,11 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    #region IGH_ModelInstance
+    #region IGH_ElementSource
     readonly RevitLinkInstance LinkInstance = new RevitLinkInstance();
 
-    RevitLinkInstance IGH_ModelInstance.ModelInstance => LinkInstance;
-    Document IGH_ModelInstance.ModelDocument => this;
+    RevitLinkInstance IGH_ElementSource.SourceInstance => LinkInstance;
+    Document IGH_ElementSource.SourceDocument => this;
     #endregion
 
     #region Properties

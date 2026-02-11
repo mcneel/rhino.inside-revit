@@ -8,7 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class ModelInstance : PersistentParam<Types.IGH_ModelInstance>, Kernel.IGH_ReferenceParam
+  public class ElementSource : PersistentParam<Types.IGH_ElementSource>, Kernel.IGH_ReferenceParam
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("EF2EFE84-8B2E-4613-A352-B1CE95671238");
@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Parameters
     internal static readonly string DefaultNickName = "S";
     internal static readonly string DefaultDescription = "Contains a collection of Revit element sources";
 
-    public ModelInstance() : base
+    public ElementSource() : base
     (
       name: DefaultName,
       nickname: DefaultName,
@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Parameters
     )
     { }
 
-    protected override Types.IGH_ModelInstance PreferredCast(object data)
+    protected override Types.IGH_ElementSource PreferredCast(object data)
     {
       switch (data)
       {
@@ -39,9 +39,9 @@ namespace RhinoInside.Revit.GH.Parameters
       return null;
     }
 
-    public static bool GetModelOrCurrent(IGH_Component component, IGH_DataAccess DA, out Types.IGH_ModelInstance model)
+    public static bool GetElementSourceOrCurrent(IGH_Component component, IGH_DataAccess DA, out Types.IGH_ElementSource source)
     {
-      model = default;
+      source = default;
 
       var _Model_ = component.Params.IndexOfInputParam(DefaultName);
       if
@@ -53,16 +53,16 @@ namespace RhinoInside.Revit.GH.Parameters
         )
       )
       {
-        if (Document.TryGetCurrentDocument(component, out var document) && document is Types.IGH_ModelInstance instance)
+        if (Document.TryGetCurrentDocument(component, out var document) && document is Types.IGH_ElementSource instance)
         {
-          model = instance;
+          source = instance;
           return true;
         }
 
         return false;
       }
 
-      return DA.GetData(_Model_, ref model);
+      return DA.GetData(_Model_, ref source);
     }
 
     #region IGH_ReferenceParam

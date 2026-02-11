@@ -5,9 +5,9 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Element Source")]
-  public interface IGH_ModelInstance : IGH_Goo
+  public interface IGH_ElementSource : IGH_Goo
   {
-    public RevitLinkInstance ModelInstance { get; }
-    public Document ModelDocument { get; }
+    public RevitLinkInstance SourceInstance { get; }
+    public Document SourceDocument { get; }
   }
 }

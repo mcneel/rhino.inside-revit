@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.ModelInstance>("Project", "P", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.ElementSource>("Project", "P", relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "New current Shared Site", optional: true, relevance: ParamRelevance.Secondary),
     };
 
@@ -102,14 +102,14 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
-      var doc = model.ModelDocument.Value;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
+      var doc = source.SourceDocument.Value;
 
       if (Params.GetData(DA, "Shared Site", out Types.ProjectLocation location, x => x.IsValid))
       {
         if (!doc.IsEquivalent(location.Document))
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Site '{location}' is not valid on document '{model}'");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Site '{location}' is not valid on document '{source}'");
           return;
         }
 
@@ -117,11 +117,11 @@ namespace RhinoInside.Revit.GH.Components.Site
         doc.ActiveProjectLocation = location.Value;
       }
 
-      Params.TrySetData(DA, "Site Location", () => new Types.SiteLocation(doc.SiteLocation).AtModel(model));
-      Params.TrySetData(DA, "Shared Site", () => new Types.ProjectLocation(doc.ActiveProjectLocation).AtModel(model));
-      Params.TrySetData(DA, "Survey Point", () => new Types.BasePoint(BasePointExtension.GetSurveyPoint(doc)).AtModel(model));
-      Params.TrySetData(DA, "Project Base Point", () => new Types.BasePoint(BasePointExtension.GetProjectBasePoint(doc)).AtModel(model));
-      Params.TrySetData(DA, "Internal Origin", () => new Types.InternalOrigin(InternalOriginExtension.Get(doc)).AtModel(model));
+      Params.TrySetData(DA, "Site Location", () => new Types.SiteLocation(doc.SiteLocation).FromSource(source));
+      Params.TrySetData(DA, "Shared Site", () => new Types.ProjectLocation(doc.ActiveProjectLocation).FromSource(source));
+      Params.TrySetData(DA, "Survey Point", () => new Types.BasePoint(BasePointExtension.GetSurveyPoint(doc)).FromSource(source));
+      Params.TrySetData(DA, "Project Base Point", () => new Types.BasePoint(BasePointExtension.GetProjectBasePoint(doc)).FromSource(source));
+      Params.TrySetData(DA, "Internal Origin", () => new Types.InternalOrigin(InternalOriginExtension.Get(doc)).FromSource(source));
     }
   }
 }

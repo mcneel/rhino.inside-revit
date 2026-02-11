@@ -178,7 +178,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Parameters.Element()
@@ -216,10 +216,10 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
-      if (element.AtModel(model) is Types.Element namesake)
+      if (element.FromSource(source) is Types.Element namesake)
       {
         Params.TrySetData(DA, "Name", () => namesake.Nomen);
         DA.SetData("Element", namesake);

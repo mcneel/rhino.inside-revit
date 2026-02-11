@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
       manager.AddParameter(new Grasshopper.Kernel.Parameters.Param_Guid(), "Document ID", "DID", "A unique identifier for the document the Element resides", GH_ParamAccess.item);
-      manager.AddParameter(new Parameters.ModelInstance(), "Model", "M", "The model that references this element", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.ElementSource(), "Model", "M", "The model that references this element", GH_ParamAccess.item);
       manager.AddTextParameter("Unique ID", "UID", "A stable across upgrades and workset operations unique identifier for the Element", GH_ParamAccess.item);
       manager.AddTextParameter("Id", "ID", "A unique identifier for an Element within the document that contains it", GH_ParamAccess.item);
     }
@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         case ElementScope.Absolute:
           var absoluteId = External.DB.ReferenceId.Parse(reference.ReferenceUniqueId, reference.ReferenceDocument);
           DA.SetData(0, reference.ReferenceDocumentId);
-          DA.SetData(1, reference.Model);
+          DA.SetData(1, reference.Source);
           DA.SetData(2, absoluteId.ToStableRepresentation(reference.ReferenceDocument));
           DA.SetData(3, absoluteId.ToStableRepresentation(null));
           break;
