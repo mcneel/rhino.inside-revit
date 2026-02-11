@@ -189,8 +189,6 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
-    public override string DisplayName => CompleteNomen ?? base.DisplayName;
-
     internal ARDB.Category APIObject => IsReferencedDataLoaded ?
       (IsLinked ? ReferenceDocument : Document).GetCategory(Id) : default;
 

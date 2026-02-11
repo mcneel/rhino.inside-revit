@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var displayName = Nomen ?? (IsReferencedData ? string.Empty : "<None>");
+        var displayName = CompleteNomen ?? (IsReferencedData ? string.Empty : "<None>");
         if (!string.IsNullOrEmpty(displayName)) return displayName;
         if (Value?.Category is ARDB.Category category)
           return $"<{category.ToBuiltInCategory().Name(localized: false).TrimEnd('s')}>";
