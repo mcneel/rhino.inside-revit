@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.Sketch sketch)
         {
-          var slopeArrow = sketch.GetDependentElements(ERDB.CompoundElementFilter.ElementClassFilter(typeof(ARDB.CurveElement))).
+          var slopeArrow = sketch.GetDependentElements(ERDB.ElementFilters.ElementClassFilter(typeof(ARDB.CurveElement))).
             Select(Document.GetElement).FirstOrDefault(x => x.get_Parameter(ARDB.BuiltInParameter.SPECIFY_SLOPE_OR_OFFSET) is object);
 
           return GetElement<CurveElement>(slopeArrow);
@@ -208,7 +208,7 @@ namespace RhinoInside.Revit.GH.Types
         if (constraintsRemoved) return;
         var constraintsIds = sketch.GetDependentElements
         (
-          ERDB.CompoundElementFilter.Intersect
+          ERDB.ElementFilters.Intersect
           (
           new ARDB.ElementClassFilter(typeof(ARDB.Dimension)),
           new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_WeakDims)

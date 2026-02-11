@@ -163,7 +163,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   {
     public override Guid ComponentGuid => new Guid("1FEE04EF-A3DA-44F4-B114-486724C92AB6");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.Universe;
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.Universe;
 
     public QueryNamesakeElement() : base
     (

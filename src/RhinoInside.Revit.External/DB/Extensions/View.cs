@@ -491,7 +491,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     static ElementFilter GetViewerFilter(ElementId viewId, bool inverted = false)
     {
-      return CompoundElementFilter.Intersect
+      return ElementFilters.Intersect
       (
         new ElementIsElementTypeFilter(inverted: true),
         new ElementMulticategoryFilter(ViewerCategories),
@@ -521,13 +521,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
-    static ElementFilter GetViewportFilter(string viewportSheetNumber, string viewportViewName) => CompoundElementFilter.Intersect
+    static ElementFilter GetViewportFilter(string viewportSheetNumber, string viewportViewName) => ElementFilters.Intersect
     (
       new ElementIsElementTypeFilter(inverted: true),
       new ElementClassFilter(typeof(Viewport)),
       new ElementParameterFilter
       (
-        CompoundElementFilter.FilterStringRule
+        ElementFilters.FilterStringRule
         (
           new ParameterValueProvider(new ElementId(BuiltInParameter.VIEWPORT_SHEET_NUMBER)),
           new FilterStringEquals(),
@@ -536,7 +536,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       ),
       new ElementParameterFilter
       (
-        CompoundElementFilter.FilterStringRule
+        ElementFilters.FilterStringRule
         (
           new ParameterValueProvider(new ElementId(BuiltInParameter.VIEWPORT_VIEW_NAME)),
           new FilterStringEquals(),
@@ -710,12 +710,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var interval = viewPlan.GetViewRangeInterval();
         if (interval.Left.IsEnabled || interval.Right.IsEnabled)
         {
-          return CompoundElementFilter.BoundingBoxIntersectsFilter
+          return ElementFilters.BoundingBoxIntersectsFilter
           (
             new Outline
             (
-              new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, interval.Left),
-              new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, interval.Right)
+              new XYZ(-ElementFilters.BoundingBoxLimits, -ElementFilters.BoundingBoxLimits, interval.Left),
+              new XYZ(+ElementFilters.BoundingBoxLimits, +ElementFilters.BoundingBoxLimits, interval.Right)
             ),
             view.Document.Application.VertexTolerance,
             clipped
@@ -732,17 +732,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (bottomId == ElementId.InvalidElementId) return default;
 
       var topId = view.get_Parameter(BuiltInParameter.VIEW_UNDERLAY_TOP_ID)?.AsElementId() ?? ElementId.InvalidElementId;
-      var bottom = (view.Document.GetElement(bottomId) as Level)?.ProjectElevation ?? -CompoundElementFilter.BoundingBoxLimits;
-      var top = (view.Document.GetElement(topId) as Level)?.ProjectElevation ?? +CompoundElementFilter.BoundingBoxLimits;
+      var bottom = (view.Document.GetElement(bottomId) as Level)?.ProjectElevation ?? -ElementFilters.BoundingBoxLimits;
+      var top = (view.Document.GetElement(topId) as Level)?.ProjectElevation ?? +ElementFilters.BoundingBoxLimits;
 
-      if (bottom != -CompoundElementFilter.BoundingBoxLimits || top != +CompoundElementFilter.BoundingBoxLimits)
+      if (bottom != -ElementFilters.BoundingBoxLimits || top != +ElementFilters.BoundingBoxLimits)
       {
-        return CompoundElementFilter.BoundingBoxIntersectsFilter
+        return ElementFilters.BoundingBoxIntersectsFilter
         (
           new Outline
           (
-            new XYZ(-CompoundElementFilter.BoundingBoxLimits, -CompoundElementFilter.BoundingBoxLimits, bottom),
-            new XYZ(+CompoundElementFilter.BoundingBoxLimits, +CompoundElementFilter.BoundingBoxLimits, top)
+            new XYZ(-ElementFilters.BoundingBoxLimits, -ElementFilters.BoundingBoxLimits, bottom),
+            new XYZ(+ElementFilters.BoundingBoxLimits, +ElementFilters.BoundingBoxLimits, top)
           ),
           view.Document.Application.VertexTolerance,
           clipped
@@ -755,19 +755,19 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static ElementFilter GetModelFilter(this View view, bool clipped = false)
     {
       if (view is ViewSheet || view is ViewDrafting || view.ViewType == ViewType.Legend)
-        return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty; // No model elements here
+        return clipped ? ElementFilters.Universe : ElementFilters.Empty; // No model elements here
 
       var filter = clipped ?
-      CompoundElementFilter.Intersect(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped)) :
-      CompoundElementFilter.Union(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped));
+      ElementFilters.Intersect(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped)) :
+      ElementFilters.Union(GetViewRangeFilter(view, clipped), GetUnderlayFilter(view, clipped));
 
       var modelClipBox = view.GetModelClipBox();
-      filter = CompoundElementFilter.Intersect
+      filter = ElementFilters.Intersect
       (
         filter,
         modelClipBox.Enabled && view.CropBoxActive ?
-        CompoundElementFilter.BoundingBoxIntersectsFilter(modelClipBox.ToOutLine(), view.Document.Application.VertexTolerance, clipped):
-        CompoundElementFilter.ElementHasBoundingBoxFilter
+        ElementFilters.BoundingBoxIntersectsFilter(modelClipBox.ToOutLine(), view.Document.Application.VertexTolerance, clipped):
+        ElementFilters.ElementHasBoundingBoxFilter
       );
 
       return filter;
@@ -784,16 +784,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       else if (view is TableView table)
       {
         if (table.TargetId.IsValid())
-          return CompoundElementFilter.ExclusionFilter(table.TargetId, inverted: true);
+          return ElementFilters.ExclusionFilter(table.TargetId, inverted: true);
 
         if (view is ViewSchedule viewSchedule && viewSchedule.Definition is ScheduleDefinition definition)
           return new ElementCategoryFilter(definition.CategoryId, clipped);
 
-        return CompoundElementFilter.Universe;
+        return ElementFilters.Universe;
       }
       else if (view is ImageView)
       {
-        return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty;
+        return clipped ? ElementFilters.Universe : ElementFilters.Empty;
       }
       else
       {
@@ -801,17 +801,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           case ViewType.ProjectBrowser:
           case ViewType.SystemBrowser:
-            return clipped ? CompoundElementFilter.Universe : CompoundElementFilter.Empty;
+            return clipped ? ElementFilters.Universe : ElementFilters.Empty;
 
           case ViewType.Report:
           case ViewType.CostReport:
           case ViewType.LoadsReport:
           case ViewType.PresureLossReport:
           case ViewType_SystemsAnalysisReport:
-            return clipped ? CompoundElementFilter.Empty : CompoundElementFilter.Universe;
+            return clipped ? ElementFilters.Empty : ElementFilters.Universe;
         }
 
-        return CompoundElementFilter.Empty;
+        return ElementFilters.Empty;
       }
 
       return filter;
@@ -820,7 +820,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static ElementFilter GetClipFilter(this View view, bool clipped = false)
     {
       var modelClipFilter = GetModelClipFilter(view, clipped);
-      var annotationClipFilter = CompoundElementFilter.Union
+      var annotationClipFilter = ElementFilters.Union
       (
         new ElementOwnerViewFilter(view.Id, clipped),
         new ElementClassFilter(typeof(DatumPlane)),
@@ -828,8 +828,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       );
 
       return clipped ?
-        CompoundElementFilter.Intersect(modelClipFilter, annotationClipFilter) :
-        CompoundElementFilter.Union(modelClipFilter, annotationClipFilter);
+        ElementFilters.Intersect(modelClipFilter, annotationClipFilter) :
+        ElementFilters.Union(modelClipFilter, annotationClipFilter);
     }
 
     public static ElementFilter GetElementCategoryFilter(this View view, CategoryType categoryType)
@@ -882,7 +882,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             case SelectionFilterElement selectionFilterElement:
               if (!linked)
-                filters.Add(CompoundElementFilter.ExclusionFilter(selectionFilterElement.GetElementIds(), inverted: true));
+                filters.Add(ElementFilters.ExclusionFilter(selectionFilterElement.GetElementIds(), inverted: true));
               break;
 
             case ParameterFilterElement parameterFilterElement:
@@ -892,7 +892,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
       }
 
-      return filters.Count > 0 ? CompoundElementFilter.Union(filters) : default;
+      return filters.Count > 0 ? ElementFilters.Union(filters) : default;
     }
 
     internal static ISet<ElementId> GetVisibleElements(this View view, ICollection<ElementId> ids)
@@ -1014,7 +1014,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
           if (visibleIds.Count > 0)
           {
-            using (var filter = CompoundElementFilter.ExclusionFilter(visibleIds, inverted: true))
+            using (var filter = ElementFilters.ExclusionFilter(visibleIds, inverted: true))
             using (var collector = new FilteredElementCollector(viewDocument, viewId).WherePasses(filter))
             {
               return collector.ToReadOnlyElementIdSet();

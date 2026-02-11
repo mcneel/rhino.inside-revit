@@ -205,7 +205,7 @@ namespace RhinoInside.Revit.External.DB
       Filters = source.Filters.Append(filter).ToArray();
     }
 
-    internal override FilteredElementCollector GetCollector() => Source.GetCollector().WherePasses(CompoundElementFilter.Intersect(Filters));
+    internal override FilteredElementCollector GetCollector() => Source.GetCollector().WherePasses(ElementFilters.Intersect(Filters));
   }
 
   class WherePassesEnumerable : IEnumerable<Element>

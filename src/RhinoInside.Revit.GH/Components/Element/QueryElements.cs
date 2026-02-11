@@ -81,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   {
     public override Guid ComponentGuid => new Guid("0F7DA57E-6C05-4DD0-AABF-69E42DF38859");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
-    protected override ARDB.ElementFilter ElementFilter => ERDB.CompoundElementFilter.ElementIsElementTypeFilter(inverted: true);
+    protected override ARDB.ElementFilter ElementFilter => ERDB.ElementFilters.ElementIsElementTypeFilter(inverted: true);
 
     static readonly string[] keywords = new string[] { "Count" };
     public override IEnumerable<string> Keywords => Enumerable.Concat(base.Keywords, keywords);
@@ -160,7 +160,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   {
     public override Guid ComponentGuid => new Guid("79DAEA3A-13A3-49BF-8BEB-AA28E3BE4515");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.GraphicalElementFilter;
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.GraphicalElementFilter;
 
     public QueryGraphicalElements() : base
     (
@@ -210,7 +210,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
           elements = elements.WherePasses
           (
-            CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
+            ElementFilters.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
           );
         }
         else

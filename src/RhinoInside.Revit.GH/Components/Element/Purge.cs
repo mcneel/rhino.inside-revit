@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
         ARDB.UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
-        var filter = ERDB.CompoundElementFilter.ElementIsNotInternalFilter(doc);
+        var filter = ERDB.ElementFilters.ElementIsNotInternalFilter(doc);
         ARDB.UpdaterRegistry.AddTrigger(UpdaterId, filter, ARDB.Element.GetChangeTypeAny());
         ARDB.UpdaterRegistry.AddTrigger(UpdaterId, filter, ARDB.Element.GetChangeTypeElementDeletion());
       }

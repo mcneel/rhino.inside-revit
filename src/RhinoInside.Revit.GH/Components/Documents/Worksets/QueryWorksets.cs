@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
     public override Guid ComponentGuid => new Guid("311316BA-81C7-495C-8A20-B7974091D6B1");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => "Q";
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.Empty;
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.Empty;
 
     public override bool NeedsToBeExpired
     (

@@ -17,8 +17,8 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
     public override Guid ComponentGuid => new Guid("D150E40E-0970-4683-B517-038F8BA8B0D8");
     public override GH_Exposure Exposure => GH_Exposure.primary;
 
-    private static readonly ARDB.ElementFilter GraphicsStyleFilter = CompoundElementFilter.ElementClassFilter(typeof(ARDB.GraphicsStyle));
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.Empty;
+    private static readonly ARDB.ElementFilter GraphicsStyleFilter = ElementFilters.ElementClassFilter(typeof(ARDB.GraphicsStyle));
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.Empty;
 
     private static ISet<ARDB.ElementId> ToGraphicsStyleCategoryIdSet(ARDB.Document document, ISet<ARDB.ElementId> ids)
     {

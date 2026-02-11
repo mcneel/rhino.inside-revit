@@ -872,7 +872,7 @@ namespace RhinoInside.Revit.GH
 
           if (allowModelessHandling)
           {
-            try { deletedIds = revitDocument.GetDependentElements(elementIds, out modifiedIds, CompoundElementFilter.ElementIsNotInternalFilter(revitDocument)); }
+            try { deletedIds = revitDocument.GetDependentElements(elementIds, out modifiedIds, ElementFilters.ElementIsNotInternalFilter(revitDocument)); }
             catch (Autodesk.Revit.Exceptions.ArgumentException) { deletedIds = elementIds; modifiedIds = ElementIdExtension.EmptySet; }
           }
 

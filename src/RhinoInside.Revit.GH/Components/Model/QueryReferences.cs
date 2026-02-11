@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => string.Empty;
 
-    static readonly ARDB.ElementFilter elementFilter = CompoundElementFilter.ElementHasBoundingBoxFilter;
+    static readonly ARDB.ElementFilter elementFilter = ElementFilters.ElementHasBoundingBoxFilter;
     protected override ARDB.ElementFilter ElementFilter => elementFilter;
 
     public QueryReferences() : base
@@ -165,7 +165,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
       using (var intersector = new ARDB.ReferenceIntersector
       (
-        CompoundElementFilter.ElementHasBoundingBoxFilter.Intersect(filter?.Value),
+        ElementFilters.ElementHasBoundingBoxFilter.Intersect(filter?.Value),
         (ARDB.FindReferenceTarget) referenceTarget,
         view.Value)
         { FindReferencesInRevitLinks = ExploreLinkedModels }
@@ -280,7 +280,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         {
           using (var collector = new ARDB.FilteredElementCollector(view.Document, view.Id))
           {
-            collector.WherePasses(CompoundElementFilter.ExclusionFilter(ids, inverted: true));
+            collector.WherePasses(ElementFilters.ExclusionFilter(ids, inverted: true));
             if (collector.Any())
               return true;
           }

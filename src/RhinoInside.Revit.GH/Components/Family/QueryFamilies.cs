@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Families
   {
     public override Guid ComponentGuid => new Guid("B6C377BA-BC46-495C-8250-F09DB0219C91");
     public override GH_Exposure Exposure => GH_Exposure.primary;
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter();
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.ElementIsElementTypeFilter();
 
     public QueryFamilies() : base
     (
@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           var elementCollector = collector.WherePasses(ElementFilter);
 
           if (kind is object)
-            elementCollector = elementCollector.WherePasses(CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true));
+            elementCollector = elementCollector.WherePasses(ElementFilters.ElementKindFilter(kind.Value, elementType: true));
 
           if (category is object)
             elementCollector = elementCollector.WhereCategoryIdEqualsTo(category.Id);

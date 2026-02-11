@@ -50,11 +50,11 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       return default;
     }
 
-    static readonly ARDB.ElementFilter ElementHasGeometryFilter = CompoundElementFilter.Intersect
+    static readonly ARDB.ElementFilter ElementHasGeometryFilter = ElementFilters.Intersect
     (
       // Not 100% sure but looks like only elements with category or `CombinableElement` have geometry.
-      CompoundElementFilter.ElementHasCategoryFilter.Union(CompoundElementFilter.ElementClassFilter(typeof(ARDB.CombinableElement))),
-      CompoundElementFilter.ElementHasBoundingBoxFilter.Union(CompoundElementFilter.ElementClassFilter(typeof(ARDB.FamilySymbol))),
+      ElementFilters.ElementHasCategoryFilter.Union(ElementFilters.ElementClassFilter(typeof(ARDB.CombinableElement))),
+      ElementFilters.ElementHasBoundingBoxFilter.Union(ElementFilters.ElementClassFilter(typeof(ARDB.FamilySymbol))),
       // Types below return no geometry.
       new ARDB.ElementMulticlassFilter
       (
@@ -170,10 +170,10 @@ namespace RhinoInside.Revit.GH.Components.Geometry
             {
               var dependents = element.GetDependentElements
               (
-                CompoundElementFilter.Intersect
+                ElementFilters.Intersect
                 (
                   // 'Element Geometry' works with types, but not when expanding dependents.
-                  CompoundElementFilter.ElementIsElementTypeFilter(inverted: true),
+                  ElementFilters.ElementIsElementTypeFilter(inverted: true),
                   ElementHasGeometryFilter,
                   new ARDB.ExclusionFilter(new ARDB.ElementId[] { element.Id })
                 )
