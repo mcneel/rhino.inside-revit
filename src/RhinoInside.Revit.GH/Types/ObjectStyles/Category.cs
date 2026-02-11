@@ -189,8 +189,6 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
-    public override string DisplayName => FullName ?? base.DisplayName;
-
     internal ARDB.Category APIObject => IsReferencedDataLoaded ?
       (IsLinked ? ReferenceDocument : Document).GetCategory(Id) : default;
 
@@ -568,7 +566,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string Nomen
     {
-      get => CategoryNaming.SplitFullName(FullName, out var _) ?? base.Nomen;
+      get => CategoryNaming.SplitFullName(CompleteNomen, out var _) ?? base.Nomen;
       set
       {
         base.Nomen = value;
@@ -579,7 +577,7 @@ namespace RhinoInside.Revit.GH.Types
     private new ARDB.BuiltInCategory? BuiltInCategory => Id?.ToBuiltInCategory();
 
     string _FullName;
-    public string FullName => _FullName ?? (APIObject?.FullName() ?? BuiltInCategory?.FullName(localized: true));
+    public override string CompleteNomen => _FullName ?? (APIObject?.FullName() ?? BuiltInCategory?.FullName(localized: true));
 
     ERDB.CategoryDiscipline? _CategoryDiscipline;
     public ERDB.CategoryDiscipline CategoryDiscipline => _CategoryDiscipline ??= APIObject?.CategoryDiscipline() ?? BuiltInCategory?.CategoryDiscipline() ?? ERDB.CategoryDiscipline.None;

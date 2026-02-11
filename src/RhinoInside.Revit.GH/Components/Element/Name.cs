@@ -206,9 +206,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Param_String()
         {
-          Name = "Full Name",
-          NickName = "FN",
-          Description = "Element name used to query the element",
+          Name = "Complete Name",
+          NickName = "CN",
+          Description = "Complete name used to query the element",
         }, ParamRelevance.Primary
       )
     };
@@ -219,7 +219,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
       Params.TrySetData(DA, "Element", () => source is object ? element.AtSource(source) : element);
-      Params.TrySetData(DA, "Full Name", () => element is Types.Category c ? c.FullName : element.Nomen);
+      Params.TrySetData(DA, "Complete Name", () => element.CompleteNomen);
     }
   }
 }
