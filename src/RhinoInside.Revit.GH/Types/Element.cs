@@ -442,7 +442,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public virtual string UniqueNomen => Nomen;
+    public virtual string CompleteNomen => Nomen;
 
     internal ARDB.BuiltInCategory? BuiltInCategory => Value?.Category.ToBuiltInCategory();
 
