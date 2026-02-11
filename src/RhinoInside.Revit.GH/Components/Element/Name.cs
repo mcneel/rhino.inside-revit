@@ -219,7 +219,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
-      if (element.FromSource(source) is Types.Element namesake)
+      if (element.AtSource(source) is Types.Element namesake)
       {
         Params.TrySetData(DA, "Name", () => namesake.Nomen);
         DA.SetData("Element", namesake);

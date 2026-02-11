@@ -197,15 +197,10 @@ namespace RhinoInside.Revit.GH.Components
         yield return Types.Element.FromElement(element) as T;
     }
 
-    internal static IEnumerable<T> FromSource<T>(this IEnumerable<T> elements, Types.IGH_ElementSource source) where T : Types.Element
+    public static IEnumerable<T> FromSource<T>(this IEnumerable<T> elements, Types.IGH_ElementSource source) where T : Types.Element
     {
-      switch (source)
-      {
-        case Types.Document _: return elements;
-        case Types.RevitLinkInstance instance: return elements.Select(x => (T) x.AsLinked(instance.Value));
-      }
-
-      return Array.Empty<T>();
+      foreach (var element in elements)
+        yield return (T) element?.FromSource(source);
     }
   }
 }

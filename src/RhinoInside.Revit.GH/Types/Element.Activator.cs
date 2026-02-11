@@ -248,7 +248,7 @@ namespace RhinoInside.Revit.GH.Types
       );
     }
 
-    public Element FromSource(IGH_ElementSource source)
+    public Element AtSource(IGH_ElementSource source)
     {
       if (IsEmpty) return this;
       if (source is Document document)
@@ -292,7 +292,41 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-    private Element AsUnlinked()
+    public Element FromSource(IGH_ElementSource source)
+    {
+      if (IsEmpty) return this;
+      if (source is Document document)
+      {
+        if (document.Value.IsEquivalent(Document))
+        {
+          if (!IsLinked)
+            return this;
+
+          var element = MemberwiseClone() as Element;
+          element.InvalidateGraphics();
+          return element.AsUnlinked();
+        }
+      }
+      else if (source is RevitLinkInstance link)
+      {
+        if (ReferenceId == link.Id && IsLinked)
+          return this;
+
+        if (link.Value.GetLinkDocument() is ARDB.Document linkedDocument)
+        {
+          if (linkedDocument.Equals(Document))
+          {
+            var element = MemberwiseClone() as Element;
+            element.InvalidateGraphics();
+            return element.AsLinked(link.Value);
+          }
+        }
+      }
+
+      return null;
+    }
+
+    internal Element AsUnlinked()
     {
       if (IsLinked)
       {
