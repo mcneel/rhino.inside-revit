@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   public class QueryNamesakeElement : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("1FEE04EF-A3DA-44F4-B114-486724C92AB6");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.Universe;
 
     public QueryNamesakeElement() : base
@@ -178,7 +178,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Primary),
       new ParamDefinition
       (
         new Parameters.Element()

@@ -337,6 +337,7 @@ namespace RhinoInside.Revit.GH.Types
         _ReferenceId = Id;
         return this;
       }
+      else if (IsEmpty) return this;
 
       throw new Exceptions.RuntimeArgumentException(nameof(IsLinked), "Invalid link instance.");
     }
@@ -360,6 +361,7 @@ namespace RhinoInside.Revit.GH.Types
         if (this is GraphicalElement || this is View) ReferenceTransform = link.GetTransform().ToTransform();
         return this;
       }
+      else if (IsEmpty) return this;
 
       throw new Exceptions.RuntimeArgumentException(nameof(link), "Invalid link instance.");
     }
