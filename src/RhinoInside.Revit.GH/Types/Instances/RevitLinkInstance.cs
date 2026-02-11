@@ -4,13 +4,6 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  [Kernel.Attributes.Name("Model")]
-  public interface IGH_ModelInstance : IGH_Goo
-  {
-    public RevitLinkInstance ModelInstance { get; }
-    public Document ModelDocument { get; }
-  }
-
   [Kernel.Attributes.Name("Linked Model")]
   public sealed class RevitLinkInstance : Instance, IGH_ModelInstance
   {
