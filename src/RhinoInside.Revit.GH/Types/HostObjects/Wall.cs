@@ -216,7 +216,7 @@ namespace RhinoInside.Revit.GH.Types
               var bboxFilter = new ARDB.BoundingBoxIntersectsFilter(outline, wall.Document.Application.VertexTolerance);
               elementCollector = elementCollector.WherePasses(bboxFilter);
 
-              using (var includesFilter = CompoundElementFilter.InclusionFilter(wall))
+              using (var includesFilter = ElementFilters.InclusionFilter(wall))
               {
                 foreach (ARDB.HostObject hostObject in elementCollector)
                 {

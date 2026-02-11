@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.External.DB
 {
   using Extensions;
 
-  internal static class CompoundElementFilter
+  internal static class ElementFilters
   {
     #region Implementation Details
     /// <summary>
@@ -486,7 +486,7 @@ namespace Autodesk.Revit.DB
     public bool PassesFilter(Document document, ElementId id) => IdsToInclude.Contains(id);
     public bool PassesFilter(Element element) => IdsToInclude.Contains(element.Id);
 
-    public static implicit operator ElementFilter(ElementIdSetFilter filter) => CompoundElementFilter.Union
+    public static implicit operator ElementFilter(ElementIdSetFilter filter) => ElementFilters.Union
     (
       filter.IdsToInclude.
       Select(x => new ElementParameterFilter(new FilterElementIdRule(IdParamProvider, NumericEqualsEvaluator, x))).
@@ -525,7 +525,7 @@ namespace Autodesk.Revit.DB
         Debug.Assert
         (
           element.OwnerViewId == viewId ||
-          CompoundElementFilter.ElementHasBoundingBoxFilter.PassesFilter(element) ||
+          ElementFilters.ElementHasBoundingBoxFilter.PassesFilter(element) ||
           (element.Category is object && VisibleCategoryIds.Contains(element.Category.Id)),
           "casting operator needs to be adjusted"
         );
@@ -557,32 +557,32 @@ namespace Autodesk.Revit.DB
     static readonly ElementCategoryFilter CamerasCategoryFilter = new ElementCategoryFilter(BuiltInCategory.OST_Cameras);
 
     public static implicit operator ElementFilter(VisibleInViewFilter filter) => filter.Inverted ?
-    CompoundElementFilter.ExclusionFilter(filter.VisibleElementIds, inverted: false) :
-    CompoundElementFilter.Intersect
+    ElementFilters.ExclusionFilter(filter.VisibleElementIds, inverted: false) :
+    ElementFilters.Intersect
     (
     #region Quick exclusion
       // should not be a type.
-      CompoundElementFilter.ElementIsElementTypeFilter(inverted: true),
+      ElementFilters.ElementIsElementTypeFilter(inverted: true),
       // and be on one of those categories
-      CompoundElementFilter.ElementCategoryFilter(filter.VisibleCategoryIds),
+      ElementFilters.ElementCategoryFilter(filter.VisibleCategoryIds),
       // and
-      CompoundElementFilter.Union
+      ElementFilters.Union
       (
         // have a bbox
-        CompoundElementFilter.ElementHasBoundingBoxFilter,
+        ElementFilters.ElementHasBoundingBoxFilter,
         // or be owned by this view
         new ElementOwnerViewFilter(filter.ViewId)
       ),
     #endregion
     #region Slow inclusion
-      CompoundElementFilter.Union
+      ElementFilters.Union
       (
         // Cameras do not have parameter Id, so we select all except... ->
         CamerasCategoryFilter,
-        CompoundElementFilter.ExclusionFilter(filter.VisibleElementIds, inverted: true)
+        ElementFilters.ExclusionFilter(filter.VisibleElementIds, inverted: true)
       ),
       // -> ... the one related to this view.
-      CompoundElementFilter.ExclusionFilter
+      ElementFilters.ExclusionFilter
       (
         new ElementId[]
         {

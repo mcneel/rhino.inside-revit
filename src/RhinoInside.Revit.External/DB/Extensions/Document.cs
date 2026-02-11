@@ -1116,7 +1116,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           //  (
           //    var collector = new FilteredElementCollector(document, view.Id).
           //    WherePasses(new ElementCategoryFilter(ElementId.InvalidElementId, inverted: true)).
-          //    WherePasses(External.DB.CompoundElementFilter.ElementHasBoundingBoxFilter)
+          //    WherePasses(External.DB.ElementFilters.ElementHasBoundingBoxFilter)
           //  )
           //  {
           //    var elements = collector.ToElementIds();

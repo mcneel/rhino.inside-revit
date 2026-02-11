@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       }
 
       if (typesList.Count == 0) return;
-      var filter = CompoundElementFilter.ElementClassFilter(typesList);
+      var filter = ElementFilters.ElementClassFilter(typesList);
 
       IEnumerable<ARDB.Element> annotationElements = null;
 

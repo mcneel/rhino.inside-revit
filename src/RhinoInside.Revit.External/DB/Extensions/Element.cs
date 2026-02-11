@@ -171,13 +171,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if (!boundBottom)
         {
           var (minX, minY, _) = outline.MinimumPoint;
-          outline.MinimumPoint = new XYZ(minX, minY, -CompoundElementFilter.BoundingBoxLimits);
+          outline.MinimumPoint = new XYZ(minX, minY, -ElementFilters.BoundingBoxLimits);
         }
 
         if (!boundTop)
         {
           var (maxX, maxY, _) = outline.MaximumPoint;
-          outline.MaximumPoint = new XYZ(maxX, maxY, +CompoundElementFilter.BoundingBoxLimits);
+          outline.MaximumPoint = new XYZ(maxX, maxY, +ElementFilters.BoundingBoxLimits);
         }
       }
       return outline;
@@ -336,7 +336,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
         if (filter is null)
-          filter = CompoundElementFilter.Universe;
+          filter = ElementFilters.Universe;
 
         UpdaterRegistry.AddTrigger(UpdaterId, document, filter, Element.GetChangeTypeAny());
         UpdaterRegistry.AddTrigger(UpdaterId, document, filter, Element.GetChangeTypeElementDeletion());
@@ -395,8 +395,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       var ids = element.GetDependentElements
       (
-        CompoundElementFilter.ExclusionFilter(element.Id).Intersect
-        (CompoundElementFilter.ElementClassFilter(typeof(T)))
+        ElementFilters.ExclusionFilter(element.Id).Intersect
+        (ElementFilters.ElementClassFilter(typeof(T)))
       );
 
       var doc = element.Document;
@@ -407,8 +407,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       var ids = element.GetDependentElements
       (
-        CompoundElementFilter.ExclusionFilter(element.Id).Intersect
-        (CompoundElementFilter.ElementClassFilter(typeof(T)))
+        ElementFilters.ExclusionFilter(element.Id).Intersect
+        (ElementFilters.ElementClassFilter(typeof(T)))
       );
 
       var doc = element.Document;
@@ -418,7 +418,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool DependsOn(this Element element, Element host)
     {
       if (!element.Document.IsEquivalent(host?.Document)) return false;
-      return host?.GetDependentElements(CompoundElementFilter.InclusionFilter(element)).Count == 1;
+      return host?.GetDependentElements(ElementFilters.InclusionFilter(element)).Count == 1;
     }
     #endregion
 

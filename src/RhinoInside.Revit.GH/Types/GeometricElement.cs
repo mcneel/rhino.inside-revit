@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.Types
             var subWires = new List<Curve>();
             var subMaterials = new List<ARDB.Material>();
 
-            foreach (var dependent in element.GetDependentElements(CompoundElementFilter.ElementHasBoundingBoxFilter).Select(element.Document.GetElement))
+            foreach (var dependent in element.GetDependentElements(ElementFilters.ElementHasBoundingBoxFilter).Select(element.Document.GetElement))
             {
               if (dependent.GetBoundingBoxXYZ(out var view) is null)
                 continue;
@@ -263,7 +263,7 @@ namespace RhinoInside.Revit.GH.Types
 
               default:
                 if (elementWires.Count == 0 && elementMeshes.Count == 0 && element.get_BoundingBox(elementView) is ARDB.BoundingBoxXYZ)
-                  dependents.AddRange(element.GetDependentElements(CompoundElementFilter.ElementHasBoundingBoxFilter));
+                  dependents.AddRange(element.GetDependentElements(ElementFilters.ElementHasBoundingBoxFilter));
                 break;
             }
 

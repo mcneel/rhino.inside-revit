@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
 
     #region ISelectionFilter
-    static readonly ARDB.ElementFilter ElementFilter = External.DB.CompoundElementFilter.Intersect
+    static readonly ARDB.ElementFilter ElementFilter = External.DB.ElementFilters.Intersect
     (
       new ARDB.ElementIsElementTypeFilter(inverted: true),
       new ARDB.ElementMulticategoryFilter

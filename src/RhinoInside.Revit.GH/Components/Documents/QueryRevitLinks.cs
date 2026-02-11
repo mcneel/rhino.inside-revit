@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     public override Guid ComponentGuid => new Guid("EBCCFDD8-9F3B-44F4-A209-72D06C8082A5");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => "M";
-    protected override ARDB.ElementFilter ElementFilter => External.DB.CompoundElementFilter.Union
+    protected override ARDB.ElementFilter ElementFilter => External.DB.ElementFilters.Union
     (
       new ARDB.ElementClassFilter(typeof(ARDB.RevitLinkInstance)),
       new ARDB.ElementClassFilter(typeof(ARDB.RevitLinkType))

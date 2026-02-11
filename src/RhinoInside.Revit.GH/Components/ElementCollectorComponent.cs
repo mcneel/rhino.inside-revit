@@ -62,7 +62,7 @@ namespace RhinoInside.Revit.GH.Components
                       Array.Empty<ARDB.ElementFilter>() :
                       Params.Input[_Filter_].VolatileData.AllData(true).
                       OfType<Types.ElementFilter>().
-                      Select(x => CompoundElementFilter.Intersect(elementFilter, x.Value));
+                      Select(x => ElementFilters.Intersect(elementFilter, x.Value));
 
         foreach (var filter in filters.Any() ? filters : new ARDB.ElementFilter[] { elementFilter })
         {
@@ -153,7 +153,7 @@ namespace RhinoInside.Revit.GH.Components
             case Operator.CompareMethod.Contains: evaluator = new ARDB.FilterStringContains(); break;
           }
 
-          var rule = CompoundElementFilter.FilterStringRule
+          var rule = ElementFilters.FilterStringRule
           (
             new ARDB.ParameterValueProvider(new ARDB.ElementId(paramId)),
             evaluator,

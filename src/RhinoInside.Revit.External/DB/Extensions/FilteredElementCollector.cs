@@ -242,18 +242,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// </summary>
     /// <param name="document"></param>
     /// <returns></returns>
-    public static FilteredElementCollector Empty(Document document) => new FilteredElementCollector(document).WherePasses(CompoundElementFilter.Empty);
+    public static FilteredElementCollector Empty(Document document) => new FilteredElementCollector(document).WherePasses(ElementFilters.Empty);
 
     /// <summary>
     /// FilteredElementCollector that contains all elements.
     /// </summary>
     /// <param name="document"></param>
     /// <returns></returns>
-    public static FilteredElementCollector Universe(Document document) => new FilteredElementCollector(document).WherePasses(CompoundElementFilter.Universe);
+    public static FilteredElementCollector Universe(Document document) => new FilteredElementCollector(document).WherePasses(ElementFilters.Universe);
 
     public static FilteredElementCollector WhereElementIsKindOf(this FilteredElementCollector collector, Type type)
     {
-      return type == typeof(Element) ? collector : collector.WherePasses(CompoundElementFilter.ElementClassFilter(type));
+      return type == typeof(Element) ? collector : collector.WherePasses(ElementFilters.ElementClassFilter(type));
     }
 
     public static FilteredElementCollector WhereCategoryIdEqualsTo(this FilteredElementCollector collector, ElementId value)
@@ -292,7 +292,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       using (var provider = new ParameterValueProvider(new ElementId(paramId)))
       using (var evaluator = new FilterStringEquals())
-      using (var rule = CompoundElementFilter.FilterStringRule(provider, evaluator, value))
+      using (var rule = ElementFilters.FilterStringRule(provider, evaluator, value))
       using (var filter = new ElementParameterFilter(rule))
         return collector.WherePasses(filter);
     }
@@ -315,7 +315,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       using (var provider = new ParameterValueProvider(new ElementId(paramId)))
       using (var evaluator = new FilterStringBeginsWith())
-      using (var rule = CompoundElementFilter.FilterStringRule(provider, evaluator, value))
+      using (var rule = ElementFilters.FilterStringRule(provider, evaluator, value))
       using (var filter = new ElementParameterFilter(rule))
         return collector.WherePasses(filter);
     }

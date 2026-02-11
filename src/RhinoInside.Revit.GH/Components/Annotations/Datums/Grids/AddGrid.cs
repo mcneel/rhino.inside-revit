@@ -199,7 +199,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
         grid.Maximize3DExtents();
 
         var view = default(ARDB.View);
-        var viewsFilter = ERDB.CompoundElementFilter.ElementClassFilter(typeof(ARDB.View3D), typeof(ARDB.ViewPlan));
+        var viewsFilter = ERDB.ElementFilters.ElementClassFilter(typeof(ARDB.View3D), typeof(ARDB.ViewPlan));
         using (var collector = new ARDB.FilteredElementCollector(grid.Document).WherePasses(viewsFilter))
         {
           var views = collector.Cast<ARDB.View>().

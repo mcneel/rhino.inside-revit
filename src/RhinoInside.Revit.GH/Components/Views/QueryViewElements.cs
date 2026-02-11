@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
           elementCollector = elementCollector.WherePasses
           (
-            ERDB.CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
+            ERDB.ElementFilters.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
           );
         }
         else
@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Views
   {
     public override Guid ComponentGuid => new Guid("92B3F600-40FB-4DD3-992B-68B68D284167");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsViewSpecificFilter();
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.ElementIsViewSpecificFilter();
 
     public QueryViewOwnedElements() : base
     (
@@ -141,7 +141,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
           elementCollector = elementCollector.WherePasses
           (
-            ERDB.CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
+            ERDB.ElementFilters.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
           );
         }
         else
