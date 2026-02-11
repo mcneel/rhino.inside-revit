@@ -178,15 +178,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition
-      (
-        new Parameters.ModelInstance()
-        {
-          Name = "Model",
-          NickName = "M",
-          Description = "Target model",
-        }
-      ),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Parameters.Element()

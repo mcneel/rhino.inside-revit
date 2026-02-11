@@ -340,7 +340,7 @@ namespace RhinoInside.Revit.GH.Types
         case RevitLinkInstance instance: return instance.ModelDocument.Equals(Document) || (acceptLinked && instance.ReferenceDocument.Equals(ReferenceDocument));
       }
 
-      throw new Exceptions.RuntimeArgumentException("Model", "Invalid Document");
+      throw new Exceptions.RuntimeArgumentException("Source", "Invalid source model");
     }
   }
 }

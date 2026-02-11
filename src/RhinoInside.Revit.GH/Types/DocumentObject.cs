@@ -386,13 +386,13 @@ namespace RhinoInside.Revit.GH.Types
       [DisplayName("Class"), Description("API Object Type."), Category("Object")]
       public virtual Type ObjectType => owner.Value?.GetType();
 
-      [DisplayName("Model"), Description("The document this element belongs to."), Category("Object")]
+      [DisplayName("Document"), Description("The document this element belongs to."), Category("Object")]
       public string Document => owner.Document?.GetTitle();
 
       [DisplayName("Document ID"), Description("The Guid of document that references this element."), Category("Reference")]
       public Guid ReferenceDocumentId => owner.ReferenceDocumentId;
 
-      [DisplayName("Persistent ID"), Description("A stable unique identifier for an element within the document."), Category("Reference")]
+      [DisplayName("Unique ID"), Description("A stable unique identifier for an element within the document."), Category("Reference")]
       public string ReferenceUniqueId => owner.ReferenceUniqueId;
     }
 

@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.ModelInstance>("Model", "M", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.ModelInstance>("Project", "P", relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "New current Shared Site", optional: true, relevance: ParamRelevance.Secondary),
     };
 
@@ -99,14 +99,6 @@ namespace RhinoInside.Revit.GH.Components.Site
       ParamDefinition.Create<Parameters.BasePoint>("Project Base Point", "PBP", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.BasePoint>("Internal Origin", "IO", relevance: ParamRelevance.Occasional),
     };
-
-    public override void AddedToDocument(GH_Document document)
-    {
-      if (Params.Input<Parameters.Document>("Project") is IGH_Param model)
-        model.Name = "Model";
-
-      base.AddedToDocument(document);
-    }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {

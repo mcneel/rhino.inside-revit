@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.ModelInstance>("Model", "M", "Revit model", relevance: ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Revit linked model instance name", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true, relevance: ParamRelevance.Occasional)
     };

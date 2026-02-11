@@ -14,9 +14,9 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("EF2EFE84-8B2E-4613-A352-B1CE95671238");
     protected override string IconTag => DefaultNickName;
 
-    internal static readonly string DefaultName = "Model";
-    internal static readonly string DefaultNickName = "M";
-    internal static readonly string DefaultDescription = "Contains a collection of Revit models";
+    internal static readonly string DefaultName = "Source";
+    internal static readonly string DefaultNickName = "S";
+    internal static readonly string DefaultDescription = "Contains a collection of Revit element sources";
 
     public ModelInstance() : base
     (
