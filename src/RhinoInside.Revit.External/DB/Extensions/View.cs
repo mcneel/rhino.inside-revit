@@ -600,7 +600,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (view.Document.GetElement(id) is T element)
       {
         // Check if is visible in the view.
-        if(view.GetVisibleElements(new ElementId[] { element.Id }).Contains(element.Id))
+        if(view.GetVisibleElements(new ElementId[] { element.Id }, accurate: false).Contains(element.Id))
           return element;
       }
 
@@ -629,13 +629,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
         if
         (
           view.GetVisibleElement<RevitLinkInstance>(linkId) is RevitLinkInstance link &&
-          link.GetLinkDocument() is Document linkDocument
+          link.GetLinkDocument() is Document linkDocument &&
+          link.GetTransform().TryGetInverse(out var inverse)
         )
         {
           var linkedElementIds = default(ICollection<ElementId>);
           using (linkDocument.RollBackScope())
           {
-            link.GetTransform().TryGetInverse(out var inverse);
             var offset = inverse.OfPoint(XYZExtension.Zero);
 
             var elementsToCopy = new HashSet<ElementId>(default(ElementIdEqualityComparer)) { view.Id };
@@ -823,8 +823,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var annotationClipFilter = ElementFilters.Union
       (
         new ElementOwnerViewFilter(view.Id, clipped),
-        new ElementClassFilter(typeof(DatumPlane)),
-        new ElementClassFilter(typeof(RevitLinkInstance))
+        ElementFilters.ElementClassFilter
+        (
+          typeof(DatumPlane),
+          typeof(RevitLinkInstance)
+        )
       );
 
       return clipped ?
@@ -895,7 +898,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return filters.Count > 0 ? ElementFilters.Union(filters) : default;
     }
 
-    internal static ISet<ElementId> GetVisibleElements(this View view, ICollection<ElementId> ids)
+    internal static ISet<ElementId> GetVisibleElements(this View view, ICollection<ElementId> ids, bool accurate = true)
     {
       if (ids.Count > 0 && FilteredElementCollector.IsViewValidForElementIteration(view.Document, view.Id))
       {
@@ -1014,11 +1017,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
           if (visibleIds.Count > 0)
           {
-            using (var filter = ElementFilters.ExclusionFilter(visibleIds, inverted: true))
-            using (var collector = new FilteredElementCollector(viewDocument, viewId).WherePasses(filter))
+            if (accurate)
             {
-              return collector.ToReadOnlyElementIdSet();
+              using (var filter = ElementFilters.ExclusionFilter(visibleIds, inverted: true))
+              using (var collector = new FilteredElementCollector(viewDocument, viewId).WherePasses(filter))
+              {
+                return collector.ToReadOnlyElementIdSet();
+              }
             }
+            else return new SortedSet<ElementId>(visibleIds, ElementIdComparer.NoNullsAscending);
           }
         }
       }
