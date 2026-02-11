@@ -476,7 +476,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public Workset Workset
     {
-      get => new Workset(Document, Document.IsWorkshared ? Document?.GetWorksetId(Id) ?? ARDB.WorksetId.InvalidWorksetId : ARDB.WorksetId.InvalidWorksetId);
+      get => new Workset(Document, (Document?.IsWorkshared is true) ? Document?.GetWorksetId(Id) ?? ARDB.WorksetId.InvalidWorksetId : ARDB.WorksetId.InvalidWorksetId);
       set
       {
         if (value is object && Value is ARDB.Element element)

@@ -162,7 +162,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   public class QueryNamesakeElement : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("1FEE04EF-A3DA-44F4-B114-486724C92AB6");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.Universe;
 
     public QueryNamesakeElement() : base
@@ -178,14 +178,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Primary),
       new ParamDefinition
       (
         new Parameters.Element()
         {
           Name = "Element",
           NickName = "E",
-          Description = "Source Element",
+          Description = "Element to query",
         }
       )
     };
@@ -195,22 +195,21 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       new ParamDefinition
       (
-        new Param_String()
-        {
-          Name = "Name",
-          NickName = "N",
-          Description = "Element Name",
-        },
-        ParamRelevance.Secondary
-      ),
-      new ParamDefinition
-      (
         new Parameters.Element()
         {
           Name = "Element",
           NickName = "E",
-          Description = "Namesake Element",
-        }
+          Description = "Namesake Element in the source model",
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_String()
+        {
+          Name = "Full Name",
+          NickName = "FN",
+          Description = "Element name used to query the element",
+        }, ParamRelevance.Primary
       )
     };
 
@@ -219,11 +218,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
-      if (element.AtSource(source) is Types.Element namesake)
-      {
-        Params.TrySetData(DA, "Name", () => namesake.Nomen);
-        DA.SetData("Element", namesake);
-      }
+      Params.TrySetData(DA, "Element", () => source is object ? element.AtSource(source) : element);
+      Params.TrySetData(DA, "Full Name", () => element is Types.Category c ? c.FullName : element.Nomen);
     }
   }
 }
