@@ -98,12 +98,15 @@ namespace RhinoInside.Revit.GH.Components
     {
       get
       {
-        ComponentVersionAttribute.GetVersionHistory(GetType(), out var introduced, out var _, out var deprecated);
+        ComponentVersionAttribute.GetVersionHistory(GetType(), out var introduced, out var updated, out var deprecated);
 
         var versionDescription = string.Empty;
 
         if (introduced is object)
           versionDescription += $"Introduced in v{introduced}" + OS.NewLine;
+
+        if (introduced is object)
+          versionDescription += $"Updated in v{updated}" + OS.NewLine;
 
         if (Obsolete)
         {
