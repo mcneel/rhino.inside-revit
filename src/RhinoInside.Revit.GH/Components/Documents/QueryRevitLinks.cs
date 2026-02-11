@@ -68,6 +68,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
           Name = "Links",
           NickName = "L",
           Description = "Revit linked models to the given model",
+          DataMapping = GH_DataMapping.Graft,
           Access = GH_ParamAccess.list
         }
       ),
@@ -78,6 +79,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
           Name = "Documents",
           NickName = "LD",
           Description = "Revit linked documents to the given model",
+          DataMapping = GH_DataMapping.Graft,
           Access = GH_ParamAccess.list
         }, ParamRelevance.Occasional
       )
