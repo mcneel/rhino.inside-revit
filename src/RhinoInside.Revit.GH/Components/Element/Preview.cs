@@ -79,14 +79,14 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           wires[w]?.Transform(element.ReferenceTransform);
         }
 
-        var model = element.Model;
+        var source = element.Source;
         var outMesh = new Mesh();
         var dictionary = Convert.Display.PreviewConverter.ZipByMaterial(materials, meshes, outMesh);
         if (dictionary is null)
         {
           // In case ZipByMaterial fails we just return the unclassified preview meshes
           DA.SetDataList(0, meshes?.Select(x => new GH_Mesh(x)));
-          DA.SetDataList(1, materials?.Select(x => new Types.Material(x).AtModel(model)));
+          DA.SetDataList(1, materials?.Select(x => new Types.Material(x).FromSource(source)));
         }
         else
         {
@@ -94,12 +94,12 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           if (outMesh.Faces.Count > 0)
           {
             DA.SetDataList(0, dictionary.Values.Select(x => new GH_Mesh(x)).Concat(Enumerable.Repeat(new GH_Mesh(outMesh), 1)));
-            DA.SetDataList(1, dictionary.Keys.Select(x => new Types.Material(x)).AtModel(model).Concat(Enumerable.Repeat(new Types.Material(), 1)));
+            DA.SetDataList(1, dictionary.Keys.Select(x => new Types.Material(x)).FromSource(source).Concat(Enumerable.Repeat(new Types.Material(), 1)));
           }
           else
           {
             DA.SetDataList(0, dictionary.Values.Select(x => new GH_Mesh(x)));
-            DA.SetDataList(1, dictionary.Keys.Select(x => new Types.Material(x)).AtModel(model));
+            DA.SetDataList(1, dictionary.Keys.Select(x => new Types.Material(x)).FromSource(source));
           }
         }
 

@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.ModelInstance>("Model", "M", "Revit model", relevance: ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Revit linked model instance name", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true, relevance: ParamRelevance.Occasional)
     };
@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
       ),
       new ParamDefinition
       (
-        new Parameters.ModelInstance()
+        new Parameters.ElementSource()
         {
           Name = "Links",
           NickName = "L",
@@ -85,18 +85,18 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
-      Params.TrySetData(DA, "Document", () => model.ModelDocument);
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
+      Params.TrySetData(DA, "Document", () => source.SourceDocument);
 
       Params.TryGetData(DA, "Name", out string name);
       Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var linksCollector = collector.OfClass(typeof(ARDB.RevitLinkInstance));
 
         if (filter is object)
-          linksCollector = linksCollector.WherePasses(filter, model.ModelInstance.Value);
+          linksCollector = linksCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.RVT_LINK_INSTANCE_NAME, ref name, out var nameFilter))
           linksCollector = linksCollector.WherePasses(nameFilter);

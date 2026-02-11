@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Parameters.Param_Enum<Types.BoundaryConditionsType>
@@ -58,10 +58,10 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Type", out ARDB.Structure.BoundaryConditionsType? type)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);
 
@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           "Boundary Conditions",
           elementsCollector.
           Select(Types.BoundaryConditions.FromElement).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

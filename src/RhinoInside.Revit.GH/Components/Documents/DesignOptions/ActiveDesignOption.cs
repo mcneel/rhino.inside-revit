@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -38,11 +38,11 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model))
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source))
         return;
 
-      var option = new Types.DesignOption(model.ModelDocument.Value, ARDB.DesignOption.GetActiveDesignOptionId(model.ModelDocument.Value));
-      DA.SetData("Active Design Option", option.AtModel(model));
+      var option = new Types.DesignOption(source.SourceDocument.Value, ARDB.DesignOption.GetActiveDesignOptionId(source.SourceDocument.Value));
+      DA.SetData("Active Design Option", option.FromSource(source));
     }
 
     #region UI

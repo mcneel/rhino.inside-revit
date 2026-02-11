@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Category>("Category", "C", "Category to look for a group type", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_String>("Name", "N", "Group name", optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true, relevance: ParamRelevance.Occasional)
@@ -45,14 +45,14 @@ namespace RhinoInside.Revit.GH.Components.Groups
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      if (category?.AssertValidModel(model) != false || category.Id.IsBuiltInId() || !category.Id.IsValid())
+      if (category?.AssertValidElementSource(source) != false || category.Id.IsBuiltInId() || !category.Id.IsValid())
       {
-        using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+        using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
         {
           var typesCollector = collector.WherePasses(ElementFilter);
 
@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
             typesCollector.WhereCategoryIdEqualsTo(category.Id);
 
           if (filter is object)
-            typesCollector = typesCollector.WherePasses(filter, model.ModelInstance.Value);
+            typesCollector = typesCollector.WherePasses(filter, source.SourceInstance.Value);
 
           if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
             typesCollector = typesCollector.WherePasses(nameFilter);
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
             "Types",
             groupTypes.
             Select(Types.Element.FromElement).
-            AtModel(model).
+            FromSource(source).
             TakeWhileIsNotEscapeKeyDown(this)
           );
         }

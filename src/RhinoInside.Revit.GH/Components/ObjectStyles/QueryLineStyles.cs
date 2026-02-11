@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Line style name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional)
     };
@@ -51,14 +51,14 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
 
       string name = null;
       DA.GetData("Name", ref name);
 
       Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
-      using (var categories = model.ModelDocument.Value.Settings.Categories)
+      using (var categories = source.SourceDocument.Value.Settings.Categories)
       {
         var styles = categories.
           get_Item(ARDB.BuiltInCategory.OST_Lines).SubCategories.Cast<ARDB.Category>().
@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
 
         if (filter is object)
         {
-          filter.AssertIsValidFiler(model.ModelInstance.Value);
+          filter.AssertIsValidFiler(source.SourceInstance.Value);
           styles = styles.Where(filter.PassesFilter);
         }
 
@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
           "Styles",
           styles.
           Select(x => new Types.GraphicsStyle(x)).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.WorksetKind>>
         ("Kind", "K", "Workset kind", defaultValue: ARDB.WorksetKind.UserWorkset, optional: true),
       ParamDefinition.Create<Param_String>
@@ -61,11 +61,11 @@ namespace RhinoInside.Revit.GH.Components.Worksets
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Kind", out Types.WorksetKind kind)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
 
-      using (var collector = new ARDB.FilteredWorksetCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredWorksetCollector(source.SourceDocument.Value))
       {
         var worksetCollector = collector;
 
@@ -80,7 +80,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
         DA.SetDataList
         (
           "Worksets",
-          worksets.Select(x => new Types.Workset(model.ModelDocument.Value, x)).
+          worksets.Select(x => new Types.Workset(source.SourceDocument.Value, x)).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

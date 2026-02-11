@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Revision Number", "RN", "Revision number", optional: true, relevance : ParamRelevance.Primary),
       ParamDefinition.Create<Param_Integer>("Revision Sequence", "RS", "Revision number", optional: true, relevance : ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Revision Date", "RD", "Revision date", optional: true, relevance : ParamRelevance.Primary),
@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Revision Number", out string number)) return;
       if (!Params.TryGetData(DA, "Revision Sequence", out int? sequence)) return;
       if (!Params.TryGetData(DA, "Revision Date", out string date)) return;
@@ -68,12 +68,12 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       if (!Params.TryGetData(DA, "Issued to", out string issuedTo)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var revisionCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          revisionCollector = revisionCollector.WherePasses(filter, model.ModelInstance.Value);
+          revisionCollector = revisionCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.PROJECT_REVISION_REVISION_NUM, ref number, out var numberFilter))
           revisionCollector = revisionCollector.WherePasses(numberFilter);
@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           "Revisions",
           revisions.
           Select(Types.Revision.FromElement).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

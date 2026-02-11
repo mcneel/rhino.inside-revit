@@ -37,8 +37,8 @@ namespace RhinoInside.Revit.GH.Components
 
     protected bool MayNeedToBeExpired(ARDB.Document document)
     {
-      if (Params.Input<Parameters.ModelInstance>(Parameters.ModelInstance.DefaultName) is Parameters.ModelInstance model)
-        return model.VolatileData.AllData(true).OfType<Types.Document>().Select(x => x.Value).Where(x => !x.IsLinked).Contains(document);
+      if (Params.Input<Parameters.ElementSource>(Parameters.ElementSource.DefaultName) is Parameters.ElementSource source)
+        return source.VolatileData.AllData(true).OfType<Types.Document>().Select(x => x.Value).Where(x => !x.IsLinked).Contains(document);
 
       if (Parameters.Document.TryGetCurrentDocument(this, out var currentDocument))
         return document.Equals(currentDocument.Value);
@@ -85,11 +85,11 @@ namespace RhinoInside.Revit.GH.Components
 
     public override void AddedToDocument(GH_Document document)
     {
-      if (Params.Input<Parameters.Document>("Document") is IGH_Param model)
+      if (Params.Input<Parameters.Document>("Document") is IGH_Param source)
       {
-        model.Name = Parameters.ModelInstance.DefaultName;
-        model.NickName = Parameters.ModelInstance.DefaultNickName;
-        model.Description = Parameters.ModelInstance.DefaultDescription;
+        source.Name = Parameters.ElementSource.DefaultName;
+        source.NickName = Parameters.ElementSource.DefaultNickName;
+        source.Description = Parameters.ElementSource.DefaultDescription;
       }
 
       base.AddedToDocument(document);
@@ -197,15 +197,10 @@ namespace RhinoInside.Revit.GH.Components
         yield return Types.Element.FromElement(element) as T;
     }
 
-    internal static IEnumerable<T> AtModel<T>(this IEnumerable<T> elements, Types.IGH_ModelInstance model) where T : Types.Element
+    public static IEnumerable<T> FromSource<T>(this IEnumerable<T> elements, Types.IGH_ElementSource source) where T : Types.Element
     {
-      switch (model)
-      {
-        case Types.Document _: return elements;
-        case Types.RevitLinkInstance instance: return elements.Select(x => (T) x.AsLinked(instance.Value));
-      }
-
-      return Array.Empty<T>();
+      foreach (var element in elements)
+        yield return (T) element?.FromSource(source);
     }
   }
 }

@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Site location name", optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
     };
@@ -52,16 +52,16 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var locationsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          locationsCollector = locationsCollector.WherePasses(filter, model.ModelInstance.Value);
+          locationsCollector = locationsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         var locations = collector.Cast<ARDB.SiteLocation>();
 
@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.GH.Components.Site
           "Site Locations",
           locations.
           Select(x => new Types.SiteLocation(x)).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

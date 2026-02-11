@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.AnalyticalStructuralRole>>
       (
         name: "Structural Role",
@@ -72,17 +72,17 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Structural Role", out ARDB.Structure.AnalyticalStructuralRole? structuralRole)) return;
       if (!Params.TryGetData(DA, "Analyze As", out ARDB.Structure.AnalyzeAs? analyzeAs)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var elementsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          elementsCollector = elementsCollector.WherePasses(filter, model.ModelInstance.Value);
+          elementsCollector = elementsCollector.WherePasses(filter, source.SourceInstance.Value);
 
 #if REVIT_2023
         if (structuralRole is object)
@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           "Analytical Elements",
           elementsCollector.
           Select(Types.AnalyticalElement.FromElement).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

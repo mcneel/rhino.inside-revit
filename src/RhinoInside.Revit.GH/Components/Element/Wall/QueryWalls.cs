@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.WallSystemFamily>>
       (
         name: "Wall System Family",
@@ -50,7 +50,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
 
       // grab wall system family from input
       var wallKind = ARDB.WallKind.Unknown;
@@ -58,7 +58,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
         return;
 
       // collect wall instances based on the given wallkind
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var wallsCollector = collector.WherePasses(ElementFilter);
         var walls = wallsCollector.Cast<ARDB.Wall>();
@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           "Walls",
           walls.
           Select(x => new Types.Wall(x)).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

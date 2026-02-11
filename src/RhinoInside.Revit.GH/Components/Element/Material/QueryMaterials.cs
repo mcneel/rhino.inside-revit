@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Class", "C", "Material class", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Material name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary)
@@ -53,17 +53,17 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       Params.TryGetData(DA, "Class", out string @class);
       Params.TryGetData(DA, "Name", out string name);
       Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var materialsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          materialsCollector = materialsCollector.WherePasses(filter, model.ModelInstance.Value);
+          materialsCollector = materialsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.MATERIAL_NAME, ref name, out var nameFilter))
           materialsCollector = materialsCollector.WherePasses(nameFilter);
@@ -81,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
           "Materials",
           materials.
           Select(x => new Types.Material(x)).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

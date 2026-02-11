@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.Phasing
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ModelInstance(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Phase name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional)
     };
@@ -52,16 +52,16 @@ namespace RhinoInside.Revit.GH.Components.Phasing
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.ModelInstance.GetModelOrCurrent(this, DA, out var model)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(model.ModelDocument.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var phasesCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          phasesCollector = phasesCollector.WherePasses(filter, model.ModelInstance.Value);
+          phasesCollector = phasesCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (name is object && TryGetFilterStringParam(ARDB.BuiltInParameter.PHASE_NAME, ref name, out var nameFilter))
           phasesCollector = phasesCollector.WherePasses(nameFilter);
@@ -77,7 +77,7 @@ namespace RhinoInside.Revit.GH.Components.Phasing
           phases.
           Select(x => new Types.Phase(x)).
           OrderBy(x => x.SequenceNumber).
-          AtModel(model).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }
