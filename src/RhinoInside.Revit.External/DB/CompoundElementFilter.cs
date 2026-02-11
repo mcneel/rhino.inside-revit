@@ -332,17 +332,16 @@ namespace RhinoInside.Revit.External.DB
 
     private static FilterCost GetFilterCost(this ElementLogicalFilter logical)
     {
-      // Documentation says Revit is already reordering operators
-      // So we don't need a more complex implementation
-      //
-      //return FilterCost.Logical;
-
+#if REVIT_2019
       var filters = logical.GetFilters();
       int cost = (int) FilterCost.Logical;
       for (int f = 0; f < filters.Count; ++f)
         cost += (int) filters[f].GetFilterCost();
 
       return (FilterCost) cost;
+#else
+      return FilterCost.Logical;
+#endif
     }
 
     public static ElementFilter Union(this ElementFilter self, ElementFilter other)
@@ -420,7 +419,7 @@ namespace RhinoInside.Revit.External.DB
 
     public static ElementFilter ThatExcludes(this ElementFilter self, params ElementId[] idsToExclude) =>
       self.Intersect(ExclusionFilter(idsToExclude, inverted: false));
-    #endregion
+#endregion
 
     #region Geometry
     public static ElementFilter GraphicalElementFilter { get; } = Intersect
