@@ -120,7 +120,7 @@ namespace RhinoInside.Revit.External.DB
             {
               if
               (
-                Document.GetElement(LinkId) is RevitLinkInstance link &&
+                view.GetVisibleElement<RevitLinkInstance>(LinkId) is RevitLinkInstance link &&
                 link.GetLinkDocument() is Document linkDocument &&
                 link.GetTransform().TryGetInverse(out var inverse)
               )
