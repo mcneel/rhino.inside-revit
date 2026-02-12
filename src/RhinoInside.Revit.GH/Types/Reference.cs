@@ -192,7 +192,6 @@ namespace RhinoInside.Revit.GH.Types
     protected void ResetReferenceTransform()
     {
       _ReferenceTransform = ModelTransform.Identity;
-      InvalidateGraphics();
     }
 
     public Rhino.Geometry.Transform ReferenceTransform

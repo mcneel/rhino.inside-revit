@@ -594,16 +594,33 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region FilteredElementCollector
-    public static T GetVisibleElement<T>(this View view, ElementId id) where T : Element
+    internal static T GetVisibleElement<T>(this View view, ElementId id) where T : Element
     {
       // Check it exists and is of the expected type
       if (view.Document.GetElement(id) is T element)
       {
         // Check if is visible in the view.
-        if(view.GetVisibleElements(new ElementId[] { element.Id }, accurate: false).Contains(element.Id))
+        if(view.GetVisibleElements(new ElementId[] { element.Id }, accurate: true).Contains(element.Id))
           return element;
       }
 
+      return null;
+    }
+
+    internal static RevitLinkInstance GetVisibleLink<T>(this View view, ElementId id, out Document linkDocument)
+    {
+      // Check it exists and is of the expected type
+      if (view.Document.GetElement(id) is RevitLinkInstance instance)
+      {
+        linkDocument = instance.GetLinkDocument();
+        if (linkDocument is null) return null;
+
+        // Check if is visible in the view.
+        if (view.GetVisibleElements(new ElementId[] { instance.Id }, accurate: false).Contains(instance.Id))
+          return instance;
+      }
+
+      linkDocument = null;
       return null;
     }
 
@@ -628,8 +645,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         // If link instance is visible in view.
         if
         (
-          view.GetVisibleElement<RevitLinkInstance>(linkId) is RevitLinkInstance link &&
-          link.GetLinkDocument() is Document linkDocument &&
+          view.GetVisibleLink<RevitLinkInstance>(linkId, out var linkDocument) is RevitLinkInstance link &&
           link.GetTransform().TryGetInverse(out var inverse)
         )
         {
