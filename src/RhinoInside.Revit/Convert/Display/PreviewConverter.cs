@@ -233,7 +233,7 @@ namespace RhinoInside.Revit.Convert.Display
           }
           case ARDB.Face face:
           {
-            foreach (var wire in face.GetEdgesAsCurveLoops().SelectMany(x => x.GetPreviewWires()))
+            foreach (var wire in face.GetEdgesAsCurveLoops().SelectMany(GetPreviewWires))
               yield return wire;
             break;
           }

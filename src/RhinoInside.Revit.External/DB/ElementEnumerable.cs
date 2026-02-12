@@ -120,8 +120,7 @@ namespace RhinoInside.Revit.External.DB
             {
               if
               (
-                view.GetVisibleElement<RevitLinkInstance>(LinkId) is RevitLinkInstance link &&
-                link.GetLinkDocument() is Document linkDocument &&
+                view.GetVisibleLink<RevitLinkInstance>(LinkId, out var _) is RevitLinkInstance link &&
                 link.GetTransform().TryGetInverse(out var inverse)
               )
               {
@@ -169,8 +168,12 @@ namespace RhinoInside.Revit.External.DB
       get
       {
         if (ViewId is null) return base.Count;
-        if (Document.GetElement(ViewId) is null) return 0;
-        if (LinkId is object && Document.GetElement<RevitLinkInstance>(LinkId)?.GetLinkDocument() is null) return 0;
+        if (Document.GetElement(ViewId) is View view)
+        {
+          if (LinkId is object && view.GetVisibleLink<RevitLinkInstance>(LinkId, out var _) is null) return 0;
+        }
+        else return 0;
+
         return Enumerable.Count(this);
       }
     }
