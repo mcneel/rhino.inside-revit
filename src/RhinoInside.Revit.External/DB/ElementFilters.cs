@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.External.DB
     /// <returns></returns>
     internal static ElementFilter ElementIsNotInternalFilter(Document doc)
     {
-      return Union
+      return new LogicalOrFilter
       (
         ElementIsElementTypeFilter(),
         ElementHasCategoryFilter
@@ -113,14 +113,14 @@ namespace RhinoInside.Revit.External.DB
     #region Generic Filters
     public static ElementFilter ElementClassFilter(Type type)
     {
-           if (typeof(Area).IsAssignableFrom(type))         return new ElementClassFilter(typeof(SpatialElement)).Intersect(new AreaFilter());
-      else if (typeof(AreaTag).IsAssignableFrom(type))      return new ElementClassFilter(typeof(SpatialElementTag)).Intersect(new AreaTagFilter());
-      else if (typeof(Room).IsAssignableFrom(type))         return new ElementClassFilter(typeof(SpatialElement)).Intersect(new RoomFilter());
-      else if (typeof(RoomTag).IsAssignableFrom(type))      return new ElementClassFilter(typeof(SpatialElementTag)).Intersect(new RoomTagFilter());
-      else if (typeof(Space).IsAssignableFrom(type))        return new ElementClassFilter(typeof(SpatialElement)).Intersect(new SpaceFilter());
-      else if (typeof(SpaceTag).IsAssignableFrom(type))     return new ElementClassFilter(typeof(SpatialElementTag)).Intersect(new SpaceTagFilter());
-      else if (typeof(Mullion) == type)                     return new ElementClassFilter(typeof(FamilyInstance)).Intersect(new ElementCategoryFilter(BuiltInCategory.OST_CurtainWallMullions));
-      else if (typeof(Panel) == type)                       return new ElementClassFilter(typeof(FamilyInstance)).Intersect(new ElementCategoryFilter(BuiltInCategory.OST_CurtainWallPanels));
+           if (typeof(Area).IsAssignableFrom(type))         return new LogicalAndFilter(new ElementClassFilter(typeof(SpatialElement)), new AreaFilter());
+      else if (typeof(AreaTag).IsAssignableFrom(type))      return new LogicalAndFilter(new ElementClassFilter(typeof(SpatialElementTag)), new AreaTagFilter());
+      else if (typeof(Room).IsAssignableFrom(type))         return new LogicalAndFilter(new ElementClassFilter(typeof(SpatialElement)), new RoomFilter());
+      else if (typeof(RoomTag).IsAssignableFrom(type))      return new LogicalAndFilter(new ElementClassFilter(typeof(SpatialElementTag)), new RoomTagFilter());
+      else if (typeof(Space).IsAssignableFrom(type))        return new LogicalAndFilter(new ElementClassFilter(typeof(SpatialElement)), new SpaceFilter());
+      else if (typeof(SpaceTag).IsAssignableFrom(type))     return new LogicalAndFilter(new ElementClassFilter(typeof(SpatialElementTag)), new SpaceTagFilter());
+      else if (typeof(Mullion) == type)                     return new LogicalAndFilter(new ElementClassFilter(typeof(FamilyInstance)), new ElementCategoryFilter(BuiltInCategory.OST_CurtainWallMullions));
+      else if (typeof(Panel) == type)                       return new LogicalAndFilter(new ElementClassFilter(typeof(FamilyInstance)), new ElementCategoryFilter(BuiltInCategory.OST_CurtainWallPanels));
       else if (typeof(CurveElement).IsAssignableFrom(type)) return new ElementClassFilter(typeof(CurveElement));
       else if (typeof(CombinableElement) == type)           return new ElementMulticlassFilter(new Type[] {typeof(GenericForm), typeof(GeomCombination) });
       else if (typeof(ElementType) == type)                 return new ElementIsElementTypeFilter();
@@ -152,7 +152,7 @@ namespace RhinoInside.Revit.External.DB
 
       switch (types.Count)
       {
-        case 0: break;
+        case 0: return Empty;
         case 1: filters.Add(new ElementClassFilter(types[0]));    break;
         default: filters.Add(new ElementMulticlassFilter(types)); break;
       }
@@ -237,16 +237,16 @@ namespace RhinoInside.Revit.External.DB
 
     public static ElementFilter ElementSubCategoryFilter(ICollection<ElementId> categoryIds, bool inverted = false)
     {
-      var filters = categoryIds.Select
+      var filters = categoryIds.Distinct().Select
       (
         x =>
         {
           using (var rule = new FilterElementIdRule(SubCategoryParamProvider, NumericEqualsEvaluator, x))
             return new ElementParameterFilter(rule, inverted);
         }
-      ).ToArray();
+      );
 
-      return inverted ? Intersect(filters) : Union(filters);
+      return inverted ? LogicalAndFilter(filters) : LogicalOrFilter(filters);
     }
 
     internal static ElementFilter ElementFamilyNameFilter(string familyName, bool inverted = false)
@@ -277,8 +277,8 @@ namespace RhinoInside.Revit.External.DB
         if (elementType?.Category is Category category && category.Parent is null)
         {
           return inverted ?
-            parameterFilter.Union    (new ElementCategoryFilter(category.Id, inverted)) :
-            parameterFilter.Intersect(new ElementCategoryFilter(category.Id, inverted)) ;
+            (ElementFilter) new LogicalOrFilter (new ElementCategoryFilter(category.Id, inverted), parameterFilter) :
+            (ElementFilter) new LogicalAndFilter(new ElementCategoryFilter(category.Id, inverted), parameterFilter) ;
         }
 
         return parameterFilter;
@@ -299,8 +299,7 @@ namespace RhinoInside.Revit.External.DB
       }
       else
       {
-        var filters = elementTypes.Select(x => ElementTypeFilter(x, inverted: false));
-        return Union(filters.ToArray());
+        return LogicalOrFilter(elementTypes.Select(x => ElementTypeFilter(x, inverted: false)));
       }
     }
     #endregion
@@ -344,6 +343,30 @@ namespace RhinoInside.Revit.External.DB
 #endif
     }
 
+    /// <summary>
+    /// Internal fast with no validation logical union.
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    internal static ElementFilter LogicalOrFilter(IEnumerable<ElementFilter> source)
+    {
+      using (var e = source.GetEnumerator())
+      {
+        if (!e.MoveNext()) return Empty;
+        var first = e.Current;
+
+        if (!e.MoveNext()) return first;
+
+        var count = (source as ICollection<ElementFilter>)?.Count ?? 2;
+        var list = new List<ElementFilter>(count) { first, e.Current };
+
+        while (e.MoveNext())
+          list.Add(e.Current);
+
+        return new LogicalOrFilter(list);
+      }
+    }
+
     public static ElementFilter Union(this ElementFilter self, ElementFilter other)
     {
       var selfCost = self.GetFilterCost();
@@ -377,6 +400,30 @@ namespace RhinoInside.Revit.External.DB
       if (list.Count == 0) return Empty;
       if (list.Count == 1) return list[0];
       return new LogicalOrFilter(list);
+    }
+
+    /// <summary>
+    /// Internal fast with no validation logical intersection.
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    internal static ElementFilter LogicalAndFilter(IEnumerable<ElementFilter> source)
+    {
+      using (var e = source.GetEnumerator())
+      {
+        if (!e.MoveNext()) return Empty;
+        var first = e.Current;
+
+        if (!e.MoveNext()) return first;
+
+        var count = (source as ICollection<ElementFilter>)?.Count ?? 2;
+        var list = new List<ElementFilter>(count) { first, e.Current };
+
+        while (e.MoveNext())
+          list.Add(e.Current);
+
+        return new LogicalAndFilter(list);
+      }
     }
 
     public static ElementFilter Intersect(this ElementFilter self, ElementFilter other)
@@ -422,7 +469,7 @@ namespace RhinoInside.Revit.External.DB
 #endregion
 
     #region Geometry
-    public static ElementFilter GraphicalElementFilter { get; } = Intersect
+    internal static ElementFilter GraphicalElementFilter { get; } = Intersect
     (
       ElementIsNotElementTypeFilterInstance,
       ElementHasCategoryFilter,
@@ -486,11 +533,10 @@ namespace Autodesk.Revit.DB
     public bool PassesFilter(Document document, ElementId id) => IdsToInclude.Contains(id);
     public bool PassesFilter(Element element) => IdsToInclude.Contains(element.Id);
 
-    public static implicit operator ElementFilter(ElementIdSetFilter filter) => ElementFilters.Union
+    public static implicit operator ElementFilter(ElementIdSetFilter filter) => ElementFilters.LogicalOrFilter
     (
       filter.IdsToInclude.
-      Select(x => new ElementParameterFilter(new FilterElementIdRule(IdParamProvider, NumericEqualsEvaluator, x))).
-      ToArray()
+      Select(x => new ElementParameterFilter(new FilterElementIdRule(IdParamProvider, NumericEqualsEvaluator, x)))
     );
   }
 
