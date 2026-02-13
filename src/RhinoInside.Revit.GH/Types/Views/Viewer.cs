@@ -225,6 +225,7 @@ namespace RhinoInside.Revit.GH.Types
     #region ISketchAccess
     Sketch _Sketch;
     public Sketch Sketch => _Sketch ??= GetElement<Sketch>(Value?.GetSketchId());
+    public Plane SketchPlane => Sketch?.Location ?? NaN.Plane;
     #endregion
 
     #region Properties

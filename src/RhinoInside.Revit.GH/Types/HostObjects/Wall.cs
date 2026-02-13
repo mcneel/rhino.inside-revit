@@ -44,6 +44,109 @@ namespace RhinoInside.Revit.GH.Types
 
     public override Vector3d FacingOrientation => Value?.Flipped == true ? -Location.YAxis : Location.YAxis;
 
+    public double SlantAngle
+    {
+      get
+      {
+        if (Value is ARDB.Wall wall)
+        {
+#if REVIT_2021
+          switch (wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).AsEnum<ARDB.WallCrossSection>())
+          {
+            case ARDB.WallCrossSection.Vertical: return 0.0;
+            case ARDB.WallCrossSection.SingleSlanted: return wall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).AsDouble();
+            case ARDB.WallCrossSection.Tapered: return 0.0;
+          }
+#else
+          return 0.0;
+#endif
+        }
+
+        return double.NaN;
+      }
+      set
+      {
+#if REVIT_2021
+        if (Value is ARDB.Wall wall)
+        {
+          wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update((int) ARDB.WallCrossSection.SingleSlanted);
+          wall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).Update(value);
+        }
+#endif
+      }
+    }
+
+    public double TapperInteriorAngle
+    {
+      get
+      {
+        if (Value is ARDB.Wall wall)
+        {
+#if REVIT_2021
+          switch (wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).AsEnum<ARDB.WallCrossSection>())
+          {
+            case ARDB.WallCrossSection.Vertical: return 0.0;
+            case ARDB.WallCrossSection.SingleSlanted: return wall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).AsDouble();
+#if REVIT_2022
+            case ARDB.WallCrossSection.Tapered: return wall.get_Parameter(ARDB.BuiltInParameter.WALL_TAPERED_INTERIOR_INWARD_ANGLE).AsDouble();
+#endif
+          }
+#else
+          return 0.0;
+#endif
+        }
+
+        return double.NaN;
+      }
+      set
+      {
+#if REVIT_2021
+        if (Value is ARDB.Wall wall)
+        {
+          wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update((int) ARDB.WallCrossSection.Tapered);
+#if REVIT_2022
+          wall.get_Parameter(ARDB.BuiltInParameter.WALL_TAPERED_INTERIOR_INWARD_ANGLE).Update(value);
+#endif
+        }
+#endif
+      }
+    }
+
+    public double TapperExteriorAngle
+    {
+      get
+      {
+        if (Value is ARDB.Wall wall)
+        {
+#if REVIT_2021
+          switch (wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).AsEnum<ARDB.WallCrossSection>())
+          {
+            case ARDB.WallCrossSection.Vertical: return 0.0;
+            case ARDB.WallCrossSection.SingleSlanted: return wall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).AsDouble();
+#if REVIT_2022
+            case ARDB.WallCrossSection.Tapered: return wall.get_Parameter(ARDB.BuiltInParameter.WALL_TAPERED_EXTERIOR_INWARD_ANGLE).AsDouble();
+#endif
+          }
+#else
+          return 0.0;
+#endif
+        }
+        return double.NaN;
+      }
+      set
+      {
+#if REVIT_2021
+        if (Value is ARDB.Wall wall)
+        {
+          wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update((int) ARDB.WallCrossSection.Tapered);
+#if REVIT_2022
+          wall.get_Parameter(ARDB.BuiltInParameter.WALL_TAPERED_EXTERIOR_INWARD_ANGLE).Update(value);
+#endif
+        }
+#endif
+      }
+    }
+
     public static bool IsValidCurve(Curve curve, out string log)
     {
       if (!curve.IsValidWithLog(out log)) return false;
@@ -243,6 +346,18 @@ namespace RhinoInside.Revit.GH.Types
 
     #region ISketchAccess
     public Sketch Sketch => GetElement<Sketch>(Value?.GetSketchId());
+
+    public override Plane SketchPlane
+    {
+      get
+      {
+        var plane = Location;
+        var axis = plane.XAxis;
+        plane = new Plane(plane.Origin, -axis, plane.ZAxis);
+        plane.Rotate(SlantAngle, axis);
+        return plane;
+      }
+    }
     #endregion
 
     #region ICurtainGridsAccess
