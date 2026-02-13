@@ -14,6 +14,7 @@ group: Deployment & Configs
 - Added 'Query References' component.
 - Added 'Query Namesake Element' component.
 - Now 'Query Elements' give elements in reverse order when 'Limit' is negative.
+- Improved 'Host Boundary Profile' to accept a plane as an input.
 
 ### RC
 

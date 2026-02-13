@@ -8,12 +8,14 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Autodesk.Revit.DB.Structure;
   using Convert.Geometry;
   using External.DB.Extensions;
 
   interface ISketchAccess
   {
     Sketch Sketch { get; }
+    Plane SketchPlane { get; }
   }
 
   [Kernel.Attributes.Name("Sketch")]
@@ -196,6 +198,7 @@ namespace RhinoInside.Revit.GH.Types
       switch (sketch.GetOwner())
       {
         // FilledRegion needs the constraints to be edited from the Revi UI latter!!
+        case ARDB.Wall _:     constraintsRemoved = true;  break;
         case ARDB.FilledRegion _:     constraintsRemoved = true;  break;
         case ARDB.FootPrintRoof _:    splitClosed = false;        break;
 #if REVIT_2022
