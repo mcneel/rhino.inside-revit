@@ -505,11 +505,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #if REVIT_2021
       if (slantAngle == 0.0)
       {
-        wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(1 /*ARDB.WallCrossSection.Vertical*/);
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.Vertical);
       }
       else
       {
-        wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(0 /*ARDB.WallCrossSection.SingleSlanted*/);
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.SingleSlanted);
         wall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).Update(slantAngle);
       }
 #endif

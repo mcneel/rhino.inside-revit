@@ -87,7 +87,9 @@ namespace RhinoInside.Revit.GH.Types
           {
             case ARDB.WallCrossSection.Vertical: return 0.0;
             case ARDB.WallCrossSection.SingleSlanted: return wall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).AsDouble();
+#if REVIT_2022
             case ARDB.WallCrossSection.Tapered: return wall.get_Parameter(ARDB.BuiltInParameter.WALL_TAPERED_INTERIOR_INWARD_ANGLE).AsDouble();
+#endif
           }
 #else
           return 0.0;
@@ -102,7 +104,9 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Wall wall)
         {
           wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update((int) ARDB.WallCrossSection.Tapered);
+#if REVIT_2022
           wall.get_Parameter(ARDB.BuiltInParameter.WALL_TAPERED_INTERIOR_INWARD_ANGLE).Update(value);
+#endif
         }
 #endif
       }
@@ -119,7 +123,9 @@ namespace RhinoInside.Revit.GH.Types
           {
             case ARDB.WallCrossSection.Vertical: return 0.0;
             case ARDB.WallCrossSection.SingleSlanted: return wall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).AsDouble();
+#if REVIT_2022
             case ARDB.WallCrossSection.Tapered: return wall.get_Parameter(ARDB.BuiltInParameter.WALL_TAPERED_EXTERIOR_INWARD_ANGLE).AsDouble();
+#endif
           }
 #else
           return 0.0;
@@ -133,8 +139,9 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Wall wall)
         {
           wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update((int) ARDB.WallCrossSection.Tapered);
+#if REVIT_2022
           wall.get_Parameter(ARDB.BuiltInParameter.WALL_TAPERED_EXTERIOR_INWARD_ANGLE).Update(value);
-
+#endif
         }
 #endif
       }

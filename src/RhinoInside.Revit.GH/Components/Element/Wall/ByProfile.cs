@@ -96,11 +96,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
 #if REVIT_2021
       if (slantAngle == 0.0)
       {
-        element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(1 /*ARDB.WallCrossSection.Vertical*/);
+        element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.Vertical);
       }
       else
       {
-        element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(0 /*ARDB.WallCrossSection.SingleSlanted*/);
+        element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.SingleSlanted);
         element.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).Update(slantAngle);
       }
 #endif
@@ -311,11 +311,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
 #if REVIT_2021
           if (angle == 0.0)
           {
-            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(1 /*ARDB.WallCrossSection.Vertical*/);
+            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.Vertical);
           }
           else
           {
-            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(0 /*ARDB.WallCrossSection.SingleSlanted*/);
+            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.SingleSlanted);
             newWall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).Update(angle);
           }
 #endif
