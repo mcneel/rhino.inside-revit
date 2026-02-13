@@ -305,7 +305,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           // Walls are created with the last LocationLine used in the Revit editor!!
           //newWall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(ARDB.WallLocationLine.WallCenterline);
 
-          // We turn off analytical model off by default
+          // We turn off analytical model by default
           newWall.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
 
 #if REVIT_2021
