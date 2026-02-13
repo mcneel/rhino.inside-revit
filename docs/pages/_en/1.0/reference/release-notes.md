@@ -12,6 +12,9 @@ group: Deployment & Configs
 
 ### RC
 
+- Fixed inconsistency in 'Add Wall (Profile)' curve handling.
+  [#1355](https://github.com/mcneel/rhino.inside-revit/issues/1355)
+
 {% endcapture %}
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
