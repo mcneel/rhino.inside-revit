@@ -945,7 +945,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (_Wires is null)
         {
-          if (ClippingBox.IsValid && Value is ARDB.Curve curve)
+          if (Value is ARDB.Curve curve)
             _Wires = new Curve[] { curve.ToCurve() };
           else
             _Wires = Array.Empty<Curve>();
@@ -1283,7 +1283,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (_Wires is null)
         {
-          if (ClippingBox.IsValid && Value is ARDB.Face face)
+          if (Value is ARDB.Face face)
             _Wires = face.GetEdgesAsCurveLoops().SelectMany(PreviewConverter.GetPreviewWires).ToArray();
           else
             _Wires = Array.Empty<Curve>();
