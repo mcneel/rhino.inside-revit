@@ -17,6 +17,10 @@ group: Deployment & Configs
 
 ### RC
 
+- Fixed 'Host Boundary Profile' when used on walls that already have an Sketch.
+- Fixed inconsistency in 'Add Wall (Profile)' curve handling.
+  [#1355](https://github.com/mcneel/rhino.inside-revit/issues/1355)
+
 {% endcapture %}
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
