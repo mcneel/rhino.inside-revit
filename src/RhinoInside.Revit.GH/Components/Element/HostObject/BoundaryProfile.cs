@@ -109,7 +109,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
             var sketch = host.Value.GetSketch();
             var sketchId = sketch?.Id ?? ARDB.ElementId.InvalidElementId;
 
-            if (scope.IsElementWithoutSketch(host.Value))
+            if (scope.ElementNeedsNewSketch(host.Value))
             {
               sketch = scope.StartWithNewSketch(host.Value);
             }
