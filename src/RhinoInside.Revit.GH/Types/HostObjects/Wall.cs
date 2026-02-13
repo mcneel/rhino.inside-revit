@@ -28,10 +28,10 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (Value?.Location is ARDB.LocationCurve curveLocation)
+        if (Value?.Location is ARDB.LocationCurve locationCurve && locationCurve.Curve is ARDB.Curve curve)
         {
-          var start = curveLocation.Curve.Evaluate(0.0, normalized: true).ToPoint3d();
-          var end = curveLocation.Curve.Evaluate(1.0, normalized: true).ToPoint3d();
+          var start = curve.GetEndPoint(CurveEnd.Start).ToPoint3d();
+          var end = curve.GetEndPoint(CurveEnd.End).ToPoint3d();
           var axis = end - start;
           var origin = start + (axis * 0.5);
           var perp = axis.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance);
@@ -216,7 +216,7 @@ namespace RhinoInside.Revit.GH.Types
               var bboxFilter = new ARDB.BoundingBoxIntersectsFilter(outline, wall.Document.Application.VertexTolerance);
               elementCollector = elementCollector.WherePasses(bboxFilter);
 
-              using (var includesFilter = CompoundElementFilter.InclusionFilter(wall))
+              using (var includesFilter = ElementFilters.InclusionFilter(wall))
               {
                 foreach (ARDB.HostObject hostObject in elementCollector)
                 {

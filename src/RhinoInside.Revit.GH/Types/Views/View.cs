@@ -41,9 +41,9 @@ namespace RhinoInside.Revit.GH.Types
       return Element.FromElementId(doc, id) as View;
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target))
+      if (base.ConvertTo(out target))
         return true;
 
       // `ViewFrame` is the Geometric representation of a `View`.

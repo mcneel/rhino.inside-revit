@@ -7,8 +7,11 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Annotations.Levels
 {
+  using Convert.Geometry;
   using External.DB.Extensions;
+  using External.DB;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryLevels : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("87715CAF-92A9-4B14-99E5-F8CCB2CC19BD");
@@ -28,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Level name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Interval>("Elevation", "E", "Level elevation interval along z-axis", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Structural", "S", "Level is structural", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
@@ -44,21 +47,19 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Elevation", out Interval? elevation, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Structural", out bool? structural)) return;
       if (!Params.TryGetData(DA, "Building Story", out bool? buildingStory)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var levelsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          levelsCollector = levelsCollector.WherePasses(filter);
+          levelsCollector = levelsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (name is string && TryGetFilterStringParam(ARDB.BuiltInParameter.DATUM_TEXT, ref name, out var nameFilter))
           levelsCollector = levelsCollector.WherePasses(nameFilter);
@@ -66,8 +67,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
         if (structural.HasValue && TryGetFilterIntegerParam(ARDB.BuiltInParameter.LEVEL_IS_STRUCTURAL, structural.Value ? 1 : 0, out var structuralFilter))
           levelsCollector = levelsCollector.WherePasses(structuralFilter);
 
-        if (buildingStory.HasValue && TryGetFilterIntegerParam(ARDB.BuiltInParameter.LEVEL_IS_BUILDING_STORY, buildingStory.Value ? 1 : 0, out var buildingStoryilter))
-          levelsCollector = levelsCollector.WherePasses(buildingStoryilter);
+        if (buildingStory.HasValue && TryGetFilterIntegerParam(ARDB.BuiltInParameter.LEVEL_IS_BUILDING_STORY, buildingStory.Value ? 1 : 0, out var buildingStoryFilter))
+          levelsCollector = levelsCollector.WherePasses(buildingStoryFilter);
 
         var levels = levelsCollector.Cast<ARDB.Level>();
 
@@ -75,13 +76,18 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
           levels = levels.Where(x => x.Name.IsSymbolNameLike(name));
 
         if (elevation.HasValue)
-          levels = levels.Where(x => elevation.Value.IncludesParameter(x.GetElevation() * Revit.ModelUnits, false));
+        {
+          elevation = elevation.Value.InHostUnits();
+          if (source.SourceInstance.Value is ARDB.RevitLinkInstance instance) elevation -= instance.GetTransform().Origin.Z;
+          levels = levels.Where(x => elevation.Value.IncludesParameter(x.GetElevation(), false));
+        }
 
         DA.SetDataList
         (
           "Levels",
           levels.
           Select(x => new Types.Level(x)).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

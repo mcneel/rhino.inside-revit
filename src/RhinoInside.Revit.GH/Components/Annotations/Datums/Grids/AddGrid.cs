@@ -122,7 +122,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
 
       ReconstructElement<ARDB.Grid>
       (
@@ -199,7 +199,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
         grid.Maximize3DExtents();
 
         var view = default(ARDB.View);
-        var viewsFilter = ERDB.CompoundElementFilter.ElementClassFilter(typeof(ARDB.View3D), typeof(ARDB.ViewPlan));
+        var viewsFilter = ERDB.ElementFilters.ElementClassFilter(typeof(ARDB.View3D), typeof(ARDB.ViewPlan));
         using (var collector = new ARDB.FilteredElementCollector(grid.Document).WherePasses(viewsFilter))
         {
           var views = collector.Cast<ARDB.View>().

@@ -158,18 +158,18 @@ namespace RhinoInside.Revit.GH.Components.Elements
     }
   }
 
-  [ComponentVersion(introduced: "1.10")]
-  public class NamesakeElement : ElementCollectorComponent
+  [ComponentVersion(introduced: "1.10", updated:"1.36")]
+  public class QueryNamesakeElement : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("1FEE04EF-A3DA-44F4-B114-486724C92AB6");
-    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter(inverted: true);
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.Universe;
 
-    public NamesakeElement() : base
+    public QueryNamesakeElement() : base
     (
-      name: "Namesake Element",
+      name: "Query Namesake Element",
       nickname: "Namesake",
-      description: "Get namesake element on a diferent document",
+      description: "Get namesake element on a different model",
       category: "Revit",
       subCategory: "Element"
     )
@@ -178,22 +178,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition
-      (
-        new Parameters.Document()
-        {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document to query on",
-        }
-      ),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Primary),
       new ParamDefinition
       (
         new Parameters.Element()
         {
           Name = "Element",
           NickName = "E",
-          Description = "Source Element",
+          Description = "Element to query",
         }
       )
     };
@@ -207,34 +199,27 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Namesake Element",
-        }
+          Description = "Namesake Element in the source model",
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
         new Param_String()
         {
-          Name = "Name",
-          NickName = "N",
-          Description = "Element Name",
-        },
-        ParamRelevance.Secondary
-      ),
+          Name = "Complete Name",
+          NickName = "CN",
+          Description = "Complete name used to query the element",
+        }, ParamRelevance.Primary
+      )
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
-
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
-      var namesake = Types.Element.FromElementId
-      (
-        doc,
-        doc.LookupElement(element.Document, element.Id)
-      );
-      DA.SetData("Element", namesake);
-      Params.TrySetData(DA, "Name", () => namesake.Nomen);
+      Params.TrySetData(DA, "Element", () => source is object ? element.AtSource(source) : element);
+      Params.TrySetData(DA, "Complete Name", () => element.CompleteNomen);
     }
   }
 }

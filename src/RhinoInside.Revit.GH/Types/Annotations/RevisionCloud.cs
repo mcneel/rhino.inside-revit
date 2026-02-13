@@ -15,14 +15,14 @@ namespace RhinoInside.Revit.GH.Types
     public RevisionCloud() { }
     public RevisionCloud(ARDB.RevisionCloud element) : base(element) { }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target))
+      if (base.ConvertTo(out target))
         return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(Revision)))
       {
-        target = (Q) (object) Types.Element.FromElementId(Document, Value?.RevisionId);
+        target = (Q) (object) Revision;
         return true;
       }
 
@@ -36,6 +36,7 @@ namespace RhinoInside.Revit.GH.Types
     #region Properties
     public override Plane Location => Sketch.ProfilesPlane;
     public override Brep TrimmedSurface => Sketch.TrimmedSurface;
+    public Revision Revision => GetElement<Revision>(Value?.RevisionId);
     #endregion
   }
 }

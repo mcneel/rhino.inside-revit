@@ -33,10 +33,15 @@ namespace RhinoInside.Revit.External.DB
         {
           case ARDB.Level _:          break;
           case ARDB.BasePoint _:      break;
+#if REVIT_2021
+          case ARDB.InternalOrigin _: break;
+#else
           case ARDB.Element e:
-          if (e.Category?.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_IOS_GeoSite)
-            throw new ArgumentException("Invalid element", nameof(baseElement));
-          break;
+                var bic = e.Category?.ToBuiltInCategory();
+                if (bic != ARDB.BuiltInCategory.OST_IOS_GeoSite)
+                  throw new ArgumentException("Invalid element", nameof(baseElement));
+                break;
+#endif
         }
       }
 

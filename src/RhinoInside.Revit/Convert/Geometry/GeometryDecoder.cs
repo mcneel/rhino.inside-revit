@@ -1204,7 +1204,68 @@ namespace RhinoInside.Revit.Convert.Geometry
     { var rhino = RawDecoder.ToRhino(polyLine); UnitConvertible.Scale(rhino, ModelScaleFactor); return rhino; }
     #endregion
 
-    #region Solids
+    #region Faces
+    /// <summary>
+    /// Converts the specified <see cref="ARDB.Face" /> to an equivalent <see cref="Rhino.Geometry.Surface" />.
+    /// </summary>
+    /// <example>
+    /// 
+    /// Using <see cref="ToSurface(ARDB.Face, out bool)" /> as extension method:
+    ///
+    /// <code language="csharp">
+    /// using DB = Autodesk.Revit.DB;
+    /// using RhinoInside.Revit.Convert.Geometry;
+    /// 
+    /// Surface rhinoSurface = revitFace.ToSurface();
+    /// </code>
+    /// 
+    /// <code language="Python">
+    /// import clr
+    /// clr.AddReference("RhinoCommon")
+    /// clr.AddReference("RevitAPI")
+    /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
+    /// import Autodesk.Revit.DB as DB
+    /// import RhinoInside.Revit.Convert.Geometry
+    /// clr.ImportExtensions(RhinoInside.Revit.Convert.Geometry)
+    /// 
+    /// rhino_surface = revit_face.ToSurface() # type: RG.Surface
+    /// </code>
+    /// 
+    /// Using <see cref="ToSurface(ARDB.Face, out bool)" /> as static method:
+    ///
+    /// <code language="csharp">
+    /// using DB = Autodesk.Revit.DB;
+    /// using RhinoInside.Revit.Convert.Geometry;
+    /// 
+    /// Surface rhinoSurface = GeometryEncoder.ToSurface(revitFace)
+    /// </code>
+    /// 
+    /// <code language="Python">
+    /// import clr
+    /// clr.AddReference("RhinoCommon")
+    /// clr.AddReference("RevitAPI")
+    /// clr.AddReference("RhinoInside.Revit")
+    /// import Rhino.Geometry as RG
+    /// import Autodesk.Revit.DB as DB
+    /// import RhinoInside.Revit.Convert.Geometry.GeometryDecoder as GD
+    /// 
+    /// rhino_surface = GD.ToSurface(revit_face) # type: RG.Surface
+    /// </code>
+    ///
+    /// </example>
+    /// <param name="face">Revit face to convert.</param>
+    /// <param name="parametricOrientation">Indicates whether this Surface's orientation is the same as or opposite to its parametric orientation.</param>
+    /// <returns>Rhino untrimmed surface that is equivalent to the provided Revit face.</returns>
+    /// <since>1.36</since>
+    internal static Surface ToSurface(this ARDB.Face face, out bool parametricOrientation)
+    {
+      var rhino = RawDecoder.ToRhinoSurface(face, out var _);
+      UnitConvertible.Scale(rhino, ModelScaleFactor);
+      parametricOrientation = face.MatchesSurfaceOrientation();
+      return rhino;
+    }
+
     /// <summary>
     /// Converts the specified <see cref="ARDB.Face" /> to an equivalent <see cref="Rhino.Geometry.Brep" />.
     /// </summary>
@@ -1259,7 +1320,9 @@ namespace RhinoInside.Revit.Convert.Geometry
     /// <since>1.0</since>
     public static Brep ToBrep(this ARDB.Face face)
     { var rhino = RawDecoder.ToRhino(face); UnitConvertible.Scale(rhino, ModelScaleFactor); return rhino; }
+    #endregion
 
+    #region Solids
     /// <summary>
     /// Converts the specified <see cref="ARDB.Solid" /> to an equivalent <see cref="Rhino.Geometry.Brep" />.
     /// </summary>
@@ -1376,7 +1439,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     /// <summary>
-    /// Converts the specified GeomertyObject to an equivalent Revit GeometryBase object.
+    /// Converts the specified GeometryObject to an equivalent Revit GeometryBase object.
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino GeometryBase object that is equivalent to the provided value.</returns>

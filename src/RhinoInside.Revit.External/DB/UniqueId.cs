@@ -242,6 +242,9 @@ namespace RhinoInside.Revit.External.DB
       if (IsLinked)
       {
         var linkedDocument = (document?.GetElement(new ARDB.ElementId(Record.Id)) as ARDB.RevitLinkInstance)?.GetLinkDocument();
+        if (document is object && linkedDocument is null)
+          throw new InvalidCastException($"Failed to convert '{this}' to a persistent string.");
+
         return IsInstance ?
           $"{Record.ToString(document)}:{Element.ToString(linkedDocument)}:{Symbol.ToString(linkedDocument)}" :
           $"{Record.ToString(document)}:{Element.ToString(linkedDocument)}";

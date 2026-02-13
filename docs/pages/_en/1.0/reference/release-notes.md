@@ -10,6 +10,11 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added support for linked elements on query components.
+- Added 'Query References' component.
+- Added 'Query Namesake Element' component.
+- Now 'Query Elements' give elements in reverse order when 'Limit' is negative.
+
 ### RC
 
 - Fixed 'Host Boundary Profile' when used on walls that already have an Sketch.

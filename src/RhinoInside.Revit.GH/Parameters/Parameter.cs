@@ -160,7 +160,7 @@ namespace RhinoInside.Revit.GH.Parameters
     private void RefreshCategoryList(ComboBox categoriesBox, ARDB.CategoryType categoryType)
     {
       var doc = Revit.ActiveUIDocument.Document;
-      var categories = BuiltInCategoryExtension.BuiltInCategories.Where(x => x.AllowsBoundParameters());
+      var categories = BuiltInCategories.Values.Where(BuiltInCategories.AllowsBoundParameters);
 
       if (categoryType != ARDB.CategoryType.Invalid)
       {

@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_Goo
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       target = default;
 
@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Types
         return target is object;
       }
 
-      return base.CastTo(out target);
+      return base.ConvertTo(out target);
     }
     #endregion
 

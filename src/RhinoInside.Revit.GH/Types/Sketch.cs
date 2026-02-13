@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Types
     public Sketch() : base() { }
     public Sketch(ARDB.Sketch sketch) : base(sketch) { }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is Element element)
       {
@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
     #region IGH_PreviewData
@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.Sketch sketch)
         {
-          var slopeArrow = sketch.GetDependentElements(ERDB.CompoundElementFilter.ElementClassFilter(typeof(ARDB.CurveElement))).
+          var slopeArrow = sketch.GetDependentElements(ERDB.ElementFilters.ElementClassFilter(typeof(ARDB.CurveElement))).
             Select(Document.GetElement).FirstOrDefault(x => x.get_Parameter(ARDB.BuiltInParameter.SPECIFY_SLOPE_OR_OFFSET) is object);
 
           return GetElement<CurveElement>(slopeArrow);
@@ -208,7 +208,7 @@ namespace RhinoInside.Revit.GH.Types
         if (constraintsRemoved) return;
         var constraintsIds = sketch.GetDependentElements
         (
-          ERDB.CompoundElementFilter.Intersect
+          ERDB.ElementFilters.Intersect
           (
           new ARDB.ElementClassFilter(typeof(ARDB.Dimension)),
           new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_WeakDims)

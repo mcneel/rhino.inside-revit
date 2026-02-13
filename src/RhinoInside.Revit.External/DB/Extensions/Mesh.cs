@@ -1,8 +1,9 @@
-using System.Runtime.InteropServices;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  using Numerical;
+
   static class MeshExtension
   {
     public static bool TryGetLocation(this Mesh mesh, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
@@ -15,7 +16,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       var basisZ = cov.TryGetInverse(out var inverse) ?
                  inverse.GetPrincipalComponent(0D) :
-                 mesh.ComputeMeanNormal().ToUnitXYZ();
+                 mesh.ComputeNetNormal().ToUnitXYZ();
 
       return UnitXYZ.Orthonormalize(basisZ, basisX, out basisZ, out basisX, out basisY);
     }
@@ -97,15 +98,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static XYZ ComputeCentroid(this Mesh mesh) => ComputeCentroid(mesh, 3);
 
     /// <summary>
-    /// Return the mean of all triangle normals
+    /// Returns net normal of this mesh.
     /// </summary>
     /// <remarks>
-    /// In case the mesh is almost planar this will correspond to
-    /// a good approximation of the normal.
+    /// The length of the resulting normal is a good approximation
+    /// of the signed area of this mesh when projected to this normal.
     /// </remarks>
     /// <param name="mesh"></param>
-    /// <returns>The XYZ vector of the mean normal of this mesh.</returns>
-    public static XYZ ComputeMeanNormal(this Mesh mesh)
+    /// <returns>The the sum of all triangle normals divided by 2.</returns>
+    public static XYZ ComputeNetNormal(this Mesh mesh)
     {
       if (mesh.NumTriangles < 1)
         return XYZExtension.Zero;
@@ -126,7 +127,60 @@ namespace RhinoInside.Revit.External.DB.Extensions
         normalZ.Add(normal.Z);
       }
 
-      return new XYZ(normalX.Value / numTriangles, normalY.Value / numTriangles, normalZ.Value / numTriangles);
+      return new XYZ(normalX.Value * 0.5, normalY.Value * 0.5, normalZ.Value * 0.5);
+    }
+
+    /// <summary>
+    /// Returns the surface area of the mesh.
+    /// </summary>
+    /// <param name="mesh"></param>
+    /// <param name="centroid">Area centroid</param>
+    /// <param name="normal">Area net normal</param>
+    /// <returns>The sum of the areas of the constituent facets of the mesh.</returns>
+    internal static double ComputeSurfaceArea(this Mesh mesh, out XYZ centroid, out XYZ normal)
+    {
+      centroid = default;
+      normal = XYZExtension.Zero;
+      if (mesh is null) return double.NaN;
+      var numTriangles = mesh.NumTriangles;
+      if (numTriangles == 0) return 0.0;
+
+      const int dimension = 2;
+      var factor = 1.0 / (dimension + 1.0);
+      Sum area = default;
+      Sum normalX = default, normalY = default, normalZ = default;
+      Sum centroidX = default, centroidY = default, centroidZ = default;
+
+      for (int t = 0; t < numTriangles; ++t)
+      {
+        var triangle = mesh.get_Triangle(t);
+        var v0 = triangle.get_Vertex(0);
+        var v1 = triangle.get_Vertex(1);
+        var v2 = triangle.get_Vertex(2);
+
+        Sum vX = default, vY = default, vZ = default;
+        vX.Add(v0.X, v1.X, v2.X);
+        vY.Add(v0.Y, v1.Y, v2.Y);
+        vZ.Add(v0.Z, v1.Z, v2.Z);
+
+        var cross = XYZExtension.CrossProduct(v1 - v0, v2 - v0);
+        var A = Euclidean.Norm(cross.X, cross.Y, cross.Z);
+        area.Add(A);
+
+        var weight = A * factor;
+        centroidX.Add(vX.Value * weight);
+        centroidY.Add(vY.Value * weight);
+        centroidZ.Add(vZ.Value * weight);
+
+        normalX.Add(cross.X);
+        normalY.Add(cross.Y);
+        normalZ.Add(cross.Z);
+      }
+
+      var areaValue = area.Value;
+      centroid = new XYZ(centroidX.Value / areaValue, centroidY.Value / areaValue, centroidZ.Value / areaValue);
+      normal = new XYZ(normalX.Value * 0.5, normalY.Value * 0.5, normalZ.Value * 0.5);
+      return areaValue * 0.5;
     }
 
 #if !REVIT_2024

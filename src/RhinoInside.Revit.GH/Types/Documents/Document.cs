@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.UI.Extensions;
 
   [Kernel.Attributes.Name("Document")]
-  public interface IGH_Document : IGH_Goo, IEquatable<IGH_Document>
+  public interface IGH_Document : IGH_ElementSource, IEquatable<IGH_Document>
   {
     Guid DocumentId { get; }
 
@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Types
       var tip = IsValid ?
       (
         IsReferencedDataLoaded ?
-        $"{(Value.IsLinked ? "Revit Linked Model" : typeName)} : {DisplayName}" :
+        $"{(Value.IsLinked ? "Revit Linked Document" : typeName)} : {DisplayName}" :
         $"Unresolved {typeName} : {DisplayName}"
       ) :
       (
@@ -269,6 +269,13 @@ namespace RhinoInside.Revit.GH.Types
         return description.TripleDotPath(64);
       }
     }
+    #endregion
+
+    #region IGH_ElementSource
+    readonly RevitLinkInstance LinkInstance = new RevitLinkInstance();
+
+    RevitLinkInstance IGH_ElementSource.SourceInstance => LinkInstance;
+    Document IGH_ElementSource.SourceDocument => this;
     #endregion
 
     #region Properties
@@ -736,9 +743,23 @@ namespace RhinoInside.Revit.GH.Types
     public Element GetNamesakeElement(Element element)
     {
       if (element is object)
+      {
+        if (!(element.Document?.Equals(Value) is false)) return element;
         return Element.FromElementId(Value, Value.LookupElement(element.Document, element.Id));
+      }
 
       return null;
+    }
+
+    public Element AssertNamesakeElement(Element element)
+    {
+      if (element is null)
+        return null;
+
+      if (GetNamesakeElement(element) is Element namesake)
+        return namesake;
+
+      throw new System.ComponentModel.WarningException($"Failed to found '{element}' on document '{this}'.");
     }
     #endregion
   }

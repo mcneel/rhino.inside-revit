@@ -51,6 +51,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override void SubInvalidateGraphics()
     {
       using (_GeometryPreview) _GeometryPreview = null;
+      _MeshingParameters = null;
 
       base.SubInvalidateGraphics();
     }
@@ -166,7 +167,7 @@ namespace RhinoInside.Revit.GH.Types
             var subWires = new List<Curve>();
             var subMaterials = new List<ARDB.Material>();
 
-            foreach (var dependent in element.GetDependentElements(CompoundElementFilter.ElementHasBoundingBoxFilter).Select(element.Document.GetElement))
+            foreach (var dependent in element.GetDependentElements(ElementFilters.ElementHasBoundingBoxFilter).Select(element.Document.GetElement))
             {
               if (dependent.GetBoundingBoxXYZ(out var view) is null)
                 continue;
@@ -262,7 +263,7 @@ namespace RhinoInside.Revit.GH.Types
 
               default:
                 if (elementWires.Count == 0 && elementMeshes.Count == 0 && element.get_BoundingBox(elementView) is ARDB.BoundingBoxXYZ)
-                  dependents.AddRange(element.GetDependentElements(CompoundElementFilter.ElementHasBoundingBoxFilter));
+                  dependents.AddRange(element.GetDependentElements(ElementFilters.ElementHasBoundingBoxFilter));
                 break;
             }
 
@@ -1005,10 +1006,9 @@ namespace RhinoInside.Revit.GH.Types
               context.Material = element.Category?.Material;
 
               var location = Location;
-              var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
-              if (ToModelInstanceDefinition(idMap, worldToElement, element, geometry) is ModelInstanceDefinition definition)
+              if (ToModelInstanceDefinition(idMap, Transform.PlaneToPlane(location, Plane.WorldXY), element, geometry) is ModelInstanceDefinition definition)
               {
-                var elementToWorld = Transform.PlaneToPlane(Plane.WorldXY, location);
+                var elementToWorld = Transform.PlaneToPlane(Plane.WorldXY, TransformTo(location));
                 var attributes = ModelObject.Cast(new GH_InstanceReference(new InstanceReferenceGeometry(Guid.Empty, elementToWorld), definition)).ToAttributes();
                 attributes.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
                 attributes.Url = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_URL)?.AsString() ?? string.Empty;

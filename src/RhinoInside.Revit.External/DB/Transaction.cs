@@ -6,9 +6,12 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using System.Security.Permissions;
 using Autodesk.Revit.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.External.DB
 {
+  using External.DB.Extensions;
+
   internal static class TransactionExtension
   {
     public readonly struct TransactionAwaitable
@@ -252,7 +255,7 @@ namespace RhinoInside.Revit.External.DB
           if (result != TransactionStatus.Started)
           {
             transaction.Dispose();
-            throw new InvalidOperationException($"Failed to start Transaction '{name}' on document '{doc.Title.TripleDot(16)}'");
+            throw new InvalidOperationException($"Failed to start Transaction '{name}' on document '{doc.GetName()}'");
           }
 
           HandlingOptions.TransactionNotification?.OnStarted(doc);
@@ -505,7 +508,7 @@ namespace RhinoInside.Revit.External.DB
         );
 
         if (transaction.Start() != TransactionStatus.Started)
-          throw new InvalidOperationException($"Transaction failed to start on document '{document.Title}'");
+          throw new InvalidOperationException($"Transaction failed to start on document '{document.GetName()}'");
       }
 
       public void Commit() => transaction?.Commit(transaction.GetFailureHandlingOptions().SetTransactionFinalizer(this));
@@ -513,7 +516,7 @@ namespace RhinoInside.Revit.External.DB
       void ITransactionFinalizer.OnCommitted(Document document, string strTransactionName) { }
       public void OnRolledBack(Document document, string strTransactionName)
       {
-        throw new InvalidOperationException($"Transaction failed to commit on document '{document.Title}'");
+        throw new InvalidOperationException($"Transaction failed to commit on document '{document.GetName()}'");
       }
 
       void IDisposable.Dispose() => transaction?.Dispose();
@@ -534,7 +537,7 @@ namespace RhinoInside.Revit.External.DB
     /// VB : Using scope [As CommittableScope] = document.CommitScope()
     /// </para>
     /// <para>
-    /// Pyhton: with document.CommitScope() as scope:
+    /// Python: with document.CommitScope() as scope:
     /// </para>
     /// </remarks>
     public static CommittableScope CommitScope(this Document document)
@@ -556,7 +559,7 @@ namespace RhinoInside.Revit.External.DB
     /// VB : Using document.RollBackScope()
     /// </para>
     /// <para>
-    /// Pyhton: with document.RollBackScope() :
+    /// Python: with document.RollBackScope() :
     /// </para>
     /// </remarks>
     public static IDisposable RollBackScope(this Document document)
@@ -565,7 +568,7 @@ namespace RhinoInside.Revit.External.DB
       {
         var subTransaction = new SubTransaction(document);
         if (subTransaction.Start() != TransactionStatus.Started)
-          throw new InvalidOperationException($"SubTransaction failed to start on document '{document.Title.TripleDot(16)}'");
+          throw new InvalidOperationException($"SubTransaction failed to start on document '{document.GetName()}'");
 
         return subTransaction;
       }
@@ -582,7 +585,7 @@ namespace RhinoInside.Revit.External.DB
         );
 
         if (transaction.Start() != TransactionStatus.Started)
-          throw new InvalidOperationException($"Transaction failed to start on document '{document.Title.TripleDot(16)}'");
+          throw new InvalidOperationException($"Transaction failed to start on document '{document.GetName()}'");
 
         return transaction;
       }

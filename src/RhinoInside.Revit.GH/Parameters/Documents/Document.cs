@@ -16,9 +16,20 @@ namespace RhinoInside.Revit.GH.Parameters
   {
     public override Guid ComponentGuid => new Guid("F3427D5C-3793-4E32-B219-8172D56EF04C");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
-    protected override string IconTag => "D";
+    protected override string IconTag => DefaultNickName;
 
-    public Document() : base("Document", "DOC", "Contains a collection of Revit documents", "Params", "Revit")
+    internal static readonly string DefaultName = "Document";
+    internal static readonly string DefaultNickName = "DOC";
+    internal static readonly string DefaultDescription = "Contains a collection of Revit documents";
+
+    public Document() : base
+    (
+      name: DefaultName,
+      nickname: DefaultName,
+      description: DefaultDescription,
+      category: "Params",
+      subcategory: "Revit"
+    )
     { }
 
     protected override Types.IGH_Document PreferredCast(object data) => Types.Document.FromValue(data);
@@ -50,9 +61,12 @@ namespace RhinoInside.Revit.GH.Parameters
       return true;
     }
 
-    public static bool TryGetDocumentOrCurrent(IGH_Component component, IGH_DataAccess DA, string name, out Types.Document document)
+    public static bool GetDocumentOrCurrent(IGH_Component component, IGH_DataAccess DA, out Types.Document document) =>
+      GetDocumentOrCurrent(component, DA, DefaultName, out document);
+
+    internal static bool GetDocumentOrCurrent(IGH_Component component, IGH_DataAccess DA, string name, out Types.Document document)
     {
-      var _Document_ = name is null ? -1 : component.Params.IndexOfInputParam(name);
+      var _Document_ = component.Params.IndexOfInputParam(name);
       if
       (
         _Document_ < 0 ||
@@ -67,33 +81,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return DA.GetData(_Document_, ref document);
     }
 
-    public static bool GetDataOrDefault(IGH_Component component, IGH_DataAccess DA, string name, out ARDB.Document document)
-    {
-      TryGetDocumentOrCurrent(component, DA, name, out var doc);
-      document = doc?.Value;
-      return document is object;
-    }
-
-    internal static bool TryGetStructuralSettings(Types.Document document, out ARDB.Structure.StructuralSettings settings)
-    {
-      try
-      {
-        if (document?.Value is ARDB.Document doc)
-        {
-          settings = ARDB.Structure.StructuralSettings.GetStructuralSettings(doc);
-          return settings.BoundaryConditionFamilySymbolFixed.IsValid();
-        }
-      }
-      catch { }
-
-      settings = null;
-      return false;
-    }
-
     #region UI
-    protected override GH_GetterResult Prompt_Singular(ref Types.IGH_Document value) => GH_GetterResult.cancel;
-    protected override GH_GetterResult Prompt_Plural(ref List<Types.IGH_Document> values) => GH_GetterResult.cancel;
-
     static ARDB.DocumentType GetDocumentType(ARDB.Document doc)
     {
       if (doc.IsFamilyDocument)

@@ -58,7 +58,9 @@ namespace RhinoInside.Revit.GH.Components.Views
       var isOpen = view.Value.IsOpen();
       if (open is object)
       {
-        if (view.Value.IsTemplate && open is true)
+        if (view.Document.IsLinked && open is true)
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Can't open view '{view.DisplayName}' on a linked document");
+        else if (view.Value.IsTemplate && open is true)
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Can't open view template '{view.DisplayName}'");
         else if (view.Value.IsCallout() && open is true)
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Can't open callout view'{view.DisplayName}'");

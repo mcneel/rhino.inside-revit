@@ -28,9 +28,9 @@ namespace RhinoInside.Revit.GH.Types
     public override bool IsValid => (Id?.TryGetBuiltInCategory(out var _) == true) || base.IsValid;
     public override object ScriptVariable() => APIObject;
 
-    public sealed override bool CastFrom(object source)
+    public sealed override bool ConvertFrom(object source)
     {
-      if (base.CastFrom(source))
+      if (base.ConvertFrom(source))
         return true;
 
       if (source is IGH_Goo goo)
@@ -38,15 +38,6 @@ namespace RhinoInside.Revit.GH.Types
         switch (source)
         {
           case CategoryId catId:        source = (ARDB.BuiltInCategory) catId.Value; break;
-          case GraphicsStyle style:     source = style.Value; break;
-          case GeometryObject geometry:
-            if (geometry.IsValid)
-            {
-              SetValue(geometry.Document, geometry.GraphicsStyle.Value?.GraphicsStyleCategory.Id ?? ElementIdExtension.Invalid);
-              return true;
-            }
-            return false;
-          case Element element:         SetValue(element.Document, element.Category?.Id ?? ElementIdExtension.Invalid); return element.IsValid;
           default:                      source = goo.ScriptVariable(); break;
         }
       }
@@ -61,15 +52,6 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.BuiltInCategory bic:  categoryId = new ARDB.ElementId(bic); break;
         case ARDB.ElementId id:         categoryId = id; break;
         case ARDB.Category c:           SetValue(c.Document(), c.Id); return true;
-        case ARDB.GraphicsStyle s:      SetValue(s.Document, s.GraphicsStyleCategory.Id); return true;
-        case ARDB.Family f:             SetValue(f.Document, f.FamilyCategoryId); return true;
-        case ARDB.Element e:
-          if(e.Category is ARDB.Category category)
-            SetValue(e.Document, category.Id);
-          else
-            SetValue(default, ARDB.ElementId.InvalidElementId);
-
-          return true;
         case string n:
           if (!DBXS.CategoryId.TryParse(n, null, out var cid)) return false;
           categoryId = new ARDB.ElementId(cid);
@@ -86,7 +68,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.Category)))
       {
@@ -118,7 +100,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 #endif
 
-      return base.CastTo(out target);
+      return base.ConvertTo(out target);
     }
 
     new class Proxy : Element.Proxy
@@ -207,13 +189,13 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
-    public override string DisplayName => FullName ?? base.DisplayName;
-
-    internal ARDB.Category APIObject => IsReferencedDataLoaded ? Document.GetCategory(Id) : default;
+    internal ARDB.Category APIObject => IsReferencedDataLoaded ?
+      (IsLinked ? ReferenceDocument : Document).GetCategory(Id) : default;
 
     protected override void ResetValue()
     {
       _FullName = default;
+      _CategoryDiscipline = default;
       _CategoryType = default;
       _IsTagCategory = default;
       _IsSubcategory = default;
@@ -244,16 +226,19 @@ namespace RhinoInside.Revit.GH.Types
     public Category(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public Category(ARDB.Category value) : base(value.Document(), value?.Id ?? ARDB.ElementId.InvalidElementId)
     {
+      if (value is null) return;
+
       // Only cache values that can not change.
-      if (Id.IsBuiltInId()) _FullName = value?.FullName();
-      _CategoryType = value?.CategoryType;
-      _IsTagCategory = value?.IsTagCategory;
-      _IsSubcategory = value?.Parent is object;
-      _IsVisibleInUI = value?.IsVisibleInUI();
-      _CanAddSubcategory = value?.CanAddSubcategory;
-      _AllowsBoundParameters = value?.AllowsBoundParameters;
-      _HasMaterialQuantities = value?.HasMaterialQuantities;
-      _IsCuttable = value?.IsCuttable;
+      if (Id.IsBuiltInId()) _FullName = value.FullName();
+      _CategoryDiscipline = value.CategoryDiscipline();
+      _CategoryType = value.CategoryType;
+      _IsTagCategory = value.IsTagCategory;
+      _IsSubcategory = value.Parent is object;
+      _IsVisibleInUI = value.IsVisibleInUI();
+      _CanAddSubcategory = value.CanAddSubcategory;
+      _AllowsBoundParameters = value.AllowsBoundParameters;
+      _HasMaterialQuantities = value.HasMaterialQuantities;
+      _IsCuttable = value.IsCuttable;
     }
 
     public static Category FromCategory(ARDB.Category category)
@@ -581,7 +566,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override string Nomen
     {
-      get => CategoryNaming.SplitFullName(FullName, out var _) ?? base.Nomen;
+      get => CategoryNaming.SplitFullName(CompleteNomen, out var _) ?? base.Nomen;
       set
       {
         base.Nomen = value;
@@ -592,13 +577,13 @@ namespace RhinoInside.Revit.GH.Types
     private new ARDB.BuiltInCategory? BuiltInCategory => Id?.ToBuiltInCategory();
 
     string _FullName;
-    public string FullName => _FullName ?? (APIObject?.FullName() ?? BuiltInCategory?.FullName(localized: true));
+    public override string CompleteNomen => _FullName ?? (APIObject?.FullName() ?? BuiltInCategory?.FullName(localized: true));
 
     ERDB.CategoryDiscipline? _CategoryDiscipline;
-    public ERDB.CategoryDiscipline CategoryDiscipline => _CategoryDiscipline ?? (_CategoryDiscipline = APIObject?.CategoryDiscipline() ?? BuiltInCategory?.CategoryDiscipline()) ?? ERDB.CategoryDiscipline.None;
+    public ERDB.CategoryDiscipline CategoryDiscipline => _CategoryDiscipline ??= APIObject?.CategoryDiscipline() ?? BuiltInCategory?.CategoryDiscipline() ?? ERDB.CategoryDiscipline.None;
 
     ARDB.CategoryType? _CategoryType;
-    public ARDB.CategoryType CategoryType => _CategoryType ?? (_CategoryType = APIObject?.CategoryType ?? BuiltInCategory?.CategoryType()) ?? ARDB.CategoryType.Invalid;
+    public ARDB.CategoryType CategoryType => _CategoryType ??= APIObject?.CategoryType ?? BuiltInCategory?.CategoryType() ?? ARDB.CategoryType.Invalid;
 
     public Category Parent => _IsSubcategory == false ? null :
       APIObject is object ? FromCategory(APIObject.Parent) :
@@ -612,30 +597,30 @@ namespace RhinoInside.Revit.GH.Types
       Select(FromCategory);
 
     bool? _IsTagCategory;
-    public bool? IsTagCategory => _IsTagCategory ?? (_IsTagCategory = APIObject?.IsTagCategory ?? BuiltInCategory?.IsTagCategory());
+    public bool? IsTagCategory => _IsTagCategory ??= APIObject?.IsTagCategory ?? BuiltInCategory?.IsTagCategory();
 
     bool? _IsSubcategory;
-    public bool? IsSubcategory => _IsSubcategory ?? (_IsSubcategory =
+    public bool? IsSubcategory => _IsSubcategory ??=
     (
       APIObject is object ? APIObject.Parent is object :
       BuiltInCategory is object ? BuiltInCategory.Value.Parent() != ARDB.BuiltInCategory.INVALID :
       default(bool?)
-    ));
+    );
 
     bool? _IsVisibleInUI;
-    public bool? IsVisibleInUI => _IsVisibleInUI ?? (_IsVisibleInUI = APIObject?.IsVisibleInUI() ?? BuiltInCategory?.IsVisibleInUI());
+    public bool? IsVisibleInUI => _IsVisibleInUI ??= APIObject?.IsVisibleInUI() ?? BuiltInCategory?.IsVisibleInUI();
 
     bool? _CanAddSubcategory;
-    public bool? CanAddSubcategory => _CanAddSubcategory ?? (_CanAddSubcategory = APIObject?.CanAddSubcategory ?? BuiltInCategory?.CanAddSubcategory());
+    public bool? CanAddSubcategory => _CanAddSubcategory ??= APIObject?.CanAddSubcategory ?? BuiltInCategory?.CanAddSubcategory();
 
     bool? _AllowsBoundParameters;
-    public bool? AllowsBoundParameters => _AllowsBoundParameters ?? (_AllowsBoundParameters = APIObject?.AllowsBoundParameters ?? BuiltInCategory?.AllowsBoundParameters());
+    public bool? AllowsBoundParameters => _AllowsBoundParameters ??= APIObject?.AllowsBoundParameters ?? BuiltInCategory?.AllowsBoundParameters();
 
     bool? _HasMaterialQuantities;
-    public bool? HasMaterialQuantities => _HasMaterialQuantities ?? (_HasMaterialQuantities = APIObject?.HasMaterialQuantities ?? BuiltInCategory?.HasMaterialQuantities());
+    public bool? HasMaterialQuantities => _HasMaterialQuantities ??= APIObject?.HasMaterialQuantities ?? BuiltInCategory?.HasMaterialQuantities();
 
     bool? _IsCuttable;
-    public bool? IsCuttable => _IsCuttable ?? (_IsCuttable = APIObject?.IsCuttable ?? BuiltInCategory?.IsCuttable());
+    public bool? IsCuttable => _IsCuttable ??= APIObject?.IsCuttable ?? BuiltInCategory?.IsCuttable();
     #endregion
 
     #region Object Style
@@ -800,9 +785,24 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool CastFrom(object source)
+    public Category GraphicsStyleCategory
     {
-      if (base.CastFrom(source))
+      get
+      {
+        if (Value is ARDB.GraphicsStyle style)
+        {
+          return style.GraphicsStyleCategory is ARDB.Category category ?
+            GetElement(Category.FromCategory(category)) :
+            new Category();
+        }
+
+        return default;
+      }
+    }
+
+    public override bool ConvertFrom(object source)
+    {
+      if (base.ConvertFrom(source))
         return true;
 
       if (source is Category category)
@@ -825,11 +825,16 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.GraphicsStyle)))
       {
         target = (Q) (object) Value;
+        return true;
+      }
+      else if (typeof(Q).IsAssignableFrom(typeof(Category)))
+      {
+        target = (Q) (object) GraphicsStyleCategory;
         return true;
       }
 
@@ -841,7 +846,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 #endif
 
-      return base.CastTo(out target);
+      return base.ConvertTo(out target);
     }
 
     #region ModelContent

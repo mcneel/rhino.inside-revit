@@ -14,8 +14,19 @@ namespace Rhino.Geometry
     public static readonly Point3d Point3d = new Point3d(Value, Value, Value);
     public static readonly Vector3d Vector3d = new Vector3d(Value, Value, Value);
     public static readonly Plane Plane = new Plane(Point3d, Vector3d, Vector3d);
+    public static readonly Line Line = new Line(Point3d, Point3d);
+    public static readonly Rectangle3d Rectangle = new Rectangle3d(Plane, Interval, Interval);
+    public static readonly Circle Circle = new Circle(Plane, Value);
+    public static readonly Arc Arc = new Arc(Circle, Interval);
     public static readonly BoundingBox BoundingBox = new BoundingBox(Point3d, Point3d);
-    public static readonly Box Box = new Box(Plane, BoundingBox);
+    public static readonly Box Box = new Box(Plane, Interval, Interval, Interval);
+    public static readonly Transform Transform = new Transform()
+    {
+      M00 = Value, M01 = Value, M02 = Value, M03 = Value,
+      M10 = Value, M11 = Value, M12 = Value, M13 = Value,
+      M20 = Value, M21 = Value, M22 = Value, M23 = Value,
+      M30 = Value, M31 = Value, M32 = Value, M33 = Value,
+    };
   }
 
   readonly struct EpsilonEqualityComparer :
@@ -1235,30 +1246,22 @@ namespace Rhino.Geometry
     }
 
     public static bool TryGetUserString(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value) =>
-      TryGetUserString(geometry, key, out value, Autodesk.Revit.DB.ElementId.InvalidElementId);
+      TryGetUserString(geometry, key, out value, ElementIdExtension.Invalid);
 
     public static bool TryGetUserString(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def)
     {
-#if REVIT_2024
-      if (geometry.TryGetUserString(key, out long id, def.ToValue()))
+      if (geometry.TryGetUserString(key, out var id, def.ToValue()))
       {
         value = new Autodesk.Revit.DB.ElementId(id);
         return true;
       }
-#else
-      if (geometry.TryGetUserString(key, out int id, def.ToValue()))
-      {
-        value = new Autodesk.Revit.DB.ElementId(id);
-        return true;
-      }
-#endif
 
       value = def;
       return false;
     }
 
     public static bool TrySetUserString(this GeometryBase geometry, string key, Autodesk.Revit.DB.ElementId value) =>
-      geometry.TrySetUserString(key, value.ToValue(), Autodesk.Revit.DB.ElementId.InvalidElementId.ToValue());
+      geometry.TrySetUserString(key, value.ToValue(), ElementIdExtension.Invalid.ToValue());
 
     public static bool TrySetUserString(this GeometryBase geometry, string key, Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def) =>
       geometry.TrySetUserString(key, value.ToValue(), def.ToValue());

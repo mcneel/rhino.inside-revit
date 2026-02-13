@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
 
       if (!Params.TryGetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       else Params.TrySetDataList(DA, "Elements", () => elements);

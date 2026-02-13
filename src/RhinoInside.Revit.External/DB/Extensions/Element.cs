@@ -158,6 +158,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return element.GetBoundingBoxXYZ()?.ToOutLine();
     }
 
+    public static Outline GetOutline(this Element element, bool boundVertically)
+    {
+      return GetOutline(element, boundVertically, boundVertically);
+    }
+
+    public static Outline GetOutline(this Element element, bool boundBottom, bool boundTop)
+    {
+      var outline = GetOutline(element);
+      if (outline is object)
+      {
+        if (!boundBottom)
+        {
+          var (minX, minY, _) = outline.MinimumPoint;
+          outline.MinimumPoint = new XYZ(minX, minY, -ElementFilters.BoundingBoxLimits);
+        }
+
+        if (!boundTop)
+        {
+          var (maxX, maxY, _) = outline.MaximumPoint;
+          outline.MaximumPoint = new XYZ(maxX, maxY, +ElementFilters.BoundingBoxLimits);
+        }
+      }
+      return outline;
+    }
+
     public static bool HasBoundingBoxXYZ(this Element element)
     {
       using (var bbox = element.GetBoundingBoxXYZ())
@@ -311,7 +336,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
         if (filter is null)
-          filter = CompoundElementFilter.Universe;
+          filter = ElementFilters.Universe;
 
         UpdaterRegistry.AddTrigger(UpdaterId, document, filter, Element.GetChangeTypeAny());
         UpdaterRegistry.AddTrigger(UpdaterId, document, filter, Element.GetChangeTypeElementDeletion());
@@ -370,8 +395,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       var ids = element.GetDependentElements
       (
-        CompoundElementFilter.ExclusionFilter(element.Id).Intersect
-        (CompoundElementFilter.ElementClassFilter(typeof(T)))
+        ElementFilters.ExclusionFilter(element.Id).Intersect
+        (ElementFilters.ElementClassFilter(typeof(T)))
       );
 
       var doc = element.Document;
@@ -382,8 +407,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       var ids = element.GetDependentElements
       (
-        CompoundElementFilter.ExclusionFilter(element.Id).Intersect
-        (CompoundElementFilter.ElementClassFilter(typeof(T)))
+        ElementFilters.ExclusionFilter(element.Id).Intersect
+        (ElementFilters.ElementClassFilter(typeof(T)))
       );
 
       var doc = element.Document;
@@ -393,7 +418,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool DependsOn(this Element element, Element host)
     {
       if (!element.Document.IsEquivalent(host?.Document)) return false;
-      return host?.GetDependentElements(CompoundElementFilter.InclusionFilter(element)).Count == 1;
+      return host?.GetDependentElements(ElementFilters.InclusionFilter(element)).Count == 1;
     }
     #endregion
 
@@ -402,7 +427,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     // `Element.Name` does not always access the true denomination of the element.
     //
     // In cases like `ViewSheet` the true denomination is the "Sheet Number" parameter.
-    // Denomination is used here as the element property that identifies it univocaly on the UI.
+    // Denomination is used here as the element property that identifies it univocally on the UI.
     // Is the property that produce a "Name" collision in case is duplicated.
     //
     // In other cases like 'Design Options' the Name parameter may come decorated
@@ -413,7 +438,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (element is null) return false;
 
-      using (element.Document.RollBackScope())
+      var document = element.Document;
+      if (document.IsLinked) return false;
+
+      using (document.RollBackScope())
       {
         try { element.SetElementNomen(Guid.NewGuid().ToString("N")); }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
@@ -616,7 +644,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       switch (set)
       {
         case ParameterClass.Any:
-          return BuiltInParameterExtension.BuiltInParameters.
+          return BuiltInParameters.Values.
             Select
             (
               x =>
@@ -630,7 +658,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             OrderBy(x => x.Id.ToValue());
 
         case ParameterClass.BuiltIn:
-          return BuiltInParameterExtension.BuiltInParameters.
+          return BuiltInParameters.Values.
             Select
             (
               x =>
@@ -672,7 +700,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             OrderBy(x => x.Id.ToValue());
 
         case ParameterClass.BuiltIn:
-          return BuiltInParameterExtension.BuiltInParameterMap.TryGetValue(name, out var parameters) ?
+          return BuiltInParameters.TryGetByStringLocalized(name, out var parameters) ?
             parameters.Select(element.get_Parameter).Where(x => x?.Definition is object) :
             Enumerable.Empty<Parameter>();
 

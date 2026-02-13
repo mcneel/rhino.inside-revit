@@ -8,8 +8,10 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Annotations.Grids
 {
   using Convert.Geometry;
+  using External.DB;
   using External.DB.Extensions;
 
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryGrids : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("218FDACD-15CE-4B3A-8D70-F7F41362A4F4");
@@ -29,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Grid name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Interval>("Elevation", "E", "Grid extents interval along z-axis", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary)
@@ -43,19 +45,17 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc))
-        return;
-
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Elevation", out Interval? elevation)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(doc.Value))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var gridsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          gridsCollector = gridsCollector.WherePasses(filter);
+          gridsCollector = gridsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.DATUM_TEXT, ref name, out var nameFilter))
           gridsCollector = gridsCollector.WherePasses(nameFilter);
@@ -67,14 +67,16 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
 
         if (elevation.HasValue)
         {
-          var height = elevation.Value.InHostUnits();
+          elevation = elevation.Value.InHostUnits();
+          if (source.SourceInstance.Value is ARDB.RevitLinkInstance instance) elevation -= instance.GetTransform().Origin.Z;
+
           grids = grids.Where
           (
             x =>
             {
               var extents = x.GetExtents();
               var interval = new Interval(extents.MinimumPoint.Z, extents.MaximumPoint.Z);
-              return Interval.FromIntersection(height, interval).IsValid;
+              return Interval.FromIntersection(elevation.Value, interval).IsValid;
             }
           );
         }
@@ -84,6 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
           "Grids",
           grids.
           Select(x => new Types.Grid(x)).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

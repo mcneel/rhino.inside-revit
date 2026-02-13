@@ -494,32 +494,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static IList<Element> GetNamesakeElements(this Document doc, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
     {
-      var enumerable = Enumerable.Empty<Element>();
-
       if (string.IsNullOrWhiteSpace(name))
-        return enumerable.ToList();
+        return Array.Empty<Element>();
 
+      var enumerable = Enumerable.Empty<Element>();
       var nomenParameter = ElementExtension.GetNomenParameter(type);
-      using (var elementCollector = new FilteredElementCollector(doc))
+      using (var collector = new FilteredElementCollector(doc))
       {
         var isElementType = typeof(ElementType).IsAssignableFrom(type);
-        var collector =
-          (isElementType ? elementCollector.WhereElementIsElementType() : elementCollector.WhereElementIsNotElementType()).
+        var elements =
+          (isElementType ? collector.WhereElementIsElementType() : collector.WhereElementIsNotElementType()).
           WhereCategoryIdEqualsTo(categoryId).
           WhereElementIsKindOf(type);
 
         if(nomenParameter != BuiltInParameter.INVALID)
-          collector = collector.WhereParameterBeginsWith(nomenParameter, name);
+          elements = elements.WhereParameterBeginsWith(nomenParameter, name);
 
         if (string.IsNullOrWhiteSpace(parentName))
         {
-          enumerable = collector;
+          enumerable = elements;
         }
         else
         {
           if (isElementType)
           {
-            enumerable = collector.
+            enumerable = elements.
               WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
               Cast<ElementType>().Where(x => x.FamilyName.Equals(parentName, ElementNaming.ComparisonType));
           }
@@ -527,15 +526,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             if (Enum.TryParse(parentName, out ViewType viewType))
             {
-              enumerable = collector.
-                Cast<View>().Where(x => !x.IsTemplate && x.ViewType == viewType);
+              enumerable = elements.Cast<View>().Where
+              (
+                x => !x.IsTemplate && x.ViewType == viewType
+              );
             }
           }
           else if (typeof(FillPatternElement).IsAssignableFrom(type))
           {
             if (Enum.TryParse(parentName, out FillPatternTarget target))
             {
-              enumerable = collector.Cast<FillPatternElement>().Where
+              enumerable = elements.Cast<FillPatternElement>().Where
               (
                 x =>
                 {
@@ -612,10 +613,28 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           return AppearanceAssetElement.GetAppearanceAssetElementByName(target, asset.Name)?.Id ?? ElementIdExtension.Invalid;
         }
+        else if (element is LinePatternElement linePattern)
+        {
+          return LinePatternElement.GetLinePatternElementByName(target, linePattern.Name)?.Id ?? ElementIdExtension.Invalid;
+        }
         else if (element is FillPatternElement fillPattern)
         {
           using (var pattern = fillPattern.GetFillPattern())
             return FillPatternElement.GetFillPatternElementByName(target, pattern.Target, fillPattern.Name)?.Id ?? ElementIdExtension.Invalid;
+        }
+        else if (element is GraphicsStyle graphicsStyle)
+        {
+          using (var collector = new FilteredElementCollector(target))
+          {
+            return collector.WhereElementIsNotElementType().
+              WhereElementIsKindOf(typeof(GraphicsStyle)).
+              WhereCategoryIdEqualsTo(ElementIdExtension.Invalid).
+              Cast<GraphicsStyle>().
+              Where(x => x.GraphicsStyleType == graphicsStyle.GraphicsStyleType).
+              Where(x => x.Name.Equals(nomen, ElementNaming.ComparisonType)).
+              Select(x => x.Id).
+              FirstOrDefault() ?? ElementIdExtension.Invalid;
+          }
         }
         else
         {
@@ -743,7 +762,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (BuiltInCategoriesWithParametersDocument?.IsValidObject != true || !doc.IsEquivalent(BuiltInCategoriesWithParametersDocument))
       {
         BuiltInCategoriesWithParametersDocument = doc;
-        BuiltInCategoriesWithParameters = BuiltInCategoryExtension.BuiltInCategories.Where
+        BuiltInCategoriesWithParameters = BuiltInCategories.Values.Where
         (
           bic =>
           {
@@ -1097,7 +1116,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           //  (
           //    var collector = new FilteredElementCollector(document, view.Id).
           //    WherePasses(new ElementCategoryFilter(ElementId.InvalidElementId, inverted: true)).
-          //    WherePasses(External.DB.CompoundElementFilter.ElementHasBoundingBoxFilter)
+          //    WherePasses(External.DB.ElementFilters.ElementHasBoundingBoxFilter)
           //  )
           //  {
           //    var elements = collector.ToElementIds();
