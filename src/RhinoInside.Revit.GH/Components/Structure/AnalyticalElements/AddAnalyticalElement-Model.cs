@@ -138,13 +138,21 @@ namespace RhinoInside.Revit.GH.Components.Structure
           else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Slanted curved walls are not supported.");
 
           structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleWall;
-          thickness = wall.Value.Width;
+          using (var structure = wall.Value.WallType.GetCompoundStructure())
+          {
+            thickness = structure.GetLayerWidth(structure.StructuralMaterialIndex);
+            materialId = structure.GetMaterialId(structure.StructuralMaterialIndex);
+          }
           break;
 
         case Types.Floor floor:
           boundary = floor.Sketch.TrimmedSurface;
           structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleFloor;
-          thickness = floor.Value.get_Parameter(ARDB.BuiltInParameter.FLOOR_ATTR_THICKNESS_PARAM).AsDouble();
+          using (var structure = floor.Value.FloorType.GetCompoundStructure())
+          {
+            thickness = structure.GetLayerWidth(structure.StructuralMaterialIndex);
+            materialId = structure.GetMaterialId(structure.StructuralMaterialIndex);
+          }
           break;
       }
 
