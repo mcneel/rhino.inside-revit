@@ -35,8 +35,8 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    public override Plane Location => Sketch.ProfilesPlane;
-    public override Brep TrimmedSurface => Sketch.TrimmedSurface;
+    public override Plane Location => Sketch?.Location ?? NaN.Plane;
+    public override Brep TrimmedSurface => Sketch?.TrimmedSurface;
     public Revision Revision => GetElement<Revision>(Value?.RevisionId);
     #endregion
   }

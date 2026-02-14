@@ -139,7 +139,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             ARDB.Line l    => l.Direction.CrossProduct(l.Direction.PerpVector()),
             ARDB.Arc a     => a.Normal,
             ARDB.Ellipse e => e.Normal,
-            _ => throw new Exceptions.RuntimeArgumentException("Curve", "Curve shuld be a line, an arc or an ellipse.", curve),
+            _ => throw new Exceptions.RuntimeArgumentException("Curve", "Curve should be a line, an arc or an ellipse.", curve),
           };
 
           // Compute
@@ -148,8 +148,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             analyticalPanel,
             doc.Value,
             analyticalCurve.CreateReversed(),
-            normal,
-            -offset
+            normal * -offset
           );
 
           DA.SetData(_AnalyticalPanel_, analyticalPanel);
@@ -158,55 +157,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
       );
 #endif
     }
-
-//#if REVIT_2023
-//    bool Reuse
-//    (
-//      ARDB_AnalyticalPanel analyticalPanel,
-//      ARDB.Curve curve,
-//      ARDB.XYZ normal,
-//      double offset
-//    )
-//    {
-//      if (analyticalPanel is null) return false;
-
-//      var curveLoop = analyticalPanel.GetOuterContour();
-//      if (!curveLoop.HasPlane())
-//        return false;
-
-//      var curves = new ARDB.Curve[] { null, null, curve, null };
-//      curves[0] = curve.CreateTransformed(ARDB.Transform.CreateTranslation(normal * offset)).CreateReversed();
-//      curves[1] = ARDB.Line.CreateBound(curves[0].GetEndPoint(1), curves[2].GetEndPoint(0));
-//      curves[3] = ARDB.Line.CreateBound(curves[2].GetEndPoint(1), curves[0].GetEndPoint(0));
-//      curveLoop = ARDB.CurveLoop.Create(curves);
-//      if (!curveLoop.HasPlane())
-//        return false;
-
-//      analyticalPanel.SetOuterContour(curveLoop);
-//      return true;
-//    }
-
-//    ARDB_AnalyticalPanel Reconstruct
-//    (
-//      ARDB_AnalyticalPanel analyticalPanel,
-//      ARDB.Document doc,
-//      ARDB.Curve curve,
-//      ARDB.XYZ normal,
-//      double offset
-//    )
-//    {
-//      if (!Reuse(analyticalPanel, curve, normal, offset))
-//      {
-//        analyticalPanel = analyticalPanel.ReplaceElement
-//        (
-//          ARDB_AnalyticalPanel.Create(doc, curve, normal * offset),
-//          ExcludeUniqueProperties
-//        );
-//      }
-
-//      return analyticalPanel;
-//    }
-//#endif
   }
 }
 
