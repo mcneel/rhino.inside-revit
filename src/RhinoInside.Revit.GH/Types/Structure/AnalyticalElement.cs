@@ -63,13 +63,13 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    public AnalyticalStructuralRole StructuralRole
+    public ARDB.Structure.AnalyticalStructuralRole? StructuralRole
     {
 #if REVIT_2023
-      get => Value is ARDB_Structure_AnalyticalElement element ? new AnalyticalStructuralRole(element.StructuralRole) : null;
+      get => Value?.StructuralRole;
       set
       {
-        if(Value is ARDB_Structure_AnalyticalElement element && element.StructuralRole != value.Value)
+        if (value is object && Value is ARDB_Structure_AnalyticalElement element && element.StructuralRole != value.Value)
           element.StructuralRole = value.Value;
       }
 #else
@@ -78,21 +78,21 @@ namespace RhinoInside.Revit.GH.Types
 #endif
     }
 
-    public AnalyzeAs AnalyzeAs
+    public ARDB.Structure.AnalyzeAs? AnalyzeAs
     {
 #if REVIT_2023
-      get => Value is ARDB_Structure_AnalyticalElement element ? new AnalyzeAs(element.AnalyzeAs) : null;
+      get => Value?.AnalyzeAs;
       set
       {
-        if(Value is ARDB_Structure_AnalyticalElement element && element.AnalyzeAs != value.Value)
+        if(value is object && Value is ARDB_Structure_AnalyticalElement element && element.AnalyzeAs != value.Value)
           element.AnalyzeAs = value.Value;
       }
 #else
-      get => Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS) is ARDB.Parameter parameter ? new AnalyzeAs(parameter.AsEnum<ARDB.Structure.AnalyzeAs>()) : null;
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS).AsEnum<ARDB.Structure.AnalyzeAs>();
       set
       {
-        if (Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS) is ARDB.Parameter parameter && parameter.AsEnum<ARDB.Structure.AnalyzeAs>() != value.Value)
-          parameter.Set(value.Value);
+        if (value is object)
+          Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS)?.Update(value.Value);
       }
 #endif
     }

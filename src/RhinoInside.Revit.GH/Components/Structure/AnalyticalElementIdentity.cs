@@ -111,14 +111,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
       if (structuralRole is object)
       {
         StartTransaction(element.Document);
-        element.StructuralRole = structuralRole;
+        element.StructuralRole = structuralRole.Value;
       }
       Params.TrySetData(DA, _StructuralRole_, () => element.StructuralRole);
 
       if (analyzeAs is object)
       {
         StartTransaction(element.Document);
-        element.AnalyzeAs = analyzeAs;
+        element.AnalyzeAs = analyzeAs.Value;
       }
       Params.TrySetData(DA, _AnalyzeAs_, () => element.AnalyzeAs);
     }
