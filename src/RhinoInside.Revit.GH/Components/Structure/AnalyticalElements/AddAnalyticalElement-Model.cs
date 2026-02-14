@@ -84,6 +84,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #if REVIT_2023
       if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
       if (!Params.GetData(DA, "Model Element", out Types.GraphicalElement element)) return;
+      if (!element.Structural)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input model element is not structural.");
+        return;
+      }
 
       // Checking input
       var tol = GeometryTolerance.Model;
@@ -140,8 +145,12 @@ namespace RhinoInside.Revit.GH.Components.Structure
           structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleWall;
           using (var structure = wall.Value.WallType.GetCompoundStructure())
           {
-            thickness = structure.GetLayerWidth(structure.StructuralMaterialIndex);
-            materialId = structure.GetMaterialId(structure.StructuralMaterialIndex);
+            var index = structure.StructuralMaterialIndex;
+            if (index > 0)
+            {
+              thickness = structure.GetLayerWidth(index);
+              materialId = structure.GetMaterialId(index);
+            }
           }
           break;
 
@@ -150,8 +159,12 @@ namespace RhinoInside.Revit.GH.Components.Structure
           structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleFloor;
           using (var structure = floor.Value.FloorType.GetCompoundStructure())
           {
-            thickness = structure.GetLayerWidth(structure.StructuralMaterialIndex);
-            materialId = structure.GetMaterialId(structure.StructuralMaterialIndex);
+            var index = structure.StructuralMaterialIndex;
+            if (index > 0)
+            {
+              thickness = structure.GetLayerWidth(index);
+              materialId = structure.GetMaterialId(index);
+            }
           }
           break;
       }

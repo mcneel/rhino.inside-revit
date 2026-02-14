@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -11,7 +13,6 @@ namespace RhinoInside.Revit.GH.Types
 
 #if REVIT_2023
   using ARDB_Structure_AnalyticalElement = ARDB.Structure.AnalyticalElement;
-  using Grasshopper.Kernel.Types;
 #else
   using ARDB_Structure_AnalyticalElement = ARDB.Structure.AnalyticalModel;
 #endif
@@ -116,17 +117,25 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    public GraphicalElement PhysicalElement
+    public GraphicalElement[] PhysicalElements
     {
       get
       {
         if (IsValid)
         {
-#if REVIT_2023
+#if REVIT_2024
           if (ARDB.Structure.AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Document) is ARDB.Structure.AnalyticalToPhysicalAssociationManager manager)
-            return GetElement<GraphicalElement>(manager.GetAssociatedElementId(Id));
+            return manager.GetAssociatedElementIds(Id).Select(x => GetElement<GraphicalElement>(x)).ToArray();
+#elif REVIT_2023
+          if (ARDB.Structure.AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Document) is ARDB.Structure.AnalyticalToPhysicalAssociationManager manager)
+          {
+            var id = manager.GetAssociatedElementId(Id);
+            return id.IsValid() ?
+                  new GraphicalElement[] { GetElement<GraphicalElement>(id) } :
+                  Array.Empty<GraphicalElement>();
+          }
 #else
-          return GetElement<GraphicalElement>(Value.GetElementId());
+          return new GraphicalElement[] { GetElement<GraphicalElement>(Value.GetElementId()) };
 #endif
         }
 
@@ -137,9 +146,21 @@ namespace RhinoInside.Revit.GH.Types
         if (value is object && IsValid)
         {
 #if REVIT_2023
-          AssertValidDocument(value, nameof(PhysicalElement));
+          foreach (var element in value)
+            AssertValidDocument(element, nameof(PhysicalElements));
+
           if (ARDB.Structure.AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Document) is ARDB.Structure.AnalyticalToPhysicalAssociationManager manager)
-            manager.AddAssociation(Id, value.Id);
+          {
+            if (manager.HasAssociation(Id))
+              manager.RemoveAssociation(Id);
+
+#if REVIT_2024
+            manager.AddAssociation(new HashSet<ARDB.ElementId>() { Id }, value.Select(x => x.Id).ToHashSet());
+#else
+            foreach (var element in value)
+              manager.AddAssociation(Id, element.Id);
+#endif
+          }
 #else
           throw new Exceptions.RuntimeErrorException($"'{DisplayName}' does not support assignment of a user-specified model element.");
 #endif
