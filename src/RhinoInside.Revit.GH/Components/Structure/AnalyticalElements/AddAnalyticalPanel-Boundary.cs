@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Name = "Openings",
           NickName = "O",
           Description = "Create analytical openings",
-        }.SetDefaultVale(true), ParamRelevance.Secondary
+        }.SetDefaultVale(true), ParamRelevance.Primary
       ),
     };
 
@@ -89,7 +89,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
           Name = "Analytical Openings",
           NickName = "O",
           Description = "Output openings",
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Primary
       )
     };
 
@@ -118,58 +118,16 @@ namespace RhinoInside.Revit.GH.Components.Structure
           if (!Params.TryGetData(DA, "Openings", out bool? openings)) return null;
 
           var tol = GeometryTolerance.Model;
-          if (boundary.Faces.Count != 1)
-            throw new RuntimeArgumentException("Boundary", "Boundary surface should have only one face.", boundary);
-
           if (!boundary.Faces[0].TryGetPlane(out var _, tol.VertexTolerance))
             throw new RuntimeArgumentException("Boundary", "Boundary surface should be planar.", boundary);
-
-          var loops = openings ?? true ?
-            boundary.Loops.Select(x => x.To3dCurve()).ToArray() :
-            boundary.Loops.Where(x => x.LoopType == BrepLoopType.Outer).Select(x => x.To3dCurve()).ToArray();
-
-          var boundaryPlane = default(Plane);
-          var maxArea = 0.0;
-          for (int index = 0; index < loops.Length; ++index)
-          {
-            var loop = loops[index];
-            var plane = default(Plane);
-            if(loop is null || loop.IsShort(tol.ShortCurveTolerance))
-              throw new RuntimeArgumentException("Boundary", $"Loop {index} is too short.\nTolerance is {tol.ShortCurveTolerance}", loop);
-
-            if (!loop.IsClosed(tol.VertexTolerance) || !loop.TryGetPlane(out plane, tol.VertexTolerance))
-              throw new RuntimeArgumentException("Boundary", $"Loop {index} should be closed and planar.\nTolerance is {tol.VertexTolerance}", loop);
-
-            loops[index] = loop.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
-
-            using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
-            {
-              if (properties is null)
-                throw new RuntimeArgumentException("Boundary", "Failed to compute loop Area.", loop);
-
-              if (properties.Area > maxArea)
-              {
-                maxArea = properties.Area;
-                var orientation = loop.ClosedCurveOrientation(plane);
-
-                if (orientation == CurveOrientation.CounterClockwise)
-                  plane.Flip();
-
-                boundaryPlane = plane;
-              }
-              else if (plane.Normal.IsParallelTo(boundaryPlane.Normal) == 0 || Math.Abs(plane.DistanceTo(boundaryPlane.Origin)) > GeometryTolerance.Internal.DefaultTolerance)
-              {
-                throw new RuntimeArgumentException("Boundary", "Loops should be a list of coplanar curves.", loops);
-              }
-            }
-          }
 
           // Compute
           analyticalPanel = Reconstruct
           (
             analyticalPanel,
             doc.Value,
-            loops
+            boundary.Faces[0],
+            openings ?? false
           );
 
           DA.SetData(_AnalyticalPanel_, analyticalPanel);
@@ -177,7 +135,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         }
       );
 
-      Params.TrySetDataList(DA, "Analytical Openings", () => panel.GetAnalyticalOpeningsIds().Select(x => new Types.AnalyticalOpening(doc.Value.GetElement(x) as ARDB_AnalyticalOpening)));
+      Params.TrySetDataList(DA, "Analytical Openings", () => panel?.GetAnalyticalOpeningsIds().Select(x => new Types.AnalyticalOpening(doc.Value.GetElement(x) as ARDB_AnalyticalOpening)));
 #endif
     }
 
