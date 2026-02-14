@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.Structure
@@ -38,9 +40,10 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.GraphicalElement()
         {
-          Name = _ModelElement_,
+          Name = _ModelElements_,
           NickName = "ME",
-          Description = "Model element",
+          Description = "Model elements associated",
+          Access = GH_ParamAccess.list,
           Optional = true
         }, ParamRelevance.Primary
       ),
@@ -65,42 +68,46 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.GraphicalElement()
         {
-          Name = _ModelElement_,
+          Name = _ModelElements_,
           NickName = "ME",
-          Description = "Model element",
+          Description = "Model elements associated",
+          Access = GH_ParamAccess.list
         }
       ),
     };
 
     const string _AnalyticalElement_ = "Analytical Element";
-    const string _ModelElement_ = "Model Element";
+    const string _ModelElements_ = "Model Elements";
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // Input
       if (!Params.GetData(DA, _AnalyticalElement_, out Types.AnalyticalElement analytical, x => x.IsValid)) return;
-      if (!Params.TryGetData(DA, _ModelElement_, out Types.GraphicalElement element, x => x.IsValid)) return;
+      if (!Params.TryGetDataList(DA, _ModelElements_, out IList<Types.GraphicalElement> elements)) return;
 
-      if (element is object)
+      if (elements is object)
       {
-        if (!element.IsPhysicalElement)
+        foreach (var element in elements)
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input element is not a model element.");
-          return;
+          if (!element.IsPhysicalElement)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input element is not a model element.");
+            return;
+          }
+
+          if (!element.Structural)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input model element is not structural.");
+            return;
+          }
         }
 
-        if (!element.Structural)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input model element is not structural.");
-          return;
-        }
-
-        StartTransaction(element.Document);
-        analytical.PhysicalElement = element;
+        StartTransaction(analytical.Document);
+        analytical.PhysicalElements = elements.ToArray();
       }
 
       Params.TrySetData(DA, _AnalyticalElement_, () => analytical);
-      Params.TrySetData(DA, _ModelElement_, () => analytical.PhysicalElement);
+      Params.TrySetDataList(DA, _ModelElements_, () => analytical.PhysicalElements);
     }
   }
 }

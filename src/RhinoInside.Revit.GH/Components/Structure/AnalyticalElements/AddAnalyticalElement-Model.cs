@@ -84,6 +84,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #if REVIT_2023
       if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
       if (!Params.GetData(DA, "Model Element", out Types.GraphicalElement element)) return;
+      if (!element.Structural)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input model element is not structural.");
+        return;
+      }
 
       // Checking input
       var tol = GeometryTolerance.Model;
@@ -138,13 +143,29 @@ namespace RhinoInside.Revit.GH.Components.Structure
           else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Slanted curved walls are not supported.");
 
           structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleWall;
-          thickness = wall.Value.Width;
+          using (var structure = wall.Value.WallType.GetCompoundStructure())
+          {
+            var index = structure.StructuralMaterialIndex;
+            if (index > 0)
+            {
+              thickness = structure.GetLayerWidth(index);
+              materialId = structure.GetMaterialId(index);
+            }
+          }
           break;
 
         case Types.Floor floor:
           boundary = floor.Sketch.TrimmedSurface;
           structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleFloor;
-          thickness = floor.Value.get_Parameter(ARDB.BuiltInParameter.FLOOR_ATTR_THICKNESS_PARAM).AsDouble();
+          using (var structure = floor.Value.FloorType.GetCompoundStructure())
+          {
+            var index = structure.StructuralMaterialIndex;
+            if (index > 0)
+            {
+              thickness = structure.GetLayerWidth(index);
+              materialId = structure.GetMaterialId(index);
+            }
+          }
           break;
       }
 
