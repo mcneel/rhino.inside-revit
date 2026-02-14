@@ -34,6 +34,16 @@ namespace RhinoInside.Revit.GH.Components.Structure
       ),
       new ParamDefinition
       (
+        new Parameters.Param_Enum<Types.AnalyzeAs>
+        {
+          Name = _AnalyzeAs_,
+          NickName = "AS",
+          Description = "Structural analysis function to apply to the analytical element",
+          Optional = true,
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
         new Parameters.Param_Enum<Types.AnalyticalStructuralRole>
         {
           Name = _StructuralRole_,
@@ -46,16 +56,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
 #else
         ParamRelevance.Occasional
 #endif
-      ),
-      new ParamDefinition
-      (
-        new Parameters.Param_Enum<Types.AnalyzeAs>
-        {
-          Name = _AnalyzeAs_,
-          NickName = "AS",
-          Description = "Structural analysis function to apply to the analytical element",
-          Optional = true,
-        }, ParamRelevance.Primary
       ),
     };
 
@@ -72,6 +72,15 @@ namespace RhinoInside.Revit.GH.Components.Structure
       ),
       new ParamDefinition
       (
+        new Parameters.Param_Enum<Types.AnalyzeAs>
+        {
+          Name = _AnalyzeAs_,
+          NickName = "AS",
+          Description = "Structural analysis function to applied to the analytical element",
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
         new Parameters.Param_Enum<Types.AnalyticalStructuralRole>
         {
           Name = _StructuralRole_,
@@ -84,20 +93,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
         ParamRelevance.Occasional
 #endif
       ),
-      new ParamDefinition
-      (
-        new Parameters.Param_Enum<Types.AnalyzeAs>
-        {
-          Name = _AnalyzeAs_,
-          NickName = "AS",
-          Description = "Structural analysis function to applied to the analytical element",
-        }, ParamRelevance.Primary
-      ),
     };
 
     const string _AnalyticalElement_ = "Analytical Element";
-    const string _StructuralRole_ = "Structural Role";
     const string _AnalyzeAs_ = "Analyze As";
+    const string _StructuralRole_ = "Structural Role";
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
@@ -105,22 +105,23 @@ namespace RhinoInside.Revit.GH.Components.Structure
       if (!Params.GetData(DA, _AnalyticalElement_, out Types.AnalyticalElement element)) return;
       else Params.TrySetData(DA, _AnalyticalElement_, () => element);
 
-      if (!Params.TryGetData(DA, _StructuralRole_, out Types.AnalyticalStructuralRole structuralRole)) return;
       if (!Params.TryGetData(DA, _AnalyzeAs_, out Types.AnalyzeAs analyzeAs)) return;
-
-      if (structuralRole is object)
-      {
-        StartTransaction(element.Document);
-        element.StructuralRole = structuralRole;
-      }
-      Params.TrySetData(DA, _StructuralRole_, () => element.StructuralRole);
+      if (!Params.TryGetData(DA, _StructuralRole_, out Types.AnalyticalStructuralRole structuralRole)) return;
 
       if (analyzeAs is object)
       {
         StartTransaction(element.Document);
-        element.AnalyzeAs = analyzeAs;
+        element.AnalyzeAs = analyzeAs.Value;
       }
       Params.TrySetData(DA, _AnalyzeAs_, () => element.AnalyzeAs);
+
+      if (structuralRole is object)
+      {
+        StartTransaction(element.Document);
+        element.StructuralRole = structuralRole.Value;
+      }
+      Params.TrySetData(DA, _StructuralRole_, () => element.StructuralRole);
+
     }
   }
 }

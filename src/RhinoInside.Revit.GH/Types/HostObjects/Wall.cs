@@ -409,6 +409,10 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
+
+    #region Structure
+    public override bool Structural => Value?.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).AsBoolean() is true;
+    #endregion
   }
 
   [Kernel.Attributes.Name("Wall Sweep")]

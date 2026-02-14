@@ -98,29 +98,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
     bool Reuse
     (
       ARDB_AnalyticalPanel analyticalPanel,
-      IList<Curve> boundary
-    )
-    {
-      if (analyticalPanel is null) return false;
-      if (analyticalPanel.GetOuterContour() is null) return false;
-      if (boundary.Count < 1) return false;
-
-      var curveLoop = boundary.ConvertAll(x => x.ToBoundedCurveLoop());
-      analyticalPanel.SetOuterContour(curveLoop[0]);
-
-      var openingIds = analyticalPanel.GetAnalyticalOpeningsIds().OrderBy(x => x.ToValue()).ToArray();
-      int o = 1;
-      for (; o < curveLoop.Length; ++o)
-        Create(analyticalPanel, curveLoop[o], o - 1 < openingIds.Length ? openingIds[o - 1] : null);
-
-      analyticalPanel.Document.Delete(openingIds.Skip(o - 1).ToArray());
-
-      return true;
-    }
-
-    bool Reuse
-    (
-      ARDB_AnalyticalPanel analyticalPanel,
       ARDB.Curve curve,
       ARDB.XYZ normal,
       double offset
@@ -144,58 +121,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
       return true;
     }
 
-    ARDB_AnalyticalOpening Create(ARDB_AnalyticalPanel panel, ARDB.CurveLoop loop, ARDB.ElementId openingId)
-    {
-      ARDB_AnalyticalOpening opening = null;
-      if (openingId is object)
-      {
-        opening = panel.Document.GetElement(openingId) as ARDB_AnalyticalOpening;
-        opening.SetOuterContour(loop);
-      }
-      else
-      {
-        opening = ARDB_AnalyticalOpening.Create(panel.Document, loop, panel.Id);
-      }
-
-      return opening;
-    }
-
-    ARDB_AnalyticalPanel Create(ARDB.Document doc, IList<Curve> boundary)
-    {
-      if (boundary.Count < 1) return null;
-
-      var curveLoop = boundary.ConvertAll(x => x.ToBoundedCurveLoop());
-
-      if (curveLoop is null)
-        throw new ArgumentException("Failed to convert boundary curves to CurveLoop.", nameof(boundary));
-
-      var panel = ARDB_AnalyticalPanel.Create(doc, curveLoop[0]);
-
-      for (int b = 1; b < boundary.Count; ++b)
-        ARDB_AnalyticalOpening.Create(doc, curveLoop[b], panel.Id);
-
-      return panel;
-    }
-
-    protected ARDB_AnalyticalPanel Reconstruct
-    (
-      ARDB_AnalyticalPanel analyticalPanel,
-      ARDB.Document doc,
-      IList<Curve> boundary
-    )
-    {
-      if (!Reuse(analyticalPanel, boundary))
-      {
-        analyticalPanel = analyticalPanel.ReplaceElement
-        (
-          Create(doc, boundary),
-          ExcludePanelUniqueProperties
-        );
-      }
-
-      return analyticalPanel;
-    }
-
     protected ARDB_AnalyticalPanel Reconstruct
     (
       ARDB_AnalyticalPanel analyticalPanel,
@@ -216,9 +141,63 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
       return analyticalPanel;
     }
+
+    bool Reuse
+    (
+      ARDB_AnalyticalPanel panel,
+      BrepFace face,
+      bool openings
+    )
+    {
+      if (panel is null) return false;
+
+      var curveLoop = face.OuterLoop.To3dCurve().ToCurveLoop();
+      panel.SetOuterContour(curveLoop);
+
+      panel.Document.Delete(panel.GetAnalyticalOpeningsIds());
+      if (openings)
+      {
+        foreach (var loop in face.Loops.Where(x => x.LoopType == BrepLoopType.Inner))
+          ARDB.Structure.AnalyticalOpening.Create(panel.Document, loop.To3dCurve().ToCurveLoop(), panel.Id);
+      }
+
+      return true;
+    }
+
+    ARDB_AnalyticalPanel Create(ARDB.Document doc, BrepFace face, bool openings)
+    {
+      var panel = ARDB_AnalyticalPanel.Create(doc, face.OuterLoop.To3dCurve().ToCurveLoop());
+
+      if (openings)
+      {
+        foreach (var loop in face.Loops.Where(x => x.LoopType == BrepLoopType.Inner))
+          ARDB.Structure.AnalyticalOpening.Create(panel.Document, loop.To3dCurve().ToCurveLoop(), panel.Id).Pinned = true;
+      }
+
+      return panel;
+    }
+
+    protected ARDB_AnalyticalPanel Reconstruct
+    (
+      ARDB_AnalyticalPanel analyticalPanel,
+      ARDB.Document doc,
+      BrepFace face,
+      bool openings = true
+    )
+    {
+      if (!Reuse(analyticalPanel, face, openings))
+      {
+        analyticalPanel = analyticalPanel.ReplaceElement
+        (
+          Create(doc, face, openings),
+          ExcludePanelUniqueProperties
+        );
+      }
+
+      return analyticalPanel;
+    }
 #endif
 
     #endregion
-
   }
 }

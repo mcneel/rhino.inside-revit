@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
-using Rhino.Geometry;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -11,6 +11,7 @@ namespace RhinoInside.Revit.GH.Types
 
 #if REVIT_2023
   using ARDB_Structure_AnalyticalElement = ARDB.Structure.AnalyticalElement;
+  using Grasshopper.Kernel.Types;
 #else
   using ARDB_Structure_AnalyticalElement = ARDB.Structure.AnalyticalModel;
 #endif
@@ -24,6 +25,12 @@ namespace RhinoInside.Revit.GH.Types
     public AnalyticalElement() { }
     public AnalyticalElement(ARDB_Structure_AnalyticalElement element) : base(element) { }
 
+#if REVIT_2023
+    public bool IsEnabled => true;
+#else
+    public bool IsEnabled => Value?.IsEnabled() is true;
+#endif
+
     public override Plane Location
     {
       get
@@ -31,12 +38,23 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB_Structure_AnalyticalElement element)
         {
           var (origin, basisX, basisY) = element.GetLocation();
-          return new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
+          return new Plane
+          (
+            origin?.ToPoint3d() ?? NaN.Point3d,
+            basisX.Direction?.ToVector3d() ?? NaN.Vector3d,
+            basisY.Direction?.ToVector3d() ?? NaN.Vector3d
+          );
         }
 
         return NaN.Plane;
       }
     }
+
+    public override Point3d Position =>
+#if !REVIT_2023
+      Value?.IsSinglePoint() is true ? Value.GetPoint().ToPoint3d() :
+#endif
+      Location.Origin;
 
     public override Curve Curve
     {
@@ -63,40 +81,71 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    public AnalyticalStructuralRole StructuralRole
+    public ARDB.Structure.AnalyzeAs? AnalyzeAs
     {
 #if REVIT_2023
-      get => Value is ARDB_Structure_AnalyticalElement element ? new AnalyticalStructuralRole(element.StructuralRole) : null;
+      get => Value?.AnalyzeAs;
       set
       {
-        if(Value is ARDB_Structure_AnalyticalElement element && element.StructuralRole != value.Value)
-          element.StructuralRole = value.Value;
-      }
-#else
-      get => null;
-      set => throw new Exceptions.RuntimeErrorException($"The element does not allow setting the property '{StructuralRole}'.");
-#endif
-    }
-
-    public AnalyzeAs AnalyzeAs
-    {
-#if REVIT_2023
-      get => Value is ARDB_Structure_AnalyticalElement element ? new AnalyzeAs(element.AnalyzeAs) : null;
-      set
-      {
-        if(Value is ARDB_Structure_AnalyticalElement element && element.AnalyzeAs != value.Value)
+        if(value is object && Value is ARDB_Structure_AnalyticalElement element && element.AnalyzeAs != value.Value)
           element.AnalyzeAs = value.Value;
       }
 #else
-      get => Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS) is ARDB.Parameter parameter ? new AnalyzeAs(parameter.AsEnum<ARDB.Structure.AnalyzeAs>()) : null;
+      get => Value?.GetAnalyzeAs();
       set
       {
-        if (Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYZES_AS) is ARDB.Parameter parameter && parameter.AsEnum<ARDB.Structure.AnalyzeAs>() != value.Value)
-          parameter.Set(value.Value);
+        if (value is object && value != AnalyzeAs)
+          Value?.SetAnalyzeAs(value.Value);
       }
 #endif
     }
+
+    public ARDB.Structure.AnalyticalStructuralRole? StructuralRole
+    {
+#if REVIT_2023
+      get => Value?.StructuralRole;
+      set
+      {
+        if (value is object && Value is ARDB_Structure_AnalyticalElement element && element.StructuralRole != value.Value)
+          element.StructuralRole = value.Value;
+      }
+#else
+      get => IsValid ? ARDB.Structure.AnalyticalStructuralRole.Unset : default;
+      set => throw new Exceptions.RuntimeErrorException($"'{DisplayName}' does not support assignment of a user-specified structural role.");
+#endif
+    }
     #endregion
+
+    public GraphicalElement PhysicalElement
+    {
+      get
+      {
+        if (IsValid)
+        {
+#if REVIT_2023
+          if (ARDB.Structure.AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Document) is ARDB.Structure.AnalyticalToPhysicalAssociationManager manager)
+            return GetElement<GraphicalElement>(manager.GetAssociatedElementId(Id));
+#else
+          return GetElement<GraphicalElement>(Value.GetElementId());
+#endif
+        }
+
+        return null;
+      }
+      set
+      {
+        if (value is object && IsValid)
+        {
+#if REVIT_2023
+          AssertValidDocument(value, nameof(PhysicalElement));
+          if (ARDB.Structure.AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Document) is ARDB.Structure.AnalyticalToPhysicalAssociationManager manager)
+            manager.AddAssociation(Id, value.Id);
+#else
+          throw new Exceptions.RuntimeErrorException($"'{DisplayName}' does not support assignment of a user-specified model element.");
+#endif
+        }
+      }
+    }
   }
 }
 
@@ -135,7 +184,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 #endif
-    #endregion
+#endregion
   }
 }
 
