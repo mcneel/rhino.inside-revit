@@ -298,20 +298,37 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region AnalyticalElement
     public static (XYZ Origin, UnitXYZ BasisX, UnitXYZ BasisY) GetLocation(this AnalyticalElement element)
     {
-#if REVIT_2023
-      using (var transform = element.GetTransform())
-#else
-      using (var transform = element.GetLocalCoordinateSystem())
+#if !REVIT_2023
+      if (element.IsEnabled())
 #endif
       {
-        return (transform.Origin, transform.BasisX.ToUnitXYZ(), transform.BasisY.ToUnitXYZ());
+        try
+        {
+#if REVIT_2023
+        using (var transform = element.GetTransform())
+#else
+          using (var transform = element.GetLocalCoordinateSystem())
+#endif
+          {
+            if (transform is object)
+              return (transform.Origin, transform.BasisX.ToUnitXYZ(), transform.BasisY.ToUnitXYZ());
+          }
+        }
+        catch { }
+
+#if !REVIT_2023
+        if (element.IsSinglePoint())
+          return (element.GetPoint(), UnitXYZ.BasisX, UnitXYZ.BasisY);
+#endif
       }
+
+      return (default, default, default);
     }
 
     public static void SetLocation(this AnalyticalElement element, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY)
     {
       ElementLocation.SetLocation(element, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
     }
-    #endregion
+#endregion
   }
 }

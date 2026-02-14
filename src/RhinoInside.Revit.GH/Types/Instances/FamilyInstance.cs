@@ -327,6 +327,8 @@ namespace RhinoInside.Revit.GH.Types
           var host = GetElement<GraphicalElement>(instance.Host);
           host = instance.HostFace is ARDB.Reference hostFace ? host?.GetElementFromReference<GraphicalElement>(hostFace) : host;
           if (host is object) return host;
+          if (instance.SuperComponent is ARDB.Element superComponent)
+            return GetElement<GraphicalElement>(superComponent);
 
           switch ((Type.Value as ARDB.FamilySymbol).Family?.FamilyPlacementType)
           {

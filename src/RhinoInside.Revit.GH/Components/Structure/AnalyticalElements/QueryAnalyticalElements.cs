@@ -36,6 +36,13 @@ namespace RhinoInside.Revit.GH.Components.Walls
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.AnalyzeAs>>
+      (
+        name: "Analyze As",
+        nickname: "AS",
+        optional: true,
+        relevance: ParamRelevance.Primary
+      ),
       ParamDefinition.Create<Parameters.Param_Enum<Types.AnalyticalStructuralRole>>
       (
         name: "Structural Role",
@@ -46,13 +53,6 @@ namespace RhinoInside.Revit.GH.Components.Walls
 #else
         relevance: ParamRelevance.Occasional
 #endif
-      ),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.AnalyzeAs>>
-      (
-        name: "Analyze As",
-        nickname: "AS",
-        optional: true,
-        relevance: ParamRelevance.Primary
       ),
       ParamDefinition.Create<Parameters.ElementFilter>
       (
@@ -73,8 +73,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
-      if (!Params.TryGetData(DA, "Structural Role", out ARDB.Structure.AnalyticalStructuralRole? structuralRole)) return;
       if (!Params.TryGetData(DA, "Analyze As", out ARDB.Structure.AnalyzeAs? analyzeAs)) return;
+      if (!Params.TryGetData(DA, "Structural Role", out ARDB.Structure.AnalyticalStructuralRole? structuralRole)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
       using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))

@@ -761,6 +761,36 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
+
+    #region Structure
+    public bool IsPhysicalElement => Document?.IsPhysicalElement(Id) is true;
+    public virtual bool Structural => false;
+    #endregion
+
+    #region AnalyticalModel
+    public bool? EnableAnalyticalModel
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.AsBoolean();
+      set { if (value is object) Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(value.Value); }
+    }
+    public AnalyticalElement AnalyticalElement
+    {
+      get
+      {
+        if (IsValid)
+        {
+#if REVIT_2023
+          if (ARDB.Structure.AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Document) is ARDB.Structure.AnalyticalToPhysicalAssociationManager manager)
+            return GetElement<AnalyticalElement>(manager.GetAssociatedElementId(Id));
+#else
+          return GetElement<AnalyticalElement>(Value.GetFirstDependent<ARDB.Structure.AnalyticalModel>());
+#endif
+        }
+
+        return null;
+      }
+    }
+    #endregion
   }
 
   static class ElementJoins

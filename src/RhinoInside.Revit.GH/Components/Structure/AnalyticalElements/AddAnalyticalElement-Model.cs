@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Documents;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
@@ -95,39 +94,29 @@ namespace RhinoInside.Revit.GH.Components.Structure
       var structuralRole = ARDB.Structure.AnalyticalStructuralRole.Unset;
       switch (element)
       {
-        case Types.StructuralInstance structural:
-        {
-          if (Types.StructuralInstance.IsStructuralFraming(structural.Value))
-          {
-            switch (structural)
-            {
-              case Types.StructuralBeam beam:
-                structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleBeam;
-                typeId = beam.Value.GetTypeId();
-                materialId = beam.Value.StructuralMaterialId;
-                break;
+        case Types.StructuralBeam beam:
+          structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleBeam;
+          typeId = beam.Value.GetTypeId();
+          materialId = beam.Value.StructuralMaterialId;
+          break;
 
-              case Types.StructuralBrace brace:
-                structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleGirder;
-                typeId = brace.Value.GetTypeId();
-                materialId = brace.Value.StructuralMaterialId;
-                break;
+        case Types.StructuralBrace brace:
+          structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleGirder;
+          typeId = brace.Value.GetTypeId();
+          materialId = brace.Value.StructuralMaterialId;
+          break;
 
-              case Types.StructuralColumn column:
-                structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleColumn;
-                typeId = column.Value.GetTypeId();
-                materialId = column.Value.StructuralMaterialId;
-                break;
+        case Types.StructuralColumn column:
+          structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleColumn;
+          typeId = column.Value.GetTypeId();
+          materialId = column.Value.StructuralMaterialId;
+          break;
 
-              case Types.StructuralFraming framing:
-                structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleMember;
-                typeId = framing.Value.GetTypeId();
-                materialId = framing.Value.StructuralMaterialId;
-                break;
-            }
-          }
-        }
-        break;
+        case Types.StructuralFraming framing:
+          structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleMember;
+          typeId = framing.Value.GetTypeId();
+          materialId = framing.Value.StructuralMaterialId;
+          break;
 
         case Types.Wall wall:
           boundary = wall.TrimmedSurface;
