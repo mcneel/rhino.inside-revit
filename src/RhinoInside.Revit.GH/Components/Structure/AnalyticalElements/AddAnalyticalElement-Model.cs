@@ -89,6 +89,8 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
       // Checking input
       var tol = GeometryTolerance.Model;
+      Curve curve = null;
+      double height = 0.0;
       Brep boundary = null;
       var thickness = 0.0;
       ARDB.ElementId typeId = default;
@@ -121,7 +123,22 @@ namespace RhinoInside.Revit.GH.Components.Structure
           break;
 
         case Types.Wall wall:
-          boundary = wall.TrimmedSurface;
+          if (wall.Sketch is Types.Sketch sketch && sketch.IsValid)
+          {
+            boundary = sketch.TrimmedSurface;
+          }
+          else if (wall.Curve.IsLinear())
+          {
+            boundary = wall.TrimmedSurface;
+          }
+          else if (wall.SlantAngle == 0.0)
+          {
+            curve = wall.Curve;
+            curve.Translate(0.0, 0.0, wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).AsDouble() * Revit.ModelUnits);
+            height = wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble();
+          }
+          else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Slanted curved walls are not supported.");
+
           structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleWall;
           thickness = wall.Value.Width;
           break;
@@ -166,7 +183,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
               analyticalMember.StructuralRole = structuralRole;
               analyticalMember.SectionTypeId = typeId;
               analyticalMember.MaterialId = materialId;
-              DA.SetData(_AnalyticalElement_, analyticalMember);
               return analyticalMember;
             }
           );
@@ -215,28 +231,45 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 analyticalPanel.Thickness = thickness;
                 return analyticalPanel;
               }
-             );
+            );
 
             analyticalElements.Add(panel);
           }
           break;
 
         case ARDB.Structure.AnalyticalStructuralRole.StructuralRoleWall:
-          foreach (var face in boundary.Faces)
+          if (curve is object)
           {
             var panel = ReconstructElement<ARDB_AnalyticalPanel>
             (
               doc.Value, _AnalyticalElement_, analyticalPanel =>
               {
-                analyticalPanel = Reconstruct(analyticalPanel, doc.Value, face);
+                analyticalPanel = Reconstruct(analyticalPanel, doc.Value, curve.ToCurve(), (element as Types.Wall).SketchPlane.YAxis.ToXYZ() * height);
                 analyticalPanel.StructuralRole = structuralRole;
                 analyticalPanel.Thickness = thickness;
-                DA.SetData(_AnalyticalElement_, analyticalPanel);
                 return analyticalPanel;
               }
             );
 
             analyticalElements.Add(panel);
+          }
+          else if (boundary is object)
+          {
+            foreach (var face in boundary.Faces)
+            {
+              var panel = ReconstructElement<ARDB_AnalyticalPanel>
+              (
+                doc.Value, _AnalyticalElement_, analyticalPanel =>
+                {
+                  analyticalPanel = Reconstruct(analyticalPanel, doc.Value, face);
+                  analyticalPanel.StructuralRole = structuralRole;
+                  analyticalPanel.Thickness = thickness;
+                  return analyticalPanel;
+                }
+              );
+
+              analyticalElements.Add(panel);
+            }
           }
           break;
       }

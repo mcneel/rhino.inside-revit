@@ -99,8 +99,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     (
       ARDB_AnalyticalPanel analyticalPanel,
       ARDB.Curve curve,
-      ARDB.XYZ normal,
-      double offset
+      ARDB.XYZ normal
     )
     {
       if (analyticalPanel is null) return false;
@@ -110,7 +109,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
         return false;
 
       var curves = new ARDB.Curve[] { null, null, curve, null };
-      curves[0] = curve.CreateTransformed(ARDB.Transform.CreateTranslation(normal * offset)).CreateReversed();
+      curves[0] = curve.CreateTransformed(ARDB.Transform.CreateTranslation(normal)).CreateReversed();
       curves[1] = ARDB.Line.CreateBound(curves[0].GetEndPoint(1), curves[2].GetEndPoint(0));
       curves[3] = ARDB.Line.CreateBound(curves[2].GetEndPoint(1), curves[0].GetEndPoint(0));
       curveLoop = ARDB.CurveLoop.Create(curves);
@@ -126,15 +125,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
       ARDB_AnalyticalPanel analyticalPanel,
       ARDB.Document doc,
       ARDB.Curve curve,
-      ARDB.XYZ normal,
-      double offset
+      ARDB.XYZ normal
     )
     {
-      if (!Reuse(analyticalPanel, curve, normal, offset))
+      if (!Reuse(analyticalPanel, curve, normal))
       {
         analyticalPanel = analyticalPanel.ReplaceElement
         (
-          ARDB_AnalyticalPanel.Create(doc, curve, normal * offset),
+          ARDB_AnalyticalPanel.Create(doc, curve, normal),
           ExcludePanelUniqueProperties
         );
       }
@@ -150,6 +148,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     )
     {
       if (panel is null) return false;
+      if (!panel.SketchId.IsValid()) return false;
 
       var curveLoop = face.OuterLoop.To3dCurve().ToCurveLoop();
       panel.SetOuterContour(curveLoop);
