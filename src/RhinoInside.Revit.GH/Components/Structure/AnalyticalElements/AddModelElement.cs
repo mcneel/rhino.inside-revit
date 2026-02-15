@@ -25,15 +25,12 @@ namespace RhinoInside.Revit.GH.Components.Structure
   using ARDB_AnalyticalOpening = ARDB.Structure.AnalyticalModelSurface;
 #endif
 
-  [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
+  [ComponentVersion(introduced: "1.27")]
   public class AddModelElementByAnalytical : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("A373CE1F-16B3-46C0-B278-A1073D6ED1EF");
-#if REVIT_2023
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
-#else
-    public override GH_Exposure Exposure => GH_Exposure.hidden;
-#endif
+
     public AddModelElementByAnalytical() : base
     (
       name: "Add Model Element",
@@ -49,13 +46,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     {
       new ParamDefinition
       (
-        new Parameters.Document()
-        {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document",
-          Optional = true
-        }, ParamRelevance.Occasional
+        new Parameters.Document(), ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -87,10 +78,15 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-#if REVIT_2023
       if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
       if (!Params.GetData(DA, "Analytical Element", out Types.AnalyticalElement analyticalElement)) return;
 
+      SolveInstance(DA, doc, analyticalElement);
+    }
+
+#if REVIT_2023
+    private void SolveInstance(IGH_DataAccess DA, Types.Document doc, Types.AnalyticalElement analyticalElement)
+    {
       switch (analyticalElement.Value.StructuralRole)
       {
         case AnalyticalStructuralRole.Unset:
@@ -102,6 +98,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
           return;
 
         case AnalyticalStructuralRole.StructuralRoleFloor:
+
           ReconstructElement<ARDB.Floor>
           (
             doc.Value, _ModelElement_, floor =>
@@ -172,7 +169,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               if (analyticalPanel.Thickness == 0.0)
                 throw new RuntimeException($"No wall type found with the same thickness as the analytical panel: {analyticalElement.Id}");
 
-              // Geting the boundary
+              // Getting the boundary
               var boundary = new List<Curve> { analyticalPanel.GetOuterContour().ToCurve() };
               foreach (var loop in boundary)
               {
@@ -274,7 +271,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 throw new RuntimeArgumentException("Curve", $"Curve start point must be below curve end point.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
               // Getting the type
-              if (!(doc.Value.GetElement(analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
+              if (!(doc.Value.GetNamesakeElement(analyticalMember.Document, analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
                 throw new RuntimeException($"No section type found in this analytical member to create a structural element: {analyticalMember.Id}");
 
               // Getting the top and base levels
@@ -322,7 +319,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 throw new RuntimeArgumentException("Curve", $"Curve should be a line like curve.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
               // Getting the type
-              if (!(doc.Value.GetElement(analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
+              if (!(doc.Value.GetNamesakeElement(analyticalMember.Document, analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
                 throw new RuntimeException($"No section type found in this analytical member to create a structural element. {{{analyticalMember.Id}}}");
 
               // Finding the reference level
@@ -365,7 +362,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
               // Getting the type
-              if (!(doc.Value.GetElement(analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
+              if (!(doc.Value.GetNamesakeElement(analyticalMember.Document, analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
                 throw new RuntimeException($"No section type found in this analytical member to create a structural element. {{{analyticalMember.Id}}}");
 
               // Finding the reference level
@@ -392,7 +389,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
           );
           break;
       }
-#endif
     }
 
     #region Floor
@@ -963,5 +959,90 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     #endregion
 
+#else
+    bool Reuse(ARDB.Element target, ARDB.Element source, ARDB.View view)
+    {
+      if (target is null) return false;
+      if (target.OwnerViewId != (view?.Id ?? source.OwnerViewId)) return false;
+
+      if (target.GetType() != source.GetType()) return false;
+      if (target.Category.Id != source.Category.Id) return false;
+      if (target.ViewSpecific != source.ViewSpecific) return false;
+
+      var targetLocation = target.Location;
+      var sourceLocation = source.Location;
+
+      if (targetLocation.GetType() != sourceLocation.GetType()) return false;
+      if (targetLocation is ARDB.LocationCurve xCurve && !(sourceLocation as ARDB.LocationCurve).Curve.IsSameKindAs(xCurve.Curve)) return false;
+
+      // TODO : Implement a DeepCopy here
+      // Duplicate any missing type, material on demand
+      //x.DeepCopyParametersFrom(element.Value);
+
+      target.GetElementNomen(out var nomenParameter);
+      if (nomenParameter.IsValid())
+        target.CopyParametersFrom(source, new ARDB.BuiltInParameter[] { nomenParameter });
+      else
+        target.CopyParametersFrom(source);
+
+      return true;
+    }
+
+    private void SolveInstance(IGH_DataAccess DA, Types.Document doc, Types.AnalyticalElement analyticalElement)
+    {
+      if (analyticalElement.PhysicalElements.FirstOrDefault() is Types.GraphicalElement physicalElement)
+      {
+        if (doc.Value.IsEquivalent(physicalElement.Document))
+        {
+          DA.SetData(_ModelElement_, physicalElement);
+        }
+        else
+        {
+          var clone = Types.GraphicalElement.FromElement
+          (
+            ReconstructElement<ARDB.Element>
+            (
+              doc.Value, _ModelElement_,
+              x =>
+              {
+                if (physicalElement.Value is ARDB.Element elementValue)
+                {
+                  if (!Reuse(x, elementValue, null))
+                  {
+                    x = elementValue.CloneElement(doc.Value, null);
+                  }
+
+                  return x;
+                }
+
+                return default;
+              }
+            )
+          ) as Types.GraphicalElement;
+
+          if (clone is object && clone.Pinned is true)
+          {
+            StartTransaction(clone.Document);
+
+            switch (analyticalElement.Value.Location)
+            {
+              case ARDB.LocationCurve locationCurve:
+                clone.SetCurve(locationCurve.Curve.ToCurve(), keepJoins: false);
+                break;
+
+              default:
+                var physicalLocation = physicalElement.Location;
+                if (!clone.Location.EpsilonEquals(physicalLocation, GeometryTolerance.Model.VertexTolerance))
+                  clone.SetLocation(physicalLocation);
+
+                break;
+            }
+          }
+
+          DA.SetData(_ModelElement_, clone);
+        }
+      }
+    }
+#endif
   }
 }

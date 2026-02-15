@@ -1,6 +1,6 @@
 using System;
+using System.Linq;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     (
       name: "Element Analytical Model",
       nickname: "E-Analytical",
-      description: "Get-Set access to the related analytical model of provided model element",
+      description: "Get the related analytical and model elements of the provided element",
       category: "Revit",
       subCategory: "Structure"
     )
@@ -29,23 +29,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.GraphicalElement()
         {
-          Name = _ModelElement_,
-          NickName = "ME",
-          Description = "Model element",
+          Name = "Element",
+          NickName = "E",
+          Description = "Element to query",
         }
       ),
-#if !REVIT_2023
-      new ParamDefinition
-      (
-        new Param_Boolean
-        {
-          Name = "Enable",
-          NickName = "E",
-          Description = "Enable Analytical Element",
-          Optional = true,
-        },ParamRelevance.Primary
-      ),
-#endif
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -55,54 +43,47 @@ namespace RhinoInside.Revit.GH.Components.Structure
       (
         new Parameters.AnalyticalElement()
         {
-          Name = _AnalyticalElement_,
+          Name = _AnalyticalElements_,
           NickName = "AE",
-          Description = $"Output {_AnalyticalElement_}",
+          Description = "Associated analytical elements",
+          Access = GH_ParamAccess.list
         }
       ),
-#if !REVIT_2023
       new ParamDefinition
       (
-        new Param_Boolean
+        new Parameters.GraphicalElement()
         {
-          Name = "Enable",
-          NickName = "E",
-          Description = "Enable Analytical Element",
-          Optional = true,
-        },ParamRelevance.Primary
+          Name = _PhysicalElements_,
+          NickName = "ME",
+          Description = "Associated model elements",
+        }
       ),
-#endif
     };
 
-    const string _ModelElement_ = "Model Element";
-    const string _AnalyticalElement_ = "Analytical Element";
+    const string _AnalyticalElements_ = "Analytical Elements";
+    const string _PhysicalElements_ = "Model Elements";
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       // Input
-      if (!Params.GetData(DA, _ModelElement_, out Types.GraphicalElement element, x => x.IsValid)) return;
-      if (!Params.TryGetData(DA, "Enable", out bool? enable)) return;
+      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element, x => x.IsValid)) return;
 
-      if (!element.IsPhysicalElement)
+      if (element.IsPhysicalElement)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input element is not a model element.");
-        return;
+        var analyticalElements = element.AnalyticalElements;
+        Params.TrySetDataList(DA, _AnalyticalElements_, () => analyticalElements);
+        Params.TrySetDataList(DA, _PhysicalElements_, () => analyticalElements.FirstOrDefault()?.PhysicalElements);
       }
-
-      if (enable is object)
+      else if (element is Types.AnalyticalElement analyticalElement)
       {
-        if (!element.Structural)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input model element is not structural.");
-          return;
-        }
-
-        StartTransaction(element.Document);
-        element.EnableAnalyticalModel = enable.Value;
+        var physicalElements = analyticalElement.PhysicalElements;
+        Params.TrySetDataList(DA, _AnalyticalElements_, () => physicalElements.FirstOrDefault()?.AnalyticalElements);
+        Params.TrySetDataList(DA, _PhysicalElements_, () => physicalElements);
       }
-
-      Params.TrySetData(DA, "Enable", () => element.EnableAnalyticalModel);
-      Params.TrySetData(DA, _AnalyticalElement_, () => element.AnalyticalElement);
+      else
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input element is not a model nor an analytical element.");
+      }
     }
   }
 }

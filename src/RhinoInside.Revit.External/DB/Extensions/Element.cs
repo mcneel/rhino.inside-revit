@@ -961,7 +961,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             destinationView = destinationView ?? sourceView;
 
             if (!destinationDocument.IsEquivalent(destinationView.Document))
-              destinationView = destinationDocument.GetElement(destinationDocument.LookupElement(sourceDocument, sourceView.Id)) as View;
+              destinationView = destinationDocument.GetNamesakeElement(sourceDocument, sourceView.Id) as View;
 
             if (destinationView is object)
             {
