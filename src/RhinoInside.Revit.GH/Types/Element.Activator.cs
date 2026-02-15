@@ -494,11 +494,12 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.Structure.AnalyticalModelStick),  (element)=> new AnalyticalMember      (element as ARDB.Structure.AnalyticalModelStick) },
       { typeof(ARDB.Structure.AnalyticalModelSurface),(element)=> new AnalyticalSurface     (element as ARDB.Structure.AnalyticalModelSurface) },
 #endif
+      { typeof(ARDB.Structure.StructuralSettings),    (element)=> new StructuralSettings    (element as ARDB.Structure.StructuralSettings) },
+      { typeof(ARDB.Structure.BoundaryConditions),    (element)=> new BoundaryConditions    (element as ARDB.Structure.BoundaryConditions) },
       { typeof(ARDB.Structure.LoadBase),              (element)=> new LoadElement           (element as ARDB.Structure.LoadBase) },
       { typeof(ARDB.Structure.PointLoad),             (element)=> new PointLoad             (element as ARDB.Structure.PointLoad) },
       { typeof(ARDB.Structure.LineLoad),              (element)=> new LineLoad              (element as ARDB.Structure.LineLoad) },
       { typeof(ARDB.Structure.AreaLoad),              (element)=> new AreaLoad              (element as ARDB.Structure.AreaLoad) },
-      { typeof(ARDB.Structure.BoundaryConditions),    (element)=> new BoundaryConditions    (element as ARDB.Structure.BoundaryConditions) },
     };
   }
 }

@@ -17,7 +17,7 @@ group: Deployment & Configs
 - Added 'Analytical Model Elements'
 - Now 'Query Elements' give elements in reverse order when 'Limit' is negative.
 - Improved 'Host Boundary Profile' to accept a plane as an input.
-- Fix on '"Add Model Element' for slanted walls.
+- Fix on 'Add Model Element' for slanted walls.
 - Fixed: Creating Wall by Profile creates a new wall when the profile is moved.
   [Issue #1277](https://github.com/mcneel/rhino.inside-revit/issues/1277)
 
