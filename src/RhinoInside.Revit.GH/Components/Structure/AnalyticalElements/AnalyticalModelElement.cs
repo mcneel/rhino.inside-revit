@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
   using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.36")]
-  public class AnalyticalModelElement : TransactionalChainComponent, IGH_TaskCapableComponent
+  public class AnalyticalModelElements : TransactionalChainComponent, IGH_TaskCapableComponent
   {
     public override Guid ComponentGuid => new Guid("{6784ABA1-9109-45E7-8DBE-ABF48D48AD23}");
 #if REVIT_2023
@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     protected override string IconTag => string.Empty;
 
-    public AnalyticalModelElement() : base
+    public AnalyticalModelElements() : base
     (
       name: "Analytical Model Elements",
       nickname: "AM-Elements",
