@@ -5,17 +5,17 @@ using Grasshopper.Kernel;
 namespace RhinoInside.Revit.GH.Components.Structure
 {
   [ComponentVersion(introduced: "1.36")]
-  public class ElementAnalyticalModel : TransactionalChainComponent
+  public class ElementAnalyticalAssociations : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("{DBC7A253-ACA8-407F-803F-0BA3B6EC5677}");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
     protected override string IconTag => string.Empty;
 
-    public ElementAnalyticalModel() : base
+    public ElementAnalyticalAssociations() : base
     (
-      name: "Element Analytical Model",
-      nickname: "E-Analytical",
+      name: "Element Analytical Associations",
+      nickname: "E-Associations",
       description: "Get the related analytical and model elements of the provided element",
       category: "Revit",
       subCategory: "Structure"
