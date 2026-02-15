@@ -7,6 +7,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
+  using External.DB.Extensions;
+
 #if REVIT_2023
   using ARDB_AnalyticalElement = ARDB.Structure.AnalyticalElement;
   using ARDB_AnalyticalMember = ARDB.Structure.AnalyticalMember;
@@ -19,15 +21,11 @@ namespace RhinoInside.Revit.GH.Components.Structure
   using ARDB_AnalyticalOpening = ARDB.Structure.AnalyticalModelSurface;
 #endif
 
-  [ComponentVersion(introduced: "1.27"), ComponentRevitAPIVersion(min: "2023.0")]
+  [ComponentVersion(introduced: "1.27")]
   public class AddAnalyticalElementByModel : AddAnalyticalElement
   {
     public override Guid ComponentGuid => new Guid("AC26C810-2043-4666-B16E-8484D9DCF7DE");
-#if REVIT_2023
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
-#else
-    public override GH_Exposure Exposure => GH_Exposure.hidden;
-#endif
     public AddAnalyticalElementByModel() : base
     (
       name: "Add Analytical Element",
@@ -43,13 +41,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
     {
       new ParamDefinition
       (
-        new Parameters.Document()
-        {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document",
-          Optional = true
-        }, ParamRelevance.Occasional
+        new Parameters.Document(), ParamRelevance.Occasional
       ),
       new ParamDefinition
       (
@@ -81,15 +73,15 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-#if REVIT_2023
       if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
-      if (!Params.GetData(DA, "Model Element", out Types.GraphicalElement element)) return;
-      if (!element.Structural)
+      if (!Params.GetData(DA, "Model Element", out Types.GraphicalElement element, x => x.IsValid)) return;
+      if (!element.IsPhysicalElement)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input model element is not structural.");
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input element is not a model element.");
         return;
       }
 
+#if REVIT_2023
       // Checking input
       var tol = GeometryTolerance.Model;
       Curve curve = null;
@@ -294,6 +286,26 @@ namespace RhinoInside.Revit.GH.Components.Structure
       }
 
       DA.SetDataList(_AnalyticalElement_, analyticalElements);
+#else
+      if (!element.Value.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL).AsBoolean())
+      {
+        if (!doc.Value.IsEquivalent(element.Document))
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid document");
+          return;
+        }
+
+        if (!element.Structural)
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Input model element is not structural.");
+          return;
+        }
+
+        StartTransaction(element.Document);
+        element.Value.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL).Update(true);
+      }
+
+      DA.SetDataList(_AnalyticalElement_, element.AnalyticalElements);
 #endif
     }
   }

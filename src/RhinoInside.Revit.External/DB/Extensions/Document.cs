@@ -564,6 +564,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
+    internal static Element GetNamesakeElement(this Document target, Document source, ElementId elementId)
+    {
+      return target.GetElement(LookupElement(target, source, elementId));
+    }
+
     internal static ElementId LookupElement(this Document target, Document source, ElementId elementId)
     {
       if (elementId.IsBuiltInId() || target.IsEquivalent(source))

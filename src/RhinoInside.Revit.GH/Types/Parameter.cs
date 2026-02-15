@@ -931,7 +931,7 @@ namespace RhinoInside.Revit.GH.Types
       //    case ARDB.StorageType.ElementId:
       //      if (parameter.HasValue)
       //      {
-      //        if (Document.GetElement(parameter.AsElementId()) is ARDB.Element value)
+      //        if (Document.GetNamesakeElement(parameter.AsElementId()) is ARDB.Element value)
       //          if (value.Category is ARDB.Category category)
       //            if (category.Id.TryGetBuiltInCategory(out var categoryId))
       //            {

@@ -773,21 +773,33 @@ namespace RhinoInside.Revit.GH.Types
       get => Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.AsBoolean();
       set { if (value is object) Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(value.Value); }
     }
-    public AnalyticalElement AnalyticalElement
+
+    public AnalyticalElement[] AnalyticalElements
     {
       get
       {
-        if (IsValid)
+        if (!IsValid) return null;
+
+        if (IsPhysicalElement)
         {
 #if REVIT_2023
           if (ARDB.Structure.AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Document) is ARDB.Structure.AnalyticalToPhysicalAssociationManager manager)
-            return GetElement<AnalyticalElement>(manager.GetAssociatedElementId(Id));
+          {
+#if REVIT_2024
+            return manager.GetAssociatedElementIds(Id).Select(GetElement<AnalyticalElement>).ToArray();
 #else
-          return GetElement<AnalyticalElement>(Value.GetFirstDependent<ARDB.Structure.AnalyticalModel>());
+            var id = manager.GetAssociatedElementId(Id);
+            if (id.IsValid())
+              return new AnalyticalElement[] { GetElement<AnalyticalElement>(id) };
+#endif
+          }
+#else
+          if (Value.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.AsBoolean() is true)
+            return Value.GetDependents<ARDB.Structure.AnalyticalModel>().Select(x => GetElement<AnalyticalElement>(x)).ToArray();
 #endif
         }
 
-        return null;
+        return Array.Empty<AnalyticalElement>();
       }
     }
     #endregion

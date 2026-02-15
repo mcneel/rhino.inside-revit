@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
               continue;
 
             if (!element.Document.IsEquivalent(type.Document))
-              type = Types.ElementType.FromElementId(element.Document, element.Document.LookupElement(type.Document, type.Id)) as Types.ElementType;
+              type = Types.ElementType.FromElement(element.Document.GetNamesakeElement(type.Document, type.Id)) as Types.ElementType;
 
             if (type is object)
             {
