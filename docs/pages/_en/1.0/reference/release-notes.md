@@ -13,8 +13,8 @@ group: Deployment & Configs
 - Added support for linked elements on query components.
 - Added 'Query References' component.
 - Added 'Query Namesake Element' component.
-- Added 'Element Analytical Model'
-- Added 'Analytical Model Elements'
+- Added 'Element Analytical Associations'
+- Added 'Analytical Associations'
 - Now 'Query Elements' give elements in reverse order when 'Limit' is negative.
 - Improved 'Host Boundary Profile' to accept a plane as an input.
 - Fix on 'Add Model Element' for slanted walls.
