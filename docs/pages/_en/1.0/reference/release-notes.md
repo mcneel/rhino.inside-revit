@@ -18,12 +18,14 @@ group: Deployment & Configs
 - Now 'Query Elements' give elements in reverse order when 'Limit' is negative.
 - Improved 'Host Boundary Profile' to accept a plane as an input.
 - Fix on '"Add Model Element' for slanted walls.
+- Fixed: Creating Wall by Profile creates a new wall when the profile is moved.
+  [Issue #1277](https://github.com/mcneel/rhino.inside-revit/issues/1277)
 
 ### RC
 
 - Fixed 'Host Boundary Profile' when used on walls that already have an Sketch.
-- Fixed inconsistency in 'Add Wall (Profile)' curve handling.
-  [#1355](https://github.com/mcneel/rhino.inside-revit/issues/1355)
+- Fixed: Inconsistency in 'Add Wall (Profile)' curve handling.
+  [Issue #1355](https://github.com/mcneel/rhino.inside-revit/issues/1355)
 
 {% endcapture %}
 
@@ -32,9 +34,12 @@ group: Deployment & Configs
 {% include ltr/release-header.html title="v1.35" version="v1.35.9525.16240" time="01/29/2026" %}
 
 - Public release with misc improvements and bug fixes listed below
-- Fixed #1365: Dynamo Python Node (CPython3) allocates a Rhino license.
-- Fixed #1275: Add shared parameter errors when switching to instance / type.
-- Fixed #1353: Inspect Element error on Pipe Element.
+- Fixed: Dynamo Python Node (CPython3) allocates a Rhino license.
+  [Issue #1365](https://github.com/mcneel/rhino.inside-revit/issues/1365)
+- Fixed: Add shared parameter errors when switching to instance / type.
+  [Issue #1275](https://github.com/mcneel/rhino.inside-revit/issues/1275)
+- Fixed: Inspect Element error on Pipe Element.
+  [Issue #1353](https://github.com/mcneel/rhino.inside-revit/issues/1353)
 - Fixed the 'AddTruss' Component to update the type.
 
 {% include ltr/release-header.html title="v1.34" version="v1.34.9525.15935" time="01/29/2026" %}
@@ -188,7 +193,8 @@ This enables:
 
 {% include ltr/release-header.html title="v1.24 RC3" version="v1.24.9019.19949" pre_release=true time="09/10/2024" %}
 
-- Fixed an issue when an old version of Eto was already loaded [Issue #1028](https://github.com/mcneel/rhino.inside-revit/issues/1028)
+- Fixed an issue when an old version of Eto was already loaded
+  [Issue #1028](https://github.com/mcneel/rhino.inside-revit/issues/1028)
 - Fix on 'Host Shape' when input points overlap corners.
 - Fixed 'Deconstruct Curtain Grid' when panels are not `FamilyInstance`.
 - Fixed `ModelText.Location` property.
