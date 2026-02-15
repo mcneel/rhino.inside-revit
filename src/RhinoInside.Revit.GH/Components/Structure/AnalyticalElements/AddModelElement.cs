@@ -294,6 +294,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 baseLevel.Value as ARDB.Level,
                 topLevel.Value as ARDB.Level
               );
+              column.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE)?.Update(analyticalMember.CrossSectionRotation);
 
               DA.SetData(_ModelElement_, column);
               return column;
@@ -331,6 +332,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
               // Compute
               brace = Reconstruct(brace, doc.Value, line.ToLine(), type, refLevel.Value as ARDB.Level);
+              brace.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE)?.Update(analyticalMember.CrossSectionRotation);
 
               DA.SetData(_ModelElement_, brace);
               return brace;
@@ -382,6 +384,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 type,
                 refLevel.Value as ARDB.Level
               );
+              beam.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE)?.Update(analyticalMember.CrossSectionRotation);
 
               DA.SetData(_ModelElement_, beam);
               return beam;

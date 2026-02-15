@@ -88,6 +88,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       double height = 0.0;
       Brep boundary = null;
       var thickness = 0.0;
+      var crossSectionRotation = 0.0;
       ARDB.ElementId typeId = default;
       ARDB.ElementId materialId = default;
       var structuralRole = ARDB.Structure.AnalyticalStructuralRole.Unset;
@@ -97,24 +98,31 @@ namespace RhinoInside.Revit.GH.Components.Structure
           structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleBeam;
           typeId = beam.Value.GetTypeId();
           materialId = beam.Value.StructuralMaterialId;
+          crossSectionRotation = beam.Value.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE).AsDouble();
           break;
 
         case Types.StructuralBrace brace:
           structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleGirder;
           typeId = brace.Value.GetTypeId();
           materialId = brace.Value.StructuralMaterialId;
+          crossSectionRotation = brace.Value.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE).AsDouble();
           break;
 
         case Types.StructuralColumn column:
           structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleColumn;
           typeId = column.Value.GetTypeId();
           materialId = column.Value.StructuralMaterialId;
+          if (column.Value.Location is ARDB.LocationPoint point)
+            crossSectionRotation = point.Rotation;
+          else
+            crossSectionRotation = column.Value.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE)?.AsDouble() ?? 0.0;
           break;
 
         case Types.StructuralFraming framing:
           structuralRole = ARDB.Structure.AnalyticalStructuralRole.StructuralRoleMember;
           typeId = framing.Value.GetTypeId();
           materialId = framing.Value.StructuralMaterialId;
+          crossSectionRotation = framing.Value.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_BEND_DIR_ANGLE).AsDouble();
           break;
 
         case Types.Wall wall:
@@ -179,6 +187,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               analyticalMember.StructuralRole = structuralRole;
               analyticalMember.SectionTypeId = typeId;
               analyticalMember.MaterialId = materialId;
+              analyticalMember.CrossSectionRotation = crossSectionRotation;
               return analyticalMember;
             }
           );
@@ -194,6 +203,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               analyticalMember.StructuralRole = structuralRole;
               analyticalMember.SectionTypeId = typeId;
               analyticalMember.MaterialId = materialId;
+              analyticalMember.CrossSectionRotation = crossSectionRotation;
               return analyticalMember;
             }
           );
@@ -209,6 +219,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               analyticalMember.StructuralRole = structuralRole;
               analyticalMember.SectionTypeId = typeId;
               analyticalMember.MaterialId = materialId;
+              analyticalMember.CrossSectionRotation = crossSectionRotation;
               return analyticalMember;
             }
           );
