@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
   public class IFCImportOptions : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("A8F3E5C1-9D4B-4E2A-B8F1-3C5D6E7F8A9B");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
     protected override string IconTag => string.Empty;
 
     public IFCImportOptions() : base

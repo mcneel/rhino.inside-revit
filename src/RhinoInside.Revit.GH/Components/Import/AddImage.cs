@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
   public class AddImage : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("506D5C19-5054-4428-A857-A4D7E8DB8AD8");
-    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.quinary);
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.senary);
     protected override string IconTag => string.Empty;
 
     public AddImage() : base

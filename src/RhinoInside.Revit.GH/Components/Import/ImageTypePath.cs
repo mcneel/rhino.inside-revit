@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
   public class ImageTypePath : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("D4873F18-3B73-4E5C-8C34-0DF7D32BE127");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.senary;
 
     protected override string IconTag => string.Empty;
 

@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
   public class QueryCloudPoints : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("72B92E6A-2B21-4A4D-8AE4-39837F4C6C8B");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
 
     protected override string IconTag => string.Empty;
 

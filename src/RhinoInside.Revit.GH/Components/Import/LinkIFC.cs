@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
   public class LinkIFC : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("D1A6C8F4-2E7B-5D5C-E1A4-6F8C0A2B3C4D");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
     protected override string IconTag => string.Empty;
 
     public LinkIFC() : base
