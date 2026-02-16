@@ -101,10 +101,10 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       ),
       new ParamDefinition
       (
-        new Param_Plane()
+        new Param_Point()
         {
           Name = "Points",
-          NickName = "X",
+          NickName = "P",
           Description = "Points of intersection",
           Access = GH_ParamAccess.list,
         }, ParamRelevance.Primary
@@ -113,8 +113,8 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       (
         new Param_Number()
         {
-          Name = "Proximity",
-          NickName = "P",
+          Name = "Distances",
+          NickName = "D",
           Description = "Distance of intersection",
           Access = GH_ParamAccess.list,
         }, ParamRelevance.Primary
@@ -177,7 +177,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
         Params.TrySetDataList(DA, "References", () => SelectGeometryObject(view, result));
         Params.TrySetDataList(DA, "Points", () => result.Select(x => line.Value.PointAtLength(x.Proximity * Revit.ModelUnits)));
-        Params.TrySetDataList(DA, "Proximity", () => result.Select(x => x.Proximity * Revit.ModelUnits));
+        Params.TrySetDataList(DA, "Distances", () => result.Select(x => x.Proximity * Revit.ModelUnits));
       }
     }
 
