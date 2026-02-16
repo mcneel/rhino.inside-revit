@@ -11,7 +11,7 @@ group: Deployment & Configs
 ### WIP
 
 - Added support for linked elements on query components.
-- Added 'Query References' component.
+- Added 'Query Geometry References' component.
 - Added 'Query Namesake Element' component.
 - Added 'Element Analytical Associations'
 - Added 'Analytical Associations'

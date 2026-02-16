@@ -266,13 +266,18 @@ namespace RhinoInside.Revit.External.DB
       return false;
     }
 
-    internal static void AssertIsValidFiler(this ElementFilter filter, RevitLinkInstance instance)
+    internal static void AssertIsValidFiler(this ElementFilter filter, bool links)
     {
-      if (instance is object)
+      if (links)
       {
         if (!IsDocumentAgnosticFilter(filter))
           throw new System.ComponentModel.WarningException("Complex filtering is not supported on linked models.");
       }
+    }
+
+    internal static void AssertIsValidFiler(this ElementFilter filter, RevitLinkInstance instance)
+    {
+      AssertIsValidFiler(filter, instance is object);
     }
 
     internal static FilteredElementCollector WherePasses(this FilteredElementCollector source, ElementFilter filter, RevitLinkInstance instance)
