@@ -298,12 +298,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       try
       {
-        var curve = edge.AsCurve();
-        var intersection = curve.Project(point);
-        intersection.SetEdgeObject(edge);
-        intersection.SetEdgeParameter(curve.GetNormalizedParameter(intersection.Parameter));
+        using (var curve = edge.AsCurve())
+        {
+          var intersection = curve.Project(point);
+          if (intersection is null) return null;
 
-        return intersection;
+          intersection.SetEdgeObject(edge);
+          intersection.SetEdgeParameter(curve.GetNormalizedParameter(intersection.Parameter));
+          return intersection;
+        }
       }
       catch { return default; }
     }
@@ -322,8 +325,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       try
       {
         var intersection = edge.Project(point);
-        var vector = (point - intersection.XYZPoint).ToUnitXYZ();
+        if (intersection is null) return null;
 
+        var vector = (point - intersection.XYZPoint).ToUnitXYZ();
         var faces = new Face[] { edge.GetFace(0), edge.GetFace(1) };
         if (!vector.IsNaN)
         {
@@ -343,7 +347,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             dot1 = normal.DotProduct(vector);
           }
 
-          face = dot1 > dot0 ? faces[1] : faces[0];
+          face = dot1 < dot0 ? faces[1] : faces[0];
         }
         else
         {

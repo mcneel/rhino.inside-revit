@@ -457,5 +457,46 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return count > 0;
     }
     #endregion
+
+    #region Project
+    /// <summary>
+    /// Projects the specified point on the curve even it is bounded.
+    /// </summary>
+    /// <param name="curve"></param>
+    /// <param name="point"></param>
+    /// <param name="closestEnd"></param>
+    /// <returns>Geometric information if projection is successful; if projection fails returns null</returns>
+    public static IntersectionResult Project(this Curve curve, XYZ point, out int closestEnd)
+    {
+      IntersectionResult closest = default;
+      if (curve.IsBound && !(curve is Line))
+      {
+        closest = curve.Project(point);
+      }
+      else
+      {
+        var count = 0;
+        var index = -1;
+        foreach (var bounded in curve.ToBoundedCurves())
+        {
+          if (bounded.Project(point) is IntersectionResult result)
+          {
+            if (closest is null) closest = result;
+            else if (result.XYZPoint.DistanceTo(point) < closest.XYZPoint.DistanceTo(point))
+            {
+              var start = (1.0 / count) * index;
+              result.SetParameter(start + bounded.GetNormalizedParameter(result.Parameter));
+              closest = result;
+              index = count;
+            }
+          }
+          count++;
+        }
+      }
+
+      closestEnd = closest is object ? curve.GetNormalizedParameter(closest.Parameter) > 0.5 ? 1 : 0 : -1;
+      return closest;
+    }
+    #endregion
   }
 }
