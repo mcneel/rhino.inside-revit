@@ -175,9 +175,36 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           Take(Math.Abs(limit.Value)).
           TakeWhileIsNotEscapeKeyDown(this);
 
-        Params.TrySetDataList(DA, "References", () => result.Select(x => view.GetGeometryObjectFromReference<Types.GeometryObject>(x.GetReference())));
+        Params.TrySetDataList(DA, "References", () => SelectGeometryObject(view, result));
         Params.TrySetDataList(DA, "Points", () => result.Select(x => line.Value.PointAtLength(x.Proximity * Revit.ModelUnits)));
         Params.TrySetDataList(DA, "Proximity", () => result.Select(x => x.Proximity * Revit.ModelUnits));
+      }
+    }
+
+    private static IEnumerable<Types.GeometryObject> SelectGeometryObject(Types.View view, IEnumerable<ARDB.ReferenceWithContext> references)
+    {
+      foreach (var reference in references)
+      {
+        var valid = true;
+        var geometryReference = reference.GetReference();
+        var geometry = view.GetGeometryObjectFromReference<Types.GeometryObject>(geometryReference);
+        switch (geometry)
+        {
+          case Types.GeometryCurve curve:
+            if (curve.ScriptVariable() is ARDB.Curve c)
+            {
+              var transform = reference.GetInstanceTransform();
+              var inverse = transform.Inverse;
+
+              // Some curves inside instances report wrong hits.
+              // Check structural beam with an S shape axis.
+              valid = c.Distance(inverse.OfPoint(geometryReference.GlobalPoint)) < view.Document.Application.VertexTolerance;
+            }
+            break;
+        }
+
+        if (valid)
+          yield return geometry;
       }
     }
 
