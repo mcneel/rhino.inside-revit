@@ -84,7 +84,7 @@ namespace RhinoInside.Revit.GH.Components.Import
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
       #if REVIT_2022
       ReconstructElement<ARDB.ImportInstance>
       (
