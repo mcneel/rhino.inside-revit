@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
@@ -16,7 +17,7 @@ namespace RhinoInside.Revit.External.DB
     readonly ARDB.ElementId BaseId;
     readonly double? Value;
 
-    ARDB.Element Base => Document?.GetElement(BaseId);
+    internal ARDB.Element Base => Document?.GetElement(BaseId);
 
     public ElevationElementReference(double? value)
     {
@@ -326,76 +327,82 @@ namespace RhinoInside.Revit.External.DB
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class ProjectElevation : GH_Goo<External.DB.ElevationElementReference>, IGH_QuickCast
+  [Kernel.Attributes.Name("Project Elevation"), Kernel.Attributes.Description("A signed distance along Z-axis")]
+  public class ProjectElevation : ValueObject, IConvertible, IGH_QuickCast
   {
+    #region DocumentObject
+    public override string DisplayName
+    {
+      get
+      {
+        if (Value.IsLevelConstraint(out var level, out var levelOffset))
+        {
+          var name = level.Name;
+          var token = $"'{name ?? "Invalid Level"}'";
+          if (levelOffset.HasValue && Math.Abs(levelOffset.Value) > 1e-9)
+          {
+            token += $" {(levelOffset.Value < 0.0 ? "-" : "+")} ";
+            if (double.IsInfinity(levelOffset.Value))
+              token += $"{Math.Abs(levelOffset.Value)} {GH_Format.RhinoUnitSymbol()}";
+            else
+              token += $"{GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(levelOffset.Value)))} {GH_Format.RhinoUnitSymbol()}";
+          }
+
+          return token;
+        }
+        else if (Value.IsRelative(out var relativeOffset, out var relativeElement))
+        {
+          var name = relativeElement.Name;
+          if (string.IsNullOrEmpty(name)) name = relativeElement.Category?.Name;
+          var token = $"'{name ?? "Invalid Element"}'";
+          token += $" {(relativeOffset < 0.0 ? "-" : "+")} {GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(relativeOffset)))} {GH_Format.RhinoUnitSymbol()}";
+
+          return token;
+        }
+        else if (Value.IsOffset(out var offset))
+        {
+          return $"Δ {(offset < 0.0 ? "-" : "+")}{GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(offset)))} {GH_Format.RhinoUnitSymbol()}";
+        }
+        else if (Value.IsElevation(out var elevation))
+        {
+          return $"{(elevation < 0.0 ? "-" : "+")} {GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(elevation)))} {GH_Format.RhinoUnitSymbol()}";
+        }
+        else if (Value.IsUnlimited())
+        {
+          return "Unlimited";
+        }
+
+        return string.Empty;
+      }
+    }
+
+    public new External.DB.ElevationElementReference Value
+    {
+      get => (External.DB.ElevationElementReference) base.Value;
+      protected set => base.Value = value;
+    }
+    #endregion
+
     public ProjectElevation() { }
     internal ProjectElevation(External.DB.ElevationElementReference value) :
-      base(value) { }
+      base(value.Base?.Document, value) { }
 
     public ProjectElevation(double? value) :
-      base(new External.DB.ElevationElementReference(value / Revit.ModelUnits))
+      base(null, new External.DB.ElevationElementReference(value / Revit.ModelUnits))
     { }
 
     public ProjectElevation(double? elevation, IGH_BasePoint basePoint = null) :
-      base(new External.DB.ElevationElementReference(elevation / Revit.ModelUnits, basePoint?.Value as ARDB.Element)) { }
+      base(basePoint?.Document, new External.DB.ElevationElementReference(elevation / Revit.ModelUnits, basePoint?.Value as ARDB.Element)) { }
 
     public ProjectElevation(Level level) :
-      base(new External.DB.ElevationElementReference(level?.Value))
+      base(level?.Document, new External.DB.ElevationElementReference(level?.Value))
     { }
 
     public override bool IsValid => Value != default;
 
-    public override string TypeName => "Project Elevation";
-
-    public override string TypeDescription => "A signed distance along Z-axis";
-
-    public override IGH_Goo Duplicate() => MemberwiseClone() as IGH_Goo;
-
-    public override string ToString()
-    {
-      if (Value.IsLevelConstraint(out var level, out var levelOffset))
-      {
-        var name = level.Name;
-        var token = $"'{name ?? "Invalid Level"}'";
-        if (levelOffset.HasValue && Math.Abs(levelOffset.Value) > 1e-9)
-        {
-          token += $" {(levelOffset.Value < 0.0 ? "-" : "+")} ";
-          if (double.IsInfinity(levelOffset.Value))
-            token += $"{Math.Abs(levelOffset.Value)} {GH_Format.RhinoUnitSymbol()}";
-          else
-            token += $"{GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(levelOffset.Value)))} {GH_Format.RhinoUnitSymbol()}";
-        }
-
-        return token;
-      }
-      else if (Value.IsRelative(out var relativeOffset, out var relativeElement))
-      {
-        var name = relativeElement.Name;
-        if (string.IsNullOrEmpty(name)) name = relativeElement.Category?.Name;
-        var token = $"'{name ?? "Invalid Element"}'";
-        token += $" {(relativeOffset < 0.0 ? "-" : "+")} {GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(relativeOffset)))} {GH_Format.RhinoUnitSymbol()}";
-
-        return token;
-      }
-      else if (Value.IsOffset(out var offset))
-      {
-        return $"Δ {(offset < 0.0 ? "-" : "+")}{GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(offset)))} {GH_Format.RhinoUnitSymbol()}";
-      }
-      else if (Value.IsElevation(out var elevation))
-      {
-        return $"{(elevation < 0.0 ? "-" : "+")} {GH_Format.FormatDouble(Math.Abs(GeometryDecoder.ToModelLength(elevation)))} {GH_Format.RhinoUnitSymbol()}";
-      }
-      else if (Value.IsUnlimited())
-      {
-        return "Unlimited";
-      }
-
-      return string.Empty;
-    }
-
     internal double Elevation => GeometryDecoder.ToModelLength(Value.Elevation);
 
-    public override bool CastTo<Q>(ref Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(External.DB.ElevationElementReference)))
       {
@@ -411,6 +418,7 @@ namespace RhinoInside.Revit.GH.Types
           return true;
         }
 
+        target = default;
         return false;
       }
 
@@ -422,6 +430,7 @@ namespace RhinoInside.Revit.GH.Types
           return true;
         }
 
+        target = default;
         return false;
       }
 
@@ -436,11 +445,13 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return base.CastTo(ref target);
+      return base.ConvertTo(out target);
     }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
+      ResetValue();
+
       if (source is IGH_Goo goo)
         source = goo.ScriptVariable();
 
@@ -458,31 +469,37 @@ namespace RhinoInside.Revit.GH.Types
         case Point3d point: Value = new External.DB.ElevationElementReference(GeometryEncoder.ToInternalLength(point.Z)); return true;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
     public static ProjectElevation operator %(ProjectElevation constraint, IGH_BasePoint basePoint)
     {
       if (basePoint is null) return constraint;
-      if (constraint?.IsElevation(out var elevation) is true) return new ProjectElevation(elevation - basePoint.Location.Origin.Z, basePoint);
-      if (constraint?.IsOffset(out var offset) is true) return new ProjectElevation(offset, basePoint);
-      if (constraint?.IsUnlimited() is true) return new ProjectElevation(default, default);
+      if (constraint?.IsValid is true)
+      {
+        if (constraint.IsElevation(out var elevation) is true) return new ProjectElevation(elevation - basePoint.Location.Origin.Z, basePoint);
+        if (constraint.IsOffset(out var offset) is true) return new ProjectElevation(offset, basePoint);
+        if (constraint.IsUnlimited() is true) return new ProjectElevation(default, default);
+      }
       return new ProjectElevation(null, basePoint);
     }
 
     public static ProjectElevation operator +(ProjectElevation constraint, double? value)
     {
       if (value is null) return constraint;
-      if (constraint?.IsProjectElevation(out var basePoint, out var elevation) is true) return new ProjectElevation(elevation + value, basePoint);
-      if (constraint?.IsElevation(out elevation) is true) return new ProjectElevation(elevation + value);
-      if (constraint?.IsOffset(out var offset) is true) return new ProjectElevation(offset + value, null);
-      if (constraint?.IsUnlimited() is true) return new ProjectElevation(default, default);
+      if (constraint?.IsValid is true)
+      {
+        if (constraint.IsProjectElevation(out var basePoint, out var elevation) is true) return new ProjectElevation(elevation + value, basePoint);
+        if (constraint.IsElevation(out elevation) is true) return new ProjectElevation(elevation + value);
+        if (constraint.IsOffset(out var offset) is true) return new ProjectElevation(offset + value, null);
+        if (constraint.IsUnlimited() is true) return new ProjectElevation(default, default);
+      }
       return new ProjectElevation(value, null);
     }
 
     public bool IsProjectElevation(out IGH_BasePoint basePoint, out double offset)
     {
-      if (Value.IsProjectElevation(out var b, out var o))
+      if (Value.IsProjectElevation(out var b, out var o) is true)
       {
         basePoint = GraphicalElement.FromValue(b) as IGH_BasePoint;
         offset = o * Revit.ModelUnits;
@@ -496,7 +513,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public bool IsOffset(out double offset)
     {
-      if (Value.IsOffset(out var o))
+      if (Value.IsOffset(out var o) is true)
       {
         offset = o * Revit.ModelUnits;
         return true;
@@ -508,7 +525,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public bool IsElevation(out double elevation)
     {
-      if (Value.IsElevation(out var e))
+      if (Value.IsElevation(out var e) is true)
       {
         elevation = e * Revit.ModelUnits;
         return true;
@@ -520,60 +537,84 @@ namespace RhinoInside.Revit.GH.Types
 
     public bool IsUnlimited() => Value.IsUnlimited();
 
+    #region IConvertible
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private double Convertible => IsElevation(out var elevation) ? elevation : double.NaN;
+
+    private IConvertible ToConvertible() => Convertible;
+    TypeCode IConvertible.GetTypeCode() => TypeCode.Object;
+    object IConvertible.ToType(Type conversionType, IFormatProvider provider) => ToConvertible().ToType(conversionType, provider);
+    bool IConvertible.ToBoolean(IFormatProvider provider) => ToConvertible().ToBoolean(provider);
+    sbyte IConvertible.ToSByte(IFormatProvider provider) => ToConvertible().ToSByte(provider);
+    byte IConvertible.ToByte(IFormatProvider provider) => ToConvertible().ToByte(provider);
+    char IConvertible.ToChar(IFormatProvider provider) => ToConvertible().ToChar(provider);
+    short IConvertible.ToInt16(IFormatProvider provider) => ToConvertible().ToInt16(provider);
+    ushort IConvertible.ToUInt16(IFormatProvider provider) => ToConvertible().ToUInt16(provider);
+    uint IConvertible.ToUInt32(IFormatProvider provider) => ToConvertible().ToUInt32(provider);
+    int IConvertible.ToInt32(IFormatProvider provider) => ToConvertible().ToInt32(provider);
+    long IConvertible.ToInt64(IFormatProvider provider) => ToConvertible().ToInt64(provider);
+    ulong IConvertible.ToUInt64(IFormatProvider provider) => ToConvertible().ToUInt64(provider);
+    float IConvertible.ToSingle(IFormatProvider provider) => ToConvertible().ToSingle(provider);
+    double IConvertible.ToDouble(IFormatProvider provider) => ToConvertible().ToDouble(provider);
+    decimal IConvertible.ToDecimal(IFormatProvider provider) => ToConvertible().ToDecimal(provider);
+    DateTime IConvertible.ToDateTime(IFormatProvider provider) => ToConvertible().ToDateTime(provider);
+    string IConvertible.ToString(IFormatProvider provider) => ToConvertible().ToString(provider);
+    #endregion
+
     #region IGH_QuickCast
     GH_QuickCastType IGH_QuickCast.QC_Type => GH_QuickCastType.text;
-    private double QC_Value => IsElevation(out var elevation) ? elevation : double.NaN;
 
     double IGH_QuickCast.QC_Distance(IGH_QuickCast other)
     {
       switch (other.QC_Type)
       {
-        case GH_QuickCastType.@bool:  return Math.Abs((other.QC_Bool() ? 1.0 : 0.0) - QC_Value);
-        case GH_QuickCastType.@int:   return Math.Abs(other.QC_Int() - QC_Value);
-        case GH_QuickCastType.num:    return Math.Abs(other.QC_Num() - QC_Value);
+        case GH_QuickCastType.@bool:  return Math.Abs((other.QC_Bool() ? 1.0 : 0.0) - Convertible);
+        case GH_QuickCastType.@int:   return Math.Abs(other.QC_Int() - Convertible);
+        case GH_QuickCastType.num:    return Math.Abs(other.QC_Num() - Convertible);
         case GH_QuickCastType.text:   return other.QC_Distance(new GH_String(((IGH_QuickCast) this).QC_Text()));
         default: throw new InvalidOperationException($"{nameof(ProjectElevation)}.QC_Distance cannot be called with a parameter of type {other.GetType().FullName}");
       }
     }
 
-    int IGH_QuickCast.QC_Hash() => Math.Round(QC_Value, 9).GetHashCode();
+    int IGH_QuickCast.QC_Hash() => Math.Round(Convertible, 9).GetHashCode();
 
-    bool IGH_QuickCast.QC_Bool() => Math.Abs(QC_Value) > 0.0; // NaN is also False
+    bool IGH_QuickCast.QC_Bool() => Math.Abs(Convertible) > 0.0; // NaN is also False
 
-    int IGH_QuickCast.QC_Int() => System.Convert.ToInt32(Math.Round(QC_Value, MidpointRounding.AwayFromZero));
+    int IGH_QuickCast.QC_Int() => System.Convert.ToInt32(Math.Round(Convertible, MidpointRounding.AwayFromZero));
 
-    double IGH_QuickCast.QC_Num() => QC_Value;
+    double IGH_QuickCast.QC_Num() => Convertible;
 
-    string IGH_QuickCast.QC_Text() => QC_Value.ToString("G17", System.Globalization.CultureInfo.InvariantCulture);
+    string IGH_QuickCast.QC_Text() => Convertible.ToString("G17", System.Globalization.CultureInfo.InvariantCulture);
 
     Color IGH_QuickCast.QC_Col()
     {
-      var c = System.Convert.ToInt32(Math.Min(Math.Max(QC_Value, 0.0), 1.0) * 255);
+      var c = System.Convert.ToInt32(Math.Min(Math.Max(Convertible, 0.0), 1.0) * 255);
       return Color.FromArgb(c, c, c);
     }
 
-    Point3d IGH_QuickCast.QC_Pt() => throw new InvalidCastException($"{TypeName} cannot be cast to Rhino.Geometry.Point3d");
-    Vector3d IGH_QuickCast.QC_Vec() => throw new InvalidCastException($"{TypeName} cannot be cast to Rhino.Geometry.Vector3d");
-    Complex IGH_QuickCast.QC_Complex() => new Complex(QC_Value);
-    Matrix IGH_QuickCast.QC_Matrix() => throw new InvalidCastException($"{TypeName} cannot be cast to Rhino.Geometry.Matrix");
-    Interval IGH_QuickCast.QC_Interval() => throw new InvalidCastException($"{TypeName} cannot be cast to Rhino.Geometry.Interval");
+    Point3d IGH_QuickCast.QC_Pt() => throw new InvalidCastException($"{(this as IGH_Goo).TypeName} cannot be cast to Rhino.Geometry.Point3d");
+    Vector3d IGH_QuickCast.QC_Vec() => throw new InvalidCastException($"{(this as IGH_Goo).TypeName} cannot be cast to Rhino.Geometry.Vector3d");
+    Complex IGH_QuickCast.QC_Complex() => new Complex(Convertible);
+    Matrix IGH_QuickCast.QC_Matrix() => throw new InvalidCastException($"{(this as IGH_Goo).TypeName} cannot be cast to Rhino.Geometry.Matrix");
+    Interval IGH_QuickCast.QC_Interval() => throw new InvalidCastException($"{(this as IGH_Goo).TypeName} cannot be cast to Rhino.Geometry.Interval");
 
     int IGH_QuickCast.QC_CompareTo(IGH_QuickCast other)
     {
       if (GH_QuickCastType.num != other.QC_Type) return other.QC_Type.CompareTo(GH_QuickCastType.num);
 
       var num = other.QC_Num();
-      if(Math.Abs(num - QC_Value) < 0.000000001) return 0;
+      if(Math.Abs(num - Convertible) < 0.000000001) return 0;
 
-      return QC_Value.CompareTo(num);
+      return Convertible.CompareTo(num);
     }
     #endregion
+
   }
 }
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class ProjectElevation : Param<Types.ProjectElevation>
+  public sealed class ProjectElevation : Param<Types.ProjectElevation>
   {
     public override Guid ComponentGuid => new Guid("63F4A581-6065-4F90-BAD2-714DA8B97C08");
 
@@ -600,7 +641,7 @@ namespace RhinoInside.Revit.GH.Parameters
 namespace RhinoInside.Revit.GH.Components.Site
 {
   [ComponentVersion(introduced: "1.0", updated: "1.14")]
-  public class ConstructProjectElevation : ZuiComponent
+  public sealed class ConstructProjectElevation : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("54C795D0-38F8-4703-8968-0336C9D9B066");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
