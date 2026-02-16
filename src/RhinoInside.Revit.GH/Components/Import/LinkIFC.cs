@@ -2,12 +2,11 @@ using System;
 using System.IO;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Import
 {
-  [ComponentVersion(introduced: "1.34")]
+  [ComponentVersion(introduced: "1.36")]
   public class LinkIFC : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("D1A6C8F4-2E7B-5D5C-E1A4-6F8C0A2B3C4D");
@@ -64,7 +63,7 @@ namespace RhinoInside.Revit.GH.Components.Import
     {
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.GraphicalElement()
         {
           Name = _Output_,
           NickName = _Output_.Substring(0, 1),

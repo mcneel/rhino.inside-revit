@@ -5,8 +5,6 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Import
 {
-  using External.DB.Extensions;
-
   [ComponentVersion(introduced: "1.12")]
   public class ImageTypePath : TransactionalChainComponent
   {
@@ -21,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Import
       nickname: "ImageType",
       description: "Get-Set accessor for image type file path",
       category: "Revit",
-      subCategory: "View"
+      subCategory: "Insert"
     )
     { }
 

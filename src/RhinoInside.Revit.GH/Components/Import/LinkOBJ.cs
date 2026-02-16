@@ -1,20 +1,15 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Import
 {
-  [ComponentVersion(introduced: "1.34")]
+  [ComponentVersion(introduced: "1.36"), ComponentRevitAPIVersion(min: "2025.0")]
   public class LinkOBJ : LinkFileComponent
   {
     public override Guid ComponentGuid => new Guid("B5E9F2C7-6F0E-8C9F-E5B8-0D2F4E6F7C8D");
-#if REVIT_2025
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
-#else
-    public override GH_Exposure Exposure => GH_Exposure.hidden;
-#endif
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.tertiary);
     protected override string IconTag => string.Empty;
 
     public LinkOBJ() : base
@@ -69,7 +64,7 @@ namespace RhinoInside.Revit.GH.Components.Import
     {
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.GraphicalElement()
         {
           Name = _Output_,
           NickName = _Output_.Substring(0, 1),
@@ -84,8 +79,8 @@ namespace RhinoInside.Revit.GH.Components.Import
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+#if REVIT_2025
       if (!Parameters.Document.GetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
-      #if REVIT_2025
       ReconstructElement<ARDB.ImportInstance>
       (
         doc.Value, _Output_, importInstance =>

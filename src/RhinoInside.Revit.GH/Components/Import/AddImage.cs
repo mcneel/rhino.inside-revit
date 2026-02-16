@@ -21,7 +21,7 @@ namespace RhinoInside.Revit.GH.Components.Import
       nickname: "Image",
       description: "Given the point, it adds an image to the given View",
       category: "Revit",
-      subCategory: "View"
+      subCategory: "Insert"
     )
     { }
 

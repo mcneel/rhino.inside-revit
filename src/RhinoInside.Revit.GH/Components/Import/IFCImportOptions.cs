@@ -5,7 +5,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Import
 {
-  [ComponentVersion(introduced: "1.34")]
+  [ComponentVersion(introduced: "1.36")]
   public class IFCImportOptions : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("A8F3E5C1-9D4B-4E2A-B8F1-3C5D6E7F8A9B");

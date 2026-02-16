@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Import
       nickname: "ImageType",
       description: "Given the path, it adds an image type to the given View",
       category: "Revit",
-      subCategory: "View"
+      subCategory: "Insert"
     )
     { }
 
