@@ -24,8 +24,8 @@ namespace RhinoInside.Revit.GH.Components.Geometry
 
     public QueryReferences() : base
     (
-      name: "Query References",
-      nickname: "Q-References",
+      name: "Query Geometry References",
+      nickname: "QG-References",
       description: "Get the geometry references that intersect to the input ray.",
       category: "Revit",
       subCategory: "Model"
@@ -93,51 +93,31 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       (
         new Parameters.GeometryObject()
         {
-          Name = "Elements",
-          NickName = "E",
-          Description = "Element references",
+          Name = "References",
+          NickName = "R",
+          Description = "Geometry references",
           Access = GH_ParamAccess.list
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
-        new Parameters.GeometryFace()
+        new Param_Plane()
         {
-          Name = "Faces",
-          NickName = "F",
-          Description = "Element face references",
-          Access = GH_ParamAccess.list
-        }, ParamRelevance.Secondary
+          Name = "Points",
+          NickName = "X",
+          Description = "Points of intersection",
+          Access = GH_ParamAccess.list,
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
-        new Parameters.GeometryCurve()
+        new Param_Number()
         {
-          Name = "Edges",
-          NickName = "E",
-          Description = "Element edge references",
-          Access = GH_ParamAccess.list
-        }, ParamRelevance.Secondary
-      ),
-      new ParamDefinition
-      (
-        new Parameters.GeometryObject()
-        {
-          Name = "Meshes",
-          NickName = "M",
-          Description = "Element mesh references",
-          Access = GH_ParamAccess.list
-        }, ParamRelevance.Secondary
-      ),
-      new ParamDefinition
-      (
-        new Parameters.GeometryCurve()
-        {
-          Name = "Curves",
-          NickName = "C",
-          Description = "Element line references",
-          Access = GH_ParamAccess.list
-        }, ParamRelevance.Secondary
+          Name = "Proximity",
+          NickName = "P",
+          Description = "Distance of intersection",
+          Access = GH_ParamAccess.list,
+        }, ParamRelevance.Primary
       ),
     };
 
@@ -153,25 +133,17 @@ namespace RhinoInside.Revit.GH.Components.Geometry
       limit ??= int.MaxValue;
       distance ??= double.PositiveInfinity;
       distance = GeometryEncoder.ToInternalLength(distance.Value);
-
-      var referenceTarget = 0;
-      if (Params.IndexOfOutputParam("Elements") >=0) referenceTarget |= (int) ARDB.FindReferenceTarget.Element;
-      if (Params.IndexOfOutputParam("Faces") >= 0) referenceTarget |= (int) ARDB.FindReferenceTarget.Face;
-      if (Params.IndexOfOutputParam("Edges") >= 0) referenceTarget |= (int) ARDB.FindReferenceTarget.Edge;
-      if (Params.IndexOfOutputParam("Meshes") >= 0) referenceTarget |= (int) ARDB.FindReferenceTarget.Mesh;
-      if (Params.IndexOfOutputParam("Curves") >= 0) referenceTarget |= (int) ARDB.FindReferenceTarget.Curve;
-      if (referenceTarget == 0) return;
-      if (!Enum.IsDefined(typeof(ARDB.FindReferenceTarget), referenceTarget)) referenceTarget = (int) ARDB.FindReferenceTarget.All;
+      filter?.Value.AssertIsValidFiler(ExploreLinkedModels);
 
       using (var intersector = new ARDB.ReferenceIntersector
       (
         ElementFilters.ElementHasBoundingBoxFilter.Intersect(filter?.Value),
-        (ARDB.FindReferenceTarget) referenceTarget,
+        ARDB.FindReferenceTarget.All,
         view.Value)
         { FindReferencesInRevitLinks = ExploreLinkedModels }
       )
       {
-        IEnumerable<ARDB.Reference> result = Array.Empty<ARDB.Reference>();
+        IEnumerable<ARDB.ReferenceWithContext> result = Array.Empty<ARDB.ReferenceWithContext>();
         var origin = line.Value.From.ToXYZ();
         var direction = distance < 0.0 ? -line.Value.Direction.ToXYZ() : line.Value.Direction.ToXYZ();
 
@@ -180,7 +152,6 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           result = intersector.Find(origin, direction).
               OrderByDescending(x => x.Proximity).
               SkipWhile(x => !double.IsInfinity(distance.Value) && Math.Abs(distance.Value) <= x.Proximity).
-              Select(x => x.GetReference()).
               ToArray();
         }
         else if (limit == 1)
@@ -188,7 +159,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           if (intersector.FindNearest(origin, direction) is ARDB.ReferenceWithContext nearest)
           {
             if (Math.Abs(distance.Value) >= nearest.Proximity)
-              result = new ARDB.Reference[] { nearest.GetReference() };
+              result = new ARDB.ReferenceWithContext[] { nearest };
           }
         }
         else if (limit > 1)
@@ -196,55 +167,17 @@ namespace RhinoInside.Revit.GH.Components.Geometry
           result = intersector.Find(origin, direction).
               OrderBy(x => x.Proximity).
               TakeWhile(x => double.IsInfinity(distance.Value) || Math.Abs(distance.Value) >= x.Proximity).
-              Select(x => x.GetReference()).
               ToArray();
         }
 
-        result = result.TakeWhileIsNotEscapeKeyDown(this);
+        result = result.
+          Where(x => x.GetReference().ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_NONE).
+          Take(Math.Abs(limit.Value)).
+          TakeWhileIsNotEscapeKeyDown(this);
 
-        Params.TrySetDataList
-        (
-          DA, "Elements",
-          () => result.
-          Where(x => intersector.FindReferencesInRevitLinks || x.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE).
-          Select(view.GetGeometryElementFromReference).
-          Distinct().
-          Take(Math.Abs(limit.Value))
-        );
-        Params.TrySetDataList
-        (
-          DA, "Faces",
-          () => result.
-          Where(x => x.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE).
-          Take(Math.Abs(limit.Value)).
-          Select(x => view.GetGeometryObjectFromReference<Types.GeometryFace>(x))
-        );
-        Params.TrySetDataList
-        (
-          DA, "Edges",
-          () => result.
-          Where(x => x.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR).
-          Where(x => (referenceTarget & (int)ARDB.FindReferenceTarget.Curve) == 0 || x.IsKindOf<ARDB.Edge>(view.ReferenceDocument)).
-          Take(Math.Abs(limit.Value)).
-          Select(x => view.GetGeometryObjectFromReference<Types.GeometryCurve>(x))
-        );
-        Params.TrySetDataList
-        (
-          DA, "Meshes",
-          () => result.
-          Where(x => x.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_MESH).
-          Take(Math.Abs(limit.Value)).
-          Select(x => view.GetGeometryObjectFromReference<Types.GeometryMesh>(x))
-        );
-        Params.TrySetDataList
-        (
-          DA, "Curves",
-          () => result.
-          Where(x => x.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR).
-          Where(x => (referenceTarget & (int) ARDB.FindReferenceTarget.Edge) == 0 || !x.IsKindOf<ARDB.Edge>(view.ReferenceDocument)).
-          Take(Math.Abs(limit.Value)).
-          Select(x => view.GetGeometryObjectFromReference<Types.GeometryCurve>(x))
-        );
+        Params.TrySetDataList(DA, "References", () => result.Select(x => view.GetGeometryObjectFromReference<Types.GeometryObject>(x.GetReference())));
+        Params.TrySetDataList(DA, "Points", () => result.Select(x => line.Value.PointAtLength(x.Proximity * Revit.ModelUnits)));
+        Params.TrySetDataList(DA, "Proximity", () => result.Select(x => x.Proximity * Revit.ModelUnits));
       }
     }
 
