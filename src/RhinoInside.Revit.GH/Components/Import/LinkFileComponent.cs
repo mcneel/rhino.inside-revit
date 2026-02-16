@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Import
+namespace RhinoInside.Revit.GH.Components.Insert
 {
   public abstract class LinkFileComponent : ElementTrackerComponent
   {

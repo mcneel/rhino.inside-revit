@@ -6,7 +6,7 @@ using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using OS = System.Environment;
 
-namespace RhinoInside.Revit.GH.Components.Import
+namespace RhinoInside.Revit.GH.Components.Insert
 {
   using Numerical;
   using Convert.Geometry;
@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Import
       nickname: "CloudPts",
       description: "Query Point Cloud points and colours.",
       category: "Revit",
-      subCategory: "Site"
+      subCategory: "Insert"
     )
     { }
 

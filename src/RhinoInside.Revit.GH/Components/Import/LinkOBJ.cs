@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Import
+namespace RhinoInside.Revit.GH.Components.Insert
 {
   [ComponentVersion(introduced: "1.36"), ComponentRevitAPIVersion(min: "2025.0")]
   public class LinkOBJ : LinkFileComponent
