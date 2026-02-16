@@ -158,7 +158,6 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void SubInvalidateGraphics()
     {
-      (this as IGH_PreviewMeshData).DestroyPreviewMeshes();
       base.SubInvalidateGraphics();
     }
     #endregion
@@ -721,11 +720,7 @@ namespace RhinoInside.Revit.GH.Types
               {
                 using (var worldCurve = edge.AsCurve().CreateTransformed(transform))
                 {
-                  var result = worldCurve.Project(reference.GlobalPoint);
-                  var points = new ARDB.XYZ[] { worldCurve.GetEndPoint(0), worldCurve.GetEndPoint(1) };
-                  int end = result.XYZPoint.DistanceTo(points[0]) < result.XYZPoint.DistanceTo(points[1]) ? 0 : 1;
-
-                  stable = reference.ConvertToStableRepresentation(document);
+                  var result = worldCurve.Project(reference.GlobalPoint, out var end);
                   reference = ARDB.Reference.ParseFromStableRepresentation(document, $"{stable}/{end}");
                   return new GeometryPoint(document, reference);
                 }
@@ -735,10 +730,7 @@ namespace RhinoInside.Revit.GH.Types
               {
                 using (var worldCurve = curve.CreateTransformed(transform))
                 {
-                  var result = worldCurve.Project(reference.GlobalPoint);
-                  var points = new ARDB.XYZ[] { worldCurve.GetEndPoint(0), worldCurve.GetEndPoint(1) };
-                  int end = result.XYZPoint.DistanceTo(points[0]) < result.XYZPoint.DistanceTo(points[1]) ? 0 : 1;
-
+                  var result = worldCurve.Project(reference.GlobalPoint, out var end);
                   reference = ARDB.Reference.ParseFromStableRepresentation(document, $"{stable}/{end}");
                   return new GeometryPoint(document, reference);
                 }
