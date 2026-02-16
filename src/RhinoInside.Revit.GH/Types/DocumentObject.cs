@@ -115,10 +115,11 @@ namespace RhinoInside.Revit.GH.Types
 
     protected static T TransformData<T>(T value, Transform xform)
     {
-      if (value is null) return default;
-
       switch (value)
       {
+        case null:
+          return default;
+
         case Rhino.Geometry.Transform transform:
           return (T) (object) (transform * xform);
 
