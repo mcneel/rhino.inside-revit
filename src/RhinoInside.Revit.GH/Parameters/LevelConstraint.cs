@@ -8,7 +8,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  public class LevelConstraint : ProjectElevation
+  [Kernel.Attributes.Name("Level Elevation"), Kernel.Attributes.Description("A signed distance along Z-axis relative to a Level")]
+  public sealed class LevelConstraint : ProjectElevation
   {
     public LevelConstraint() { }
     internal LevelConstraint(External.DB.ElevationElementReference value) : base(value) { }
@@ -19,13 +20,7 @@ namespace RhinoInside.Revit.GH.Types
       base(new External.DB.ElevationElementReference(value / Revit.ModelUnits, level?.Value))
     { }
 
-    public override bool IsValid => Value != default;
-
-    public override string TypeName => "Level Elevation";
-
-    public override string TypeDescription => "A signed distance along Z-axis relative to a Level";
-
-    public override bool CastTo<Q>(ref Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(GH_Plane)))
       {
@@ -37,14 +32,17 @@ namespace RhinoInside.Revit.GH.Types
           return true;
         }
 
+        target = default;
         return false;
       }
 
-      return base.CastTo(ref target);
+      return base.ConvertTo(out target);
     }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
+      ResetValue();
+
       switch (source)
       {
         case Level l: Value = new External.DB.ElevationElementReference(default, l.Value); return true;
@@ -69,25 +67,31 @@ namespace RhinoInside.Revit.GH.Types
     public static LevelConstraint operator %(LevelConstraint constraint, Level level)
     {
       if (level is null) return constraint;
-      if (constraint?.IsElevation(out var elevation) is true) return new LevelConstraint(elevation - level.Elevation, level);
-      if (constraint?.IsOffset(out var offset) is true) return new LevelConstraint(offset, level);
-      if (constraint?.IsUnlimited() is true) return new LevelConstraint(default, default);
+      if (constraint?.IsValid is true)
+      {
+        if (constraint.IsElevation(out var elevation) is true) return new LevelConstraint(elevation - level.Elevation, level);
+        if (constraint.IsOffset(out var offset) is true) return new LevelConstraint(offset, level);
+        if (constraint.IsUnlimited() is true) return new LevelConstraint(default, default);
+      }
       return new LevelConstraint(null, level);
     }
 
     public static LevelConstraint operator +(LevelConstraint constraint, double? value)
     {
       if (value is null) return constraint;
-      if (constraint?.IsLevelConstraint(out var level, out var elevation) is true) return new LevelConstraint(elevation + value, level);
-      if (constraint?.IsElevation(out elevation) is true) return new LevelConstraint(elevation + value);
-      if (constraint?.IsOffset(out var offset) is true) return new LevelConstraint(offset + value, null);
-      if (constraint?.IsUnlimited() is true) return new LevelConstraint(default, default);
+      if (constraint?.IsValid is true)
+      {
+        if (constraint.IsLevelConstraint(out var level, out var elevation) is true) return new LevelConstraint(elevation + value, level);
+        if (constraint.IsElevation(out elevation) is true) return new LevelConstraint(elevation + value);
+        if (constraint.IsOffset(out var offset) is true) return new LevelConstraint(offset + value, null);
+        if (constraint.IsUnlimited() is true) return new LevelConstraint(default, default);
+      }
       return new LevelConstraint(value, null);
     }
 
     public bool IsLevelConstraint(out Level level, out double offset)
     {
-      if (Value.IsLevelConstraint(out var l, out var o))
+      if (Value.IsLevelConstraint(out var l, out var o) is true)
       {
         level = Level.FromElement(l) as Level;
         offset = (o ?? 0.0) * Revit.ModelUnits;
@@ -103,7 +107,7 @@ namespace RhinoInside.Revit.GH.Types
 
 namespace RhinoInside.Revit.GH.Parameters
 {
-  public class LevelConstraint : Param<Types.LevelConstraint>
+  public sealed class LevelConstraint : Param<Types.LevelConstraint>
   {
     public override Guid ComponentGuid => new Guid("4150D40A-7C02-4633-B3B5-CFE4B16855B5");
 
@@ -130,7 +134,7 @@ namespace RhinoInside.Revit.GH.Parameters
 namespace RhinoInside.Revit.GH.Components.Annotations.Levels
 {
   [ComponentVersion(introduced: "1.0", updated: "1.14")]
-  public class LevelOffset : ZuiComponent
+  public sealed class LevelOffset : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("01C853D8-87A3-4A76-8855-130BECA30DA1");
     public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;

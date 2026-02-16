@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.GH.Types
 
           try
           {
-            var value = System.Convert.ChangeType(this, targetType, default);
+            var value = System.Convert.ChangeType(this, targetType, System.Globalization.CultureInfo.InvariantCulture);
             if (Activator.CreateInstance<Q>() is IGH_Goo goo && goo.CastFrom(value))
             {
               target = (Q) goo;
@@ -92,7 +92,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           try
           {
-            target = (Q) System.Convert.ChangeType(this, typeof(Q), default);
+            target = (Q) System.Convert.ChangeType(this, typeof(Q), System.Globalization.CultureInfo.InvariantCulture);
             return true;
           }
           catch (InvalidCastException) { }
@@ -223,6 +223,7 @@ namespace RhinoInside.Revit.GH.Types
       Equals(Document, other.Document) && Equals(Value, other.Value);
     public override bool Equals(object obj) => (obj is ValueObject id) ? Equals(id) : base.Equals(obj);
     public override int GetHashCode() => Document.GetHashCode() ^ Value.GetHashCode();
+    public override string ToString() => DisplayName;
     #endregion
 
     #region IGH_Goo
