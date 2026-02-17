@@ -10,12 +10,12 @@ namespace RhinoInside.Revit.GH.Components.Insert
   public class LinkRevit : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("F3C8E0A6-4E9E-7A7F-E3C6-8A0E2C4D5F6E");
-    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => string.Empty;
 
     public LinkRevit() : base
     (
-      name: "Link Revit",
+      name: "Link Revit File",
       nickname: "LinkRVT",
       description: "Link a Revit file (RVT, RFA) to the current Revit document",
       category: "Revit",

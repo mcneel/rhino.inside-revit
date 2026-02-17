@@ -10,12 +10,12 @@ namespace RhinoInside.Revit.GH.Components.Insert
   public class LinkIFC : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("D1A6C8F4-2E7B-5D5C-E1A4-6F8C0A2B3C4D");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public LinkIFC() : base
     (
-      name: "Link IFC",
+      name: "Link IFC File",
       nickname: "LinkIFC",
       description: "Link an IFC file to the current Revit document",
       category: "Revit",
