@@ -24,107 +24,130 @@ namespace RhinoInside.Revit.GH.Components
   {
     readonly IGH_ActiveObject ActiveObject;
     readonly IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix;
+    readonly ARDB.FailureDefinitionId[] PendingFailureDefinitionIdsToFix;
     readonly ARDB.FailureProcessingResult FailureProcessingMode;
 
     public TransactionalComponentFailuresPreprocessor
     (
       IGH_ActiveObject activeObject,
-      IEnumerable<ARDB.FailureDefinitionId> failureDefinitionIdsToFix
-    ) :
-    this
-    (
-      activeObject,
-      failureDefinitionIdsToFix,
-      ARDB.FailureProcessingResult.ProceedWithRollBack
-    )
-    { }
-
-    public TransactionalComponentFailuresPreprocessor
-    (
-      IGH_ActiveObject activeObject,
       IEnumerable<ARDB.FailureDefinitionId> failureDefinitionIdsToFix,
+      ARDB.FailureDefinitionId[] pendingFailureDefinitionIdsToFix,
       ARDB.FailureProcessingResult failureProcessingMode
     )
     {
       ActiveObject = activeObject;
-      FailureDefinitionIdsToFix = failureDefinitionIdsToFix;
+      FailureDefinitionIdsToFix = failureDefinitionIdsToFix ?? Array.Empty<ARDB.FailureDefinitionId>();
+      PendingFailureDefinitionIdsToFix = pendingFailureDefinitionIdsToFix ?? Array.Empty<ARDB.FailureDefinitionId>();
       FailureProcessingMode = failureProcessingMode;
     }
 
-    static string GetDescriptionMessage(ARDB.FailureMessageAccessor error)
+    static string GetDescriptionText(ARDB.FailureMessageAccessor message)
     {
-      var description = error.GetDescriptionText();
-      if (string.IsNullOrWhiteSpace(description))
-        return $"{error.GetSeverity()} {{{error.GetFailureDefinitionId().Guid}}}";
+      var description = message.GetDescriptionText();
 
-      return description;
+      return string.IsNullOrWhiteSpace(description) ?
+        $"{message.GetSeverity()} {{{message.GetFailureDefinitionId().Guid}}}" :
+        description;
     }
 
-    void AddRuntimeMessage(ARDB.FailureMessageAccessor error, bool? solved = null)
+    void AddRuntimeMessage(ARDB.FailureMessageAccessor message, bool? solved = null)
     {
-      var severity = error.GetSeverity();
-      var failureId = error.GetFailureDefinitionId();
-
-      if (failureId == ERDB.ExternalFailures.TransactionFailures.SimulatedTransaction)
+      if (ActiveObject is IGH_ActiveObject activeObject)
       {
-        // Simulation signal is already reflected in the canvas changing the component color,
-        // So it's up to the component show relevant information about what 'simulation' means.
-        // As an example Purge component shows a remarks that reads like 'No elements were deleted'.
-        //AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, error.GetDescriptionText());
+        var severity = message.GetSeverity();
+        var failureId = message.GetFailureDefinitionId();
 
-        return;
-      }
-
-      if (severity == ARDB.FailureSeverity.Warning && FailureDefinitionIdsToFix?.Contains(failureId) is true)
-        return;
-
-      var level = GH_RuntimeMessageLevel.Remark;
-      switch (severity)
-      {
-        case ARDB.FailureSeverity.None:               level = GH_RuntimeMessageLevel.Remark;  break;
-        case ARDB.FailureSeverity.Warning:            level = GH_RuntimeMessageLevel.Warning; break;
-        case ARDB.FailureSeverity.Error:              level = GH_RuntimeMessageLevel.Error;   break;
-        case ARDB.FailureSeverity.DocumentCorruption: level = GH_RuntimeMessageLevel.Error;   break;
-      }
-
-      string solvedMark = string.Empty;
-      if (error.GetSeverity() > ARDB.FailureSeverity.Warning)
-      {
-        switch (solved)
+        if (failureId == ERDB.ExternalFailures.TransactionFailures.SimulatedTransaction)
         {
-          case false: solvedMark = "❌ "; break;
-          case true:  solvedMark = "✔ "; break;
+          // Simulation signal is already reflected in the canvas changing the component color,
+          // So it's up to the component show relevant information about what 'simulation' means.
+          // As an example Purge component shows a remarks that reads like 'No elements were deleted'.
+          //AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, message.GetDescriptionText());
+
+          return;
         }
+
+        if (severity == ARDB.FailureSeverity.Warning && FailureDefinitionIdsToFix.Contains(failureId) is true)
+          return;
+
+        var level = GH_RuntimeMessageLevel.Remark;
+        switch (severity)
+        {
+          case ARDB.FailureSeverity.None: level = GH_RuntimeMessageLevel.Remark; break;
+          case ARDB.FailureSeverity.Warning: level = GH_RuntimeMessageLevel.Warning; break;
+          case ARDB.FailureSeverity.Error: level = GH_RuntimeMessageLevel.Error; break;
+          case ARDB.FailureSeverity.DocumentCorruption: level = GH_RuntimeMessageLevel.Error; break;
+        }
+
+        string solvedMark = string.Empty;
+        if (message.GetSeverity() > ARDB.FailureSeverity.Warning)
+        {
+          switch (solved)
+          {
+            case null:
+              solvedMark = FailureProcessingMode == ARDB.FailureProcessingResult.Continue ?
+                $"{TransactionalComponent.TransactionalComponentAttributes.IssuePrefix} " : string.Empty;
+              break;
+            case false: solvedMark = "❌ "; break;
+            case true: solvedMark = "✔ "; break;
+          }
+        }
+
+        var text = $"{solvedMark}{GetDescriptionText(message).Replace(". ", OS.NewLine)}";
+        {
+          int idsCount = 0;
+          foreach (var id in message.GetFailingElementIds())
+            text += idsCount++ == 0 ? $" {{{id.ToValue()}" : $", {id.ToValue()}";
+          if (idsCount > 0) text += "} ";
+        }
+
+        activeObject.AddRuntimeMessage(level, text);
       }
-
-      var description = GetDescriptionMessage(error);
-      var message = $"{solvedMark}{description}";
-
-      int idsCount = 0;
-      foreach (var id in error.GetFailingElementIds())
-        message += idsCount++ == 0 ? $" {{{id.ToValue()}" : $", {id.ToValue()}";
-      if (idsCount > 0) message += "} ";
-
-      ActiveObject?.AddRuntimeMessage(level, message);
     }
 
-    ARDB.FailureProcessingResult FixFailures(ARDB.FailuresAccessor failuresAccessor, IEnumerable<ARDB.FailureDefinitionId> failureIds)
+    void AddContinueMessage(ARDB.FailuresAccessor failures)
+    {
+      if (ActiveObject is TransactionalComponent activeObject)
+      {
+        var caption = string.Empty;
+        var messages = failures.GetFailureMessages();
+        if (messages.Count > 0)
+        {
+          caption = messages[0].GetDefaultResolutionCaption();
+          for (int m = 1; m < messages.Count; ++m)
+          {
+            if (!messages[m].ShouldMergeWithMessage(messages[0]))
+            {
+              caption = string.Empty;
+              break;
+            }
+          }
+        }
+
+        if (!string.IsNullOrEmpty(caption))
+          activeObject.AddContinueFailure(caption);
+      }
+    }
+    private bool Continuing => (ActiveObject?.Attributes as TransactionalComponent.TransactionalComponentAttributes)?.Pressed is true;
+
+    ARDB.FailureProcessingResult FixFailures(ARDB.FailuresAccessor failures, IEnumerable<ARDB.FailureDefinitionId> failureIds, bool report = true)
     {
       foreach (var failureId in failureIds)
       {
         var solved = 0;
-        foreach (var error in failuresAccessor.GetFailureMessages().Where(x => x.GetFailureDefinitionId() == failureId))
+        foreach (var error in failures.GetFailureMessages().Where(x => x.GetFailureDefinitionId() == failureId))
         {
-          if (!failuresAccessor.IsFailureResolutionPermitted(error))
+          if (!failures.IsFailureResolutionPermitted(error))
             continue;
 
           // Don't try to fix two times same issue
-          if (failuresAccessor.GetAttemptedResolutionTypes(error).Any())
+          if (failures.GetAttemptedResolutionTypes(error).Any())
             continue;
 
-          AddRuntimeMessage(error, solved: true);
+          if (report)
+            AddRuntimeMessage(error, solved: true);
 
-          failuresAccessor.ResolveFailure(error);
+          failures.ResolveFailure(error);
           solved++;
         }
 
@@ -135,26 +158,26 @@ namespace RhinoInside.Revit.GH.Components
       return ARDB.FailureProcessingResult.Continue;
     }
 
-    public ARDB.FailureProcessingResult PreprocessFailures(ARDB.FailuresAccessor failuresAccessor)
+    public ARDB.FailureProcessingResult PreprocessFailures(ARDB.FailuresAccessor failures)
     {
 #if DEBUG
-      var tranasction = failuresAccessor.GetTransactionName();
-      var failureMessages = failuresAccessor.GetFailureMessages().Select
+      var tranasction = failures.GetTransactionName();
+      var failureMessages = failures.GetFailureMessages().Select
       (
-        error =>
+        failure =>
         (
-          Severity: error.GetSeverity(),
-          Description: error.GetDescriptionText(),
-          FailingElements: error.GetFailingElementIds().Select(x => failuresAccessor.GetDocument().GetElement(x)).ToArray(),
-          AdditionalElements: error.GetAdditionalElementIds().Select(x => failuresAccessor.GetDocument().GetElement(x)).ToArray(),
+          Severity: failure.GetSeverity(),
+          Description: failure.GetDescriptionText(),
+          FailingElements: failure.GetFailingElementIds().Select(x => failures.GetDocument().GetElement(x)).ToArray(),
+          AdditionalElements: failure.GetAdditionalElementIds().Select(x => failures.GetDocument().GetElement(x)).ToArray(),
 
-          Caption: error.HasResolutions() ? error.GetDefaultResolutionCaption() : string.Empty,
-          CurrentResolution: error.HasResolutions() ? error.GetCurrentResolutionType() : ARDB.FailureResolutionType.Invalid,
-          Resolutions: ((ARDB.FailureResolutionType[]) Enum.GetValues(typeof(ARDB.FailureResolutionType))).Where(x => error.HasResolutionOfType(x)).ToArray()
+          Caption: failure.HasResolutions() ? failure.GetDefaultResolutionCaption() : string.Empty,
+          CurrentResolution: failure.HasResolutions() ? failure.GetCurrentResolutionType() : ARDB.FailureResolutionType.Invalid,
+          Resolutions: ((ARDB.FailureResolutionType[]) Enum.GetValues(typeof(ARDB.FailureResolutionType))).Where(x => failure.HasResolutionOfType(x)).ToArray()
         )
       ).ToArray();
 #endif
-      var severity = failuresAccessor.GetSeverity();
+      var severity = failures.GetSeverity();
 
       if
       (
@@ -162,34 +185,40 @@ namespace RhinoInside.Revit.GH.Components
         FailureProcessingMode <= ARDB.FailureProcessingResult.ProceedWithCommit
       )
       {
-        if (failuresAccessor.IsTransactionBeingCommitted())
+        if (failures.IsTransactionBeingCommitted())
         {
           // Handled failures in order
-          if (FailureDefinitionIdsToFix is IEnumerable<ARDB.FailureDefinitionId> failureDefinitionIdsToFix)
-          {
-            var result = FixFailures(failuresAccessor, failureDefinitionIdsToFix);
-            if (result != ARDB.FailureProcessingResult.Continue)
-              return result;
-          }
-        }
-
-        // Unhandled failures in incomming order
-        {
-          var unhandledFailureDefinitionIds = failuresAccessor.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
-          var result = FixFailures(failuresAccessor, unhandledFailureDefinitionIds);
+          var result = FixFailures(failures, FailureDefinitionIdsToFix);
           if (result != ARDB.FailureProcessingResult.Continue)
             return result;
+        }
+
+        // Unhandled failures in incoming order
+        var unhandledFailureDefinitionIds = Continuing ?
+          PendingFailureDefinitionIdsToFix :
+          failures.GetFailureMessages().GroupBy(x => x.GetFailureDefinitionId()).Select(x => x.Key);
+
+        if (FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithCommit)
+        {
+          var result = FixFailures(failures, unhandledFailureDefinitionIds, !Continuing);
+          if (result != ARDB.FailureProcessingResult.Continue)
+            return result;
+        }
+        else if (FailureProcessingMode == ARDB.FailureProcessingResult.Continue)
+        {
+          AddContinueMessage(failures);
+          if(ActiveObject is TransactionalComponent component) component.PendingFailureDefinitionIdsToFix = unhandledFailureDefinitionIds.ToArray();
         }
       }
 
       if (severity >= ARDB.FailureSeverity.Warning)
       {
-        // Unsolved failures or warnings
-        foreach (var error in failuresAccessor.GetFailureMessages())
+        // Unsolved failures
+        foreach (var error in failures.GetFailureMessages())
           AddRuntimeMessage(error);
 
         if (FailureProcessingMode != ARDB.FailureProcessingResult.WaitForUserInput)
-          failuresAccessor.DeleteAllWarnings();
+          failures.DeleteAllWarnings();
       }
 
       if (FailureProcessingMode != ARDB.FailureProcessingResult.WaitForUserInput)
@@ -209,11 +238,11 @@ namespace RhinoInside.Revit.GH.Components
     : base(name, nickname, description, category, subCategory) { }
 
     #region Transaction
-    ARDB.TransactionStatus status = ARDB.TransactionStatus.Uninitialized;
+    ARDB.TransactionStatus _Status = ARDB.TransactionStatus.Uninitialized;
     public ARDB.TransactionStatus Status
     {
-      get => status;
-      protected set => status = value;
+      get => _Status;
+      protected set => _Status = value;
     }
 
     protected ARDB.Transaction NewTransaction(ARDB.Document doc) => NewTransaction(doc, Name);
@@ -238,7 +267,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected ARDB.TransactionStatus CommitTransaction(ARDB.Document doc, ARDB.Transaction transaction)
     {
-      // Disable Rhino UI if any warning-error dialog popup
+      // Disable Rhino UI if any warning-message dialog popup
       var uiApplication = Revit.ActiveUIApplication;
       External.UI.EditScope scope = null;
       EventHandler<DialogBoxShowingEventArgs> _ = null;
@@ -273,11 +302,18 @@ namespace RhinoInside.Revit.GH.Components
       private new TransactionalComponent Owner => (TransactionalComponent) base.Owner;
 
       internal static string IssuePrefix => "⏯";
+      internal static string ContinuePrefix => "✅";
 
       protected override bool Top => true;
-      protected override string DisplayText => "✅ Continue";
-      protected override bool Visible => Owner.RuntimeMessageLevel == GH_RuntimeMessageLevel.Error &&
-        Owner.RuntimeMessages(GH_RuntimeMessageLevel.Error).Any(x => x.StartsWith(IssuePrefix));
+      protected override bool Visible => Owner.RuntimeMessages(GH_RuntimeMessageLevel.Error).Any(x => x.StartsWith(IssuePrefix));
+      protected override string DisplayText
+      {
+        get
+        {
+          var continues = Owner.RuntimeMessages(GH_RuntimeMessageLevel.Remark).Where(x => x.StartsWith(ContinuePrefix)).ToArray();
+          return continues.Length == 1 ? continues[0] : "✅ Continue";
+        }
+      }
 
       public override void SetupTooltip(PointF canvasPoint, GH_TooltipDisplayEventArgs e)
       {
@@ -353,10 +389,14 @@ namespace RhinoInside.Revit.GH.Components
     {
       AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{TransactionalComponentAttributes.IssuePrefix} {message}");
     }
+    protected internal void AddContinueFailure(string message)
+    {
+      AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{TransactionalComponentAttributes.ContinuePrefix} {message}");
+    }
     #endregion
 
-    // Setp 1.
-    protected override void BeforeSolveInstance() => status = ARDB.TransactionStatus.Uninitialized;
+    // Step 1.
+    protected override void BeforeSolveInstance() => _Status = ARDB.TransactionStatus.Uninitialized;
 
     // Step 2.
     //protected override void TrySolveInstance(IGH_DataAccess DA) { }
@@ -365,8 +405,11 @@ namespace RhinoInside.Revit.GH.Components
     //protected override void AfterSolveInstance() {}
 
     #region IFailuresPreprocessor
-    // Override to add handled failures to your component (Order is important).
+    /// <summary>
+    /// Override to add handled failures to your component (Order is not important).
+    /// </summary>
     protected virtual IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => null;
+    protected internal ARDB.FailureDefinitionId[] PendingFailureDefinitionIdsToFix { get; internal set; } = Array.Empty<ARDB.FailureDefinitionId>();
 
     ARDB.FailureProcessingResult _FailureProcessingMode = ARDB.FailureProcessingResult.Continue;
     public ARDB.FailureProcessingResult FailureProcessingMode
@@ -379,7 +422,9 @@ namespace RhinoInside.Revit.GH.Components
 
     protected virtual ARDB.IFailuresPreprocessor CreateFailuresPreprocessor()
     {
-      return new TransactionalComponentFailuresPreprocessor(this, FailureDefinitionIdsToFix, FailureProcessingMode);
+      var pending = PendingFailureDefinitionIdsToFix;
+      PendingFailureDefinitionIdsToFix = Array.Empty<ARDB.FailureDefinitionId>();
+      return new TransactionalComponentFailuresPreprocessor(this, FailureDefinitionIdsToFix, pending, FailureProcessingMode);
     }
     #endregion
 
@@ -665,7 +710,7 @@ namespace RhinoInside.Revit.GH.Components
     // Step 3.1
     void ERDB.ITransactionNotification.OnPrepare(IReadOnlyCollection<ARDB.Document> documents)
     {
-      // Disable Rhino UI in case any warning-error dialog popups
+      // Disable Rhino UI in case any warning-message dialog popups
       var activeApplication = Revit.ActiveUIApplication;
       activeApplication.DialogBoxShowing += dialogBoxShowing = (sender, args) =>
       {
@@ -688,7 +733,7 @@ namespace RhinoInside.Revit.GH.Components
       }
       finally
       {
-        // Restore Rhino UI in case any warning-error dialog popups
+        // Restore Rhino UI in case any warning-message dialog popups
         if (dialogBoxShowing is object)
         {
           Revit.ActiveUIApplication.DialogBoxShowing -= dialogBoxShowing;
