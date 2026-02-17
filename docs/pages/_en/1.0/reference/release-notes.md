@@ -10,6 +10,15 @@ group: Deployment & Configs
 
 ### WIP
 
+### RC
+
+
+{% endcapture %}
+
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.36 RC 1" version="v1.36.9544.15028" time="02/17/2026" %}
+
 - Added support for linked elements on query components.
 - Added 'Query Geometry References' component.
 - Added 'Query Namesake Element' component.
@@ -21,15 +30,11 @@ group: Deployment & Configs
 - Fixed: Creating Wall by Profile creates a new wall when the profile is moved.
   [Issue #1277](https://github.com/mcneel/rhino.inside-revit/issues/1277)
 
-### RC
+{% include ltr/release-header.html title="v1.35" version="v1.35.9540.6370" time="01/29/2026" %}
 
 - Fixed 'Host Boundary Profile' when used on walls that already have an Sketch.
 - Fixed: Inconsistency in 'Add Wall (Profile)' curve handling.
   [Issue #1355](https://github.com/mcneel/rhino.inside-revit/issues/1355)
-
-{% endcapture %}
-
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
 {% include ltr/release-header.html title="v1.35" version="v1.35.9525.16240" time="01/29/2026" %}
 
