@@ -30,7 +30,7 @@ group: Deployment & Configs
 - Fixed: Creating Wall by Profile creates a new wall when the profile is moved.
   [Issue #1277](https://github.com/mcneel/rhino.inside-revit/issues/1277)
 
-{% include ltr/release-header.html title="v1.35" version="v1.35.9540.6370" time="01/29/2026" %}
+{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9540.6370" time="01/29/2026" %}
 
 - Fixed 'Host Boundary Profile' when used on walls that already have an Sketch.
 - Fixed: Inconsistency in 'Add Wall (Profile)' curve handling.
