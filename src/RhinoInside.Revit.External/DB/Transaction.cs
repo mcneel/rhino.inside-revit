@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using System.Security.Permissions;
 using Autodesk.Revit.DB;
-using OS = System.Environment;
 
 namespace RhinoInside.Revit.External.DB
 {
@@ -112,7 +111,7 @@ namespace RhinoInside.Revit.External.DB
     /// This method is called before start a transaction.
     /// </summary>
     /// <param name="document">The document associated with the transaction.</param>
-    /// <returns>True to allow a new transacion on <paramref name="document"/> or false to prevent it.</returns>
+    /// <returns>True to allow a new transaction on <paramref name="document"/> or false to prevent it.</returns>
     bool OnStart(Document document);
 
     /// <summary>
