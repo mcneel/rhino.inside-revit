@@ -17,7 +17,7 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.36 RC 1" version="v1.36.9544.15028" time="02/17/2026" %}
+{% include ltr/release-header.html title="v1.36 RC1" version="v1.36.9544.15028" pre_release=true time="02/17/2026" %}
 
 - Added support for linked elements on query components.
 - Added 'Query Geometry References' component.
