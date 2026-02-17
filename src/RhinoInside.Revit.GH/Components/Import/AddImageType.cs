@@ -3,13 +3,13 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Import
+namespace RhinoInside.Revit.GH.Components.Insert
 {
   [ComponentVersion(introduced: "1.11")]
   public class AddImageType : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("09BD0AA8-52D7-4C2B-B7B1-C66304C939AF");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.senary;
 
     protected override string IconTag => string.Empty;
 
@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Import
       nickname: "ImageType",
       description: "Given the path, it adds an image type to the given View",
       category: "Revit",
-      subCategory: "View"
+      subCategory: "Insert"
     )
     { }
 

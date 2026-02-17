@@ -1,13 +1,11 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using Rhino.Collections;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Import
+namespace RhinoInside.Revit.GH.Components.Insert
 {
-  [ComponentVersion(introduced: "1.34")]
+  [ComponentVersion(introduced: "1.36")]
   public class LinkCAD : LinkFileComponent
   {
     public override Guid ComponentGuid => new Guid("E2B7D9F5-3F8D-6A6E-F2C5-7E9D1B3C4E5F");
@@ -66,7 +64,7 @@ namespace RhinoInside.Revit.GH.Components.Import
     {
       new ParamDefinition
       (
-        new Parameters.Element()
+        new Parameters.GraphicalElement()
         {
           Name = _Output_,
           NickName = _Output_.Substring(0, 1),

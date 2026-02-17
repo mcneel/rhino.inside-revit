@@ -1,10 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
-using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Import
+namespace RhinoInside.Revit.GH.Components.Insert
 {
   public abstract class LinkFileComponent : ElementTrackerComponent
   {
