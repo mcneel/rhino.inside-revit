@@ -10,12 +10,12 @@ namespace RhinoInside.Revit.GH.Components.Insert
   public class OpenIFC : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("CA8912CE-19A9-404C-95EE-C758A5C7E4C9");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public OpenIFC() : base
     (
-      name: "Open IFC",
+      name: "Open IFC File",
       nickname: "OpenIFC",
       description: "Open an IFC file as a new Revit document (does not link to current document)",
       category: "Revit",
