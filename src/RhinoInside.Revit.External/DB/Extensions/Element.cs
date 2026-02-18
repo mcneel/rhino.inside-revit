@@ -218,8 +218,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
         switch (geometry)
         {
           case GeometryInstance instance:
-            foreach (var xyz in GetSamplePoints(instance.GetInstanceGeometry(), view))
-              yield return xyz;
+            var transform = instance.Transform;
+            foreach (var xyz in GetSamplePoints(instance.SymbolGeometry, view))
+              yield return transform.OfPoint(xyz);
 
           break;
 

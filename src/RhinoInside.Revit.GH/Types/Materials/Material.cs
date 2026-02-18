@@ -55,15 +55,14 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(Grasshopper.Kernel.Types.GH_Material)))
       {
-        if (RhinoDoc.ActiveDoc is RhinoDoc doc)
-        {
-          if(Value?.ToRenderMaterial(doc) is Rhino.Render.RenderMaterial renderMaterial)
-            target = (Q) (object) new Grasshopper.Kernel.Types.GH_Material(renderMaterial);
-          else
-            target = default;
+        if (IsEmpty)
+          target = (Q) (object) new Grasshopper.Kernel.Types.GH_Material(new Guid("{DEFADEFA-DEFA-DEFA-DEFA-DEFADEFADEFA}"));
+        else if (Value?.ToRenderMaterial(RhinoDoc.ActiveDoc) is Rhino.Render.RenderMaterial renderMaterial)
+          target = (Q) (object) new Grasshopper.Kernel.Types.GH_Material(renderMaterial);
+        else
+          target = default;
 
           return true;
-        }
       }
 
 #if RHINO_8

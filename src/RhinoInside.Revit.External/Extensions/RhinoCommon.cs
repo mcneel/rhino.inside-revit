@@ -1527,4 +1527,14 @@ namespace Rhino.Display
       return true;
     }
   }
+
+  static class RenderMaterialExtension
+  {
+#if !RHINO_8
+    public static DocObjects.Material ToMaterial(this Render.RenderMaterial material, Render.RenderTexture.TextureGeneration generation)
+    {
+      return material.SimulatedMaterial(generation);
+    }
+#endif
+  }
 }
