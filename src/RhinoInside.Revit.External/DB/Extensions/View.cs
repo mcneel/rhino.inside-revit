@@ -195,6 +195,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case ViewType.DraftingView:
         case ViewType.Legend:
           return true;
+
+        case ViewType.ThreeD:
+          return view.get_Parameter(BuiltInParameter.VIEWER_PERSPECTIVE).AsInteger() == 0;
       }
 
       return false;
