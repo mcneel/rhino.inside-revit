@@ -881,7 +881,8 @@ namespace RhinoInside.Revit.GH
             if (tx.Start() == ARDB.TransactionStatus.Started)
             {
               // Untrack elements on revitDocument owned by deleted callSites
-              foreach (var element in elements)
+              // We check for IsValidObject because it may been deleted while deleting the dependent elements above.
+              foreach (var element in elements.Where(x => x.IsValidObject))
               {
                 if (ElementTracking.TrackedElementsDictionary.Remove(element))
                   element.Pinned = false;
