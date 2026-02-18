@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
   public class IFCImportOptions : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("A8F3E5C1-9D4B-4E2A-B8F1-3C5D6E7F8A9B");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
     public IFCImportOptions() : base
@@ -33,7 +33,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
           NickName = "O",
           Description = "IFC import options object (optional, will create new if not provided)",
           Optional = true
-        }, ParamRelevance.Primary
+        }
       ),
       new ParamDefinition
       (
@@ -63,7 +63,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
           NickName = "AJ",
           Description = "Enable or disable auto-join at the end of import",
           Optional = true
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
           NickName = "AC",
           Description = "Enable or disable correcting lines that are slightly off-axis",
           Optional = true
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Primary
       )
     };
 
@@ -98,7 +98,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
           NickName = "I",
           Description = "Import intent value",
           Access = GH_ParamAccess.item
-        }
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
           NickName = "A",
           Description = "Import action value",
           Access = GH_ParamAccess.item
-        }
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (
@@ -118,7 +118,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
           NickName = "AJ",
           Description = "Auto-join enabled",
           Access = GH_ParamAccess.item
-        }
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
       (

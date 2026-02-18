@@ -5,7 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Documents
+namespace RhinoInside.Revit.GH.Components.Insert
 {
   using External.DB;
   using External.DB.Extensions;
@@ -14,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
   public class QueryRevitModels : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("EBCCFDD8-9F3B-44F4-A209-72D06C8082A5");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     protected override string IconTag => "M";
     protected override ARDB.ElementFilter ElementFilter => External.DB.ElementFilters.Union
     (
@@ -32,11 +32,11 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     public QueryRevitModels() : base
     (
-      name: "Query Revit Models",
+      name: "Query Linked Models",
       nickname: "Models",
       description: "Gets Revit linked models into given document",
       category: "Revit",
-      subCategory: "Document"
+      subCategory: "Insert"
     )
     { }
 
