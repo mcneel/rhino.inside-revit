@@ -16,13 +16,10 @@ namespace RhinoInside.Revit.Convert.Display
   {
     public static DisplayMaterial ToDisplayMaterial(this ARDB.Material material)
     {
-      if(RhinoDoc.ActiveDoc is RhinoDoc rhinoDoc)
+      using (var renderMaterial = material.ToRenderMaterial(RhinoDoc.ActiveDoc))
       {
-        using (var renderMaterial = material.ToRenderMaterial(rhinoDoc))
-        {
-          if (renderMaterial?.SimulatedMaterial(RenderTexture.TextureGeneration.Allow) is Rhino.DocObjects.Material rhinoMaterial)
-            return new DisplayMaterial(rhinoMaterial);
-        }
+        if (renderMaterial?.SimulatedMaterial(RenderTexture.TextureGeneration.Allow) is Rhino.DocObjects.Material rhinoMaterial)
+          return new DisplayMaterial(rhinoMaterial);
       }
 
       return new DisplayMaterial()
