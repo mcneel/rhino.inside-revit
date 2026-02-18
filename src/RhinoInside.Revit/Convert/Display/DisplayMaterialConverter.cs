@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.Convert.Display
     {
       using (var renderMaterial = material.ToRenderMaterial(RhinoDoc.ActiveDoc))
       {
-        if (renderMaterial?.SimulatedMaterial(RenderTexture.TextureGeneration.Allow) is Rhino.DocObjects.Material rhinoMaterial)
+        if (renderMaterial?.ToMaterial(RenderTexture.TextureGeneration.Allow) is Rhino.DocObjects.Material rhinoMaterial)
           return new DisplayMaterial(rhinoMaterial);
       }
 
