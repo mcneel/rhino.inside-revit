@@ -76,7 +76,10 @@ namespace RhinoInside.Revit.AddIn.Commands
       switch (Core.CurrentStatus)
       {
         case Core.Status.Ready:
-          Rhinoceros.ToggleMinimizedWindows();
+
+          if (!Rhinoceros.ToggleMinimizedWindows().HasValue)
+            Core.Host.ActivateRibbonTab(TabName);
+
           return Result.Succeeded;
 
         case Core.Status.Available:

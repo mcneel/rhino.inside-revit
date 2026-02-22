@@ -482,7 +482,7 @@ namespace RhinoInside.Revit
     /// Toggles minimized windows into its normal state or normal ones into minimized.
     /// </summary>
     /// <returns>Resulting minimized state.</returns>
-    internal static bool ToggleMinimizedWindows()
+    internal static bool? ToggleMinimizedWindows()
     {
       var activeWindow = WindowHandle.ActiveWindow;
       WindowHandle.ActiveWindow = Revit.MainWindow;
@@ -498,7 +498,7 @@ namespace RhinoInside.Revit
         }
 
         if (guests is null)
-          return true;
+          return default;
 
         var action = default(bool?);
         foreach (var guestInfo in guests)
@@ -529,7 +529,7 @@ namespace RhinoInside.Revit
           catch (Exception) { }
         }
 
-        return action ?? true;
+        return action;
       }
       finally
       {
