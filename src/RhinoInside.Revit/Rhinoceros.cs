@@ -477,6 +477,65 @@ namespace RhinoInside.Revit
 
       guests = null;
     }
+
+    /// <summary>
+    /// Toggles minimized windows into its normal state or normal ones into minimized.
+    /// </summary>
+    /// <returns>Resulting minimized state.</returns>
+    internal static bool ToggleMinimizedWindows()
+    {
+      var activeWindow = WindowHandle.ActiveWindow;
+      WindowHandle.ActiveWindow = Revit.MainWindow;
+
+      try
+      {
+        switch (MainWindow.WindowStyle)
+        {
+          case ProcessWindowStyle.Hidden: break;
+          case ProcessWindowStyle.Normal: MainWindow.Minimize(true); return true;
+          case ProcessWindowStyle.Maximized: break;
+          case ProcessWindowStyle.Minimized: MainWindow.Minimize(false); return false;
+        }
+
+        if (guests is null)
+          return true;
+
+        var action = default(bool?);
+        foreach (var guestInfo in guests)
+        {
+          if (guestInfo.Guest is null)
+            continue;
+
+          if (guestInfo.CheckInResult != GuestResult.Succeeded)
+            continue;
+
+          try
+          {
+            var guestWindow = guestInfo.Guest.MainWindow;
+            if (guestWindow.IsInvalid)
+              continue;
+
+            switch (guestWindow.WindowStyle)
+            {
+              case ProcessWindowStyle.Hidden: continue;
+              case ProcessWindowStyle.Normal: action ??= true; break;
+              case ProcessWindowStyle.Maximized: continue;
+              case ProcessWindowStyle.Minimized: action ??= false; break;
+            }
+
+            if (action.HasValue)
+              guestWindow.Minimize(action.Value);
+          }
+          catch (Exception) { }
+        }
+
+        return action ?? true;
+      }
+      finally
+      {
+        WindowHandle.ActiveWindow = activeWindow;
+      }
+    }
     #endregion
 
     #region Document

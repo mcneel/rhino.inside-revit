@@ -141,6 +141,8 @@ namespace RhinoInside.Revit.GH
     #region Grasshopper Editor
     static readonly GH_RhinoScriptInterface Script = new GH_RhinoScriptInterface();
 
+    WindowHandle IGuest.MainWindow => (WindowHandle) (Script.IsEditorLoaded() ? Instances.DocumentEditor.Handle : WindowHandle.Zero.Handle);
+
     /// <summary>
     /// Returns the loaded state of the Grasshopper Main window.
     /// </summary>

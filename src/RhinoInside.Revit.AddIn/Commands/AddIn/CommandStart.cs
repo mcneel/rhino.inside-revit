@@ -76,19 +76,7 @@ namespace RhinoInside.Revit.AddIn.Commands
       switch (Core.CurrentStatus)
       {
         case Core.Status.Ready:
-          if
-          (
-            Rhinoceros.MainWindow.Visible ||
-            Rhinoceros.MainWindow.ActivePopup?.IsInvalid == false
-          )
-          {
-            Rhinoceros.MainWindow.BringToFront();
-          }
-          else
-          {
-            Core.Host.ActivateRibbonTab(TabName);
-          }
-
+          Rhinoceros.ToggleMinimizedWindows();
           return Result.Succeeded;
 
         case Core.Status.Available:
@@ -211,16 +199,21 @@ namespace RhinoInside.Revit.AddIn.Commands
         CreateStartButton(TabName);
       }
 
+#if DEBUG
+      if (Properties.AddInOptions.Session.CompactTab)
+      {
+        ribbonPanel.AddSeparator();
+        CommandDebug.CreateUI(ribbonPanel);
+      }
+      else CommandDebug.CreateUI(uiCtrlApp.CreateRibbonPanel(TabName, "Debug"));
+#endif
+
       // About and help links
       ribbonPanel.AddSlideOut();
       CommandAbout.CreateUI(ribbonPanel);
       CommandGuides.CreateUI(ribbonPanel);
       CommandForums.CreateUI(ribbonPanel);
       CommandHelpLinks.CreateUI(ribbonPanel);
-
-#if DEBUG
-      CommandDebug.CreateUI(uiCtrlApp.CreateRibbonPanel(TabName, "Debug"));
-#endif
 
       if (!Properties.AddInOptions.Session.CompactTab)
       {
