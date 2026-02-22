@@ -1527,11 +1527,19 @@ namespace Rhino.Display
       return true;
     }
   }
+}
 
+namespace Rhino.Render
+{
   static class RenderMaterialExtension
   {
 #if !RHINO_8
-    public static DocObjects.Material ToMaterial(this Render.RenderMaterial material, Render.RenderTexture.TextureGeneration generation)
+    public static RenderMaterial Find(this RenderMaterialTable table, Guid id)
+    {
+      return table.FirstOrDefault(x => x.Id == id);
+    }
+
+    public static DocObjects.Material ToMaterial(this RenderMaterial material, RenderTexture.TextureGeneration generation)
     {
       return material.SimulatedMaterial(generation);
     }
