@@ -173,6 +173,7 @@ namespace RhinoInside.Revit.GH.Types
 
       return null;
     }
+#endif
 
     internal Linetype ToLinetype(Linetype linetype = null)
     {
@@ -205,7 +206,6 @@ namespace RhinoInside.Revit.GH.Types
 
       return null;
     }
-#endif
     #endregion
 
     #region Properties
