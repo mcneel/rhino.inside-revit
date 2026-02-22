@@ -24,25 +24,14 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (base.ConvertTo<Q>(out target))
         return true;
-#if REVIT_2018
+
       if (typeof(Q).IsAssignableFrom(typeof(Grasshopper.Kernel.Types.GH_Material)))
       {
-        if (RhinoDoc.ActiveDoc is RhinoDoc doc)
-        {
-          if (Value is ARDB.AppearanceAssetElement appearance)
-          {
-            var renderMaterial = RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material.DefaultMaterial, doc);
-            renderMaterial.Name = appearance.Name;
+        if (Value?.ToRenderMaterial(RhinoDoc.ActiveDoc) is RenderMaterial renderMaterial)
+          target = (Q) (object) new Grasshopper.Kernel.Types.GH_Material(renderMaterial);
 
-            using (var asset = appearance.GetRenderingAsset())
-              renderMaterial.SimulateRenderingAsset(asset, doc);
-
-            target = (Q) (object) new Grasshopper.Kernel.Types.GH_Material(renderMaterial);
-            return true;
-          }
-        }
+        return true;
       }
-#endif
       return false;
     }
 
@@ -59,65 +48,41 @@ namespace RhinoInside.Revit.GH.Types
       out Guid guid
     )
     {
-#if REVIT_2018
       // 1. Check if is already cloned
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
       if (Value is ARDB.AppearanceAssetElement appearance)
       {
-        if (BakeRenderMaterial(overwrite, doc, appearance.Name, out guid))
-          idMap.Add(Id, guid);
-      }
-#else
-      guid = Guid.Empty; 
-#endif
-
-      return false;
-    }
-
-#if REVIT_2018
-    internal bool BakeRenderMaterial
-    (
-      bool overwrite,
-      RhinoDoc doc,
-      string materialName,
-      out Guid guid
-    )
-    {
-      if (Value is ARDB.AppearanceAssetElement appearance)
-      {
         // 2. Check if already exist
-        var material = doc.RenderMaterials.FirstOrDefault(x => x.Name == materialName);
+        var target = doc.RenderMaterials.FindName(appearance.Name);
 
-        if (material is null)
+        // 3. Update if necessary
+        if (target is null || overwrite)
         {
-          material = RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material.DefaultMaterial, doc);
-          material.Name = materialName;
+          var source = appearance.ToRenderMaterial(doc);
+          if (target is object)
+          {
+            target.BeginChange(RenderContent.ChangeContexts.Program);
+            if (!target.Replace(source)) target.MatchData(source);
+            target.EndChange();
+          }
+          else if (doc.RenderMaterials.Add(source))
+          {
+            target = source;
+          }
         }
 
-        if(material.DocumentOwner is null || overwrite)
+        if (target is object)
         {
-          if (material.DocumentOwner is object)
-            material.BeginChange(RenderContent.ChangeContexts.Program);
-
-          using (var asset = appearance.GetRenderingAsset())
-            material.SimulateRenderingAsset(asset, doc);
-
-          if (material.DocumentOwner is object)
-            material.EndChange();
-          else
-            doc.RenderMaterials.Add(material);
+          idMap.Add(Id, (guid = target.Id));
+          return true;
         }
-
-        guid = material.Id;
-        return true;
       }
 
       guid = Guid.Empty;
       return false;
     }
-#endif
     #endregion
   }
 }

@@ -1533,6 +1533,11 @@ namespace Rhino.Render
 {
   static class RenderMaterialExtension
   {
+    public static RenderMaterial FindName(this RenderMaterialTable table, string name)
+    {
+      return table.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.InvariantCultureIgnoreCase));
+    }
+
 #if !RHINO_8
     public static RenderMaterial Find(this RenderMaterialTable table, Guid id)
     {

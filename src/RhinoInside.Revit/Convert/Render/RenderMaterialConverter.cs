@@ -17,7 +17,6 @@ using SD = System.Drawing;
 namespace RhinoInside.Revit.Convert.Render
 {
   using Numerical;
-  using Convert.Geometry;
   using Convert.System.Drawing;
   using Convert.Units;
   using External.DB.Extensions;
@@ -91,7 +90,8 @@ namespace RhinoInside.Revit.Convert.Render
     internal static RenderMaterial ToRenderMaterial(this ARDB.AppearanceAssetElement appearanceAssetElement, RhinoDoc rhinoDoc)
     {
       var renderMaterial = RenderMaterial.CreateBasicMaterial(Rhino.DocObjects.Material.DefaultMaterial, rhinoDoc);
-      renderMaterial.Name = appearanceAssetElement.Name;
+      renderMaterial.Name = $"Appearance Assets::{appearanceAssetElement.Name}";
+      renderMaterial.Hidden = true;
 
 #if REVIT_2018
       using (var asset = appearanceAssetElement.GetRenderingAsset())
@@ -170,6 +170,65 @@ namespace RhinoInside.Revit.Convert.Render
       {
         using (var asset = appearance.GetRenderingAsset())
           renderMaterial.SimulateRenderingAsset(asset, rhinoDoc);
+
+        if (renderMaterial.TextureChildSlotName(RenderMaterial.StandardChildSlots.Diffuse) is string diffuseSlot)
+        {
+          var diffuse = RenderContentType.NewContentFromTypeId(ContentUuids.SingleColorTextureType) as RenderTexture;
+          diffuse.Hidden = true;
+          diffuse.Name = $"{material.Name} Color";
+          diffuse.Fields.Set("color-one", renderMaterial.Fields.GetField(RenderMaterial.BasicMaterialParameterNames.Diffuse).GetValue<Color4f>());
+
+          if (renderMaterial.FindChild(diffuseSlot) is RenderTexture previousDiffuse)
+          {
+            diffuse.SetProjectionMode(previousDiffuse.GetProjectionMode(), RenderContent.ChangeContexts.Program);
+            diffuse.SetProjectionMode(previousDiffuse.GetProjectionMode(), RenderContent.ChangeContexts.Program);
+            diffuse.SetMappingChannel(previousDiffuse.GetMappingChannel(), RenderContent.ChangeContexts.Program);
+            diffuse.SetWrapType(TextureWrapType.Clamped, RenderContent.ChangeContexts.Program);
+            diffuse.SetOffset(previousDiffuse.GetOffset(), RenderContent.ChangeContexts.Program);
+            diffuse.SetRepeat(previousDiffuse.GetRepeat(), RenderContent.ChangeContexts.Program);
+            diffuse.SetRotation(previousDiffuse.GetRotation(), RenderContent.ChangeContexts.Program);
+
+            diffuse.SetChild(previousDiffuse.MakeCopy(), "color-one");
+            diffuse.SetChildSlotAmount("color-one", renderMaterial.ChildSlotAmount(diffuseSlot), RenderContent.ChangeContexts.Program);
+            diffuse.SetChildSlotOn("color-one", renderMaterial.ChildSlotOn(diffuseSlot), RenderContent.ChangeContexts.Program);
+          }
+
+          renderMaterial.SetChild(diffuse, diffuseSlot);
+          renderMaterial.SetChildSlotAmount(diffuseSlot, 100.0, RenderContent.ChangeContexts.Program);
+          renderMaterial.SetChildSlotOn(diffuseSlot, true, RenderContent.ChangeContexts.Program);
+          renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Diffuse, material.Color.ToColor());
+        }
+
+        if (!material.UseRenderAppearanceForShading)
+        {
+          if (renderMaterial.TextureChildSlotName(RenderMaterial.StandardChildSlots.Transparency) is string transparencySlot)
+          {
+            //var transparency = RenderContentType.NewContentFromTypeId(ContentUuids.SingleColorTextureType) as RenderTexture;
+            //transparency.Hidden = true;
+            //transparency.Name = $"{material.Name} Transparency";
+            //transparency.Fields.Set("color-one", renderMaterial.Fields.GetField(RenderMaterial.BasicMaterialParameterNames.TransparencyColor).GetValue<Color4f>());
+
+            //if (renderMaterial.FindChild(transparencySlot) is RenderTexture previousTransparency)
+            //{
+            //  transparency.SetProjectionMode(previousTransparency.GetProjectionMode(), RenderContent.ChangeContexts.Program);
+            //  transparency.SetProjectionMode(previousTransparency.GetProjectionMode(), RenderContent.ChangeContexts.Program);
+            //  transparency.SetMappingChannel(previousTransparency.GetMappingChannel(), RenderContent.ChangeContexts.Program);
+            //  transparency.SetWrapType(TextureWrapType.Clamped, RenderContent.ChangeContexts.Program);
+            //  transparency.SetOffset(previousTransparency.GetOffset(), RenderContent.ChangeContexts.Program);
+            //  transparency.SetRepeat(previousTransparency.GetRepeat(), RenderContent.ChangeContexts.Program);
+            //  transparency.SetRotation(previousTransparency.GetRotation(), RenderContent.ChangeContexts.Program);
+
+            //  transparency.SetChild(previousTransparency.MakeCopy(), "color-one");
+            //  transparency.SetChildSlotAmount("color-one", renderMaterial.ChildSlotAmount(transparencySlot), RenderContent.ChangeContexts.Program);
+            //  transparency.SetChildSlotOn("color-one", renderMaterial.ChildSlotOn(transparencySlot), RenderContent.ChangeContexts.Program);
+            //}
+
+            //renderMaterial.SetChild(transparency, transparencySlot);
+            //renderMaterial.SetChildSlotAmount(transparencySlot, 100.0 * (renderMaterial.Fields.GetField(RenderMaterial.BasicMaterialParameterNames.Transparency).GetValue<double>()), RenderContent.ChangeContexts.Program);
+            //renderMaterial.SetChildSlotOn(transparencySlot, true, RenderContent.ChangeContexts.Program);
+            renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Transparency, material.Transparency / 100.0);
+          }
+        }
       }
       else
 #endif
@@ -184,6 +243,11 @@ namespace RhinoInside.Revit.Convert.Render
     }
 
 #if REVIT_2018
+    static double NormalizedChildSlotAmount(RenderContent renderContent, string slotName)
+    {
+      return (double) (((float) renderContent.ChildSlotAmount(slotName)) - 0.01f) * 0.01f;
+    }
+
     class BasicMaterialParameters
     {
       public RenderMaterial.PreviewGeometryType PreviewGeometryType = RenderMaterial.PreviewGeometryType.Scene;
