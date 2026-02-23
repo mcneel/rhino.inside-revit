@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.DocObjects;
+using Rhino.DocObjects.Tables;
 using Rhino.Render;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
@@ -19,6 +20,7 @@ using Grasshopper.Rhinoceros.Render;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Render;
   using Convert.System.Drawing;
   using External.DB.Extensions;
 
@@ -359,6 +361,7 @@ namespace RhinoInside.Revit.GH.Types
 
               layer = new Layer
               {
+                Id = Guid.NewGuid(),
                 Index = -1,
                 Name = name,
                 IsExpanded = false,
@@ -389,13 +392,7 @@ namespace RhinoInside.Revit.GH.Types
 
           // Color
           {
-            if (category.Material is ARDB.Material material)
-            {
-              var color = category.Material.Color.ToColor();
-              var alpha = 255 - (int) (category.Material.Transparency * 2.55);
-              layer.Color = System.Drawing.Color.FromArgb(alpha, color);
-            }
-            else layer.Color = System.Drawing.Color.FromArgb(0x7F, 0x7F, 0x7F);
+            layer.Color = category.Material.ToShadingMaterial(out var _, out var _);
           }
 
           // Material
@@ -407,12 +404,17 @@ namespace RhinoInside.Revit.GH.Types
               if (material.BakeElement(idMap, false, doc, att, out var renderMaterialInstanceId))
               {
                 materialIndex = layer.RenderMaterialIndex;
+                if (materialIndex < 0) materialIndex = doc.Materials.FindName(layer.Id.ToString())?.Index ?? -1;
+
                 var layerMaterial = materialIndex >= 0 && materialIndex < doc.Materials.Count ? doc.Materials[materialIndex] : null;
                 if (layerMaterial?.IsDeleted is true || layerMaterial?.IsReference is true) layerMaterial = null;
                 if (layerMaterial?.RenderMaterialInstanceId != renderMaterialInstanceId)
                 {
-                  layerMaterial = doc.RenderMaterials.Find(renderMaterialInstanceId).ToMaterial(RenderTexture.TextureGeneration.Allow);
-                  layerMaterial.RenderMaterialInstanceId = renderMaterialInstanceId;
+                  layerMaterial = new Rhino.DocObjects.Material()
+                  {
+                    Name = layer.Id.ToString(),
+                    RenderMaterialInstanceId = renderMaterialInstanceId
+                  };
 
                   if (materialIndex < 0) materialIndex = doc.Materials.Add(layerMaterial);
                   else doc.Materials.Modify(layerMaterial, materialIndex, quiet: true);

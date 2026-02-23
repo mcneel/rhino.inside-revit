@@ -187,24 +187,20 @@ namespace RhinoInside.Revit.GH.Types
 
             if (objectGeometry is Mesh mesh)
             {
-#if RHINO_8
-              objectAttributes.ColorSource = ObjectColorSource.ColorFromMaterial;
-#endif
-
               var context = GeometryDecoder.Context.Peek;
               if (context.FaceMaterialId?.Length == 1 && context.FaceMaterialId[0].IsValid())
               {
                 var faceMaterial = new Material(element.Document, context.FaceMaterialId[0]);
                 if (faceMaterial.BakeElement(idMap, false, doc, null, out var materialId))
+                {
                   objectAttributes.RenderMaterial = doc.RenderMaterials.Find(materialId);
+                  objectAttributes.ColorSource = ObjectColorSource.ColorFromObject;
+                  objectAttributes.ObjectColor = faceMaterial.ObjectColor;
+                }
               }
             }
             else if (objectGeometry is Brep brep)
             {
-#if RHINO_8
-              objectAttributes.ColorSource = ObjectColorSource.ColorFromMaterial;
-#endif
-
               // In case objectGeometry is a Brep and has different materials per face.
               var context = GeometryDecoder.Context.Peek;
               if (context.FaceMaterialId?.Length > 0)
@@ -238,9 +234,6 @@ namespace RhinoInside.Revit.GH.Types
                       if (faceMaterial.BakeSharedMaterial(idMap, false, doc, out var materialGuid))
                       {
                         face.MaterialChannelIndex = objectMaterial.MaterialChannelIndexFromId(materialGuid, true);
-#if !RHINO_8
-                        face.PerFaceColor = NoBlack(faceMaterial.ObjectColor);
-#endif
                       }
                     }
                     else
@@ -254,9 +247,6 @@ namespace RhinoInside.Revit.GH.Types
                       else
                       {
                         face.ClearMaterialChannelIndex();
-#if !RHINO_8
-                        face.PerFaceColor = System.Drawing.Color.Empty;
-#endif
                       }
                     }
                   }
@@ -268,7 +258,11 @@ namespace RhinoInside.Revit.GH.Types
                 {
                   var objectMaterial = new Material(element.Document, context.FaceMaterialId[0]);
                   if (objectMaterial.BakeElement(idMap, false, doc, null, out var materialId))
+                  {
                     objectAttributes.RenderMaterial = doc.RenderMaterials.Find(materialId);
+                    objectAttributes.ColorSource = ObjectColorSource.ColorFromObject;
+                    objectAttributes.ObjectColor = objectMaterial.ObjectColor;
+                  }
                 }
 
                 // If we don't have per-face materials let's try to convert it to an extrusion.

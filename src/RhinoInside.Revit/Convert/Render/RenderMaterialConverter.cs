@@ -170,76 +170,37 @@ namespace RhinoInside.Revit.Convert.Render
       {
         using (var asset = appearance.GetRenderingAsset())
           renderMaterial.SimulateRenderingAsset(asset, rhinoDoc);
-
-        if (renderMaterial.TextureChildSlotName(RenderMaterial.StandardChildSlots.Diffuse) is string diffuseSlot)
-        {
-          var diffuse = RenderContentType.NewContentFromTypeId(ContentUuids.SingleColorTextureType) as RenderTexture;
-          diffuse.Hidden = true;
-          diffuse.Name = $"{material.Name} Color";
-          diffuse.Fields.Set("color-one", renderMaterial.Fields.GetField(RenderMaterial.BasicMaterialParameterNames.Diffuse).GetValue<Color4f>());
-
-          if (renderMaterial.FindChild(diffuseSlot) is RenderTexture previousDiffuse)
-          {
-            diffuse.SetProjectionMode(previousDiffuse.GetProjectionMode(), RenderContent.ChangeContexts.Program);
-            diffuse.SetProjectionMode(previousDiffuse.GetProjectionMode(), RenderContent.ChangeContexts.Program);
-            diffuse.SetMappingChannel(previousDiffuse.GetMappingChannel(), RenderContent.ChangeContexts.Program);
-            diffuse.SetWrapType(TextureWrapType.Clamped, RenderContent.ChangeContexts.Program);
-            diffuse.SetOffset(previousDiffuse.GetOffset(), RenderContent.ChangeContexts.Program);
-            diffuse.SetRepeat(previousDiffuse.GetRepeat(), RenderContent.ChangeContexts.Program);
-            diffuse.SetRotation(previousDiffuse.GetRotation(), RenderContent.ChangeContexts.Program);
-
-            diffuse.SetChild(previousDiffuse.MakeCopy(), "color-one");
-            diffuse.SetChildSlotAmount("color-one", renderMaterial.ChildSlotAmount(diffuseSlot), RenderContent.ChangeContexts.Program);
-            diffuse.SetChildSlotOn("color-one", renderMaterial.ChildSlotOn(diffuseSlot), RenderContent.ChangeContexts.Program);
-          }
-
-          renderMaterial.SetChild(diffuse, diffuseSlot);
-          renderMaterial.SetChildSlotAmount(diffuseSlot, 100.0, RenderContent.ChangeContexts.Program);
-          renderMaterial.SetChildSlotOn(diffuseSlot, true, RenderContent.ChangeContexts.Program);
-          renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Diffuse, material.Color.ToColor());
-        }
-
-        if (!material.UseRenderAppearanceForShading)
-        {
-          if (renderMaterial.TextureChildSlotName(RenderMaterial.StandardChildSlots.Transparency) is string transparencySlot)
-          {
-            //var transparency = RenderContentType.NewContentFromTypeId(ContentUuids.SingleColorTextureType) as RenderTexture;
-            //transparency.Hidden = true;
-            //transparency.Name = $"{material.Name} Transparency";
-            //transparency.Fields.Set("color-one", renderMaterial.Fields.GetField(RenderMaterial.BasicMaterialParameterNames.TransparencyColor).GetValue<Color4f>());
-
-            //if (renderMaterial.FindChild(transparencySlot) is RenderTexture previousTransparency)
-            //{
-            //  transparency.SetProjectionMode(previousTransparency.GetProjectionMode(), RenderContent.ChangeContexts.Program);
-            //  transparency.SetProjectionMode(previousTransparency.GetProjectionMode(), RenderContent.ChangeContexts.Program);
-            //  transparency.SetMappingChannel(previousTransparency.GetMappingChannel(), RenderContent.ChangeContexts.Program);
-            //  transparency.SetWrapType(TextureWrapType.Clamped, RenderContent.ChangeContexts.Program);
-            //  transparency.SetOffset(previousTransparency.GetOffset(), RenderContent.ChangeContexts.Program);
-            //  transparency.SetRepeat(previousTransparency.GetRepeat(), RenderContent.ChangeContexts.Program);
-            //  transparency.SetRotation(previousTransparency.GetRotation(), RenderContent.ChangeContexts.Program);
-
-            //  transparency.SetChild(previousTransparency.MakeCopy(), "color-one");
-            //  transparency.SetChildSlotAmount("color-one", renderMaterial.ChildSlotAmount(transparencySlot), RenderContent.ChangeContexts.Program);
-            //  transparency.SetChildSlotOn("color-one", renderMaterial.ChildSlotOn(transparencySlot), RenderContent.ChangeContexts.Program);
-            //}
-
-            //renderMaterial.SetChild(transparency, transparencySlot);
-            //renderMaterial.SetChildSlotAmount(transparencySlot, 100.0 * (renderMaterial.Fields.GetField(RenderMaterial.BasicMaterialParameterNames.Transparency).GetValue<double>()), RenderContent.ChangeContexts.Program);
-            //renderMaterial.SetChildSlotOn(transparencySlot, true, RenderContent.ChangeContexts.Program);
-            renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Transparency, material.Transparency / 100.0);
-          }
-        }
       }
       else
 #endif
       {
         renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Diffuse, material.Color.ToColor());
-        renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Shine, material.Shininess / 128.0 * Rhino.DocObjects.Material.MaxShine);
+        renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Shine, material.Shininess / 128.0);
         renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Reflectivity, 1.0 / Math.Exp((1.0 - (material.Smoothness / 100.0)) * 10));
         renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Transparency, material.Transparency / 100.0);
       }
 
       return renderMaterial;
+    }
+
+    internal static SD.Color ToShadingMaterial(this ARDB.Material material, out double shininess, out double smoothness)
+    {
+      if (material is null)
+      {
+        shininess = 0.5;
+        smoothness = 0.0;
+        return SD.Color.FromArgb(0x7F, 0x7F, 0x7F);
+      }
+      else
+      {
+        shininess = Math.Round(material.Shininess / 128.0);
+        smoothness = Math.Round(material.Smoothness / 100.0);
+        return SD.Color.FromArgb
+        (
+          byte.MaxValue - (int) Math.Round(material.Transparency * 2.55),
+          material.Color.ToColor()
+        );
+      }
     }
 
 #if REVIT_2018
@@ -254,6 +215,7 @@ namespace RhinoInside.Revit.Convert.Render
 
       public Color4f Ambient = Color4f.Black;
       public Color4f Diffuse = Color4f.White;
+      public Color4f? Tint = default;
 
       public double Shine = 0.0;
       public Color4f Specular = Color4f.White;
@@ -304,6 +266,7 @@ namespace RhinoInside.Revit.Convert.Render
 
       if (asset.Name == "UnifiedBitmapSchema") return GetUnifiedBitmapSchemaTexture(asset);
       if (asset.Name == "BumpMapSchema") return GetBumpMapSchemaTexture(asset);
+      if (asset.Name == "CheckerSchema") return GetCheckerSchemaTexture(asset);
       else Debug.WriteLine($"Unimplemented Texture Schema: {asset.Name}");
 
       return default;
@@ -467,6 +430,52 @@ namespace RhinoInside.Revit.Convert.Render
       return null;
     }
 
+    static SimulatedProceduralTexture GetCheckerSchemaTexture(Asset asset)
+    {
+      var activeModelScale = UnitScale.GetModelScale(RhinoDoc.ActiveDoc);
+
+      var offset = Rhino.Geometry.Vector2d.Zero;
+      if (asset.FindByName(Checker.TextureRealWorldOffsetX) is AssetPropertyDistance offsetX)
+        offset.X = ARDB.UnitUtils.Convert(offsetX.Value, offsetX.GetUnitTypeId(), DBXS.UnitType.Meters) / activeModelScale;
+      if (asset.FindByName(Checker.TextureRealWorldOffsetY) is AssetPropertyDistance offsetY)
+        offset.Y = ARDB.UnitUtils.Convert(offsetY.Value, offsetY.GetUnitTypeId(), DBXS.UnitType.Meters) / activeModelScale;
+
+      var repeat = new Rhino.Geometry.Vector2d(1.0, 1.0);
+      if (asset.FindByName(Checker.TextureRealWorldScaleX) is AssetPropertyDistance scaleX)
+        repeat.X = activeModelScale / ARDB.UnitUtils.Convert(scaleX.Value, scaleX.GetUnitTypeId(), DBXS.UnitType.Meters);
+      if (asset.FindByName(Checker.TextureRealWorldScaleY) is AssetPropertyDistance scaleY)
+        repeat.Y = activeModelScale / ARDB.UnitUtils.Convert(scaleY.Value, scaleY.GetUnitTypeId(), DBXS.UnitType.Meters);
+
+      var color_one = Color4f.Black;
+      if (asset.FindByName(Checker.CheckerColor1) is AssetPropertyDoubleArray4d color1)
+        color_one = ToColor4f(color1);
+
+      var color_two = Color4f.White;
+      if (asset.FindByName(Checker.CheckerColor2) is AssetPropertyDoubleArray4d color2)
+        color_two = ToColor4f(color2);
+
+      var texture = new SimulatedProceduralTexture(ContentUuids.Texture2DCheckerTextureType)
+      {
+        ProjectionMode = SimulatedTexture.ProjectionModes.WcsBox,
+        Fields =
+        {
+          { "color-one", color_one },
+          { "color-two", color_two }
+        }
+      };
+
+      if (asset.FindByName(Checker.TextureURepeat) is AssetPropertyBoolean uRepeat &&
+        asset.FindByName(Checker.TextureVRepeat) is AssetPropertyBoolean vRepeat)
+        texture.Repeating = uRepeat.Value | vRepeat.Value;
+
+      if (asset.FindByName(Checker.TextureWAngle) is AssetPropertyDouble angle)
+        texture.Rotation = RhinoMath.ToRadians(angle.Value);
+
+      texture.Offset = offset;
+      texture.Repeat = repeat;
+
+      return texture;
+    }
     static SimulatedTexture ToSimulatedTexture(string path)
     {
       return new SimulatedTexture(RhinoDoc.ActiveDoc)
@@ -514,8 +523,50 @@ namespace RhinoInside.Revit.Convert.Render
         SetChildSlot(material, RenderMaterial.StandardChildSlots.Bump, materialParams.BumpTexture, materialParams.BumpTextureAmount, doc);
         SetChildSlot(material, RenderMaterial.StandardChildSlots.Transparency, materialParams.OpacityTexture, materialParams.OpacityTextureAmount, doc);
         SetChildSlot(material, RenderMaterial.StandardChildSlots.Environment, materialParams.EnvironmentTexture, materialParams.EnvironmentTextureAmount, doc);
+
+        TintMaterial(material, materialParams.Tint);
       }
       else Debug.WriteLine($"Unimplemented Material Schema: {asset.Name}");
+    }
+
+    static void TintMaterial(RenderMaterial material, Color4f? tintColor)
+    {
+      if (material.TextureChildSlotName(RenderMaterial.StandardChildSlots.Diffuse) is string diffuseSlot)
+      {
+        var diffuse = tintColor.HasValue ?
+          RenderContentType.NewContentFromTypeId(ContentUuids.MultiplyTextureType) as RenderTexture:
+          RenderContentType.NewContentFromTypeId(ContentUuids.SingleColorTextureType) as RenderTexture;
+
+        diffuse.Hidden = true;
+        diffuse.Name = $"{material.Name} Color";
+        diffuse.Fields.Set("color-one", material.Fields.GetField(RenderMaterial.BasicMaterialParameterNames.Diffuse).GetValue<Color4f>());
+
+        if (material.FindChild(diffuseSlot) is RenderTexture previousDiffuse)
+        {
+          diffuse.SetProjectionMode(previousDiffuse.GetProjectionMode(), RenderContent.ChangeContexts.Program);
+          diffuse.SetProjectionMode(previousDiffuse.GetProjectionMode(), RenderContent.ChangeContexts.Program);
+          diffuse.SetMappingChannel(previousDiffuse.GetMappingChannel(), RenderContent.ChangeContexts.Program);
+          diffuse.SetWrapType(TextureWrapType.Clamped, RenderContent.ChangeContexts.Program);
+          diffuse.SetOffset(previousDiffuse.GetOffset(), RenderContent.ChangeContexts.Program);
+          diffuse.SetRepeat(previousDiffuse.GetRepeat(), RenderContent.ChangeContexts.Program);
+          diffuse.SetRotation(previousDiffuse.GetRotation(), RenderContent.ChangeContexts.Program);
+
+          diffuse.SetChild(previousDiffuse.MakeCopy(), "color-one");
+          diffuse.SetChildSlotAmount("color-one", material.ChildSlotAmount(diffuseSlot), RenderContent.ChangeContexts.Program);
+          diffuse.SetChildSlotOn("color-one", material.ChildSlotOn(diffuseSlot), RenderContent.ChangeContexts.Program);
+        }
+
+        if (tintColor.HasValue)
+        {
+          diffuse.Fields.Set("color-two", tintColor.Value);
+          diffuse.SetChildSlotAmount("color-two", 100.0, RenderContent.ChangeContexts.Program);
+          diffuse.SetChildSlotOn("color-two", true, RenderContent.ChangeContexts.Program);
+        }
+
+        material.SetChild(diffuse, diffuseSlot);
+        material.SetChildSlotAmount(diffuseSlot, 100.0, RenderContent.ChangeContexts.Program);
+        material.SetChildSlotOn(diffuseSlot, true, RenderContent.ChangeContexts.Program);
+      }
     }
 
     static void SetFieldValues(Rhino.Render.Fields.FieldDictionary fields, Dictionary<string, object> values)
@@ -619,24 +670,20 @@ namespace RhinoInside.Revit.Convert.Render
 
     static void GetGenericSchemaParameters(Asset asset, ref BasicMaterialParameters material)
     {
+      var metal = (asset.FindByName(Generic.GenericIsMetal) is AssetPropertyBoolean isMetal && isMetal.Value);
+
       if (asset.FindByName(Generic.GenericDiffuse) is AssetPropertyDoubleArray4d diffuse)
       {
         material.Diffuse = ToColor4f(diffuse);
         material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
         if (asset.FindByName(Generic.GenericDiffuseImageFade) is AssetPropertyDouble diffuseAmount)
           material.DiffuseTextureAmount = diffuseAmount.Value;
+      }
 
-        if (asset.FindByName(Generic.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
-        {
-          if (asset.FindByName(Generic.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-          {
-            var tintColor = ToColor4f(tint);
-            material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-          }
-        }
-
-        if (asset.FindByName(Generic.GenericIsMetal) is AssetPropertyBoolean isMetal && isMetal.Value)
-          material.ReflectivityColor = material.Diffuse;
+      if (asset.FindByName(Generic.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+      {
+        if (asset.FindByName(Generic.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+          material.Tint = ToColor4f(tint);
       }
 
       if (asset.FindByName(Generic.GenericBumpMap) is AssetPropertyDoubleArray4d bumpMap)
@@ -656,6 +703,7 @@ namespace RhinoInside.Revit.Convert.Render
       if (asset.FindByName(Generic.GenericTransparency) is AssetPropertyDouble transparency)
       {
         material.Transparency = transparency.Value;
+        material.TransparencyColor = material.Diffuse;
 
         // TODO : Build a Transparency Texture.
         //material.OpacityTexture = ToSimulatedTexture(transparency.GetSingleConnectedAsset());
@@ -668,7 +716,7 @@ namespace RhinoInside.Revit.Convert.Render
         material.Ior = ior.Value;
 
       if (asset.FindByName(Generic.GenericGlossiness) is AssetPropertyDouble glossiness)
-        material.Reflectivity = glossiness.Value;
+        material.PolishAmount = glossiness.Value;
 
       if (asset.FindByName(Generic.GenericSelfIllumLuminance) is AssetPropertyDouble luminance)
       {
@@ -683,14 +731,20 @@ namespace RhinoInside.Revit.Convert.Render
         }
       }
 
-      if (asset.FindByName(Generic.GenericReflectivityAt0deg) is AssetPropertyDouble refelectivity0)
-        material.PolishAmount = refelectivity0.Value;
+      if (asset.FindByName(Generic.GenericReflectivityAt0deg) is AssetPropertyDouble reflectivity0)
+      {
+        material.Reflectivity = RhinoMath.Clamp(reflectivity0.Value, 0.0, 1.0); ;
+        material.ReflectivityColor = metal ? material.Diffuse : Color4f.White;
+      }
 
       if (asset.FindByName(Generic.GenericReflectivityAt90deg) is AssetPropertyDouble reflectivity90)
-        material.Shine = reflectivity90.Value;
+      {
+        material.Shine = RhinoMath.Clamp(reflectivity90.Value, 0.0, 1.0);
+        material.Specular = metal ? material.Diffuse : Color4f.White;
+      }
 
       if (asset.FindByName(Generic.GenericRefractionTranslucencyWeight) is AssetPropertyDouble refractionTranslucencyWeight)
-        material.ClarityAmount = refractionTranslucencyWeight.Value;
+        material.ClarityAmount = 1.0 - refractionTranslucencyWeight.Value;
     }
 
     static void GetGlazingSchemaParameters(Asset asset, ref BasicMaterialParameters material)
@@ -699,12 +753,12 @@ namespace RhinoInside.Revit.Convert.Render
       {
         switch ((GlazingTransmittanceColorType) transmittance.Value)
         {
-          case GlazingTransmittanceColorType.Clear: material.TransparencyColor = new Color4f(0.858f, 0.893f, 0.879f, 1.0f); break;
-          case GlazingTransmittanceColorType.Green: material.TransparencyColor = new Color4f(0.676f, 0.797f, 0.737f, 1.0f); break;
-          case GlazingTransmittanceColorType.Gray: material.TransparencyColor = new Color4f(0.451f, 0.449f, 0.472f, 1.0f); break;
-          case GlazingTransmittanceColorType.Blue: material.TransparencyColor = new Color4f(0.367f, 0.514f, 0.651f, 1.0f); break;
-          case GlazingTransmittanceColorType.Bluegreen: material.TransparencyColor = new Color4f(0.654f, 0.788f, 0.772f, 1.0f); break;
-          case GlazingTransmittanceColorType.Bronze: material.TransparencyColor = new Color4f(0.583f, 0.516f, 0.467f, 1.0f); break;
+          case GlazingTransmittanceColorType.Clear: material.TransparencyColor = new Color4f(236 / 255f, 240 / 255f, 239 / 255f, 1.0f); break;
+          case GlazingTransmittanceColorType.Green: material.TransparencyColor = new Color4f(209 / 255f, 227 / 255f, 218 / 255f, 1.0f); break;
+          case GlazingTransmittanceColorType.Gray: material.TransparencyColor = new Color4f(171 / 255f, 170 / 255f, 175 / 255f, 1.0f); break;
+          case GlazingTransmittanceColorType.Blue: material.TransparencyColor = new Color4f(154 / 255f, 182 / 255f, 205 / 255f, 1.0f); break;
+          case GlazingTransmittanceColorType.Bluegreen: material.TransparencyColor = new Color4f(206 / 255f, 226 / 255f, 224 / 255f, 1.0f); break;
+          case GlazingTransmittanceColorType.Bronze: material.TransparencyColor = new Color4f(194 / 255f, 183 / 255f, 174 / 255f, 1.0f); break;
           case GlazingTransmittanceColorType.Custom:
             if (asset.FindByName(Glazing.GlazingTransmittanceMap) is AssetPropertyDoubleArray4d transmittanceCustomColor)
             {
@@ -716,15 +770,12 @@ namespace RhinoInside.Revit.Convert.Render
       }
 
       material.Diffuse = material.TransparencyColor;
-      material.Transparency = 0.9;
+      material.Transparency = 1.0;
 
       if (asset.FindByName(Glazing.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
       {
         if (asset.FindByName(Glazing.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-        {
-          var tintColor = ToColor4f(tint);
-          material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-        }
+          material.Tint = ToColor4f(tint);
       }
 
       material.Ior = 1.52;
@@ -734,6 +785,7 @@ namespace RhinoInside.Revit.Convert.Render
       if (asset.FindByName(Glazing.GlazingReflectance) is AssetPropertyDouble refelectance)
         material.Reflectivity = refelectance.Value;
 
+      material.FresnelEnabled = true;
       material.PolishAmount = 1.0;
       material.ClarityAmount = 1.0;
     }
@@ -766,10 +818,7 @@ namespace RhinoInside.Revit.Convert.Render
       if (asset.FindByName(SolidGlass.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
       {
         if (asset.FindByName(SolidGlass.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-        {
-          var tintColor = ToColor4f(tint);
-          material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-        }
+          material.Tint = ToColor4f(tint);
       }
 
       if (asset.FindByName(SolidGlass.SolidglassRefractionIor) is AssetPropertyDouble ior)
@@ -812,15 +861,12 @@ namespace RhinoInside.Revit.Convert.Render
       {
         material.Diffuse = ToColor4f(diffuse);
         material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
+      }
 
-        if (asset.FindByName(Concrete.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
-        {
-          if (asset.FindByName(Concrete.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-          {
-            var tintColor = ToColor4f(tint);
-            material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-          }
-        }
+      if (asset.FindByName(Concrete.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+      {
+        if (asset.FindByName(Concrete.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+          material.Tint = ToColor4f(tint);
       }
 
       if (asset.FindByName(Concrete.ConcreteSealant) is AssetPropertyInteger sealant)
@@ -877,16 +923,14 @@ namespace RhinoInside.Revit.Convert.Render
       if (asset.FindByName(Stone.StoneColor) is AssetPropertyReference diffuse)
       {
         material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
-
-        if (asset.FindByName(Stone.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
-        {
-          if (asset.FindByName(Stone.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-          {
-            var tintColor = ToColor4f(tint);
-            material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-          }
-        }
       }
+
+      if (asset.FindByName(Stone.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+      {
+        if (asset.FindByName(Stone.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+          material.Tint = ToColor4f(tint);
+      }
+
 
       if (asset.FindByName(Stone.StoneApplication) is AssetPropertyInteger application)
       {
@@ -966,7 +1010,7 @@ namespace RhinoInside.Revit.Convert.Render
               material.Diffuse = ToColor4f(metalColor);
               material.DiffuseTexture = ToSimulatedTexture(metalColor.GetSingleConnectedAsset());
             }
-            metalFinishType = MetalFinishType.Polished;
+            metalFinishType = MetalFinishType.Brushed;
             break;
           case MetalType.Chrome: material.Diffuse = new Color4f(SD.Color.FromArgb(244, 244, 244)); break;
           case MetalType.Copper: material.Diffuse = new Color4f(SD.Color.FromArgb(187, 80, 46)); break;
@@ -983,10 +1027,7 @@ namespace RhinoInside.Revit.Convert.Render
       if (asset.FindByName(Metal.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
       {
         if (asset.FindByName(Metal.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-        {
-          var tintColor = ToColor4f(tint);
-          material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-        }
+          material.Tint = ToColor4f(tint);
       }
 
       material.ReflectivityColor = material.Diffuse;
@@ -1025,15 +1066,12 @@ namespace RhinoInside.Revit.Convert.Render
       {
         material.Diffuse = ToColor4f(diffuse);
         material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
+      }
 
-        if (asset.FindByName(MetallicPaint.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
-        {
-          if (asset.FindByName(MetallicPaint.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-          {
-            var tintColor = ToColor4f(tint);
-            material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-          }
-        }
+      if (asset.FindByName(MetallicPaint.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+      {
+        if (asset.FindByName(MetallicPaint.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+          material.Tint = ToColor4f(tint);
       }
 
       if (asset.FindByName(MetallicPaint.MetallicpaintPearlColor) is AssetPropertyDoubleArray4d specular)
@@ -1071,8 +1109,8 @@ namespace RhinoInside.Revit.Convert.Render
             if (asset.FindByName(MetallicPaint.MetallicpaintTopcoatGlossy) is AssetPropertyDouble glossy)
               glossines = glossy.Value;
 
-            if (asset.FindByName(MetallicPaint.MetallicpaintTopcoatFalloff) is AssetPropertyDouble fallof)
-              angle = fallof.Value;
+            if (asset.FindByName(MetallicPaint.MetallicpaintTopcoatFalloff) is AssetPropertyDouble falloff)
+              angle = falloff.Value;
             break;
         }
       }
@@ -1095,17 +1133,12 @@ namespace RhinoInside.Revit.Convert.Render
       {
         material.Diffuse = ToColor4f(diffuse);
         material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
+      }
 
-        if (asset.FindByName(WallPaint.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
-        {
-          if (asset.FindByName(WallPaint.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-          {
-            var tintColor = ToColor4f(tint);
-            material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-          }
-        }
-
-        material.ReflectivityColor = material.Diffuse;
+      if (asset.FindByName(WallPaint.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+      {
+        if (asset.FindByName(WallPaint.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+          material.Tint = ToColor4f(tint);
       }
 
       // TODO: apply some bump texture
@@ -1150,17 +1183,11 @@ namespace RhinoInside.Revit.Convert.Render
       {
         material.Diffuse = Color4f.White;
         material.DiffuseTexture = ToSimulatedTexture(hardwoodColor.GetSingleConnectedAsset());
-
-        if (asset.FindByName(Hardwood.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
-        {
-          if (asset.FindByName(Hardwood.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-          {
-            var tintColor = ToColor4f(tint);
-            material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-          }
-        }
-
-        material.ReflectivityColor = material.Diffuse;
+      }
+      if (asset.FindByName(Hardwood.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+      {
+        if (asset.FindByName(Hardwood.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+          material.Tint = ToColor4f(tint);
       }
 
       // TODO: apply some bump texture
@@ -1201,16 +1228,12 @@ namespace RhinoInside.Revit.Convert.Render
         material.Diffuse = ToColor4f(diffuse);
         material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
 
-        if (asset.FindByName(Ceramic.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
-        {
-          if (asset.FindByName(Ceramic.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-          {
-            var tintColor = ToColor4f(tint);
-            material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-          }
-        }
+      }
 
-        material.ReflectivityColor = material.Diffuse;
+      if (asset.FindByName(Ceramic.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+      {
+        if (asset.FindByName(Ceramic.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+          material.Tint = ToColor4f(tint);
       }
 
       double polish = 0.0;
@@ -1265,17 +1288,12 @@ namespace RhinoInside.Revit.Convert.Render
       {
         material.Diffuse = ToColor4f(diffuse);
         material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
+      }
 
-        if (asset.FindByName(PlasticVinyl.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
-        {
-          if (asset.FindByName(PlasticVinyl.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-          {
-            var tintColor = ToColor4f(tint);
-            material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-          }
-        }
-
-        material.ReflectivityColor = material.Diffuse;
+      if (asset.FindByName(PlasticVinyl.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+      {
+        if (asset.FindByName(PlasticVinyl.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+          material.Tint = ToColor4f(tint);
       }
 
       double polish = 0.0;
@@ -1472,10 +1490,7 @@ namespace RhinoInside.Revit.Convert.Render
       if (asset.FindByName(Water.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
       {
         if (asset.FindByName(Water.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-        {
-          var tintColor = ToColor4f(tint);
-          material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-        }
+          material.Tint = ToColor4f(tint);
       }
 
       material.Shine = material.PolishAmount;
@@ -1499,10 +1514,7 @@ namespace RhinoInside.Revit.Convert.Render
       if (asset.FindByName(Mirror.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
       {
         if (asset.FindByName(Mirror.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-        {
-          var tintColor = ToColor4f(tint);
-          material.ReflectivityColor = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-        }
+          material.Tint = ToColor4f(tint);
       }
     }
 
@@ -1514,17 +1526,12 @@ namespace RhinoInside.Revit.Convert.Render
       {
         material.Diffuse = ToColor4f(diffuse);
         material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
+      }
 
-        if (asset.FindByName(MasonryCMU.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
-        {
-          if (asset.FindByName(MasonryCMU.CommonTintColor) is AssetPropertyDoubleArray4d tint)
-          {
-            var tintColor = ToColor4f(tint);
-            material.Diffuse = new Color4f(material.Diffuse.R * tintColor.R, material.Diffuse.G * tintColor.G, material.Diffuse.B * tintColor.B, material.Diffuse.A * tintColor.A);
-          }
-        }
-
-        material.ReflectivityColor = material.Diffuse;
+      if (asset.FindByName(MasonryCMU.CommonTintToggle) is AssetPropertyBoolean tintToggle && tintToggle.Value)
+      {
+        if (asset.FindByName(MasonryCMU.CommonTintColor) is AssetPropertyDoubleArray4d tint)
+          material.Tint = ToColor4f(tint);
       }
 
       if (asset.FindByName(MasonryCMU.MasonryCMUPatternMap) is AssetPropertyReference bumpMap)
@@ -1718,10 +1725,10 @@ namespace RhinoInside.Revit.Convert.Render
         material.OpacityTexture = ToSimulatedTexture(cutout.GetSingleConnectedAsset());
       }
 
-      if (asset.FindByName(AdvancedGlazing.SurfaceAlbedo) is AssetPropertyDoubleArray4d albeldo)
+      if (asset.FindByName(AdvancedGlazing.SurfaceAlbedo) is AssetPropertyDoubleArray4d albedo)
       {
         material.Reflectivity = 1.0;
-        material.ReflectivityColor = ToColor4f(albeldo);
+        material.ReflectivityColor = ToColor4f(albedo);
       }
     }
 #endif
@@ -1755,14 +1762,14 @@ namespace RhinoInside.Revit.Convert.Render
         if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Ior, out double ior))
           asset.SetProperty(Generic.GenericRefractionIndex, ior);
 
-        if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Shine, out double shine))
-          asset.SetProperty(Generic.GenericGlossiness, shine);
-
         if (mat.Fields.TryGetValue("polish-amount", out double polish))
-          asset.SetProperty(Generic.GenericReflectivityAt0deg, polish * 0.5);
+          asset.SetProperty(Generic.GenericGlossiness, polish);
+
+        if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Shine, out double shine))
+          asset.SetProperty(Generic.GenericReflectivityAt90deg, shine * 0.5);
 
         if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Reflectivity, out double reflectivity))
-          asset.SetProperty(Generic.GenericReflectivityAt90deg, reflectivity * 0.5);
+          asset.SetProperty(Generic.GenericReflectivityAt0deg, reflectivity * 0.5);
 
         if (mat.Fields.TryGetValue(Rhino.Render.RenderMaterial.BasicMaterialParameterNames.Transparency, out double transparency))
         {
@@ -1784,21 +1791,21 @@ namespace RhinoInside.Revit.Convert.Render
         if (mat.ChildSlotOn("bitmap-texture"))
         {
           asset.SetProperty(Generic.GenericDiffuse, mat.FindChild("bitmap-texture") as RenderTexture);
-          asset.SetProperty(Generic.GenericDiffuseImageFade, mat.ChildSlotAmount("bitmap-texture") * 0.01);
+          asset.SetProperty(Generic.GenericDiffuseImageFade, NormalizedChildSlotAmount(mat, "bitmap-texture"));
         }
         else asset.SetProperty(Generic.GenericDiffuse, default(RenderTexture));
 
         if (mat.ChildSlotOn("transparency-texture"))
         {
           asset.SetProperty(Generic.GenericTransparency, mat.FindChild("transparency-texture") as RenderTexture);
-          asset.SetProperty(Generic.GenericTransparencyImageFade, mat.ChildSlotAmount("transparency-texture") * 0.01);
+          asset.SetProperty(Generic.GenericTransparencyImageFade, NormalizedChildSlotAmount(mat, "transparency-texture"));
         }
         else asset.SetProperty(Generic.GenericTransparency, default(RenderTexture));
 
         if (mat.ChildSlotOn("bump-texture"))
         {
           asset.SetProperty(Generic.GenericBumpMap, mat.FindChild("bump-texture") as RenderTexture);
-          asset.SetProperty(Generic.GenericBumpAmount, mat.ChildSlotAmount("bump-texture") * 0.01);
+          asset.SetProperty(Generic.GenericBumpAmount, NormalizedChildSlotAmount(mat, "bump-texture"));
         }
         else asset.SetProperty(Generic.GenericBumpMap, default(RenderTexture));
       }

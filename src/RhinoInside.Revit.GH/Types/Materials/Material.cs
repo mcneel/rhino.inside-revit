@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Rhino;
 using Rhino.Display;
 using Rhino.DocObjects;
+using Rhino.DocObjects.Tables;
 using Rhino.Render;
 using ARDB = Autodesk.Revit.DB;
 #if RHINO_8
@@ -144,25 +145,25 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(id, out guid))
         return true;
 
-      var material = Value;
-      if (material is object)
+      if (BakeElement(idMap, overwrite, doc, null, out var materialId))
       {
         // 2. Check if already exist
-        var name = material.UniqueId;
-        var target = doc.Materials.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.InvariantCultureIgnoreCase));
-        if (target?.IsDeleted is true || target?.IsReference is true) target = null;
+        var target = doc.Materials.FindName(materialId.ToString());
+        if (target is object && target.RenderMaterialInstanceId != materialId) overwrite = true;
 
         // 3. Update if necessary
         if (target is null || overwrite)
         {
-          if (BakeElement(idMap, overwrite, doc, null, out var materialId))
+          var source = new Rhino.DocObjects.Material
           {
-            var source = doc.RenderMaterials.Find(materialId).ToMaterial(RenderTexture.TextureGeneration.Allow);
-            if (target is object)
-              doc.Materials.Modify(source, target.Index, quiet: true);
-            else
-              target = doc.Materials[doc.Materials.Add(source)];
-          }
+            Name = materialId.ToString(),
+            RenderMaterialInstanceId = materialId
+          };
+
+          if (target is object)
+            doc.Materials.Modify(source, target.Index, quiet: true);
+          else
+            target = doc.Materials[doc.Materials.Add(source)];
         }
 
         if (target is object)
@@ -175,36 +176,18 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    internal System.Drawing.Color ObjectColor
-    {
-      get
-      {
-        if (Value is ARDB.Material material)
-        {
-          var color = System.Drawing.Color.FromArgb
-          (
-            255 - (int) Math.Round(material.Transparency / 100.0 * 255.0),
-            material.Color.ToColor()
-          );
-
-          return color;
-        }
-
-        return IsEmpty ? DefaultRenderMaterialColor : System.Drawing.Color.Empty;
-      }
-    }
+    internal System.Drawing.Color ObjectColor => Value.ToShadingMaterial(out var _, out var _);
     #endregion
 
     #region DefaultRenderMaterial
-    const string DefaultRenderMaterialName = "<None>";
-    static readonly System.Drawing.Color DefaultRenderMaterialColor = System.Drawing.Color.FromArgb(0x7F, 0x7F, 0x7F);
+    internal const string DefaultRenderMaterialName = "<None>";
 
     static RenderMaterial _DefaultRenderMaterial => CreateDefaultMaterial();
     static RenderMaterial DefaultRenderMaterial => _DefaultRenderMaterial.MakeCopy() as RenderMaterial;
 
     static RenderMaterial CreateDefaultMaterial()
     {
-      var color = new ColorRGBA(DefaultRenderMaterialColor.ToArgb());
+      var color = new ColorRGBA(default(ARDB.Material).ToShadingMaterial(out var shininess, out var smoothness).ToArgb());
       var rgba = new Color4f((float) color.R, (float) color.G, (float) color.B, (float) color.A);
 
       var hsl = ColorHSL.CreateFromRGBA(color);
@@ -217,16 +200,16 @@ namespace RhinoInside.Revit.GH.Types
       renderMaterial.Name = DefaultRenderMaterialName;
       renderMaterial.Notes = "Default Revit Material";
       renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Diffuse, rgba);
-      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Shine, 0.0);
-      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Specular, Color4f.Black);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Shine, shininess);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Specular, Color4f.White);
       renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Transparency, transparency);
-      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.TransparencyColor, rgba);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.TransparencyColor, Color4f.White);
       renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Emission, emission);
-      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Reflectivity, 0.0);
-      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.ReflectivityColor, rgba);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Reflectivity, smoothness);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.ReflectivityColor, Color4f.White);
       renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Ior, transparency < 0.5 ? 1.0 : transparency + 0.52);
-      renderMaterial.Fields.Set("polish-amount", 0.5);
-      renderMaterial.Fields.Set("clarity-amount", 1.0);
+      renderMaterial.Fields.Set("polish-amount", smoothness);
+      renderMaterial.Fields.Set("clarity-amount", smoothness);
       renderMaterial.Fields.Set("fresnel-enabled", true);
 
       return renderMaterial;
@@ -402,7 +385,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value is object && Value is ARDB.Material material)
         {
           var intValue = (int) Math.Round(value.Value * 100.0);
-          if(0.0 > intValue || intValue > 100)
+          if (0.0 > intValue || intValue > 100)
             throw new ArgumentOutOfRangeException(nameof(Transparency), "Valid value range for transparency is [0.0, 1.0]");
 
           if (material.Transparency != intValue)
