@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Win32.SafeHandles;
+using Rhino.Render;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Numerical;
 
@@ -1368,6 +1369,14 @@ namespace Rhino.DocObjects
 
 namespace Rhino.DocObjects.Tables
 {
+  static class MaterialTableExtension
+  {
+    public static Material FindName(this MaterialTable table, string name)
+    {
+      return table.FirstOrDefault(x => !x.IsReference && !x.IsDeleted && string.Equals(x.Name, name, StringComparison.InvariantCultureIgnoreCase));
+    }
+  }
+
   static class NamedConstructionPlaneTableExtension
   {
     public static int Add(this NamedConstructionPlaneTable table, ConstructionPlane cplane)
@@ -1533,6 +1542,11 @@ namespace Rhino.Render
 {
   static class RenderMaterialExtension
   {
+    public static RenderMaterial FindName(this RenderMaterialTable table, string name)
+    {
+      return table.FirstOrDefault(x => !x.IsReference() && string.Equals(x.Name, name, StringComparison.InvariantCultureIgnoreCase));
+    }
+
 #if !RHINO_8
     public static RenderMaterial Find(this RenderMaterialTable table, Guid id)
     {
