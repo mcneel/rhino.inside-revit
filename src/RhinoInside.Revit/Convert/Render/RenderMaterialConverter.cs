@@ -529,13 +529,21 @@ namespace RhinoInside.Revit.Convert.Render
       else Debug.WriteLine($"Unimplemented Material Schema: {asset.Name}");
     }
 
+#if RHINO_8
+    static Guid MultiplyTextureType = ContentUuids.MultiplyTextureType;
+    static Guid SingleColorTextureType = ContentUuids.SingleColorTextureType;
+#else
+    static readonly Guid MultiplyTextureType = new Guid("{95BF2B4A-C79B-48E8-97D0-2584F2E8E52B}");
+    static readonly Guid SingleColorTextureType = new Guid("{B9368B92-9F02-45FB-B6CF-095EF8463550}");
+#endif
+
     static void TintMaterial(RenderMaterial material, Color4f? tintColor)
     {
       if (material.TextureChildSlotName(RenderMaterial.StandardChildSlots.Diffuse) is string diffuseSlot)
       {
         var diffuse = tintColor.HasValue ?
-          RenderContentType.NewContentFromTypeId(ContentUuids.MultiplyTextureType) as RenderTexture:
-          RenderContentType.NewContentFromTypeId(ContentUuids.SingleColorTextureType) as RenderTexture;
+          RenderContentType.NewContentFromTypeId(MultiplyTextureType) as RenderTexture:
+          RenderContentType.NewContentFromTypeId(SingleColorTextureType) as RenderTexture;
 
         diffuse.Hidden = true;
         diffuse.Name = $"{material.Name} Color";
