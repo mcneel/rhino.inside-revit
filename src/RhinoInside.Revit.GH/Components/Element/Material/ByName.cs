@@ -266,7 +266,7 @@ namespace RhinoInside.Revit.GH.Components.Materials.Obsolete
           if (newColor.Red != material.Color.Red || newColor.Green != material.Color.Green || newColor.Blue != material.Color.Blue)
             material.Color = newColor;
 
-          var newTransparency = (int) Math.Round((255 - color.A) * 100.0 / 255.0);
+          var newTransparency = (int) Math.Round((byte.MaxValue - color.A) / 2.55);
           if (material.Transparency != newTransparency)
             material.Transparency = newTransparency;
 
