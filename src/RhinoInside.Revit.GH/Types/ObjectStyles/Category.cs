@@ -463,6 +463,7 @@ namespace RhinoInside.Revit.GH.Types
 
             case ARDB.BuiltInCategory.OST_Levels:
             case ARDB.BuiltInCategory.OST_Grids:
+            case ARDB.BuiltInCategory.OST_GridChains:
               layer.Color = System.Drawing.Color.FromArgb(35, layer.Color);
               layer.IsLocked = true;
               break;
@@ -474,9 +475,6 @@ namespace RhinoInside.Revit.GH.Types
 #endif
               break;
 
-            case ARDB.BuiltInCategory.OST_GridChains:
-              layer.Color = System.Drawing.Color.FromArgb(35, layer.Color);
-              break;
 
             case ARDB.BuiltInCategory.OST_LightingFixtureSource:
               layer.IsVisible = false;
@@ -580,20 +578,22 @@ namespace RhinoInside.Revit.GH.Types
 
         // LineColor
         {
-          //var lineColor = category.LineColor.ToColor();
-          //attributes.DraftingColor = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
+          var lineColor = category.LineColor.ToColor();
+          attributes.DraftingColor = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
         }
 
         // Color
         {
-          var lineColor = category.LineColor.ToColor();
-          attributes.DisplayColor = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
+          attributes.DisplayColor = category.Material.ToShadingMaterial(out var _, out var _);
         }
 
         // Material
-        var material = Material;
+        if (category.CategoryType != ARDB.CategoryType.Annotation)
         {
-          attributes.Material = material.ToModelContent(idMap) as ModelRenderMaterial;
+          var material = Material;
+          {
+            attributes.Material = material.ToModelContent(idMap) as ModelRenderMaterial;
+          }
         }
 
         // Some hardcoded tweaks…
@@ -605,12 +605,17 @@ namespace RhinoInside.Revit.GH.Types
 
           case ARDB.BuiltInCategory.OST_Levels:
           case ARDB.BuiltInCategory.OST_Grids:
+          case ARDB.BuiltInCategory.OST_GridChains:
             attributes.DisplayColor = System.Drawing.Color.FromArgb(35, attributes.DisplayColor.Value);
             attributes.Locked = true;
             break;
 
+          case ARDB.BuiltInCategory.OST_VolumeOfInterest:
+            attributes.LineWeight = -1.0;
+            attributes.HiddenOnNewDetail = true;
+            break;
+
           case ARDB.BuiltInCategory.OST_LightingFixtureSource:
-            attributes.DisplayColor = System.Drawing.Color.FromArgb(35, attributes.DisplayColor.Value);
             attributes.Hidden = true;
             break;
         }
