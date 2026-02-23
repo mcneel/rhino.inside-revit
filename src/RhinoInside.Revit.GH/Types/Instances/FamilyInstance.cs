@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Types
                 var location = new Plane(transform.Origin.ToPoint3d(), transform.BasisX.ToVector3d(), transform.BasisY.ToVector3d());
                 var worldToElement = Transform.PlaneToPlane(location, Plane.WorldXY);
 
-                if (BakeGeometryElement(idMap, overwrite, doc, att, worldToElement, element, geometry, out var idefIndex))
+                if (BakeGeometryElement(idMap, overwrite, doc, worldToElement, element, geometry, out var idefIndex))
                 {
                   att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
                   att.Name = element.get_Parameter(ARDB.BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? string.Empty;
@@ -434,7 +434,7 @@ namespace RhinoInside.Revit.GH.Types
             {
               if (geometry is ARDB.GeometryElement geometryElement)
               {
-                if (GeometricElement.BakeGeometryElement(idMap, overwrite, doc, att, Transform.Identity, element, geometry, out var idefIndex))
+                if (GeometricElement.BakeGeometryElement(idMap, overwrite, doc, Transform.Identity, element, geometry, out var idefIndex))
                   guid = doc.InstanceDefinitions[idefIndex].Id;
               }
 

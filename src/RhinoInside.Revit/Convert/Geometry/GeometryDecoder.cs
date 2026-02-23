@@ -1668,6 +1668,8 @@ namespace RhinoInside.Revit.Convert.Geometry
           else if (geometryObject is ARDB.GeometryElement geometry)
           {
             context.Material = geometry.MaterialElement;
+            if (element is ARDB.ElementType)
+              return;
           }
           else if (geometryObject is ARDB.Solid solid)
           {
@@ -1732,8 +1734,12 @@ namespace RhinoInside.Revit.Convert.Geometry
             yield break;
 
           case ARDB.GeometryInstance instance:
-            foreach (var g in instance.GetInstanceGeometry().ToGeometryBaseMany(predicate))
+            var transform = instance.Transform.ToTransform();
+            foreach (var g in instance.SymbolGeometry.ToGeometryBaseMany(predicate))
+            {
+              g.Transform(transform);
               yield return g;
+            }
             yield break;
 
           case ARDB.Mesh mesh:

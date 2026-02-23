@@ -5,6 +5,8 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.DocObjects;
+using Rhino.DocObjects.Tables;
+using Rhino.Render;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 using DBXS = RhinoInside.Revit.External.DB.Schemas;
@@ -18,6 +20,7 @@ using Grasshopper.Rhinoceros.Render;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Convert.Render;
   using Convert.System.Drawing;
   using External.DB.Extensions;
 
@@ -309,67 +312,69 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
-      const string RootLayerName = "Revit";
-      var PS = Layer.PathSeparator;
-
       if (APIObject is ARDB.Category category)
       {
-        var fullLayerName = category.Parent is null ?
-          $"{RootLayerName}{PS}{category.CategoryType}{PS}{category.Name}" :
-          $"{RootLayerName}{PS}{category.CategoryType}{PS}{category.Parent.Name}{PS}{category.Name}";
+        var elementPath = GetElementPath().ToArray();
 
         // 2. Check if already exist
-        var index = doc.Layers.FindByFullPath(fullLayerName, -1);
-        var layer = index < 0 ?
-          Layer.GetDefaultLayerProperties() :
-          doc.Layers[index];
+        var index = doc.Layers.FindByFullPath(string.Join("::", elementPath), -1);
+        var layer = index >= 0 && index < doc.Layers.Count ? doc.Layers[index] : null;
 
         // 3. Update if necessary
         if (index < 0 || overwrite)
         {
           if (index < 0)
           {
-            // Create Root Layer
-            new Category(category.Parent).BakeElement(idMap, false, doc, att, out var parentGuid);
-
-            // Create Category Type Layer
-            if (category.Parent is null)
+            // Bake parent layers and create current one
+            var name = default(string);
+            var parentId = Guid.Empty;
             {
-              if (Types.CategoryType.NamedValues.TryGetValue((int) category.CategoryType, out var typeName))
+              if (Parent is Category parent)
               {
-                var type = doc.Layers.FindByFullPath($"{RootLayerName}::{category.CategoryType}", -1);
-                if (type < 0)
-                {
-                  var typeLayer = Layer.GetDefaultLayerProperties();
-                  typeLayer.ParentLayerId = parentGuid;
-                  typeLayer.Name = typeName;
-                  type = doc.Layers.Add(typeLayer);
-                }
-
-                parentGuid = doc.Layers[type].Id;
+                parent.BakeElement(idMap, overwrite: true, doc, default, out parentId);
+                name = elementPath.LastOrDefault();
               }
-            }
+              else
+              {
+                var added = false;
+                foreach (var token in elementPath.TakeButLast(out name))
+                {
+                  if (!added && doc.Manifest.FindName(token, ModelComponentType.Layer, parentId) is Layer current)
+                  {
+                    parentId = current.Id;
+                  }
+                  else
+                  {
+                    current = new Layer
+                    {
+                      Index = -1,
+                      IsExpanded = false,
+                      ParentLayerId = parentId,
+                      Name = token,
+                      Color = System.Drawing.Color.FromArgb(23, 107, 254),
+                    };
+                    parentId = doc.Layers[doc.Layers.Add(current)].Id;
+                    added = true;
+                  }
+                }
+              }
 
-            layer.ParentLayerId = parentGuid;
-            layer.Name = category.Name;
-            layer.IsExpanded = false;
+              layer = new Layer
+              {
+                Id = Guid.NewGuid(),
+                Index = -1,
+                Name = name,
+                IsExpanded = false,
+                ParentLayerId = parentId
+              };
+            }
           }
 
           // Linetype
           {
-            var linetypeIndex = -1;
-            if (ProjectionLinePattern is LinePatternElement linePattern)
-            {
-              if (linePattern.BakeElement(idMap, false, doc, att, out var linetypeGuid))
-                linetypeIndex = doc.Linetypes.FindId(linetypeGuid).Index;
-            }
-            layer.LinetypeIndex = linetypeIndex;
-          }
-
-          // LineColor
-          {
-            var lineColor = category.LineColor.ToColor();
-            layer.PlotColor = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
+            layer.LinetypeIndex = ProjectionLinePattern.BakeElement(idMap, false, doc, att, out var linetypeGuid) ?
+                                  doc.Linetypes.FindId(linetypeGuid).Index :
+                                  -1; // Continuous
           }
 
           // Print Width
@@ -379,26 +384,75 @@ namespace RhinoInside.Revit.GH.Types
               ToLineWeight(ProjectionLineWeight);
           }
 
+          // LineColor
+          {
+            var lineColor = category.LineColor.ToColor();
+            layer.PlotColor = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
+          }
+
           // Color
           {
-            var displayColor = category.CategoryType != ARDB.CategoryType.Model ||
-              category.Root().ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Lines ?
-              layer.PlotColor :
-              new Material(category.Material).ObjectColor;
-
-            layer.Color = displayColor.IsEmpty ? System.Drawing.Color.FromArgb(0x7F, 0x7F, 0x7F) : displayColor;
+            layer.Color = category.Material.ToShadingMaterial(out var _, out var _);
           }
 
           // Material
+          if (category.CategoryType != ARDB.CategoryType.Annotation)
           {
             var materialIndex = -1;
-            if (Material is Material material)
             {
-              if (material.BakeElement(idMap, false, doc, att, out var materialGuid))
-                materialIndex = doc.Materials.FindId(materialGuid).Index;
+              var material = new Material(category.Material);
+              if (material.BakeElement(idMap, false, doc, att, out var renderMaterialInstanceId))
+              {
+                materialIndex = layer.RenderMaterialIndex;
+                if (materialIndex < 0) materialIndex = doc.Materials.FindName(layer.Id.ToString())?.Index ?? -1;
+
+                var layerMaterial = materialIndex >= 0 && materialIndex < doc.Materials.Count ? doc.Materials[materialIndex] : null;
+                if (layerMaterial?.IsDeleted is true || layerMaterial?.IsReference is true) layerMaterial = null;
+                if (layerMaterial?.RenderMaterialInstanceId != renderMaterialInstanceId)
+                {
+                  layerMaterial = new Rhino.DocObjects.Material()
+                  {
+                    Name = layer.Id.ToString(),
+                    RenderMaterialInstanceId = renderMaterialInstanceId
+                  };
+
+                  if (materialIndex < 0) materialIndex = doc.Materials.Add(layerMaterial);
+                  else doc.Materials.Modify(layerMaterial, materialIndex, quiet: true);
+                }
+              }
             }
             layer.RenderMaterialIndex = materialIndex;
           }
+
+#if RHINO_8
+          // Section style
+          if (ToSectionStyle() is SectionStyle sectionStyle)
+          {
+            var material = Material;
+            if (!material.IsEmpty)
+            {
+              sectionStyle.HatchPatternColor = material.CutForegroundPatternColor ?? System.Drawing.Color.Black;
+              if (material.CutForegroundPattern?.BakeElement(idMap, overwrite: false, doc, null, out var patternId) is true)
+                sectionStyle.HatchIndex = doc.HatchPatterns.FindId(patternId).Index;
+
+              if (material.CutBackgroundPattern.Value?.GetFillPattern()?.IsSolidFill is true)
+              {
+                sectionStyle.BackgroundFillColor = material.CutBackgroundPatternColor ?? System.Drawing.Color.White;
+                sectionStyle.BackgroundFillMode = SectionBackgroundFillMode.SolidColor;
+              }
+              else
+              {
+                sectionStyle.BackgroundFillMode = SectionBackgroundFillMode.Viewport;
+              }
+            }
+
+            layer.SetCustomSectionStyle(sectionStyle);
+          }
+          else if (layer.GetCustomSectionStyle() is object)
+          {
+            layer.RemoveCustomSectionStyle();
+          }
+#endif
 
           // Some hardcoded tweaks…
           switch (Id.ToBuiltInCategory())
@@ -409,6 +463,7 @@ namespace RhinoInside.Revit.GH.Types
 
             case ARDB.BuiltInCategory.OST_Levels:
             case ARDB.BuiltInCategory.OST_Grids:
+            case ARDB.BuiltInCategory.OST_GridChains:
               layer.Color = System.Drawing.Color.FromArgb(35, layer.Color);
               layer.IsLocked = true;
               break;
@@ -420,12 +475,8 @@ namespace RhinoInside.Revit.GH.Types
 #endif
               break;
 
-            case ARDB.BuiltInCategory.OST_GridChains:
-              layer.Color = System.Drawing.Color.FromArgb(35, layer.Color);
-              break;
 
             case ARDB.BuiltInCategory.OST_LightingFixtureSource:
-              layer.Color = System.Drawing.Color.FromArgb(35, layer.Color);
               layer.IsVisible = false;
               break;
           }
@@ -434,31 +485,59 @@ namespace RhinoInside.Revit.GH.Types
           else if (overwrite) doc.Layers.Modify(layer, index, true);
         }
 
-        idMap.Add(Id, guid = layer.Id);
-        return true;
-      }
-      else
-      {
-        var index = doc.Layers.FindByFullPath(RootLayerName, -1);
-        if (index < 0)
+        if (layer is object)
         {
-          var layer = Layer.GetDefaultLayerProperties();
-          {
-            layer.Name = RootLayerName;
-          }
-          index = doc.Layers.Add(layer);
+          idMap.Add(Id, guid = layer.Id);
+          return true;
         }
-
-        guid = doc.Layers[index].Id;
-        return true;
       }
+
+      guid = default;
+      return false;
     }
     #endregion
 
     #region ModelContent
-    protected override string ElementPath => Parent is Category parent ?
-      $"{CategoryType}::{parent.Nomen}::{Nomen}" :
-      $"{CategoryType}::{Nomen}";
+    private IEnumerable<string> GetElementPath()
+    {
+      if (APIObject is ARDB.Category category)
+      {
+        var parent = Parent;
+        if (parent is object)
+        {
+          foreach (var token in parent.GetElementPath())
+            yield return token;
+        }
+        else
+        {
+          yield return "Revit";
+
+          if (category.Id.TryGetBuiltInCategory(out var bic) && bic != ARDB.BuiltInCategory.OST_ImportObjectStyles)
+          {
+            if (category.IsTagCategory)
+            {
+              yield return "Tags";
+            }
+            else if (Types.CategoryType.NamedValues.TryGetValue((int) category.CategoryType, out var typeName))
+            {
+              yield return typeName;
+            }
+            else
+            {
+              yield return "~";
+            }
+          }
+          else yield return "Imports";
+        }
+
+        if (category.Id.IsBuiltInId() || parent is object)
+          yield return Nomen;
+        else
+          yield return $"<{Nomen}>";
+      }
+    }
+
+    protected override string ElementPath => string.Join("::", GetElementPath());
 
 #if RHINO_8
     internal ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
@@ -472,8 +551,8 @@ namespace RhinoInside.Revit.GH.Types
 
         // Path
         {
-          attributes.Path = $"Revit::{ElementPath}";
-        };
+          attributes.Path = ElementPath;
+        }
 
         // Tags
         {
@@ -490,12 +569,6 @@ namespace RhinoInside.Revit.GH.Types
           attributes.Linetype = ProjectionLinePattern?.ToModelContent(idMap) as ModelLinetype ?? ModelLinetype.Unset;
         }
 
-        // LineColor
-        {
-          var lineColor = category.LineColor.ToColor();
-          attributes.DraftingColor = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
-        }
-
         // LineWeight
         {
           attributes.LineWeight = category.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_InvisibleLines ?
@@ -503,19 +576,24 @@ namespace RhinoInside.Revit.GH.Types
             ToLineWeight(ProjectionLineWeight);
         }
 
+        // LineColor
+        {
+          var lineColor = category.LineColor.ToColor();
+          attributes.DraftingColor = lineColor.IsEmpty ? System.Drawing.Color.Black : lineColor;
+        }
+
         // Color
         {
-          var displayColor = category.CategoryType != ARDB.CategoryType.Model ||
-            category.Root().ToBuiltInCategory() == ARDB.BuiltInCategory.OST_Lines ?
-            (System.Drawing.Color) attributes.DraftingColor :
-            new Material(category.Material).ObjectColor;
-
-          attributes.DisplayColor = displayColor.IsEmpty ? System.Drawing.Color.FromArgb(0x7F, 0x7F, 0x7F) : displayColor;
+          attributes.DisplayColor = category.Material.ToShadingMaterial(out var _, out var _);
         }
 
         // Material
+        if (category.CategoryType != ARDB.CategoryType.Annotation)
         {
-          attributes.Material = Material?.ToModelContent(idMap) as ModelRenderMaterial;
+          var material = Material;
+          {
+            attributes.Material = material.ToModelContent(idMap) as ModelRenderMaterial;
+          }
         }
 
         // Some hardcoded tweaks…
@@ -527,18 +605,44 @@ namespace RhinoInside.Revit.GH.Types
 
           case ARDB.BuiltInCategory.OST_Levels:
           case ARDB.BuiltInCategory.OST_Grids:
+          case ARDB.BuiltInCategory.OST_GridChains:
             attributes.DisplayColor = System.Drawing.Color.FromArgb(35, attributes.DisplayColor.Value);
             attributes.Locked = true;
             break;
 
+          case ARDB.BuiltInCategory.OST_VolumeOfInterest:
+            attributes.LineWeight = -1.0;
+            attributes.HiddenOnNewDetail = true;
+            break;
+
           case ARDB.BuiltInCategory.OST_LightingFixtureSource:
-            attributes.DisplayColor = System.Drawing.Color.FromArgb(35, attributes.DisplayColor.Value);
             attributes.Hidden = true;
             break;
         }
 
         idMap.Add(Id, modelContent = attributes.ToModelData() as ModelContent);
         return modelContent;
+      }
+
+      return null;
+    }
+
+    private SectionStyle ToSectionStyle()
+    {
+      if (APIObject is ARDB.Category category && category.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut) is object)
+      {
+        var style = new SectionStyle();
+
+        var linetype = CutLinePattern?.ToLinetype();
+        {
+          if (linetype is null) { linetype = new Linetype(); linetype.SetSegments(new double[] { 1.0 }); }
+          linetype.Name = $"{Nomen} [cut]";
+          linetype.WidthUnits = Rhino.UnitSystem.Millimeters;
+          linetype.Width = ToLineWeight(CutLineWeight);
+          style.SetBoundaryLinetype(linetype);
+        }
+
+        return style;
       }
 
       return null;

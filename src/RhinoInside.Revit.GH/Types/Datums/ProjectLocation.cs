@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.GH.Types
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
       BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
 
-    public bool BakeElement
+    public override bool BakeElement
     (
       IDictionary<ARDB.ElementId, Guid> idMap,
       bool overwrite,
