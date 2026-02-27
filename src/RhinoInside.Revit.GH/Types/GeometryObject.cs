@@ -83,23 +83,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public override object ScriptVariable() => Value;
 
-    public new ARDB.GeometryObject Value
-    {
-      get
-      {
-        var geometryObject = base.Value as ARDB.GeometryObject;
-        switch (geometryObject?.IsValidObject())
-        {
-          case false:
-            Debug.WriteLine("GeometryObject is not valid.");
-            ResetValue();
-            return base.Value as ARDB.GeometryObject;
-
-          case true: return geometryObject;
-          default: return null;
-        }
-      }
-    }
+    public new ARDB.GeometryObject Value => base.Value as ARDB.GeometryObject;
 
     protected override object FetchValue()
     {
@@ -158,6 +142,12 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void SubInvalidateGraphics()
     {
+      _Location = null;
+      _Wires = null;
+      _Meshes = null;
+      _LevelOfDetail = double.NaN;
+      _ClippingBox = default;
+
       base.SubInvalidateGraphics();
     }
     #endregion
