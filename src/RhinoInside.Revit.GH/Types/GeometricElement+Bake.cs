@@ -124,8 +124,8 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      var geometryElementContent = geometryElement.ToArray();
-      if (geometryElementContent.Length < 1)
+      var geometryElementContent = geometryElement?.Where(x => !x.IsEmpty()).ToArray() ?? Array.Empty<ARDB.GeometryObject>();
+      if (geometryElementContent.Length == 0)
       {
         index = -1;
         return false;
@@ -138,8 +138,9 @@ namespace RhinoInside.Revit.GH.Types
       )
       {
         // Special case to simplify ARDB.FamilyInstance elements.
-        var instanceTransform = geometryInstance.Transform.ToTransform();
-        return BakeGeometryElement(idMap, false, doc, instanceTransform * transform, symbol, geometryInstance.SymbolGeometry, out index);
+        var instanceTransform = geometryInstance.Transform.ToTransform() * transform;
+        if (instanceTransform.IsIdentity)
+          return BakeGeometryElement(idMap, false, doc, instanceTransform, symbol, geometryInstance.SymbolGeometry, out index);
       }
 
       // Get a Unique Instance Definition name.
@@ -167,10 +168,10 @@ namespace RhinoInside.Revit.GH.Types
             var objectGeometry = default(GeometryBase);
             switch (g)
             {
-              case ARDB.Mesh m: if (m.NumTriangles > 0) objectGeometry = m.ToMesh(); break;
-              case ARDB.Solid s: if (!s.Faces.IsEmpty) objectGeometry = s.ToBrep(); break;
+              case ARDB.Mesh m: objectGeometry = m.ToMesh(); break;
+              case ARDB.Solid s: objectGeometry = s.ToBrep(); break;
               case ARDB.Curve c: objectGeometry = c.ToCurve(); break;
-              case ARDB.PolyLine p: if (p.NumberOfCoordinates > 0) objectGeometry = p.ToPolylineCurve(); break;
+              case ARDB.PolyLine p: objectGeometry = p.ToPolylineCurve(); break;
               case ARDB.GeometryInstance i:
                 using (GeometryDecoder.Context.Push())
                 {
