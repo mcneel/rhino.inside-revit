@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(element.Id, out var modelContent))
         return modelContent as ModelInstanceDefinition;
 
-      var geometryElementContent = geometryElement?.ToArray() ?? Array.Empty<ARDB.GeometryObject>();
+      var geometryElementContent = geometryElement?.Where(x => !x.IsEmpty()).ToArray() ?? Array.Empty<ARDB.GeometryObject>();
       if (geometryElementContent.Length == 0)
         return null;
 
@@ -58,8 +58,9 @@ namespace RhinoInside.Revit.GH.Types
       )
       {
         // Special case to simplify ARDB.FamilyInstance elements.
-        var instanceTransform = geometryInstance.Transform.ToTransform();
-        return ToModelInstanceDefinition(idMap, instanceTransform * transform, symbol, geometryInstance.SymbolGeometry);
+        var instanceTransform = geometryInstance.Transform.ToTransform() * transform;
+        if (instanceTransform.IsIdentity)
+          return ToModelInstanceDefinition(idMap, instanceTransform, symbol, geometryInstance.SymbolGeometry);
       }
 
       var definition = new ModelInstanceDefinition.Attributes()
@@ -89,7 +90,6 @@ namespace RhinoInside.Revit.GH.Types
               break;
 
             case ARDB.PolyLine pline:
-              if (pline.NumberOfCoordinates == 0) continue;
               var plineGeometry = pline.ToPolylineCurve();
               if (!identity) plineGeometry.Transform(transform);
               geo = new GH_Curve(plineGeometry);
@@ -102,7 +102,6 @@ namespace RhinoInside.Revit.GH.Types
               break;
 
             case ARDB.Mesh mesh:
-              if (mesh.NumTriangles == 0) continue;
               var meshGeometry = mesh.ToMesh();
               if (!identity) meshGeometry.Transform(transform);
               geo = new GH_Mesh(meshGeometry);
@@ -110,7 +109,6 @@ namespace RhinoInside.Revit.GH.Types
               break;
 
             case ARDB.Solid solid:
-              if (solid.Faces.IsEmpty) continue;
               var solidGeometry = solid.ToBrep();
               if (!identity) solidGeometry.Transform(transform);
               if (solidGeometry.TryGetExtrusion(out var extrusion)) geo = new GH_Extrusion(extrusion);
