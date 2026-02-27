@@ -4,6 +4,7 @@ using Grasshopper;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using RhinoInside.Revit.Convert.Geometry;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -18,6 +19,17 @@ namespace RhinoInside.Revit.GH.Types
 
     public BoundaryConditions() { }
     public BoundaryConditions(ARDB.Structure.BoundaryConditions boundaryConditions) : base(boundaryConditions) { }
+
+    public override Plane Location
+    {
+      get
+      {
+        if (Value?.GetDegreesOfFreedomCoordinateSystem() is ARDB.Transform coordSystem)
+          return new Plane(BoundingBox.Center, coordSystem.BasisX.ToVector3d(), coordSystem.BasisY.ToVector3d());
+
+        return NaN.Plane;
+      }
+    }
 
     protected Rhino.Display.PointStyle GetPointStyle()
     {
@@ -70,8 +82,11 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value?.GetCurve().ToCurve() is Curve curve)
       {
-        var segments = (int) Math.Ceiling(curve.GetLength() / (ARDB.Structure.StructuralSettings.GetStructuralSettings(Document).BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits));
-        curve.DivideByCount(segments, true, out Point3d[] points);
+        args.Viewport.GetWorldToScreenScale(curve.PointAtStart, out var pixelsPerUnit);
+        var spacing = ARDB.Structure.StructuralSettings.GetStructuralSettings(Document).BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits;
+        spacing *= 500.0 / pixelsPerUnit;
+        var segments = (int) Math.Ceiling(curve.GetLength() / spacing);
+        curve.DivideByCount(Math.Min(512, segments), true, out var points);
 
         if (points != null)
           args.Pipeline.DrawPoints(points, GetPointStyle(), CentralSettings.PreviewPointRadius, args.Color);
@@ -93,8 +108,30 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var loops = Value.GetLoops().First().Select(x => x.ToCurve());
-        return Brep.CreateEdgeSurface(loops);
+        var loops = Value.GetLoops().Select(GeometryDecoder.ToCurve).ToArray();
+        var plane = Location;
+        if (loops.Length > 0)
+        {
+          var loopsBox = BoundingBox.Empty;
+          foreach (var loop in loops)
+          {
+            if (loop.ClosedCurveOrientation(plane) == CurveOrientation.Clockwise)
+              loop.Reverse();
+
+            loopsBox.Union(loop.GetBoundingBox(plane));
+          }
+
+          var planeSurface = new PlaneSurface
+          (
+            plane,
+            new Interval(loopsBox.Min.X, loopsBox.Max.X),
+            new Interval(loopsBox.Min.Y, loopsBox.Max.Y)
+          );
+
+          return planeSurface.CreateTrimmedSurface(loops, GeometryTolerance.Model.VertexTolerance);
+        }
+
+        return null;
       }
     }
     #endregion
@@ -102,13 +139,19 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      if (GeometryDecoder.ToCurve(Value?.GetLoops().First()) is Curve curve)
+      foreach(var loop in Value.GetLoops())
       {
-        var segments = (int) Math.Ceiling(curve.GetLength() / (ARDB.Structure.StructuralSettings.GetStructuralSettings(Document).BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits));
-        curve.DivideByCount(segments, true, out var points);
+        args.Viewport.GetWorldToScreenScale(BoundingBox.Center, out var pixelsPerUnit);
+        var spacing = ARDB.Structure.StructuralSettings.GetStructuralSettings(Document).BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits;
+        spacing *= 500.0 / pixelsPerUnit;
+        var style = GetPointStyle();
 
-        if (points != null)
-          args.Pipeline.DrawPoints(points, GetPointStyle(), CentralSettings.PreviewPointRadius, args.Color);
+        foreach (var curve in loop.ToCurve().GetSubCurves())
+        {
+          var segments = (int) Math.Ceiling(curve.GetLength() / spacing);
+          if (curve.DivideByCount(Math.Min(512, segments), true, out var points) is object)
+            args.Pipeline.DrawPoints(points, style, CentralSettings.PreviewPointRadius, args.Color);
+        }
       }
     }
     #endregion
