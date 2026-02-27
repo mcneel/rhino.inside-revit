@@ -679,6 +679,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
       catch { return false; }
     }
 
+    internal static bool IsEmpty(this GeometryObject geometry)
+    {
+      switch (geometry)
+      {
+        case PolyLine pline: return pline.NumberOfCoordinates == 0;
+        case Mesh mesh: return mesh.NumTriangles == 0;
+        case Solid solid: return solid.Faces.IsEmpty;
+      }
+
+      return false;
+    }
+
     public static bool AlmostEquals<G>(this G left, G right)
       where G : GeometryObject
     {
