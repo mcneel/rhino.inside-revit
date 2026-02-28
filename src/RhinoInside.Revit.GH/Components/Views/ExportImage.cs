@@ -277,7 +277,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         if (folder?.Any(x => Path.GetInvalidPathChars().Contains(x)) is true)
           throw new Exceptions.RuntimeArgumentException("Folder", $"'{folder}' is not a valid folder name", folder);
 
-        if (folder?.IsFullyQualifiedPath() is false)
+        if (!PathExtension.TryGetFullyQualifiedPath(ref folder))
           throw new Exceptions.RuntimeArgumentException("Folder", $"'{folder}' is not a valid absolute path", folder);
       }
 
