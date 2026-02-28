@@ -52,8 +52,8 @@ namespace RhinoInside.Revit.GH.Components.Documents
       (
         new Param_Boolean
         {
-          Name = "Load",
-          NickName = "L",
+          Name = _Load_,
+          NickName = _Load_.Substring(0,1),
           Description = "Load",
         }.SetDefaultVale(false), ParamRelevance.Secondary
       ),
@@ -74,6 +74,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
       )
     };
 
+    const string _Load_ = "Load";
     const string _Output_ = "Document";
 
     static readonly ISet<string> FileExtensions = new HashSet<string>(PathExtension.Comparer){ ".rte", ".rvt", ".rfa", ".ifc", ".ifczip" };
@@ -82,19 +83,13 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     void PurgeCachedDocs()
     {
-      try
+      using (Guest.Instance.PauseTransactionGroups())
       {
-        Guest.Instance.CommitTransactionGroups();
-
         foreach (var tempDoc in _cachedDocs.Values)
           tempDoc.Value?.Release();
-      }
-      finally
-      {
-        Guest.Instance.StartTransactionGroups();
-      }
 
-      _cachedDocs.Clear();
+        _cachedDocs.Clear();
+      }
     }
 
     public override void RemovedFromDocument(GH_Document document)
@@ -116,7 +111,6 @@ namespace RhinoInside.Revit.GH.Components.Documents
       if (!Params.TryGetData(DA, inputs[_in_++].Param.Name, out ARDB.IFC.IFCImportOptions options)) return;
       if (!Params.TryGetData(DA, inputs[_in_++].Param.Name, out bool? load)) return;
 
-      // Validations
       var extension = Path.GetExtension(path);
       if (!FileExtensions.Contains(extension))
       {
@@ -144,7 +138,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
       _currentDocs = null;
     }
 
-    private bool TryGetDocument(string uri, bool? import, out Types.Document document, ARDB.IFC.IFCImportOptions options)
+    private bool TryGetDocument(string uri, bool? load, out Types.Document document, object options)
     {
       if (_currentDocs.TryGetValue(uri, out document))
         return document is object;
@@ -168,20 +162,20 @@ namespace RhinoInside.Revit.GH.Components.Documents
         }
 #endif
 
-        if (import != true)
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"File '{uri}' has changed since last time it was imported.");
+        if (load != true)
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"File '{uri}' has changed since last time it was loaded.");
 
         _currentDocs[uri] = document;
 
-        if (!import.HasValue)
+        if (!load.HasValue)
           return true;
       }
-      else if (!import.HasValue)
+      else if (!load.HasValue)
       {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"File '{uri}' is not imported.{System.Environment.NewLine}Use the 'Import' button to effectively import");
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"File '{uri}' is not loaded.{System.Environment.NewLine}Use the '{_Load_}' button to effectively load it into memory");
       }
 
-      if (import is true)
+      if (load is true)
       {
         try
         {
@@ -204,14 +198,39 @@ namespace RhinoInside.Revit.GH.Components.Documents
       return false;
     }
 
-    ARDB.Document LoadDocument(string path, ARDB.IFC.IFCImportOptions options)
+    ARDB.Document LoadDocument(string path, object options)
     {
-      if (string.Equals(Path.GetExtension(path), ".rvt", StringComparison.OrdinalIgnoreCase))
+      var extension = Path.GetExtension(path);
+
+      if
+      (
+        string.Equals(extension, ".rte", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(extension, ".rvt", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(extension, ".rfa", StringComparison.OrdinalIgnoreCase)
+      )
       {
-        using (var optionsRVT = new ARDB.OpenOptions())
-          return Revit.ActiveDBApplication.OpenDocumentFile(new ARDB.FilePath(path), optionsRVT);
+        return LoadRevitDocument(path, options as ARDB.OpenOptions);
+      }
+      else if
+      (
+        string.Equals(extension, ".ifc", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(extension, ".ifczip", StringComparison.OrdinalIgnoreCase)
+      )
+      {
+        return LoadIFCDocument(path, options as ARDB.IFC.IFCImportOptions);
       }
 
+      return null;
+    }
+
+    ARDB.Document LoadRevitDocument(string path, ARDB.OpenOptions options)
+    {
+      if (options is null) options = new ARDB.OpenOptions();
+      return Revit.ActiveDBApplication.OpenDocumentFile(new ARDB.FilePath(path), options);
+    }
+
+    ARDB.Document LoadIFCDocument(string path, ARDB.IFC.IFCImportOptions options)
+    {
       if (options == null)
         options = new ARDB.IFC.IFCImportOptions();
 
@@ -251,8 +270,8 @@ namespace RhinoInside.Revit.GH.Components.Documents
     {
       public CustomAttributes(ZuiComponent owner) : base(owner) { }
 
-      protected override string DisplayText => "Load";
-      protected override bool Visible => Owner.Params.IndexOfInputParam("Load") < 0;
+      protected override string DisplayText => _Load_;
+      protected override bool Visible => Owner.Params.IndexOfInputParam(_Load_) < 0;
     }
     #endregion
   }
