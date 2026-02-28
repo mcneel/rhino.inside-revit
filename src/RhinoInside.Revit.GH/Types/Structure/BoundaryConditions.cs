@@ -42,6 +42,15 @@ namespace RhinoInside.Revit.GH.Types
         case "User": return Rhino.Display.PointStyle.Asterisk;
       }
     }
+
+    protected Rhino.Display.PointStyle GetPointStyle(Rhino.Display.RhinoViewport viewport, out double spacing)
+    {
+      viewport.GetWorldToScreenScale(BoundingBox.Center, out var pixelsPerUnit);
+      spacing = ARDB.Structure.StructuralSettings.GetStructuralSettings(Document).BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits;
+      spacing *= 500.0 / pixelsPerUnit;
+
+      return GetPointStyle();
+    }
   }
 
   [Kernel.Attributes.Name("Point Boundary Conditions")]
@@ -80,16 +89,16 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      if (Value?.GetCurve().ToCurve() is Curve curve)
+      if (Value is ARDB.Structure.BoundaryConditions conditions)
       {
-        args.Viewport.GetWorldToScreenScale(curve.PointAtStart, out var pixelsPerUnit);
-        var spacing = ARDB.Structure.StructuralSettings.GetStructuralSettings(Document).BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits;
-        spacing *= 500.0 / pixelsPerUnit;
-        var segments = (int) Math.Ceiling(curve.GetLength() / spacing);
-        curve.DivideByCount(Math.Min(512, segments), true, out var points);
+        var style = GetPointStyle(args.Viewport, out var spacing);
 
-        if (points != null)
-          args.Pipeline.DrawPoints(points, GetPointStyle(), CentralSettings.PreviewPointRadius, args.Color);
+        if (conditions.GetCurve().ToCurve() is Curve curve)
+        {
+          var segments = (int) Math.Ceiling(curve.GetLength() / spacing);
+          if (curve.DivideByCount(Math.Min(512, segments), true, out var points) is object)
+            args.Pipeline.DrawPoints(points.Skip(points.Length > 2 ? 1 : 0), style, CentralSettings.PreviewPointRadius, args.Color);
+        }
       }
     }
     #endregion
@@ -108,7 +117,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var loops = Value.GetLoops().Select(GeometryDecoder.ToCurve).ToArray();
+        var loops = Value.GetLoops().Select(GeometryDecoder.ToPolyCurve).ToArray();
         var plane = Location;
         if (loops.Length > 0)
         {
@@ -139,18 +148,15 @@ namespace RhinoInside.Revit.GH.Types
     #region IGH_PreviewData
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      foreach(var loop in Value.GetLoops())
+      if (Value is ARDB.Structure.BoundaryConditions conditions)
       {
-        args.Viewport.GetWorldToScreenScale(BoundingBox.Center, out var pixelsPerUnit);
-        var spacing = ARDB.Structure.StructuralSettings.GetStructuralSettings(Document).BoundaryConditionAreaAndLineSymbolSpacing * Revit.ModelUnits;
-        spacing *= 500.0 / pixelsPerUnit;
-        var style = GetPointStyle();
+        var style = GetPointStyle(args.Viewport, out var spacing);
 
-        foreach (var curve in loop.ToCurve().GetSubCurves())
+        foreach (var curve in conditions.GetLoops().SelectMany(GeometryDecoder.ToCurveMany))
         {
           var segments = (int) Math.Ceiling(curve.GetLength() / spacing);
           if (curve.DivideByCount(Math.Min(512, segments), true, out var points) is object)
-            args.Pipeline.DrawPoints(points, style, CentralSettings.PreviewPointRadius, args.Color);
+            args.Pipeline.DrawPoints(points.Skip(points.Length > 2 ? 1 : 0), style, CentralSettings.PreviewPointRadius, args.Color);
         }
       }
     }
