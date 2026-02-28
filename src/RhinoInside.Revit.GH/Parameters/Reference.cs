@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.DocObjects;
 using ARDB = Autodesk.Revit.DB;
@@ -209,13 +210,39 @@ namespace RhinoInside.Revit.GH.Parameters
           continue;
 
         if (modified.Contains(elementId))
-          return true;
+          return ReloadReferencedData(reload: true);
 
         if (deleted.Contains(elementId))
-          return true;
+          return ReloadReferencedData(reload: false);
       }
 
       return false;
+    }
+
+    private bool ReloadReferencedData(bool reload)
+    {
+      if (typeof(Types.IGH_GeometryObject).IsAssignableFrom(typeof(T)))
+      {
+        if (OnPingDocument() is GH_Document document)
+        {
+          GH_Document.SolutionEndEventHandler SolutionEndEventHandler = default;
+          document.SolutionEnd += SolutionEndEventHandler = (s, a) =>
+          {
+            document.SolutionEnd -= SolutionEndEventHandler;
+
+            foreach (var data in VolatileData.AllData(true).OfType<IGH_ReferencedData>())
+            {
+              if (data is Types.IGH_GeometryObject)
+              {
+                data.UnloadReferencedData();
+                if (reload) data.LoadReferencedData();
+              }
+            }
+          };
+        }
+      }
+
+      return true;
     }
     #endregion
 

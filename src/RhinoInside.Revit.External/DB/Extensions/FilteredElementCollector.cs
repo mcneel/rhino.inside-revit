@@ -286,6 +286,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return collector.WherePasses(filter);
     }
 
+    public static FilteredElementCollector WhereParameterEqualsTo(this FilteredElementCollector collector, BuiltInParameter paramId, double value, double tolerance = Numerical.Constant.DefaultTolerance)
+    {
+      using (var provider = new ParameterValueProvider(new ElementId(paramId)))
+      using (var evaluator = new FilterNumericEquals())
+      using (var rule = new FilterDoubleRule(provider, evaluator, value, tolerance))
+      using (var filter = new ElementParameterFilter(rule))
+        return collector.WherePasses(filter);
+    }
+
     public static FilteredElementCollector WhereParameterEqualsTo(this FilteredElementCollector collector, BuiltInParameter paramId, string value)
     {
       if (value is null) return collector;

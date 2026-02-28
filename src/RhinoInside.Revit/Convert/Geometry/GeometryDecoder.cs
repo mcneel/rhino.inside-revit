@@ -1460,24 +1460,20 @@ namespace RhinoInside.Revit.Convert.Geometry
     #endregion
 
     #region CurveLoop
-    internal static TOutput[] ToArray<TOutput>
-    (
-      this ARDB.CurveLoop value,
-      Converter<ARDB.Curve, TOutput> converter
-    )
+    /// <summary>
+    /// Converts the specified CurveLoop to a Rhino C2-continuous Curve IEnumerable.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>A Rhino Curve IEnumerable that is equivalent to the provided value.</returns>
+    /// <since>1.36</since>
+    public static IEnumerable<Curve> ToCurveMany(this ARDB.CurveLoop value)
     {
-      var count = value.NumberOfCurves();
-      var curves = new TOutput[count];
-
-      var index = 0;
-      foreach (var curve in value)
-        curves[index++] = converter(curve);
-
-      return curves;
+      foreach (ARDB.Curve curve in value)
+        yield return ToCurve(curve);
     }
 
     /// <summary>
-    /// Converts the specified <see cref="ARDB.CurveLoop" /> to an equivalent <see cref="Rhino.Geometry.Curve" />.
+    /// Converts the specified <see cref="ARDB.CurveLoop" /> to an equivalent C0-continuous <see cref="Rhino.Geometry.Curve" />.
     /// </summary>
     /// <example>
     /// 
@@ -1526,19 +1522,22 @@ namespace RhinoInside.Revit.Convert.Geometry
     ///
     /// </example>
     /// <param name="curveLoop">Revit curveLoop to convert.</param>
-    /// <returns>Rhino curve that is equivalent to the provided Revit curveLoop.</returns>
+    /// <returns>A Rhino C0-continuous curve that is equivalent to the provided Revit curveLoop.</returns>
     /// <since>1.0</since>
     public static Curve ToCurve(this ARDB.CurveLoop curveLoop)
     {
-      var count = curveLoop.NumberOfCurves();
-      if (count == 0) return default;
-      if (count == 1) return curveLoop.First().ToCurve();
-
-      return ToPolyCurve(curveLoop);
+      switch (curveLoop.NumberOfCurves())
+      {
+        case 0: return default;
+        case 1: return curveLoop.First().ToCurve();
+        default:
+          var loops = Curve.JoinCurves(ToCurveMany(curveLoop), Tolerance.VertexTolerance);
+          return loops?.Length == 1 ? loops[0] : null;
+      }
     }
 
     /// <summary>
-    /// Converts the specified CurveLoop to an equivalent Rhino PolyCurve.
+    /// Converts the specified CurveLoop to an equivalent Rhino closed PolyCurve.
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino PolyCurve that is equivalent to the provided value.</returns>
@@ -1549,62 +1548,44 @@ namespace RhinoInside.Revit.Convert.Geometry
       foreach (var curve in value)
         polycurve.AppendSegment(curve.ToCurve());
 
-      if (!value.IsOpen())
-        polycurve.MakeClosed(Tolerance.VertexTolerance);
-
-      return polycurve;
+      return polycurve.MakeClosed(Tolerance.VertexTolerance) ? polycurve : null;
     }
     #endregion
 
     #region CurveArray
-    internal static TOuput[] ToArray<TOuput>(this ARDB.CurveArray value, Converter<ARDB.Curve, TOuput> converter)
-    {
-      var count = value.Size;
-      var curves = new TOuput[count];
-
-      int index = 0;
-      foreach (var curve in value)
-        curves[index++] = converter((ARDB.Curve) curve);
-
-      return curves;
-    }
-
     /// <summary>
-    /// Converts the specified CurveArrArray to a Rhino Curve IEnumerable.
+    /// Converts the specified CurveArrArray to a Rhino C2-continuous Curve IEnumerable.
     /// </summary>
     /// <param name="value">A value to convert.</param>
-    /// <returns>A Rhino Curve IEnumerable that is equivalent to the provided value.</returns>
+    /// <returns>A Rhino C2-continuous Curve IEnumerable that is equivalent to the provided value.</returns>
     /// <since>1.4</since>
     public static IEnumerable<Curve> ToCurveMany(this ARDB.CurveArray value)
     {
-      foreach (object curve in value)
-        yield return ToCurve((ARDB.Curve) curve);
+      foreach (ARDB.Curve curve in value)
+        yield return ToCurve(curve);
     }
 
     /// <summary>
-    /// Converts the specified CurveArray to an array of C0 continuous Rhino Curves.
+    /// Converts the specified CurveArray to an array of C0-continuous Rhino Curves.
     /// </summary>
     /// <param name="value">A value to convert.</param>
-    /// <returns>An array of C0 continuous Rhino Curve that is equivalent to the provided value.</returns>
+    /// <returns>An array of C0-continuous Rhino Curve that is equivalent to the provided value.</returns>
     /// <since>1.6</since>
     public static Curve[] ToCurves(this ARDB.CurveArray value)
     {
-      var count = value.Size;
-      var segments = new Curve[count];
-
-      for (int c = 0; c < count; ++c)
-        segments[c] = value.get_Item(c).ToCurve();
-
-      return segments.Length > 1 ?
-        Curve.JoinCurves(segments, Tolerance.VertexTolerance) :
-        segments;
+      switch (value.Size)
+      {
+        case 0: return Array.Empty<Curve>();
+        case 1: return new Curve[] { value.get_Item(0).ToCurve() };
+        default: return Curve.JoinCurves(ToCurveMany(value), Tolerance.VertexTolerance);
+      }
     }
 
     /// <summary>
-    /// Converts the specified CurveArray to an equivalent Rhino PolyCurve.
+    /// Converts the specified CurveArray to an equivalent Rhino closed PolyCurve.
     /// </summary>
     /// <param name="value">A value to convert.</param>
-    /// <returns>A Rhino PolyCurve that is equivalent to the provided value.</returns>
+    /// <returns>A Rhino closed PolyCurve that is equivalent to the provided value.</returns>
     /// <since>1.4</since>
     public static PolyCurve ToPolyCurve(this ARDB.CurveArray value)
     {
@@ -1613,35 +1594,56 @@ namespace RhinoInside.Revit.Convert.Geometry
       for (int c = 0; c < count; ++c)
         polycurve.AppendSegment(value.get_Item(c).ToCurve());
 
-      polycurve.MakeClosed(Tolerance.VertexTolerance);
-      return polycurve;
+      return polycurve.MakeClosed(Tolerance.VertexTolerance) ? polycurve : null;
     }
     #endregion
 
     #region CurveArrArray
-    internal static TOutput[] ToArray<TOutput>
-    (
-      this ARDB.CurveArrArray value,
-      Converter<ARDB.CurveArray, TOutput> converter
-    )
-    {
-      var array = new TOutput[value.Size];
-      int index = 0;
-      foreach (var item in value)
-        array[index++] = converter((ARDB.CurveArray) item);
-
-      return array;
-    }
-
     /// <summary>
-    /// Converts the specified CurveArrArray to a Rhino Curve IEnumerable.
+    /// Converts the specified CurveArrArray to a flat Rhino C2-continuous Curve IEnumerable.
     /// </summary>
     /// <param name="value">A value to convert.</param>
-    /// <returns>A Rhino Curve IEnumerable that is equivalent to the provided value.</returns>
+    /// <returns>A Rhino C2-continuous Curve IEnumerable that is equivalent to the provided value.</returns>
     /// <since>1.4</since>
     public static IEnumerable<Curve> ToCurveMany(this ARDB.CurveArrArray value)
     {
-      return value.Cast<ARDB.CurveArray>().SelectMany(ToCurves);
+      return value.Cast<ARDB.CurveArray>().SelectMany(ToCurveMany);
+    }
+
+    /// <summary>
+    /// Converts the specified CurveArray to a flat array of C0-continuous Rhino Curves.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>An array of C0-continuous Rhino Curve that is equivalent to the provided value.</returns>
+    /// <since>1.6</since>
+    public static Curve[] ToCurves(this ARDB.CurveArrArray value)
+    {
+      return value.Cast<ARDB.CurveArray>().SelectMany(ToCurves).ToArray();
+    }
+
+    /// <summary>
+    /// Converts the specified CurveArrArray to an array of closed Rhino PolyCurves.
+    /// </summary>
+    /// <param name="value">A value to convert.</param>
+    /// <returns>An array of closed Rhino PolyCurves that is equivalent to the provided value.</returns>
+    /// <since>1.36</since>
+    public static PolyCurve[] ToPolyCurves(this ARDB.CurveArrArray value)
+    {
+      var count = value.Size;
+      switch (count)
+      {
+        case 0: return Array.Empty<PolyCurve>();
+        case 1: return value.get_Item(0).ToPolyCurve() is PolyCurve loop ? new PolyCurve[] { loop } : Array.Empty<PolyCurve>();
+        default:
+          var array = new List<PolyCurve>(count);
+          for (int c = 0; c < count; ++c)
+          {
+            if (ToPolyCurve(value.get_Item(c)) is PolyCurve closed)
+              array.Add(closed);
+          }
+
+          return array.ToArray();
+      }
     }
     #endregion
 

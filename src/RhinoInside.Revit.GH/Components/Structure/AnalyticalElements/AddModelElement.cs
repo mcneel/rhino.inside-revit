@@ -109,28 +109,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
               if (panel.Thickness == 0.0)
                 throw new RuntimeException($"No floor type found with the same thickness as the analytical panel. {{{analyticalElement.Id}}}");
 
-              var boundary = new List<Curve> { panel.GetOuterContour().ToCurve() };
-              foreach (var loop in boundary)
-              {
-                if (loop is null) return null;
-                if
-                (
-                  loop.IsShort(tol.ShortCurveTolerance) ||
-                  !loop.IsClosed ||
-                  !loop.TryGetPlane(out var plane, tol.VertexTolerance)
-                )
-                  throw new Exceptions.RuntimeArgumentException("Boundary", "Boundary loop curves should be a set of valid coplanar and closed curves.", boundary);
-              }
+              // Getting the boundary
+              var boundary = panel.GetOuterContour().ToPolyCurve();
 
-              ARDB.FilteredElementCollector collector = new ARDB.FilteredElementCollector(doc.Value);
-              var floorType = collector.
+              // Getting the floor type
+              var collector = new ARDB.FilteredElementCollector(doc.Value);
+              var floorType = collector.WhereElementIsElementType().
                 OfCategory(ARDB.BuiltInCategory.OST_Floors).
-                WhereElementIsElementType().
-                Where(t => GeometryTolerance.Internal.DefaultTolerance.Equals
-                (
-                  t.get_Parameter(ARDB.BuiltInParameter.FLOOR_ATTR_DEFAULT_THICKNESS_PARAM).AsDouble(),
-                  panel.Thickness
-                )).
+                WhereParameterEqualsTo(ARDB.BuiltInParameter.FLOOR_ATTR_DEFAULT_THICKNESS_PARAM, panel.Thickness, GeometryTolerance.Internal.DefaultTolerance).
                 Cast<ARDB.FloorType>().
                 FirstOrDefault();
 
@@ -143,7 +129,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               (
                 floor,
                 doc.Value,
-                boundary,
+                new Curve[] { boundary },
                 floorType,
                 doc.Value.GetElement(panel.LevelId) as ARDB.Level,
                 true
@@ -161,8 +147,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
             doc.Value, _ModelElement_, wall =>
             {
               var tol = GeometryTolerance.Model;
-              var boundaryPlane = default(Rhino.Geometry.Plane);
-              var maxArea = 0.0;
               var analyticalPanel = analyticalElement.Value as ARDB_AnalyticalPanel;
 
               // Getting the curve from the analytical member
@@ -170,50 +154,22 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 throw new RuntimeException($"No wall type found with the same thickness as the analytical panel: {analyticalElement.Id}");
 
               // Getting the boundary
-              var boundary = new List<Curve> { analyticalPanel.GetOuterContour().ToCurve() };
-              foreach (var loop in boundary)
-              {
-                var plane = default(Rhino.Geometry.Plane);
-
-                if (loop is null) return null;
-                if
-                (
-                  loop.IsShort(tol.ShortCurveTolerance) ||
-                  !loop.IsClosed ||
-                  !loop.TryGetPlane(out plane, tol.VertexTolerance)
-                )
-                  throw new Exceptions.RuntimeArgumentException("Boundary", "Boundary loop curves should be a set of valid coplanar and closed curves.", boundary);
-
-                using (var prop = AreaMassProperties.Compute(loop, tol.VertexTolerance))
-                {
-                  if (prop == null)
-                    throw new Exceptions.RuntimeArgumentException("Boundary", "Boundary loop curves should enclose a valid area.", boundary);
-
-                  if (prop.Area > maxArea)
-                  {
-                    maxArea = prop.Area;
-                    boundaryPlane = plane;
-                  }
-                  else if (plane.Normal.IsParallelTo(boundaryPlane.Normal) == 0 || Math.Abs(plane.DistanceTo(boundaryPlane.Origin)) > GeometryTolerance.Internal.DefaultTolerance)
-                  {
-                    throw new Exceptions.RuntimeArgumentException("Boundary", "Boundary should be a list of coplanar surfaces.", boundary);
-                  }
-                }
-              }
+              var boundary = analyticalPanel.GetOuterContour().ToPolyCurve();
+              boundary.TryGetPlane(out var boundaryPlane);
 
               // Getting the wall type
               var collector = new ARDB.FilteredElementCollector(doc.Value);
-              var wallType = collector.WhereElementIsElementType()
-                .OfCategory(ARDB.BuiltInCategory.OST_Walls)
-                .Cast<ARDB.WallType>()
-                .Where(t => Rhino.RhinoMath.EpsilonEquals(t.Width, analyticalPanel.Thickness, tol.DefaultTolerance))
-                .FirstOrDefault();
+              var wallType = collector.WhereElementIsElementType().
+                OfCategory(ARDB.BuiltInCategory.OST_Walls).
+                Cast<ARDB.WallType>().
+                Where(t => Rhino.RhinoMath.EpsilonEquals(t.Width, analyticalPanel.Thickness, tol.DefaultTolerance)).
+                FirstOrDefault();
 
               if (wallType is null)
                 throw new RuntimeException($"No wall type found with the same thickness as the analytical panel:  {analyticalElement.Id}");
 
               // Getting the ref levels
-              var bbox = boundary[0].GetBoundingBox(accurate: true);
+              var bbox = boundary.GetBoundingBox(accurate: true);
               var baseLevel = Types.Level.FromElement(doc.Value.GetNearestLevel(bbox.Min.Z / Revit.ModelUnits));
               if (baseLevel is null)
                 throw new Exceptions.RuntimeArgumentException(nameof(baseLevel), "No suitable level has been found.");
@@ -235,7 +191,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
               (
                 wall,
                 doc.Value,
-                boundary,
+                new Curve[] { boundary },
                 orientation,
                 boundaryPlane,
                 line,

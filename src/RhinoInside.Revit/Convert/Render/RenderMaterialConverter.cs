@@ -539,6 +539,7 @@ namespace RhinoInside.Revit.Convert.Render
 
     static void TintMaterial(RenderMaterial material, Color4f? tintColor)
     {
+      if (!tintColor.HasValue) return;
       if (material.TextureChildSlotName(RenderMaterial.StandardChildSlots.Diffuse) is string diffuseSlot)
       {
         var diffuse = tintColor.HasValue ?
@@ -1580,164 +1581,325 @@ namespace RhinoInside.Revit.Convert.Render
     static void GetPrismOpaqueSchemaParameters(Asset asset, ref BasicMaterialParameters material)
     {
       material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Cube;
+      material.Transparency = 0.0;
+      material.FresnelEnabled = true;
 
+      if (asset.FindByName(AdvancedOpaque.SurfaceNdfType) is AssetPropertyInteger ndfType)
+      {
+        switch ((SurfaceNdfType) ndfType.Value)
+        {
+          case SurfaceNdfType.Beckmann: break;
+          case SurfaceNdfType.Ggx: break;
+        }
+      }
+
+      #region Parameters
+      // Color
       if (asset.FindByName(AdvancedOpaque.OpaqueAlbedo) is AssetPropertyDoubleArray4d diffuse)
       {
         material.Diffuse = ToColor4f(diffuse);
         material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
       }
 
-      if (asset.FindByName(AdvancedOpaque.OpaqueLuminance) is AssetPropertyDouble luminance)
+      // Reflectance
+      if (asset.FindByName(AdvancedOpaque.OpaqueF0) is AssetPropertyDouble reflectance)
       {
-        material.DisableLighting = luminance.Value > 0.0;
-        if (material.DisableLighting)
+        material.PolishAmount = reflectance.Value / 0.08;
+      }
+
+      // Roughness
+      if (asset.FindByName(AdvancedOpaque.SurfaceRoughness) is AssetPropertyDouble roughness)
+      {
+        material.Reflectivity = 1.0 - roughness.Value;
+      }
+      #endregion
+
+      #region Translucency
+      if (asset.FindByName(AdvancedOpaque.OpaqueTranslucency) is AssetPropertyBoolean translucency && translucency.Value)
+      {
+        // Depth
+        if (asset.FindByName(AdvancedOpaque.OpaqueMfp) is AssetPropertyDistance depth)
         {
-          if (asset.FindByName(AdvancedOpaque.OpaqueLuminanceModifier) is AssetPropertyDoubleArray4d emission)
+          var depth_mm = ARDB.UnitUtils.Convert(depth.Value, depth.GetUnitTypeId(), DBXS.UnitType.Millimeters);
+          material.ClarityAmount = depth_mm / 10.0;
+        }
+
+        // Weight
+        if (asset.FindByName(AdvancedOpaque.OpaqueMfpModifier) is AssetPropertyDoubleArray4d weight)
+        {
+
+        }
+      }
+      #endregion
+
+      #region Emissivity
+      if (asset.FindByName(AdvancedOpaque.OpaqueEmission) is AssetPropertyBoolean emission && emission.Value)
+      {
+        // Luminance
+        if (asset.FindByName(AdvancedOpaque.OpaqueLuminance) is AssetPropertyDouble luminance)
+        {
+          material.DisableLighting = luminance.Value > 0.0;
+          if (material.DisableLighting)
           {
-            var luminanceFactor = Arithmetic.Clamp(luminance.Value, 0.0, 2000.0) / 2000.0;
-            material.Emission = ToColor4f(emission, luminanceFactor);
+            // Filter Color
+            if (asset.FindByName(AdvancedOpaque.OpaqueLuminanceModifier) is AssetPropertyDoubleArray4d modifier)
+            {
+              var luminanceFactor = Arithmetic.Clamp(luminance.Value, 0.0, 2000.0) / 2000.0;
+              material.Emission = ToColor4f(modifier, luminanceFactor);
+            }
           }
         }
       }
+      #endregion
 
-      if (asset.FindByName(AdvancedOpaque.SurfaceRoughness) is AssetPropertyDouble roughness)
-      {
-        material.Shine = 1.0 - roughness.Value;
-        material.PolishAmount = 1.0 - roughness.Value;
-      }
-
+      #region Relief Pattern
+      // Image
       if (asset.FindByName(AdvancedOpaque.SurfaceNormal) is AssetPropertyReference normal)
       {
         material.BumpTexture = ToSimulatedTexture(normal.GetSingleConnectedAsset());
       }
+      #endregion
 
+      #region Cutout
       if (asset.FindByName(AdvancedOpaque.SurfaceCutout) is AssetPropertyReference cutout)
       {
         material.OpacityTexture = ToSimulatedTexture(cutout.GetSingleConnectedAsset());
       }
+      #endregion
 
+      #region Advanced Highlight Controls
+      // Anisotropy
+      if (asset.FindByName(AdvancedOpaque.SurfaceAnisotropy) is AssetPropertyDouble anisotropy)
+      {
+        material.Shine = 1.0 - anisotropy.Value;
+      }
+
+      // Orientation
+      if (asset.FindByName(AdvancedOpaque.SurfaceRotation) is AssetPropertyDouble orientation)
+      {
+      }
+
+      // Color
       if (asset.FindByName(AdvancedOpaque.SurfaceAlbedo) is AssetPropertyDoubleArray4d specular)
       {
-        material.Reflectivity = 1.0;
-        material.ReflectivityColor = ToColor4f(specular);
+        material.Specular = ToColor4f(specular);
+        material.EnvironmentTexture = ToSimulatedTexture(specular.GetSingleConnectedAsset());
+        material.EnvironmentTextureAmount = 0.1;
       }
-    }
-
-    static void GetPrismTransparentSchemaParameters(Asset asset, ref BasicMaterialParameters material)
-    {
-      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Plane;
-
-      if (asset.FindByName(AdvancedTransparent.TransparentColor) is AssetPropertyDoubleArray4d transparency)
-      {
-        material.TransparencyColor = ToColor4f(transparency);
-      }
-
-      if (asset.FindByName(AdvancedTransparent.TransparentIor) is AssetPropertyDouble ior)
-      {
-        material.Transparency = 0.92;
-        material.Ior = ior.Value;
-        material.FresnelEnabled = true;
-      }
-
-      if (asset.FindByName(AdvancedTransparent.SurfaceRoughness) is AssetPropertyDouble roughness)
-      {
-        material.Shine = 1.0 - roughness.Value;
-        material.PolishAmount = 1.0 - roughness.Value;
-      }
-
-      if (asset.FindByName(AdvancedTransparent.SurfaceNormal) is AssetPropertyReference normal)
-      {
-        material.BumpTexture = ToSimulatedTexture(normal.GetSingleConnectedAsset());
-      }
-
-      if (asset.FindByName(AdvancedTransparent.SurfaceCutout) is AssetPropertyReference cutout)
-      {
-        material.OpacityTexture = ToSimulatedTexture(cutout.GetSingleConnectedAsset());
-      }
-
-      if (asset.FindByName(AdvancedTransparent.SurfaceAlbedo) is AssetPropertyDoubleArray4d diffuse)
-      {
-        material.Diffuse = ToColor4f(diffuse);
-        material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
-      }
+      #endregion
     }
 
     static void GetPrismMetalSchemaParameters(Asset asset, ref BasicMaterialParameters material)
     {
       material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Cube;
+      material.FresnelEnabled = true;
+      material.Transparency = 0.0;
 
+      if (asset.FindByName(AdvancedMetal.SurfaceNdfType) is AssetPropertyInteger ndfType)
+      {
+        switch ((SurfaceNdfType) ndfType.Value)
+        {
+          case SurfaceNdfType.Beckmann: break;
+          case SurfaceNdfType.Ggx: break;
+        }
+      }
+
+      #region Parameters
+      // Color
       if (asset.FindByName(AdvancedMetal.MetalF0) is AssetPropertyDoubleArray4d diffuse)
       {
         material.Diffuse = ToColor4f(diffuse);
         material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
       }
 
+      // Roughness
       if (asset.FindByName(AdvancedMetal.SurfaceRoughness) is AssetPropertyDouble roughness)
       {
-        material.Shine = 1.0 - roughness.Value;
+        material.Reflectivity = 1.0 - roughness.Value;
         material.PolishAmount = 1.0 - roughness.Value;
       }
+      #endregion
 
+      #region Relief Pattern
       if (asset.FindByName(AdvancedMetal.SurfaceNormal) is AssetPropertyReference normal)
       {
         material.BumpTexture = ToSimulatedTexture(normal.GetSingleConnectedAsset());
       }
+      #endregion
 
+      #region Cutout
       if (asset.FindByName(AdvancedMetal.SurfaceCutout) is AssetPropertyReference cutout)
       {
         material.OpacityTexture = ToSimulatedTexture(cutout.GetSingleConnectedAsset());
       }
+      #endregion
 
-      if (asset.FindByName(AdvancedMetal.SurfaceAlbedo) is AssetPropertyDoubleArray4d albeldo)
+      #region Advanced Highlight Controls
+      // Anisotropy
+      if (asset.FindByName(AdvancedMetal.SurfaceAnisotropy) is AssetPropertyDouble anisotropy)
       {
-        material.Reflectivity = 0.25;
-        material.ReflectivityColor = ToColor4f(albeldo);
+        material.Shine = 1.0 - anisotropy.Value;
       }
+
+      // Orientation
+      if (asset.FindByName(AdvancedOpaque.SurfaceRotation) is AssetPropertyDouble orientation)
+      {
+      }
+
+      // Color
+      if (asset.FindByName(AdvancedMetal.SurfaceAlbedo) is AssetPropertyDoubleArray4d specular)
+      {
+        material.Specular = ToColor4f(specular);
+        material.EnvironmentTexture = ToSimulatedTexture(specular.GetSingleConnectedAsset());
+        material.EnvironmentTextureAmount = 0.1;
+      }
+      #endregion
+    }
+
+    static void GetPrismTransparentSchemaParameters(Asset asset, ref BasicMaterialParameters material)
+    {
+      material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Plane;
+      material.FresnelEnabled = true;
+      material.Transparency = 1.0;
+
+      if (asset.FindByName(AdvancedTransparent.SurfaceNdfType) is AssetPropertyInteger ndfType)
+      {
+        switch ((SurfaceNdfType) ndfType.Value)
+        {
+          case SurfaceNdfType.Beckmann: break;
+          case SurfaceNdfType.Ggx: break;
+        }
+      }
+
+      #region Parameters
+      if (asset.FindByName(AdvancedTransparent.TransparentColor) is AssetPropertyDoubleArray4d transparency)
+      {
+        material.Diffuse = ToColor4f(transparency);
+        material.Diffuse = new Color4f(material.Diffuse.R, material.Diffuse.G, material.Diffuse.B, 1.0f);
+
+        material.TransparencyColor = ToColor4f(transparency);
+        material.OpacityTexture = ToSimulatedTexture(transparency.GetSingleConnectedAsset());
+      }
+
+      if (asset.FindByName(AdvancedTransparent.TransparentIor) is AssetPropertyDouble ior)
+      {
+        material.Ior = ior.Value;
+      }
+
+      if (asset.FindByName(AdvancedTransparent.SurfaceRoughness) is AssetPropertyDouble roughness)
+      {
+        material.Shine = 1.0 - roughness.Value;
+        material.Reflectivity = 1.0 - roughness.Value;
+      }
+      #endregion
+
+      #region Relief Pattern
+      if (asset.FindByName(AdvancedTransparent.SurfaceNormal) is AssetPropertyReference normal)
+      {
+        material.BumpTexture = ToSimulatedTexture(normal.GetSingleConnectedAsset());
+      }
+      #endregion
+
+      #region Cutout
+      if (asset.FindByName(AdvancedTransparent.SurfaceCutout) is AssetPropertyReference cutout)
+      {
+        material.OpacityTexture = ToSimulatedTexture(cutout.GetSingleConnectedAsset());
+      }
+      #endregion
+
+      #region Advanced Highlight Controls
+      // Anisotropy
+      if (asset.FindByName(AdvancedTransparent.SurfaceAnisotropy) is AssetPropertyDouble anisotropy)
+      {
+        material.PolishAmount = 1.0 - anisotropy.Value;
+        material.ClarityAmount = 1.0 - anisotropy.Value;
+      }
+
+      // Orientation
+      if (asset.FindByName(AdvancedOpaque.SurfaceRotation) is AssetPropertyDouble orientation)
+      {
+      }
+
+      // Color
+      if (asset.FindByName(AdvancedTransparent.SurfaceAlbedo) is AssetPropertyDoubleArray4d specular)
+      {
+        material.Specular = ToColor4f(specular);
+        material.EnvironmentTexture = ToSimulatedTexture(specular.GetSingleConnectedAsset());
+        material.EnvironmentTextureAmount = 0.1;
+      }
+      #endregion
     }
 
 #if REVIT_2020
     static void GetPrismGlazingSchemaParameters(Asset asset, ref BasicMaterialParameters material)
     {
       material.PreviewGeometryType = RenderMaterial.PreviewGeometryType.Plane;
-
-      material.Transparency = 0.92;
-      material.Ior = 1.52;
       material.FresnelEnabled = true;
+      material.Ior = 1.52;
 
-      if (asset.FindByName(AdvancedGlazing.GlazingTransmissionColor) is AssetPropertyDoubleArray4d diffuse)
-      {
-        material.TransparencyColor = ToColor4f(diffuse);
-        material.DiffuseTexture = ToSimulatedTexture(diffuse.GetSingleConnectedAsset());
-      }
-
-      if (asset.FindByName(AdvancedGlazing.GlazingTransmissionRoughness) is AssetPropertyDouble clarity)
-        material.ClarityAmount = 1.0 - clarity.Value;
-
-      if (asset.FindByName(AdvancedGlazing.GlazingF0) is AssetPropertyDoubleArray4d emission)
-        material.Emission = ToColor4f(emission);
-
+      #region Parameters
       if (asset.FindByName(AdvancedGlazing.SurfaceRoughness) is AssetPropertyDouble roughness)
       {
         material.Shine = 1.0 - roughness.Value;
         material.Reflectivity = 1.0 - roughness.Value;
-        material.PolishAmount = 1.0 - roughness.Value;
+        material.ClarityAmount = 1.0 - roughness.Value;
+      }
+      #endregion
+
+      #region Glazing
+      if (asset.FindByName(AdvancedGlazing.GlazingTransmissionColor) is AssetPropertyDoubleArray4d transparency)
+      {
+        material.Diffuse = ToColor4f(transparency);
+
+        material.TransparencyColor = ToColor4f(transparency);
+        material.OpacityTexture = ToSimulatedTexture(transparency.GetSingleConnectedAsset());
       }
 
+      if (asset.FindByName(AdvancedGlazing.GlazingTransmissionRoughness) is AssetPropertyDouble clarity)
+      {
+        material.Transparency = 1.0 - clarity.Value;
+      }
+
+      if (asset.FindByName(AdvancedGlazing.GlazingF0) is AssetPropertyDoubleArray4d reflective)
+      {
+        material.ReflectivityColor = ToColor4f(reflective);
+      }
+      #endregion
+
+      #region Relief Pattern
       if (asset.FindByName(AdvancedGlazing.SurfaceNormal) is AssetPropertyReference normal)
       {
         material.BumpTexture = ToSimulatedTexture(normal.GetSingleConnectedAsset());
       }
+      #endregion
 
+      #region Cutout
       if (asset.FindByName(AdvancedGlazing.SurfaceCutout) is AssetPropertyReference cutout)
       {
         material.OpacityTexture = ToSimulatedTexture(cutout.GetSingleConnectedAsset());
       }
+      #endregion
 
-      if (asset.FindByName(AdvancedGlazing.SurfaceAlbedo) is AssetPropertyDoubleArray4d albedo)
+      #region Advanced Highlight Controls
+      // Anisotropy
+      if (asset.FindByName(AdvancedMetal.SurfaceAnisotropy) is AssetPropertyDouble anisotropy)
       {
-        material.Reflectivity = 1.0;
-        material.ReflectivityColor = ToColor4f(albedo);
+        material.PolishAmount = 1.0 - anisotropy.Value;
       }
+
+      // Orientation
+      if (asset.FindByName(AdvancedOpaque.SurfaceRotation) is AssetPropertyDouble orientation)
+      {
+      }
+
+      // Color
+      if (asset.FindByName(AdvancedMetal.SurfaceAlbedo) is AssetPropertyDoubleArray4d specular)
+      {
+        material.Specular = ToColor4f(specular);
+        material.EnvironmentTexture = ToSimulatedTexture(specular.GetSingleConnectedAsset());
+        material.EnvironmentTextureAmount = 0.1;
+      }
+      #endregion
     }
 #endif
 

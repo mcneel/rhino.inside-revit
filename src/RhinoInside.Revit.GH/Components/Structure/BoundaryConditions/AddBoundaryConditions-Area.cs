@@ -86,14 +86,23 @@ namespace RhinoInside.Revit.GH.Components.Structure
         {
           if (!Params.GetData(DA, "Face", out Types.GeometryFace face)) return null;
 
-          boundaryConditions = Reconstruct
-          (
-            boundaryConditions,
-            doc.Value,
-            face
-          );
+          if (Types.Element.FromReference(face.Document, face.GetReference()) is Types.AnalyticalElement)
+          {
+            boundaryConditions = Reconstruct
+            (
+              boundaryConditions,
+              doc.Value,
+              face
+            );
 
-          DA.SetData(_BoundaryConditions_, new Types.AreaBoundaryConditions(boundaryConditions));
+            DA.SetData(_BoundaryConditions_, Types.AreaBoundaryConditions.FromElement(boundaryConditions));
+          }
+          else
+          {
+            boundaryConditions = null;
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input 'Face' is not suitable for Boundary Conditions element creation.");
+          }
+
           return boundaryConditions;
         }
       );

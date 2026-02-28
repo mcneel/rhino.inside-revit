@@ -558,11 +558,7 @@ namespace RhinoInside.Revit.GH
         {
           var activeDefinition = definition.SolutionState == GH_ProcessStep.Process;
 
-          // Prevent delayed solutions.
-          if (activeDefinition)
-            continue;
-
-          var change = new DocumentChangedEvent()
+          var change = activeDefinition ? null: new DocumentChangedEvent()
           {
             Operation = e.Operation,
             Document = document,
@@ -588,13 +584,13 @@ namespace RhinoInside.Revit.GH
               if (obj is Kernel.IGH_ReferenceParam persistentParam)
               {
                 if (persistentParam.NeedsToBeExpired(document, added, deleted, modified))
-                  change.ExpiredObjects.Add(persistentParam);
+                  change?.ExpiredObjects.Add(persistentParam);
               }
               else if (obj is Kernel.IGH_ReferenceComponent persistentComponent)
               {
                 if (persistentComponent.NeedsToBeExpired(document, added, deleted, modified))
                 {
-                  change.ExpiredObjects.Add(persistentComponent);
+                  change?.ExpiredObjects.Add(persistentComponent);
                 }
                 else
                 {
@@ -607,7 +603,7 @@ namespace RhinoInside.Revit.GH
                         if (activeDefinition && recipient.Phase == GH_SolutionPhase.Blank)
                           continue;
 
-                        change.ExpiredObjects.Add(recipient.Attributes.GetTopLevel.DocObject as IGH_ActiveObject);
+                        change?.ExpiredObjects.Add(recipient.Attributes.GetTopLevel.DocObject as IGH_ActiveObject);
                       }
                     }
                   }
@@ -616,7 +612,11 @@ namespace RhinoInside.Revit.GH
             } catch { }
           }
 
-          if (change.ExpiredObjects.Count > 0)
+          // Prevent delayed solutions but notify components & params about changes.
+          if (activeDefinition)
+            continue;
+
+          if (change?.ExpiredObjects.Count > 0)
             DocumentChangedEvent.Enqueue(change);
         }
       }
@@ -664,7 +664,7 @@ namespace RhinoInside.Revit.GH
         }
 #if DEBUG
         else if (!System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Escape))
-        {          
+        {
           value.Definition.ScheduleSolution
           (
             delay: 500,

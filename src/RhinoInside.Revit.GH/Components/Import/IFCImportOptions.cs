@@ -6,17 +6,17 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Insert
 {
   [ComponentVersion(introduced: "1.36")]
-  public class IFCImportOptions : ZuiComponent
+  public class IFCReadOptions : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("A8F3E5C1-9D4B-4E2A-B8F1-3C5D6E7F8A9B");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
     protected override string IconTag => string.Empty;
 
-    public IFCImportOptions() : base
+    public IFCReadOptions() : base
     (
-      name: "IFC Import Options",
-      nickname: "IFCOpt",
-      description: "Configure options for IFC file import or link operations",
+      name: "IFC Read Options",
+      nickname: "IFC-Read",
+      description: "Configure options to read IFC files.",
       category: "Revit",
       subCategory: "Insert"
     )
@@ -128,7 +128,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
           NickName = "AC",
           Description = "Autocorrect off-axis lines enabled",
           Access = GH_ParamAccess.item
-        }
+        }, ParamRelevance.Secondary
       )
     };
 
@@ -162,10 +162,10 @@ namespace RhinoInside.Revit.GH.Components.Insert
 
       if (options != null)
       {
-        DA.SetData("Intent", (int)options.Intent);
-        DA.SetData("Action", (int)options.Action);
-        DA.SetData("Auto Join", options.AutoJoin);
-        DA.SetData("Autocorrect Off Axis Lines", options.AutocorrectOffAxisLines);
+        Params.TrySetData(DA, "Intent", () => (int)options.Intent);
+        Params.TrySetData(DA, "Action", () => (int)options.Action);
+        Params.TrySetData(DA, "Auto Join", () => options.AutoJoin);
+        Params.TrySetData(DA, "Autocorrect Off Axis Lines", () => options.AutocorrectOffAxisLines);
       }
     }
   }
