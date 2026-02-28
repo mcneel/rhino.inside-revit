@@ -277,7 +277,7 @@ namespace RhinoInside.Revit.GH.Types
             (
               x =>
               {
-                try { return x.PlanarizedCurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
+                try { return x.PlanarizedCurveLoops.ToPolyCurves(); }
                 catch { return Array.Empty<PolyCurve>(); }
               }
             ).
@@ -301,7 +301,7 @@ namespace RhinoInside.Revit.GH.Types
             (
               x =>
               {
-                try { return x.CurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
+                try { return x.CurveLoops.ToPolyCurves(); }
                 catch { return Array.Empty<PolyCurve>(); }
               }
             ).

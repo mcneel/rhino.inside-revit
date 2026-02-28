@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (_PlanarizedCurveLoops is null && Value is ARDB.CurtainCell cell)
         {
-          try { _PlanarizedCurveLoops = cell.PlanarizedCurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
+          try { _PlanarizedCurveLoops = cell.PlanarizedCurveLoops.ToPolyCurves(); }
           catch { _PlanarizedCurveLoops = Array.Empty<PolyCurve>(); }
         }
 
@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (_CurveLoops is null && Value is ARDB.CurtainCell cell)
         {
-          try { _CurveLoops = cell.CurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
+          try { _CurveLoops = cell.CurveLoops.ToPolyCurves(); }
           catch { _CurveLoops = Array.Empty<PolyCurve>(); }
         }
 
