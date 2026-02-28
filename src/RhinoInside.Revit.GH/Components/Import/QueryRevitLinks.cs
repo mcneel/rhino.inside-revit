@@ -32,8 +32,8 @@ namespace RhinoInside.Revit.GH.Components.Insert
 
     public QueryRevitModels() : base
     (
-      name: "Query Linked Models",
-      nickname: "Models",
+      name: "Query Revit Models",
+      nickname: "R-Models",
       description: "Gets Revit linked models into given document",
       category: "Revit",
       subCategory: "Insert"

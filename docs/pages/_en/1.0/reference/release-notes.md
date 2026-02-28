@@ -11,7 +11,10 @@ group: Deployment & Configs
 ### WIP
 
 ### RC
-
+- Added 'Add Revit Link' component.
+- Added 'Link IFC File' component.
+- Added 'Link CAD File' component.
+- Added 'Query CAD Models' component.
 
 {% endcapture %}
 
