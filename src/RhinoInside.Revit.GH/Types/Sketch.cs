@@ -122,7 +122,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (!_TrimmedSurface.HasValue && Value is ARDB.Sketch sketch)
         {
-          var loops = sketch.Profile.ToCurveMany().Where(x => x.IsClosed).ToArray();
+          var loops = sketch.Profile.ToPolyCurves();
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
 
           if (loops.Length > 0)
@@ -188,7 +188,7 @@ namespace RhinoInside.Revit.GH.Types
       if (normal.IsParallelTo(plane.Normal, tol.AngleTolerance) == 0)
         return false;
 
-      var profiles = sketch.Profile.ToArray(GeometryDecoder.ToPolyCurve);
+      var profiles = sketch.Profile.ToPolyCurves();
       if (profiles.Length != boundaries.Count)
         return false;
 
