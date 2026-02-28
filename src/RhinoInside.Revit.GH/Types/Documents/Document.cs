@@ -5,10 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using GH_IO.Serialization;
-using Grasshopper.Special;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using Grasshopper.Special;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -202,7 +202,7 @@ namespace RhinoInside.Revit.GH.Types
 
           if (ModelURI.IsFileUri(out var localPath))
           {
-            if (File.Exists(localPath))
+            if (System.IO.File.Exists(localPath))
             {
               try
               {
@@ -245,7 +245,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get 
       {
-        if (FilePath is string filePath && File.Exists(filePath))
+        if (FilePath is string filePath && System.IO.File.Exists(filePath))
           return ARDB.BasicFileInfo.Extract(filePath);
 
         return default;
@@ -638,6 +638,8 @@ namespace RhinoInside.Revit.GH.Types
     public string FileName => Path.GetFileName(FilePath);
 
     public string FileExtension => Path.GetExtension(FilePath);
+
+    internal FileInfo File => FilePath is string path ? new FileInfo(path) : default;
     #endregion
 
     #region Version
