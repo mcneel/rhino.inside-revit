@@ -66,10 +66,8 @@ namespace RhinoInside.Revit.GH.Components.Documents
         return;
       }
 
-      try
+      using (Guest.Instance.PauseTransactionGroups())
       {
-        Guest.Instance.CommitTransactionGroups();
-
         if (string.IsNullOrEmpty(filePath))
         {
           var wasSaved = !string.IsNullOrEmpty(doc.PathName);
@@ -138,10 +136,6 @@ namespace RhinoInside.Revit.GH.Components.Documents
           }
           else AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path should be absolute.");
         }
-      }
-      finally
-      {
-        Guest.Instance.StartTransactionGroups();
       }
     }
   }

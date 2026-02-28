@@ -699,13 +699,13 @@ namespace RhinoInside.Revit.GH
     readonly Queue<ARDB.TransactionGroup> ActiveTransactionGroups = new Queue<ARDB.TransactionGroup>();
     readonly Stack<GH_Document> ActiveDocumentStack = new Stack<GH_Document>();
 
-    internal void StartTransactionGroups()
+    void StartTransactionGroups()
     {
       var name = ActiveDocumentStack.Peek().GetTransactionName();
-      StartTransactionGroups(name, true);
+      StartTransactionGroups(name);
     }
 
-    internal void StartTransactionGroups(string name, bool forcedModal)
+    void StartTransactionGroups(string name)
     {
       using (var documents = Revit.ActiveDBApplication.Documents)
       {
@@ -725,7 +725,7 @@ namespace RhinoInside.Revit.GH
 
           var group = new ARDB.TransactionGroup(doc, name)
           {
-            IsFailureHandlingForcedModal = forcedModal
+            IsFailureHandlingForcedModal = true
           };
           group.Start();
 
@@ -734,21 +734,48 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    internal void CommitTransactionGroups()
+    Queue<string> CommitTransactionGroups()
     {
+      var groups = new Queue<string>();
       while (ActiveTransactionGroups.Count > 0)
       {
         try
         {
           using (var group = ActiveTransactionGroups.Dequeue())
           {
+            groups.Enqueue(group.GetName());
+
             if (group.IsValidObject)
               group.Assimilate();
           }
         }
         catch { }
       }
+
+      return groups;
     }
+
+    internal IDisposable PauseTransactionGroups()
+    {
+      return new TransactionGroupsPause(this, CommitTransactionGroups());
+    }
+
+    class TransactionGroupsPause : IDisposable
+    {
+      readonly Guest Guest;
+      readonly Queue<string> Groups;
+      public TransactionGroupsPause(Guest guest, Queue<string> groups)
+      {
+        Guest = guest;
+        Groups = groups;
+      }
+      void IDisposable.Dispose()
+      {
+        while (Groups.Count > 0)
+          Guest.Instance.StartTransactionGroups(Groups.Dequeue());
+      }
+    }
+
     #endregion
 
     #region Element Tracking
