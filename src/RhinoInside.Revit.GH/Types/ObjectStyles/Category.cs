@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Types
   {
     #region IGH_Goo
     public override bool IsValid => (Id?.TryGetBuiltInCategory(out var _) == true) || base.IsValid;
-    public override object ScriptVariable() => APIObject;
+    public override object ScriptVariable() => ScriptCategory;
 
     public sealed override bool ConvertFrom(object source)
     {
@@ -75,14 +75,14 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.Category)))
       {
-        target = (Q) (object) APIObject;
+        target = (Q) (object) ReadCategory;
         return true;
       }
 
       if (typeof(Q).IsAssignableFrom(typeof(CategoryId)))
       {
         var categoryId = new CategoryId();
-        if (APIObject.Id.TryGetBuiltInCategory(out var bic))
+        if (ReadCategory.Id.TryGetBuiltInCategory(out var bic))
         {
           categoryId.Value = bic;
           target = (Q) (object) categoryId;
@@ -93,6 +93,12 @@ namespace RhinoInside.Revit.GH.Types
           target = (Q) (object) default(Q);
           return false;
         }
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(GraphicsStyle)))
+      {
+        target = (Q) (object) GetElement<GraphicsStyle>(ReadCategory.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection));
+        return true;
       }
 
 #if RHINO_8
@@ -160,7 +166,7 @@ namespace RhinoInside.Revit.GH.Types
       #region Category
       const string Category = "Category";
 
-      ARDB.Category category => owner.APIObject;
+      ARDB.Category category => owner.ReadCategory;
 
       [System.ComponentModel.Category(Category), System.ComponentModel.Description("Parent category of this category.")]
       public string Parent => category?.Parent?.Name;
@@ -192,8 +198,32 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region DocumentObject
-    internal ARDB.Category APIObject => IsReferencedDataLoaded ?
+    /// <summary>
+    /// TODO : Remove this property.
+    /// </summary>
+    internal ARDB.Category APIObject => ReadCategory;
+
+    /// <summary>
+    /// ARDB.Category instance for script and material.
+    /// Material property should return the material on the linked model.
+    /// Also script should be able to at least read from the linked category.
+    /// </summary>
+    private ARDB.Category ScriptCategory => IsReferencedDataLoaded ?
+      Document.GetCategory(Id) : default;
+
+    /// <summary>
+    /// ARDB.Category instance for read access.
+    /// On linked models all the read opearions are redirected to the host model categories.
+    /// </summary>
+    private ARDB.Category ReadCategory => IsReferencedDataLoaded ?
       (IsLinked ? ReferenceDocument : Document).GetCategory(Id) : default;
+
+    /// <summary>
+    /// ARDB.Category instance for write access.
+    /// On linked models all the write opearions are silently ignored.
+    /// </summary>
+    private ARDB.Category WriteCategory => IsReferencedDataLoaded && !IsLinked ?
+      Document.GetCategory(Id) : default;
 
     protected override void ResetValue()
     {
@@ -221,8 +251,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region ReferenceObject
-    public override bool? IsEditable => APIObject is ARDB.Category category ?
-      !category.IsReadOnly && !Document.IsLinked : default(bool?);
+    public override bool? IsEditable => WriteCategory?.IsReadOnly is false;
     #endregion
 
     public Category() : base() { }
@@ -312,7 +341,7 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
-      if (APIObject is ARDB.Category category)
+      if (ReadCategory is ARDB.Category category)
       {
         var elementPath = GetElementPath().ToArray();
 
@@ -392,7 +421,7 @@ namespace RhinoInside.Revit.GH.Types
 
           // Color
           {
-            layer.Color = category.Material.ToShadingMaterial(out var _, out var _);
+            layer.Color = Material.Value.ToShadingMaterial(out var _, out var _);
           }
 
           // Material
@@ -400,8 +429,7 @@ namespace RhinoInside.Revit.GH.Types
           {
             var materialIndex = -1;
             {
-              var material = new Material(category.Material);
-              if (material.BakeElement(idMap, false, doc, att, out var renderMaterialInstanceId))
+              if (Material.BakeElement(idMap, false, doc, att, out var renderMaterialInstanceId))
               {
                 materialIndex = layer.RenderMaterialIndex;
                 if (materialIndex < 0) materialIndex = doc.Materials.FindName(layer.Id.ToString())?.Index ?? -1;
@@ -500,7 +528,7 @@ namespace RhinoInside.Revit.GH.Types
     #region ModelContent
     private IEnumerable<string> GetElementPath()
     {
-      if (APIObject is ARDB.Category category)
+      if (ReadCategory is ARDB.Category category)
       {
         var parent = Parent;
         if (parent is object)
@@ -545,7 +573,7 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out var modelContent))
         return modelContent;
 
-      if (APIObject is ARDB.Category category)
+      if (ReadCategory is ARDB.Category category)
       {
         var attributes = new ModelLayer.Attributes();
 
@@ -584,16 +612,13 @@ namespace RhinoInside.Revit.GH.Types
 
         // Color
         {
-          attributes.DisplayColor = category.Material.ToShadingMaterial(out var _, out var _);
+          attributes.DisplayColor = Material.Value.ToShadingMaterial(out var _, out var _);
         }
 
         // Material
         if (category.CategoryType != ARDB.CategoryType.Annotation)
         {
-          var material = Material;
-          {
-            attributes.Material = material.ToModelContent(idMap) as ModelRenderMaterial;
-          }
+          attributes.Material = Material.ToModelContent(idMap) as ModelRenderMaterial;
         }
 
         // Some hardcoded tweaks…
@@ -629,7 +654,7 @@ namespace RhinoInside.Revit.GH.Types
 
     private SectionStyle ToSectionStyle()
     {
-      if (APIObject is ARDB.Category category && category.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut) is object)
+      if (ReadCategory is ARDB.Category category && category.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut) is object)
       {
         var style = new SectionStyle();
 
@@ -653,7 +678,7 @@ namespace RhinoInside.Revit.GH.Types
     #region Properties
     public override string NextIncrementalNomen(string prefix)
     {
-      if (APIObject is ARDB.Category category)
+      if (ReadCategory is ARDB.Category category)
       {
         DocumentExtension.TryParseNomenId(prefix, out prefix, out var _);
         var nextName = category.Parent?.SubCategories.
@@ -681,59 +706,59 @@ namespace RhinoInside.Revit.GH.Types
     private new ARDB.BuiltInCategory? BuiltInCategory => Id?.ToBuiltInCategory();
 
     string _FullName;
-    public override string CompleteNomen => _FullName ?? (APIObject?.FullName() ?? BuiltInCategory?.FullName(localized: true));
+    public override string CompleteNomen => _FullName ?? (ReadCategory?.FullName() ?? BuiltInCategory?.FullName(localized: true));
 
     ERDB.CategoryDiscipline? _CategoryDiscipline;
-    public ERDB.CategoryDiscipline CategoryDiscipline => _CategoryDiscipline ??= APIObject?.CategoryDiscipline() ?? BuiltInCategory?.CategoryDiscipline() ?? ERDB.CategoryDiscipline.None;
+    public ERDB.CategoryDiscipline CategoryDiscipline => _CategoryDiscipline ??= ReadCategory?.CategoryDiscipline() ?? BuiltInCategory?.CategoryDiscipline() ?? ERDB.CategoryDiscipline.None;
 
     ARDB.CategoryType? _CategoryType;
-    public ARDB.CategoryType CategoryType => _CategoryType ??= APIObject?.CategoryType ?? BuiltInCategory?.CategoryType() ?? ARDB.CategoryType.Invalid;
+    public ARDB.CategoryType CategoryType => _CategoryType ??= ReadCategory?.CategoryType ?? BuiltInCategory?.CategoryType() ?? ARDB.CategoryType.Invalid;
 
     public Category Parent => _IsSubcategory == false ? null :
-      APIObject is object ? FromCategory(APIObject.Parent) :
+      ReadCategory is object ? FromCategory(ReadCategory.Parent) :
       BuiltInCategory is object ? FromElementId(null, new ARDB.ElementId(BuiltInCategory.Value.Parent())) :
       null;
 
-    public IEnumerable<Category> SubCategories => APIObject?.
+    public IEnumerable<Category> SubCategories => ReadCategory?.
       SubCategories?.
       Cast<ARDB.Category>().
       OrderBy(x => x.Id.ToValue()).
       Select(FromCategory);
 
     bool? _IsTagCategory;
-    public bool? IsTagCategory => _IsTagCategory ??= APIObject?.IsTagCategory ?? BuiltInCategory?.IsTagCategory();
+    public bool? IsTagCategory => _IsTagCategory ??= ReadCategory?.IsTagCategory ?? BuiltInCategory?.IsTagCategory();
 
     bool? _IsSubcategory;
     public bool? IsSubcategory => _IsSubcategory ??=
     (
-      APIObject is object ? APIObject.Parent is object :
+      ReadCategory is object ? ReadCategory.Parent is object :
       BuiltInCategory is object ? BuiltInCategory.Value.Parent() != ARDB.BuiltInCategory.INVALID :
       default(bool?)
     );
 
     bool? _IsVisibleInUI;
-    public bool? IsVisibleInUI => _IsVisibleInUI ??= APIObject?.IsVisibleInUI() ?? BuiltInCategory?.IsVisibleInUI();
+    public bool? IsVisibleInUI => _IsVisibleInUI ??= ReadCategory?.IsVisibleInUI() ?? BuiltInCategory?.IsVisibleInUI();
 
     bool? _CanAddSubcategory;
-    public bool? CanAddSubcategory => _CanAddSubcategory ??= APIObject?.CanAddSubcategory ?? BuiltInCategory?.CanAddSubcategory();
+    public bool? CanAddSubcategory => _CanAddSubcategory ??= ReadCategory?.CanAddSubcategory ?? BuiltInCategory?.CanAddSubcategory();
 
     bool? _AllowsBoundParameters;
-    public bool? AllowsBoundParameters => _AllowsBoundParameters ??= APIObject?.AllowsBoundParameters ?? BuiltInCategory?.AllowsBoundParameters();
+    public bool? AllowsBoundParameters => _AllowsBoundParameters ??= ReadCategory?.AllowsBoundParameters ?? BuiltInCategory?.AllowsBoundParameters();
 
     bool? _HasMaterialQuantities;
-    public bool? HasMaterialQuantities => _HasMaterialQuantities ??= APIObject?.HasMaterialQuantities ?? BuiltInCategory?.HasMaterialQuantities();
+    public bool? HasMaterialQuantities => _HasMaterialQuantities ??= ReadCategory?.HasMaterialQuantities ?? BuiltInCategory?.HasMaterialQuantities();
 
     bool? _IsCuttable;
-    public bool? IsCuttable => _IsCuttable ??= APIObject?.IsCuttable ?? BuiltInCategory?.IsCuttable();
+    public bool? IsCuttable => _IsCuttable ??= ReadCategory?.IsCuttable ?? BuiltInCategory?.IsCuttable();
     #endregion
 
     #region Object Style
     public System.Drawing.Color? LineColor
     {
-      get => APIObject?.LineColor.ToColor();
+      get => ReadCategory?.LineColor.ToColor();
       set
       {
-        if (value is object && APIObject is ARDB.Category category)
+        if (value is object && WriteCategory is ARDB.Category category)
         {
           if (category.LineColor.ToColor() != value.Value)
             category.LineColor = value.Value.ToColor();
@@ -743,10 +768,10 @@ namespace RhinoInside.Revit.GH.Types
 
     public Material Material
     {
-      get => APIObject is ARDB.Category category ? new Material(category.Material) : default;
+      get => ScriptCategory is ARDB.Category category ? new Material(category.Material) : default;
       set
       {
-        if (value is object && APIObject is ARDB.Category category)
+        if (value is object && WriteCategory is ARDB.Category category)
         {
           AssertValidDocument(value, nameof(Material));
           if ((category.Material?.Id ?? ARDB.ElementId.InvalidElementId) != value.Id)
@@ -759,7 +784,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (APIObject is ARDB.Category category)
+        if (!IsLinked && ReadCategory is ARDB.Category category)
         {
           if (category.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection) is ARDB.GraphicsStyle _)
             return category.GetLineWeight(ARDB.GraphicsStyleType.Projection);
@@ -769,7 +794,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       set
       {
-        if (value is object && APIObject is ARDB.Category category)
+        if (value is object && WriteCategory is ARDB.Category category)
         {
           if (category.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection) is ARDB.GraphicsStyle _)
           {
@@ -784,7 +809,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (APIObject is ARDB.Category category)
+        if (ReadCategory is ARDB.Category category)
         {
           if (category.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut) is ARDB.GraphicsStyle _)
             return category.GetLineWeight(ARDB.GraphicsStyleType.Cut);
@@ -794,7 +819,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       set
       {
-        if (value is object && APIObject is ARDB.Category category)
+        if (value is object && WriteCategory is ARDB.Category category)
         {
           if (category.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut) is ARDB.GraphicsStyle _)
           {
@@ -809,7 +834,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (APIObject is ARDB.Category category)
+        if (ReadCategory is ARDB.Category category)
         {
           if (category.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection) is ARDB.GraphicsStyle style)
             return new LinePatternElement(style.Document, category.GetLinePatternId(ARDB.GraphicsStyleType.Projection));
@@ -819,7 +844,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       set
       {
-        if (value is object && APIObject is ARDB.Category category)
+        if (value is object && WriteCategory is ARDB.Category category)
         {
           AssertValidDocument(value, nameof(ProjectionLinePattern));
           if (category.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection) is ARDB.GraphicsStyle)
@@ -835,7 +860,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        if (APIObject is ARDB.Category category)
+        if (ReadCategory is ARDB.Category category)
         {
           if (category.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut) is ARDB.GraphicsStyle style)
             return new LinePatternElement(style.Document, category.GetLinePatternId(ARDB.GraphicsStyleType.Cut));
@@ -845,7 +870,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       set
       {
-        if (value is object && APIObject is ARDB.Category category)
+        if (value is object && WriteCategory is ARDB.Category category)
         {
           AssertValidDocument(value, nameof(CutLinePattern));
           if (category.GetGraphicsStyle(ARDB.GraphicsStyleType.Cut) is ARDB.GraphicsStyle)
@@ -902,31 +927,6 @@ namespace RhinoInside.Revit.GH.Types
 
         return default;
       }
-    }
-
-    public override bool ConvertFrom(object source)
-    {
-      if (base.ConvertFrom(source))
-        return true;
-
-      if (source is Category category)
-      {
-        if (category.APIObject.GetGraphicsStyle(ARDB.GraphicsStyleType.Projection) is ARDB.GraphicsStyle style)
-        {
-          SetValue(style.Document, style.Id);
-          return true;
-        }
-      }
-      else if (source is GeometryObject geometry)
-      {
-        if (geometry.Value is ARDB.GeometryObject geometryObject)
-        {
-          SetValue(geometry.Document, geometryObject.GraphicsStyleId);
-          return true;
-        }
-      }
-
-      return false;
     }
 
     public override bool ConvertTo<Q>(out Q target)

@@ -778,6 +778,25 @@ namespace Rhino.Geometry
     /// <returns>true if the curve has kinks within tolerance and results into a PolyCurve.</returns>
     public static bool TryGetPolyCurve(this Curve curve, out PolyCurve polyCurve, double angleToleranceRadians)
     {
+      if (GetSubCurves(curve, angleToleranceRadians) is Curve[] segments)
+      {
+        polyCurve = new PolyCurve();
+        foreach (var segment in segments)
+          polyCurve.AppendSegment(segment);
+
+        return true;
+      }
+
+      polyCurve = default;
+      return false;
+    }
+
+#if !RHINO_8
+    public static Curve[] GetSubCurves(this Curve curve) => GetSubCurves(curve).ToArray();
+#endif
+
+    private static Curve[] GetSubCurves(Curve curve, double angleToleranceRadians = Math.PI / 180.0)
+    {
       var kinks = default(List<double>);
 
       var continuity = curve.IsClosed ? Continuity.G2_locus_continuous : Continuity.G2_continuous;
@@ -792,16 +811,9 @@ namespace Rhino.Geometry
       }
 
       if (kinks is object && kinks.Count > (curve.IsClosed ? 1 : 0) && curve.Split(kinks) is Curve[] segments)
-      {
-        polyCurve = new PolyCurve();
-        foreach (var segment in segments)
-          polyCurve.AppendSegment(segment);
+        return curve.Split(kinks);
 
-        return true;
-      }
-
-      polyCurve = default;
-      return false;
+      return null;
     }
 
     static bool TryEvaluateCurvature

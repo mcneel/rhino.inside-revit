@@ -32,8 +32,8 @@ namespace RhinoInside.Revit.GH.Parameters
     {
       switch (data)
       {
-        case ARDB.RevitLinkInstance _: return Types.RevitLinkInstance.FromValue(data) as Types.RevitLinkInstance;
-        case ARDB.Document _: return Types.Document.FromValue(data);
+        case ARDB.RevitLinkInstance instance: return Types.RevitLinkInstance.FromElement(instance) as Types.RevitLinkInstance;
+        case ARDB.Document document: return Types.Document.FromValue(document);
       }
 
       return null;
