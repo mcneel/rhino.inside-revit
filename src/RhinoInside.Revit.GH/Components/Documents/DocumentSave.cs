@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     public DocumentSave() : base
     (
       name: "Save Document",
-      nickname: "Save",
+      nickname: "D-Save",
       description: "Saves a document to a given file path",
       category: "Revit",
       subCategory: "Document"
@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
           if (filePath.Last() == Path.DirectorySeparatorChar)
             filePath = Path.Combine(filePath, doc.Title);
 
-          if (filePath.IsFullyQualifiedPath())
+          if (PathExtension.TryGetFullyQualifiedPath(ref filePath))
           {
             if (!Path.HasExtension(filePath))
             {
