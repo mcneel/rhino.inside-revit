@@ -1461,7 +1461,7 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     #region CurveLoop
     /// <summary>
-    /// Converts the specified CurveLoop to a Rhino Curve IEnumerable.
+    /// Converts the specified CurveLoop to a Rhino C2-continuous Curve IEnumerable.
     /// </summary>
     /// <param name="value">A value to convert.</param>
     /// <returns>A Rhino Curve IEnumerable that is equivalent to the provided value.</returns>
@@ -1473,7 +1473,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 
     /// <summary>
-    /// Converts the specified <see cref="ARDB.CurveLoop" /> to an equivalent <see cref="Rhino.Geometry.Curve" />.
+    /// Converts the specified <see cref="ARDB.CurveLoop" /> to an equivalent C0-continuous <see cref="Rhino.Geometry.Curve" />.
     /// </summary>
     /// <example>
     /// 
@@ -1522,7 +1522,7 @@ namespace RhinoInside.Revit.Convert.Geometry
     ///
     /// </example>
     /// <param name="curveLoop">Revit curveLoop to convert.</param>
-    /// <returns>Rhino curve that is equivalent to the provided Revit curveLoop.</returns>
+    /// <returns>A Rhino C0-continuous curve that is equivalent to the provided Revit curveLoop.</returns>
     /// <since>1.0</since>
     public static Curve ToCurve(this ARDB.CurveLoop curveLoop)
     {
@@ -1554,10 +1554,10 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     #region CurveArray
     /// <summary>
-    /// Converts the specified CurveArrArray to a Rhino Curve IEnumerable.
+    /// Converts the specified CurveArrArray to a Rhino C2-continuous Curve IEnumerable.
     /// </summary>
     /// <param name="value">A value to convert.</param>
-    /// <returns>A Rhino Curve IEnumerable that is equivalent to the provided value.</returns>
+    /// <returns>A Rhino C2-continuous Curve IEnumerable that is equivalent to the provided value.</returns>
     /// <since>1.4</since>
     public static IEnumerable<Curve> ToCurveMany(this ARDB.CurveArray value)
     {
@@ -1566,10 +1566,10 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 
     /// <summary>
-    /// Converts the specified CurveArray to an array of C0 continuous Rhino Curves.
+    /// Converts the specified CurveArray to an array of C0-continuous Rhino Curves.
     /// </summary>
     /// <param name="value">A value to convert.</param>
-    /// <returns>An array of C0 continuous Rhino Curve that is equivalent to the provided value.</returns>
+    /// <returns>An array of C0-continuous Rhino Curve that is equivalent to the provided value.</returns>
     /// <since>1.6</since>
     public static Curve[] ToCurves(this ARDB.CurveArray value)
     {
@@ -1600,10 +1600,10 @@ namespace RhinoInside.Revit.Convert.Geometry
 
     #region CurveArrArray
     /// <summary>
-    /// Converts the specified CurveArrArray to a flat Rhino Curve IEnumerable.
+    /// Converts the specified CurveArrArray to a flat Rhino C2-continuous Curve IEnumerable.
     /// </summary>
     /// <param name="value">A value to convert.</param>
-    /// <returns>A Rhino Curve IEnumerable that is equivalent to the provided value.</returns>
+    /// <returns>A Rhino C2-continuous Curve IEnumerable that is equivalent to the provided value.</returns>
     /// <since>1.4</since>
     public static IEnumerable<Curve> ToCurveMany(this ARDB.CurveArrArray value)
     {
@@ -1611,10 +1611,10 @@ namespace RhinoInside.Revit.Convert.Geometry
     }
 
     /// <summary>
-    /// Converts the specified CurveArray to a flat array of C0 continuous Rhino Curves.
+    /// Converts the specified CurveArray to a flat array of C0-continuous Rhino Curves.
     /// </summary>
     /// <param name="value">A value to convert.</param>
-    /// <returns>An array of C0 continuous Rhino Curve that is equivalent to the provided value.</returns>
+    /// <returns>An array of C0-continuous Rhino Curve that is equivalent to the provided value.</returns>
     /// <since>1.6</since>
     public static Curve[] ToCurves(this ARDB.CurveArrArray value)
     {
