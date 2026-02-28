@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
       )
     };
 
-    const string _Output_ = "Import Symbol";
+    const string _Output_ = "Link";
     static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
       ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,

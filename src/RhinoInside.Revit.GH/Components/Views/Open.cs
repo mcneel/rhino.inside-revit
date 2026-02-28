@@ -75,79 +75,80 @@ namespace RhinoInside.Revit.GH.Components.Views
     {
       if (ViewStates.Count > 0)
       {
-        try
+        using (Guest.Instance.PauseTransactionGroups())
         {
-          Guest.Instance.CommitTransactionGroups();
-          var activeView = Revit.ActiveUIDocument.ActiveView;
-
           try
           {
-            foreach (var group in ViewStates.GroupBy(x => x.Key.Document))
+            var activeView = Revit.ActiveUIDocument.ActiveView;
+
+            try
             {
-              using (var uiDocument = new ARUI.UIDocument(group.Key))
+              foreach (var group in ViewStates.GroupBy(x => x.Key.Document))
               {
-                var openViews = uiDocument.GetOpenUIViews();
-                if (openViews.Count == 0)
+                using (var uiDocument = new ARUI.UIDocument(group.Key))
                 {
-                  AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Document {uiDocument.Document.GetTitle()} is not open on UI.");
-                }
-                else
-                {
-                  var openViewIds = new HashSet<ARDB.ElementId>(openViews.Select(x => x.ViewId));
-                  var viewsToClose = group.Where(x => x.Value == false).Select(x => x.Key);
-                  var viewsToOpen = group.Where(x => x.Value == true).Select(x => x.Key);
-
-                  foreach (var view in viewsToOpen)
+                  var openViews = uiDocument.GetOpenUIViews();
+                  if (openViews.Count == 0)
                   {
-                    if (!openViewIds.Contains(view.Id))
-                      view.Value.Document.SetActiveView(view.Value);
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Document {uiDocument.Document.GetTitle()} is not open on UI.");
                   }
-
-                  foreach (var view in viewsToClose)
+                  else
                   {
-                    if (view.Value.IsEquivalent(activeView))
+                    var openViewIds = new HashSet<ARDB.ElementId>(openViews.Select(x => x.ViewId));
+                    var viewsToClose = group.Where(x => x.Value == false).Select(x => x.Key);
+                    var viewsToOpen = group.Where(x => x.Value == true).Select(x => x.Key);
+
+                    foreach (var view in viewsToOpen)
                     {
-                      AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Can't close '{view.DisplayName}' because is the active one.");
+                      if (!openViewIds.Contains(view.Id))
+                        view.Value.Document.SetActiveView(view.Value);
                     }
-                    else
+
+                    foreach (var view in viewsToClose)
                     {
-                      try { view.Value.Close(); }
-                      catch (Exception e) { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message); }
+                      if (view.Value.IsEquivalent(activeView))
+                      {
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Can't close '{view.DisplayName}' because is the active one.");
+                      }
+                      else
+                      {
+                        try { view.Value.Close(); }
+                        catch (Exception e) { AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message); }
+                      }
                     }
                   }
                 }
               }
             }
+            finally
+            {
+              activeView.Document.SetActiveView(activeView);
+            }
+
+            // Reconstruct output 'Open' with final values from 'View'.
+            var _View_ = Params.IndexOfOutputParam("View");
+            var _Open_ = Params.IndexOfOutputParam("Open");
+            if (_View_ >= 0 && _Open_ >= 0)
+            {
+              var viewParam = Params.Output[_View_];
+              var openParam = Params.Output[_Open_];
+              var openData = new GH_Structure<GH_Boolean>();
+
+              var viewData = viewParam.VolatileData;
+              foreach (var path in viewData.Paths)
+              {
+                var open = viewData.get_Branch(path).Cast<object>().Select(x => (x as Types.View)?.Value.IsOpen());
+                openData.AppendRange(open.Select(x => x.HasValue ? new GH_Boolean(x.Value) : null), path);
+              }
+
+              openParam.ClearData();
+              openParam.AddVolatileDataTree(openData);
+            }
           }
           finally
           {
-            activeView.Document.SetActiveView(activeView);
+            ViewStates.Clear();
           }
-
-          // Reconstruct output 'Open' with final values from 'View'.
-          var _View_ = Params.IndexOfOutputParam("View");
-          var _Open_ = Params.IndexOfOutputParam("Open");
-          if (_View_ >= 0 && _Open_ >= 0)
-          {
-            var viewParam = Params.Output[_View_];
-            var openParam = Params.Output[_Open_];
-            var openData = new GH_Structure<GH_Boolean>();
-
-            var viewData = viewParam.VolatileData;
-            foreach (var path in viewData.Paths)
-            {
-              var open = viewData.get_Branch(path).Cast<object>().Select(x => (x as Types.View)?.Value.IsOpen());
-              openData.AppendRange(open.Select(x => x.HasValue ? new GH_Boolean(x.Value) : null), path);
-            }
-
-            openParam.ClearData();
-            openParam.AddVolatileDataTree(openData);
-          }
-        }
-        finally
-        {
-          ViewStates.Clear();
-          Guest.Instance.StartTransactionGroups();
         }
       }
 
