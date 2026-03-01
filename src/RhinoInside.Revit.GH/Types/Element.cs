@@ -49,6 +49,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         var displayName = CompleteNomen ?? (IsReferencedData ? string.Empty : "<None>");
         if (!string.IsNullOrEmpty(displayName)) return displayName;
+        displayName = Value?.Name;
+        if (!string.IsNullOrEmpty(displayName)) return displayName;
         if (Value?.Category is ARDB.Category category)
           return $"<{category.ToBuiltInCategory().Name(localized: false).TrimEnd('s')}>";
 
@@ -349,6 +351,8 @@ namespace RhinoInside.Revit.GH.Types
           element.Pinned = value.Value;
       }
     }
+
+    public bool HasNomen() => Value.HasNomen();
 
     public virtual bool CanBeRenominated() => Value.CanBeRenominated();
 

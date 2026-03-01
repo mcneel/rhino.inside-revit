@@ -56,10 +56,10 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
         case ElementScope.Persistent:
           var persistentId = External.DB.ReferenceId.Parse(reference.ReferenceUniqueId, reference.ReferenceDocument);
-          DA.SetData(0, Guid.Empty);
+          DA.SetData(0, reference.ReferenceDocumentId);
           DA.SetData(1, null);
-          DA.SetData(2, $"{reference.ReferenceDocumentId}:{persistentId.ToString(reference.ReferenceDocument)}");
-          DA.SetData(3, $"{reference.ReferenceDocumentId}:{persistentId.ToString()}");
+          DA.SetData(2, persistentId.ToString(reference.ReferenceDocument));
+          DA.SetData(3, null);
           break;
       }
     }
