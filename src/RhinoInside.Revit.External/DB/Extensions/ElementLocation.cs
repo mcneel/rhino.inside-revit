@@ -248,8 +248,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       UnitXYZ basisX = default;
       UnitXYZ basisY = default;
 
-      var viewX = mark.Document.GetElement(mark.GetViewId(1)) as View;
-      var viewY = mark.Document.GetElement(mark.GetViewId(0)) as View;
+      var viewX = mark.IsAvailableIndex(0) ? mark.Document.GetElement(mark.GetViewId(1)) as View : null;
+      var viewY = mark.IsAvailableIndex(1) ? mark.Document.GetElement(mark.GetViewId(0)) as View : null;
 
       var lineX = viewX is object ? Line.CreateUnbound(new XYZ(viewX.Origin.X, viewX.Origin.Y, 0.0), viewX.RightDirection) : default;
       var lineY = viewY is object ? Line.CreateUnbound(new XYZ(viewY.Origin.X, viewY.Origin.Y, 0.0), viewY.RightDirection) : default;

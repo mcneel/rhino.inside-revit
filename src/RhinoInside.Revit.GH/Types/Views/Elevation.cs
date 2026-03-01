@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           _Location = NaN.Plane;
 
-          if (Value is ARDB.ElevationMarker mark)
+          if (Value is ARDB.ElevationMarker mark && ((mark.IsAvailableIndex(0) && mark.IsAvailableIndex(1)) || !mark.Document.IsReadOnly))
           {
             var (origin, basisX, basisY) = mark.GetLocation();
             _Location = new Plane(origin.ToPoint3d(), basisX.Direction.ToVector3d(), basisY.Direction.ToVector3d());
