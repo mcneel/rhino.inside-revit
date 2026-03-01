@@ -413,7 +413,7 @@ namespace RhinoInside.Revit.GH.Types
           }
         }
 
-        element.SetElementNomen
+        element.SetNomen
         (
           string.IsNullOrEmpty(name) ? $"({element.UniqueId})" : $"{name} ({element.UniqueId})"
         );
@@ -425,7 +425,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual string Nomen
     {
-      get => Rhinoceros.InvokeInHostContext(() => Value?.GetElementNomen());
+      get => Rhinoceros.InvokeInHostContext(() => Value?.GetNomen());
       set
       {
         if (value is object && value != Nomen)
@@ -436,7 +436,7 @@ namespace RhinoInside.Revit.GH.Types
           }
           else if (Value is ARDB.Element element)
           {
-            element.SetElementNomen(value);
+            element.SetNomen(value);
           }
         }
       }
