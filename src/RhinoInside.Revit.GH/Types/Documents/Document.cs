@@ -272,7 +272,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_ElementSource
-    readonly RevitLinkInstance LinkInstance = new RevitLinkInstance();
+    readonly RevitLinkInstance LinkInstance;
 
     RevitLinkInstance IGH_ElementSource.SourceInstance => LinkInstance;
     Document IGH_ElementSource.SourceDocument => this;
@@ -302,26 +302,26 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     public Document() { }
-    protected Document(ARDB.Document value)
+    protected internal Document(ARDB.Document value)
     {
       if (value is null) return;
 
       if (DocumentsDictionary.TryGetValue(value, out var document))
+      {
         Id = document.Id;
+        SwapFolder = document.SwapFolder;
+        LinkInstance = document.LinkInstance;
+      }
       else
+      {
         Id = ++NextId;
-
-      SwapFolder = new TemporaryDirectory(Path.Combine(Core.SwapFolder, $"{Id:X8}"), default(ElementsObjectIDGenerator));
+        SwapFolder = new TemporaryDirectory(Path.Combine(Core.SwapFolder, $"{Id:X8}"), default(ElementsObjectIDGenerator));
+        LinkInstance = new RevitLinkInstance();
+      }
 
       _Document = value;
       DocumentId = value.GetPersistentGUID();
       RefreshReferenceData();
-    }
-
-    ~Document()
-    {
-      if (SwapFolder?.Directory.Exists is true)
-        try { SwapFolder.Directory.Delete(recursive: true); } catch { }
     }
 
     static Document()
@@ -353,7 +353,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    internal TemporaryDirectory SwapFolder { get; }
+    internal readonly TemporaryDirectory SwapFolder;
     #endregion
 
     private static void Host_DocumentCreated(object sender, ARDB.Events.DocumentCreatedEventArgs e)
