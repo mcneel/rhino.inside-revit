@@ -101,6 +101,26 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return builder.ToString();
     }
 
+    public static string Tooltip(this Element element)
+    {
+      var tokens = new List<string>(3);
+      if (element.Category is Category category)
+      {
+        if (category.Parent is Category parent)
+          tokens.Add(parent.Name);
+        tokens.Add(category.Name);
+      }
+
+      if (element.Document.GetElement(element.GetTypeId()) is ElementType type)
+      {
+        tokens.Add(type.FamilyName);
+      }
+
+      tokens.Add(element.Name);
+
+      return string.Join(" : ", tokens);
+    }
+
     struct ElementNameComparer : IComparer<string>
     {
       public int Compare(string x, string y) => NamingUtils.CompareNames(x, y);
@@ -153,6 +173,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return ElementKind.None;
     }
 
+    #region Graphics
     public static Outline GetOutline(this Element element)
     {
       return element.GetBoundingBoxXYZ()?.ToOutLine();
@@ -292,6 +313,50 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return geometry;
     }
+    #endregion
+
+    #region Dependents
+
+    private static void Unproxy(ref Element element)
+    {
+      if (element.IsProxyElement(out var id))
+        element = element.Document.GetElement(id);
+    }
+
+    public static bool IsProxyElement(this Element element, out ElementId elementId)
+    {
+      if (element.get_Parameter(BuiltInParameter.ID_PARAM)?.AsElementId() is ElementId id && id.IsValid())
+      {
+        if (element.Id != id)
+        {
+          elementId = id;
+          return true;
+        }
+      }
+
+      elementId = ElementIdExtension.Invalid;
+      return false;
+    }
+
+    public static IList<ElementId> GetProxyElements(this Element element)
+    {
+      return element.GetDependentElements
+      (
+        ElementFilters.Intersect
+        (
+          new ExclusionFilter(new ElementId[] { element.Id }),
+          new ElementParameterFilter
+          (
+            new FilterElementIdRule
+            (
+              new ParameterValueProvider(new ElementId(BuiltInParameter.ID_PARAM)),
+              new FilterNumericEquals(),
+              element.Id
+            )
+          )
+        )
+      );
+    }
 
 #if !REVIT_2019
     public static IList<ElementId> GetDependentElements(this Element element, ElementFilter filter)
@@ -307,8 +372,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 #endif
-
-    #region Dependents
     /// <summary>
     /// Updater to collect changes on the Delete operation
     /// </summary>
@@ -425,6 +488,55 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     #region Nomen
 
+    static bool HasNomen(this Type type)
+    {
+      if (typeof(Family).IsAssignableFrom(type))
+        return true;
+
+      if (typeof(ElementType).IsAssignableFrom(type))
+        return true;
+
+      if (typeof(ParameterElement).IsAssignableFrom(type))
+        return true;
+
+      if (typeof(GraphicsStyle).IsAssignableFrom(type))
+        return true;
+
+      if (typeof(LinePatternElement).IsAssignableFrom(type))
+        return true;
+
+      if (typeof(FillPatternElement).IsAssignableFrom(type))
+        return true;
+
+      if (typeof(AppearanceAssetElement).IsAssignableFrom(type))
+        return true;
+
+      if (typeof(StructuralAsset).IsAssignableFrom(type))
+        return true;
+
+      if (typeof(ThermalAsset).IsAssignableFrom(type))
+        return true;
+
+      return false;
+    }
+
+    public static bool HasNomen(this Element element)
+    {
+      if (element is null) return false;
+      Unproxy(ref element);
+
+      if (HasNomen(element.GetType()))
+        return true;
+
+      if (GetNomenParameter(element) != BuiltInParameter.INVALID)
+        return true;
+
+      if (element.GetTypeId() != ElementIdExtension.Invalid)
+        return false;
+
+      return true;
+    }
+
     // `Element.Name` does not always access the true denomination of the element.
     //
     // In cases like `ViewSheet` the true denomination is the "Sheet Number" parameter.
@@ -437,23 +549,32 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool CanBeRenominated(this Element element)
     {
-      if (element is null) return false;
+      if (!HasNomen(element))
+        return false;
 
       var document = element.Document;
       if (document.IsLinked) return false;
 
+      // At that point let's be empiric…
       using (document.RollBackScope())
       {
-        try { element.SetElementNomen(Guid.NewGuid().ToString("N")); }
-        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
+        try
+        {
+          var guid = Guid.NewGuid().ToString("N");
+          element.Name = guid;
+          return element.Name == guid;
+        }
+        catch
+        {
+          return false;
+        }
       }
-
-      return true;
     }
 
     public static bool IsNomenInUse(this Element element, string name)
     {
       if (element is null) return false;
+      Unproxy(ref element);
 
       var nomen = element.GetElementNomen(out var nomenParameter);
       using (element.Document.RollBackScope())
@@ -550,6 +671,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     static BuiltInParameter GetNomenParameter(Element element)
     {
+      Unproxy(ref element);
+
       var builtInParameter = GetNomenParameter(element.GetType());
       if (builtInParameter != BuiltInParameter.INVALID) return builtInParameter;
 
@@ -589,20 +712,29 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static void SetElementNomen(this Element element, BuiltInParameter nomenParameter, string name)
     {
-      if
-      (
-        !(element is ElementType) &&
-        nomenParameter != BuiltInParameter.INVALID &&
-        element.get_Parameter(nomenParameter) is Parameter parameter &&
-        !parameter.IsReadOnly
-      )
+      if (nomenParameter != BuiltInParameter.INVALID && !(element is ElementType))
       {
-        parameter.Update(name);
+        if (element.get_Parameter(nomenParameter) is Parameter parameter)
+        {
+          if (parameter.IsReadOnly)
+            throw new InvalidOperationException($"Element '{element.Tooltip()}' parameter {parameter.Definition?.Name} is read-only. {{{element.Id.ToValue()}}}");
+
+          parameter.Update(name);
+        }
+      }
+      else if (element.GetTypeId() != ElementIdExtension.Invalid)
+      {
+        // These elements do not support user-specified naming (Nomen).
+        name = null;
       }
       else if (element.Name != name)
       {
-        element.Name = name;
+        try { element.Name = name; }
+        catch { }
       }
+
+      if (element.Name != name)
+        throw new InvalidOperationException($"Element '{element.Tooltip()}' does not support assignment of a user-specified name. {{{element.Id.ToValue()}}}");
     }
 
     public static void SetElementNomen(this Element element, string nomen) =>
