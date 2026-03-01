@@ -136,8 +136,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
           {
             foreach (var sourceElement in sourceSystem)
             {
-              var element = Types.Element.FromElement(doc.Value.GetNamesakeElement(sourceElement.element.Document, sourceElement.element.Id));
-              duplicates[sourceElement.index] = element;
+              doc.Value.TryGetNamesakeElement(sourceElement.element.Document, sourceElement.element.Id, out ARDB.Element element);
+              duplicates[sourceElement.index] = Types.Element.FromElement(element);
             }
           }
 

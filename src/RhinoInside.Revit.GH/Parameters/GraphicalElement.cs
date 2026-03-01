@@ -780,11 +780,11 @@ namespace RhinoInside.Revit.GH.Parameters
                 }
 
                 var dataCount = m_data.DataCount;
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{dataCount}/{dataCount + filteredElementsCount} {(dataCount != 1 ? GH_Convert.ToPlural(TypeName) : TypeName)} collected from document '{doc.GetTitle()}'");
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{dataCount}/{dataCount + filteredElementsCount} {(dataCount != 1 ? GH_Convert.ToPlural(TypeName) : TypeName)} collected from document '{doc.Tooltip()}'");
               }
               else
               {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect '{NickName}' elements from document '{doc.GetTitle()}'");
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect '{NickName}' elements from document '{doc.Tooltip()}'");
               }
             }
           }

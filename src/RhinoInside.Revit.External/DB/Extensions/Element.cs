@@ -719,12 +719,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
           if (template.ViewSpecific)
           {
             var sourceView = sourceDocument.GetElement(template.OwnerViewId) as View;
-            destinationView = destinationView ?? sourceView;
+            destinationView ??= sourceView;
 
-            if (!destinationDocument.IsEquivalent(destinationView.Document))
-              destinationView = destinationDocument.GetNamesakeElement(sourceDocument, sourceView.Id) as View;
-
-            if (destinationView is object)
+            if (destinationDocument.TryGetNamesakeElement(destinationView.Document, destinationView.Id, out destinationView))
             {
               ids = ElementTransformUtils.CopyElements
               (
@@ -732,6 +729,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
                 destinationView, default, options
               );
             }
+            else throw new InvalidOperationException($"Failed to found '{destinationView.Tooltip()}' on document '{destinationDocument.Tooltip()}'");
           }
           else
           {

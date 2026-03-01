@@ -284,7 +284,7 @@ namespace RhinoInside.Revit.GH.Types
           else
           {
             // Namesake Element
-            return FromElement(linkedDocument.GetNamesakeElement(Document, Id)).AsLinked(link.Value);
+            return FromElementId(linkedDocument, linkedDocument.LookupElement(Document, Id)).AsLinked(link.Value);
           }
         }
       }

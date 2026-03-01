@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// The document's name.
     /// </summary>
     /// <param name="doc"></param>
-    /// <returns>The file name of the document's disk file.</returns>
+    /// <returns>The file name of the document's disk file including the extension.</returns>
     /// <remarks>
     /// This method returns an non empty string even if the project has not been saved yet.
     /// </remarks>
@@ -137,6 +137,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return title;
     }
+
+    internal static string Tooltip(this Document doc) => doc.GetName().TripleDot(64);
     #endregion
 
     #region File
@@ -564,9 +566,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
 
-    internal static Element GetNamesakeElement(this Document target, Document source, ElementId elementId)
+    internal static bool TryGetNamesakeElement<T>(this Document target, Document source, ElementId elementId, out T namesake)
     {
-      return target.GetElement(LookupElement(target, source, elementId));
+      if (target.GetElement(LookupElement(target, source, elementId)) is T element)
+      {
+        namesake = element;
+        return true;
+      }
+      namesake = default;
+      return false;
     }
 
     internal static ElementId LookupElement(this Document target, Document source, ElementId elementId)

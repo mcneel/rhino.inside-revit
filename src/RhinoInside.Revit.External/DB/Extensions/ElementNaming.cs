@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -49,7 +47,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return builder.ToString();
     }
 
-    public static string Tooltip(this Element element)
+    internal static string Tooltip(this Element element)
     {
       var tokens = new List<string>(3);
       if (element.Category is Category category)
@@ -61,7 +59,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (element.Document.GetElement(element.GetTypeId()) is ElementType type)
       {
-        tokens.Add(type.FamilyName);
+        tokens.Add(UI.HostedApplication.Active.InvokeInHostContext(() => type.FamilyName));
       }
 
       tokens.Add(element.Name);
