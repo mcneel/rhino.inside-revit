@@ -387,7 +387,7 @@ namespace RhinoInside.Revit.GH.Components.Views
             {
               // By default adjust Crop to visible in view elements projected-box
               if (!view.Value.CropBoxActive && !cropExtents.HasValue)
-                cropExtents = view.GetElementsBoundingRectangle(modelToProjection, filter);
+                cropExtents = view.GetElementsOutline(modelToProjection, filter);
 
               // Adjust Crop Box
               if (cropExtents.HasValue)

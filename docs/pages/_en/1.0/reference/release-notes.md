@@ -16,6 +16,7 @@ group: Deployment & Configs
 - Added 'Link IFC File' component.
 - Added 'Link CAD File' component.
 - Added 'Query CAD Models' component.
+- Enabled 'Element Curve' component to edit multi-segment grids.
 
 {% endcapture %}
 

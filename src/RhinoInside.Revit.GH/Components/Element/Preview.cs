@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var element = default(Types.Element);
-      if (!DA.GetData(0, ref element) && element.Value is object)
+      if (!DA.GetData(0, ref element))
         return;
 
       var scope = default(IDisposable);
