@@ -629,6 +629,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (element.GetSketch() is ARDB.Sketch sketch)
         {
+          InvalidateGraphics();
+
           var tol = GeometryTolerance.Model;
           var axisPlane = sketch.SketchPlane.GetPlane().ToPlane();
 
