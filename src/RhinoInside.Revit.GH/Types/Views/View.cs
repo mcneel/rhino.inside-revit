@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Types
     protected View(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     protected internal View(ARDB.View view) : base(view) { }
 
-    internal static new Element FromElementId(ARDB.Document doc, ARDB.ElementId id)
+    internal static new View FromElementId(ARDB.Document doc, ARDB.ElementId id)
     {
       if (id == ElementIdExtension.Invalid) return new View();
       return Element.FromElementId(doc, id) as View;
@@ -170,60 +170,33 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
+    protected override void SubInvalidateGraphics()
+    {
+      _ViewFrame = default;
+
+      base.SubInvalidateGraphics();
+    }
+
     #region ModelContent
     protected override string ElementPath => Type?.FamilyName is string familyName && familyName.Length > 0 ?
       $"{familyName}::{base.ElementPath}" : base.ElementPath;
     #endregion
 
+    #region Properties
     public override string DisplayName => Value?.Name ?? base.DisplayName;
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public string FullName => Type?.FamilyName is string familyName && familyName.Length > 0 ?
       $"{familyName} : {base.DisplayName}" : base.DisplayName;
 
-    string Family => Value.get_Parameter(ARDB.BuiltInParameter.VIEW_FAMILY).AsString();
-
-    public ViewFamily ViewFamily => Value is ARDB.View view ?
-      new ViewFamily(view.GetViewFamily()) : default;
+    public ViewFamily ViewFamily => Value is ARDB.View view ? new ViewFamily(view.GetViewFamily()) : default;
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    public ViewType ViewType => Value is ARDB.View view ?
-      new ViewType(view.ViewType) : default;
-
-    public virtual ARDB.ElementId GenLevelId => Value?.GenLevel?.Id;
-    public Level GenLevel => GetElement<Level>(Value?.GenLevel);
+    public ViewType ViewType => Value is ARDB.View view ? new ViewType(view.ViewType) : default;
 
     public double Scale => Value is ARDB.View view ?
       view.Scale == 0 ? 1.0 : (double) view.Scale :
       double.NaN;
-
-    public UVInterval GetOutline(ActiveSpace space)
-    {
-      if (Value is ARDB.View view)
-      {
-        space = space == ActiveSpace.None ? ActiveSpace.PageSpace : space;
-        var unitsScale = UnitScale.Internal / UnitScale.GetUnitScale(RhinoDoc.ActiveDoc, space);
-
-        try
-        {
-          using (view.Document.NoSelectionScope())
-          {
-            using (var outline = space == ActiveSpace.PageSpace ? view.Outline : view.GetModelOutline())
-            {
-              var (min, max) = outline;
-              return new UVInterval
-              (
-                new Interval(min.U * unitsScale, max.U * unitsScale),
-                new Interval(min.V * unitsScale, max.V * unitsScale)
-              );
-            }
-          }
-        }
-        catch (Autodesk.Revit.Exceptions.ApplicationException) { }
-      }
-
-      return new UVInterval(NaN.Interval, NaN.Interval);
-    }
 
     Plane CutPlane
     {
@@ -271,45 +244,6 @@ namespace RhinoInside.Revit.GH.Types
           new Rectangle3d(box.Plane, box.X, box.Y):
           new Rectangle3d(NaN.Plane, NaN.Interval, NaN.Interval);
       }
-    }
-
-    public Curve CropShape
-    {
-      get
-      {
-        if (Value is ARDB.View view)
-        {
-          using (var shape = view.GetCropRegionShapeManager())
-          {
-            if (shape.CanHaveShape && !shape.Split)
-              return shape.GetCropShape().Select(GeometryDecoder.ToPolyCurve).FirstOrDefault();
-          }
-        }
-
-        return null;
-      }
-    }
-
-    static UVInterval StandardizeOutline(UVInterval outline, double minRatio = 0.1)
-    {
-      var length = new Interval(outline.U.Length, outline.V.Length);
-      for (int u = 0; u < 2; ++u)
-      {
-        var v = u == 0 ? 1 : 0;
-        if (length[u] < length[v] * minRatio)
-        {
-          var outlineU = u == 0 ? outline.U : outline.V;
-          var outlineV = v == 0 ? outline.V : outline.U;
-          var mid = outlineU.Mid;
-          outline = new UVInterval
-          (
-            new Interval(mid - length[v] * (minRatio * 0.5), mid + length[v] * (minRatio * 0.5)),
-            outlineV
-          );
-        }
-      }
-
-      return outline;
     }
 
     public Surface Surface
@@ -402,28 +336,30 @@ namespace RhinoInside.Revit.GH.Types
 
       return default;
     });
+    #endregion
 
-    public Transform GetModelToProjectionTransform()
+    #region SketchPlane
+    public SketchPlane SketchPlane
     {
-      if (Value is ARDB.View view && view.TryGetViewportInfo(useUIView: false, out var vport))
+      get => GetElement<SketchPlane>(Value?.SketchPlane);
+      set
       {
-        var project = vport.GetXform(CoordinateSystem.World, CoordinateSystem.Clip);
-        var scale = Transform.Scale(Plane.WorldXY, vport.FrustumWidth * 0.5, vport.FrustumHeight * 0.5, (vport.FrustumFar - vport.FrustumNear) * 0.5);
-        var translate = Transform.Translation
-        (
-          new Vector3d
-          (
-            vport.FrustumLeft + 0.5 * vport.FrustumWidth,
-            vport.FrustumBottom + 0.5 * vport.FrustumHeight,
-            -vport.FrustumNear - (0.5 * (vport.FrustumFar - vport.FrustumNear))
-          )
-        );
+        if (value is object && Value is ARDB.View view)
+        {
+          AssertValidDocument(value, nameof(SketchPlane));
+          InvalidateGraphics();
 
-        return translate * scale * project;
+          view.SketchPlane = value.Value;
+        }
       }
-
-      return Transform.ZeroTransformation;
     }
+
+    public ARDB.ElementId GenLevelId => Value?.GenLevel?.Id ?? ElementIdExtension.Invalid;
+    public Level GenLevel => GetElement<Level>(Value?.GenLevel);
+    #endregion
+
+    #region Camera
+    public Viewer Viewer => GetElement<Viewer>(Value?.GetViewer());
 
     ViewFrame _ViewFrame;
     public ViewFrame GetViewFrame()
@@ -467,8 +403,101 @@ namespace RhinoInside.Revit.GH.Types
       return _ViewFrame;
     }
 
-    internal UVInterval GetElementsBoundingRectangle(ElementFilter elementFilter) => GetElementsBoundingRectangle(GetModelToProjectionTransform(), elementFilter);
-    internal UVInterval GetElementsBoundingRectangle(Transform projection, ElementFilter elementFilter)
+    public Transform GetModelToProjectionTransform()
+    {
+      if (Value is ARDB.View view && view.TryGetViewportInfo(useUIView: false, out var vport))
+      {
+        var project = vport.GetXform(CoordinateSystem.World, CoordinateSystem.Clip);
+        var scale = Transform.Scale(Plane.WorldXY, vport.FrustumWidth * 0.5, vport.FrustumHeight * 0.5, (vport.FrustumFar - vport.FrustumNear) * 0.5);
+        var translate = Transform.Translation
+        (
+          new Vector3d
+          (
+            vport.FrustumLeft + 0.5 * vport.FrustumWidth,
+            vport.FrustumBottom + 0.5 * vport.FrustumHeight,
+            -vport.FrustumNear - (0.5 * (vport.FrustumFar - vport.FrustumNear))
+          )
+        );
+
+        return translate * scale * project;
+      }
+
+      return Transform.ZeroTransformation;
+    }
+    #endregion
+
+    #region Viewport
+    public Viewport Viewport => GetElement<Viewport>(Value?.GetViewport());
+
+    public Curve CropShape
+    {
+      get
+      {
+        if (Value is ARDB.View view)
+        {
+          using (var shape = view.GetCropRegionShapeManager())
+          {
+            if (shape.CanHaveShape && !shape.Split)
+              return shape.GetCropShape().Select(GeometryDecoder.ToPolyCurve).FirstOrDefault();
+          }
+        }
+
+        return null;
+      }
+    }
+
+    public UVInterval GetOutline(ActiveSpace space)
+    {
+      if (Value is ARDB.View view)
+      {
+        space = space == ActiveSpace.None ? ActiveSpace.PageSpace : space;
+        var unitsScale = UnitScale.Internal / UnitScale.GetUnitScale(RhinoDoc.ActiveDoc, space);
+
+        try
+        {
+          using (view.Document.NoSelectionScope())
+          {
+            using (var outline = space == ActiveSpace.PageSpace ? view.Outline : view.GetModelOutline())
+            {
+              var (min, max) = outline;
+              return new UVInterval
+              (
+                new Interval(min.U * unitsScale, max.U * unitsScale),
+                new Interval(min.V * unitsScale, max.V * unitsScale)
+              );
+            }
+          }
+        }
+        catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+      }
+
+      return new UVInterval(NaN.Interval, NaN.Interval);
+    }
+
+    static UVInterval StandardizeOutline(UVInterval outline, double minRatio = 0.1)
+    {
+      var length = new Interval(outline.U.Length, outline.V.Length);
+      for (int u = 0; u < 2; ++u)
+      {
+        var v = u == 0 ? 1 : 0;
+        if (length[u] < length[v] * minRatio)
+        {
+          var outlineU = u == 0 ? outline.U : outline.V;
+          var outlineV = v == 0 ? outline.V : outline.U;
+          var mid = outlineU.Mid;
+          outline = new UVInterval
+          (
+            new Interval(mid - length[v] * (minRatio * 0.5), mid + length[v] * (minRatio * 0.5)),
+            outlineV
+          );
+        }
+      }
+
+      return outline;
+    }
+
+    internal UVInterval GetElementsOutline(ElementFilter elementFilter) => GetElementsOutline(GetModelToProjectionTransform(), elementFilter);
+    internal UVInterval GetElementsOutline(Transform projection, ElementFilter elementFilter)
     {
       var uv = new BoundingBox
       (
@@ -514,15 +543,9 @@ namespace RhinoInside.Revit.GH.Types
         new Interval(uv.Min.Y, uv.Max.Y)
       );
     }
+    #endregion
 
-    protected override void SubInvalidateGraphics()
-    {
-      _ViewFrame = default;
-
-      base.SubInvalidateGraphics();
-    }
-
-    #region Properties
+    #region Extents
     public bool? CropBoxActive
     {
       get => Value?.CropBoxActive;
@@ -551,6 +574,24 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public Box? CropBox => Value is ARDB.View view && view.CropBoxActive ? view.CropBox.ToBox() : default;
+
+    public SectionBox SectionBox
+    {
+      get
+      {
+        if (Value is ARDB.View view)
+        {
+          if (view.get_Parameter(ARDB.BuiltInParameter.VIEWER_MODEL_CLIP_BOX_ACTIVE)?.AsBoolean() is true)
+            return GetElement<SectionBox>(Value.GetDependentElements(new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_SectionBox)).FirstOrDefault());
+        }
+
+        return default;
+      }
+    }
+    #endregion
+
+    #region Phasing
     public Phase Phase
     {
       get => GetElement<Phase>(Value.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElement());
@@ -565,25 +606,6 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
     }
-
-    public SketchPlane SketchPlane
-    {
-      get => GetElement<SketchPlane>(Value?.SketchPlane);
-      set
-      {
-        if (value is object && Value is ARDB.View view)
-        {
-          AssertValidDocument(value, nameof(SketchPlane));
-          InvalidateGraphics();
-
-          view.SketchPlane = value.Value;
-        }
-      }
-    }
-
-    public Viewport Viewport => GetElement<Viewport>(Value?.GetViewport());
-
-    public Viewer Viewer => GetElement<Viewer>(Value?.GetViewer());
     #endregion
 
     #region IGH_BakeAwareElement

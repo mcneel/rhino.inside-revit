@@ -64,7 +64,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (value is View view)
       {
-        SetValue(view.Document, view.GenLevelId ?? ARDB.ElementId.InvalidElementId);
+        SetValue(view.Document, view.GenLevelId);
         return true;
       }
       else if (value is GraphicalElement element)
