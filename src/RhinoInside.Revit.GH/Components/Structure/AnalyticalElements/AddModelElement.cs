@@ -938,7 +938,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       // Duplicate any missing type, material on demand
       //x.DeepCopyParametersFrom(element.Value);
 
-      target.GetElementNomen(out var nomenParameter);
+      target.GetNomen(out var nomenParameter);
       if (nomenParameter.IsValid())
         target.CopyParametersFrom(source, new ARDB.BuiltInParameter[] { nomenParameter });
       else
