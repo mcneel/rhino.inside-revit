@@ -49,6 +49,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         var displayName = CompleteNomen ?? (IsReferencedData ? string.Empty : "<None>");
         if (!string.IsNullOrEmpty(displayName)) return displayName;
+        displayName = Value?.Name;
+        if (!string.IsNullOrEmpty(displayName)) return displayName;
         if (Value?.Category is ARDB.Category category)
           return $"<{category.ToBuiltInCategory().Name(localized: false).TrimEnd('s')}>";
 
@@ -350,6 +352,8 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public bool HasNomen() => Value.HasNomen();
+
     public virtual bool CanBeRenominated() => Value.CanBeRenominated();
 
     public virtual string NextIncrementalNomen(string prefix)
@@ -413,7 +417,7 @@ namespace RhinoInside.Revit.GH.Types
           }
         }
 
-        element.SetElementNomen
+        element.SetNomen
         (
           string.IsNullOrEmpty(name) ? $"({element.UniqueId})" : $"{name} ({element.UniqueId})"
         );
@@ -425,7 +429,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual string Nomen
     {
-      get => Rhinoceros.InvokeInHostContext(() => Value?.GetElementNomen());
+      get => Rhinoceros.InvokeInHostContext(() => Value?.GetNomen());
       set
       {
         if (value is object && value != Nomen)
@@ -436,7 +440,7 @@ namespace RhinoInside.Revit.GH.Types
           }
           else if (Value is ARDB.Element element)
           {
-            element.SetElementNomen(value);
+            element.SetNomen(value);
           }
         }
       }

@@ -265,7 +265,7 @@ namespace RhinoInside.Revit.GH.Types
         else
         {
           // Namesake Element
-          return FromElement(document.Value.GetNamesakeElement(Document, Id));
+          return FromElementId(document.Value, document.Value.LookupElement(Document, Id));
         }
       }
       else if (source is RevitLinkInstance link)
@@ -284,7 +284,7 @@ namespace RhinoInside.Revit.GH.Types
           else
           {
             // Namesake Element
-            return FromElement(linkedDocument.GetNamesakeElement(Document, Id)).AsLinked(link.Value);
+            return FromElementId(linkedDocument, linkedDocument.LookupElement(Document, Id)).AsLinked(link.Value);
           }
         }
       }

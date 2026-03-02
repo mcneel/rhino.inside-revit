@@ -151,10 +151,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
             var axisPlane = sketchPlane.Location;
 
             curve = curve.ProjectToPlane(axisPlane);
-            if (curve is null) throw new RuntimeArgumentException("Curve", "Failed to project Curve on to Work Plane.", curve);
-
-            curve = curve.ToArcsAndLines(tol.VertexTolerance, 10.0 * tol.AngleTolerance, tol.ShortCurveTolerance, 0.0);
-            if (curve is null) throw new RuntimeArgumentException("Curve", "Failed to convert Curve on to a series of arcs and lines.", curve);
+            curve.CombineShortSegments(tol.ShortCurveTolerance);
+            curve = curve.ToArcsAndLines(tol.VertexTolerance, 10.0 * tol.AngleTolerance, 10.0 * tol.ShortCurveTolerance, 0.0) ?? curve;
+            curve = curve.Simplify(CurveSimplifyOptions.RebuildLines | CurveSimplifyOptions.RebuildArcs | CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? curve;
 
             extents = new Interval
             (
@@ -187,7 +186,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
     {
       if (grid is null) return false;
 
-      curve.CombineShortSegments(GeometryDecoder.Tolerance.ShortCurveTolerance);
       if (!(grid.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, new Curve[] { curve }, Vector3d.ZAxis)))
         return false;
 
@@ -227,6 +225,8 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
           if (name is null) name = previousGrid.Name;
           previousGrid.Document.Delete(previousGrid.Id);
         }
+
+        grid.Document.Regenerate();
       }
 
       if (name is object && grid.Name != name)

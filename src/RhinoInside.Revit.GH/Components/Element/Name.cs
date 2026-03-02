@@ -218,7 +218,30 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
-      Params.TrySetData(DA, "Element", () => source is object ? element.AtSource(source) : element);
+      Params.TrySetData
+      (
+        DA,
+        "Element",
+        () =>
+        {
+          if (source is null) return element;
+
+          if (element.HasNomen())
+          {
+            var namesake = element.AtSource(source);
+            if (!namesake.IsValid)
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"{(element as IGH_Goo).TypeName} '{element.CompleteNomen}' was not found at '{source}'. {{{element.Id.ToValue()}}}");
+
+            return namesake;
+          }
+          else
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{GH_Convert.ToPlural((element as IGH_Goo).TypeName)} do not have a unique user-specified name. {{{element.Id.ToValue()}}}");
+            return null;
+          }
+        }
+      );
+
       Params.TrySetData(DA, "Complete Name", () => element.CompleteNomen);
     }
   }

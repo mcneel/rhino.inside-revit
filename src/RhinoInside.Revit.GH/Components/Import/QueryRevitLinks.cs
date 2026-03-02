@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
         var links = collector.Cast<ARDB.RevitLinkInstance>();
 
         if (!string.IsNullOrEmpty(name))
-          links = links.Where(x => x.GetElementNomen(ARDB.BuiltInParameter.RVT_LINK_INSTANCE_NAME).IsSymbolNameLike(name));
+          links = links.Where(x => x.GetNomen(ARDB.BuiltInParameter.RVT_LINK_INSTANCE_NAME).IsSymbolNameLike(name));
 
         Params.TrySetDataList(DA, "Links", () => links);
         Params.TrySetDataList(DA, "Documents", () => links.Select(x => x.GetLinkDocument()));

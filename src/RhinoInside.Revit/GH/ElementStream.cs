@@ -182,8 +182,8 @@ namespace RhinoInside.Revit.GH.ElementTracking
             foreach (var viewToDelete in openViews.Where(viewsToDelete.Contains))
             {
               var view = document.GetElement(viewToDelete) as ARDB.View;
-              var viewNomen = view.GetElementNomen(out var nomenParameter);
-              view.SetElementNomen(nomenParameter, ElementNaming.MakeValidName($"{viewNomen} <Deleting…>"));
+              var viewNomen = view.GetNomen(out var nomenParameter);
+              view.SetNomen(nomenParameter, ElementNaming.MakeValidName($"{viewNomen} <Deleting…>"));
 
               // It's almost deleted, we don't want the ElementStream found it anymore.
               ReleaseElement(view);

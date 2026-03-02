@@ -358,7 +358,7 @@ namespace RhinoInside.Revit.External.DB
       try { referenceId = Parse(s, document); return true; }
       catch (FormatException) { }
 
-      referenceId = default;
+      referenceId = new ReferenceId(new GeometryObjectId(-1));
       return false;
     }
     #endregion

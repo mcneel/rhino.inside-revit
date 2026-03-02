@@ -136,8 +136,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
           {
             foreach (var sourceElement in sourceSystem)
             {
-              var element = Types.Element.FromElement(doc.Value.GetNamesakeElement(sourceElement.element.Document, sourceElement.element.Id));
-              duplicates[sourceElement.index] = element;
+              doc.Value.TryGetNamesakeElement(sourceElement.element.Document, sourceElement.element.Id, out ARDB.Element element);
+              duplicates[sourceElement.index] = Types.Element.FromElement(element);
             }
           }
 
@@ -179,7 +179,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 if
                 (
                   // element.CanBeRenamed() && // More precise but slow.
-                  ElementExtension.GetNomenParameter(element.Value.GetType()) != ARDB.BuiltInParameter.INVALID &&
+                  ElementNaming.GetNomenParameter(element.Value.GetType()) != ARDB.BuiltInParameter.INVALID &&
                   element.Nomen == copiedElement.source.Value.name
                 )
                 {
