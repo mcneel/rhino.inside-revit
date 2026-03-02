@@ -227,7 +227,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 throw new RuntimeArgumentException("Curve", $"Curve start point must be below curve end point.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
               // Getting the type
-              if (!(doc.Value.GetNamesakeElement(analyticalMember.Document, analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
+              if (!doc.Value.TryGetNamesakeElement(analyticalMember.Document, analyticalMember.SectionTypeId, out ARDB.FamilySymbol type))
                 throw new RuntimeException($"No section type found in this analytical member to create a structural element: {analyticalMember.Id}");
 
               // Getting the top and base levels
@@ -276,7 +276,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 throw new RuntimeArgumentException("Curve", $"Curve should be a line like curve.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
 
               // Getting the type
-              if (!(doc.Value.GetNamesakeElement(analyticalMember.Document, analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
+              if (!doc.Value.TryGetNamesakeElement(analyticalMember.Document, analyticalMember.SectionTypeId, out ARDB.FamilySymbol type))
                 throw new RuntimeException($"No section type found in this analytical member to create a structural element. {{{analyticalMember.Id}}}");
 
               // Finding the reference level
@@ -320,7 +320,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
                 throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be C1 continuous.\nTolerance is {Rhino.RhinoMath.ToDegrees(tol.AngleTolerance):N1}°", curve);
 
               // Getting the type
-              if (!(doc.Value.GetNamesakeElement(analyticalMember.Document, analyticalMember.SectionTypeId) is ARDB.FamilySymbol type))
+              if (!doc.Value.TryGetNamesakeElement(analyticalMember.Document, analyticalMember.SectionTypeId, out ARDB.FamilySymbol type))
                 throw new RuntimeException($"No section type found in this analytical member to create a structural element. {{{analyticalMember.Id}}}");
 
               // Finding the reference level
@@ -938,7 +938,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
       // Duplicate any missing type, material on demand
       //x.DeepCopyParametersFrom(element.Value);
 
-      target.GetElementNomen(out var nomenParameter);
+      target.GetNomen(out var nomenParameter);
       if (nomenParameter.IsValid())
         target.CopyParametersFrom(source, new ARDB.BuiltInParameter[] { nomenParameter });
       else

@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Views
                   var openViews = uiDocument.GetOpenUIViews();
                   if (openViews.Count == 0)
                   {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Document {uiDocument.Document.GetTitle()} is not open on UI.");
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Document {uiDocument.Document.Tooltip()} is not open on UI.");
                   }
                   else
                   {

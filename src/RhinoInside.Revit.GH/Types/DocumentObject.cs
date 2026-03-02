@@ -389,7 +389,7 @@ namespace RhinoInside.Revit.GH.Types
       public virtual Type ObjectType => owner.Value?.GetType();
 
       [DisplayName("Document"), Description("The document this element belongs to."), Category("Object")]
-      public string Document => owner.Document?.GetTitle();
+      public string Document => owner.Document?.GetName();
 
       [DisplayName("Document ID"), Description("The Guid of document that references this element."), Category("Reference")]
       public Guid ReferenceDocumentId => owner.ReferenceDocumentId;

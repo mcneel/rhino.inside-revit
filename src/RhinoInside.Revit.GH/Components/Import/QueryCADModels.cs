@@ -92,7 +92,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
         elements = elements.WherePasses(nameFilter);
 
       if (!string.IsNullOrEmpty(name))
-        elements = elements.Where(x => x.GetElementNomen(ARDB.BuiltInParameter.IMPORT_SYMBOL_NAME).IsSymbolNameLike(name));
+        elements = elements.Where(x => x.GetNomen(ARDB.BuiltInParameter.IMPORT_SYMBOL_NAME).IsSymbolNameLike(name));
 
       if (Params.Output.Count > 0)
       {

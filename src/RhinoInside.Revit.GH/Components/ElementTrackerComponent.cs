@@ -235,7 +235,7 @@ namespace RhinoInside.Revit.GH.Components
       if
       (
         !string.IsNullOrWhiteSpace(elementNomen) &&
-        element?.GetElementNomen(out nomenParameter) != elementNomen
+        element?.GetNomen(out nomenParameter) != elementNomen
       )
       {
         // Query for an existing element.
@@ -247,7 +247,7 @@ namespace RhinoInside.Revit.GH.Components
           {
             // If existing is tracked and still pending to be processed
             // change its name to avoid collisions.
-            existing.SetElementNomen(nomenParameter, existing.UniqueId);
+            existing.SetNomen(nomenParameter, existing.UniqueId);
           }
           else
           {
@@ -266,7 +266,7 @@ namespace RhinoInside.Revit.GH.Components
     {
       if (existing is object)
       {
-        var nomen = existing.GetElementNomen(out var nomemParameter);
+        var nomen = existing.GetNomen(out var nomemParameter);
         var label = ((ERDB.Schemas.ParameterId) nomemParameter).Label;
         if (string.IsNullOrWhiteSpace(label)) label = "name";
         var message = $"The {label.ToLowerInvariant()} '{nomen}' is already in use.";

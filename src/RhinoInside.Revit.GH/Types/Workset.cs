@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Types
       if (/*ReferenceDocument is ARDB.Document && */Document is ARDB.Document document)
       {
         if (document.IsLinked || document.IsFamilyDocument)
-          InstanceId = $"{InstanceId} @ {document.GetTitle()}";
+          InstanceId = $"{InstanceId} @ {document.GetName()}";
       }
       else InstanceId = $"{InstanceId} @ {ReferenceDocumentId:B}";
 
@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.Types
     Bitmap IGH_ItemDescription.GetTypeIcon(Size size) => Properties.Resources.Workset;
     string IGH_ItemDescription.Name => DisplayName;
     string IGH_ItemDescription.Identity => $"{{{Id?.ToString()}}}";
-    string IGH_ItemDescription.Description => Document?.GetTitle();
+    string IGH_ItemDescription.Description => Document?.GetName();
     #endregion
 
     #region IGH_ReferencedData
