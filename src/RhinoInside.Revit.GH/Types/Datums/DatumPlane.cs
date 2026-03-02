@@ -25,6 +25,26 @@ namespace RhinoInside.Revit.GH.Types
     public DatumPlane() { }
     public DatumPlane(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public DatumPlane(ARDB.DatumPlane plane) : base(plane) { }
+
+    protected internal static Surface CreateVerticalSurface(Curve curve, Interval v)
+    {
+      var curveA = curve.DuplicateCurve(); curveA.Translate(0.0, 0.0, v.Min - curve.PointAtStart.Z);
+      var curveB = curve.DuplicateCurve(); curveB.Translate(0.0, 0.0, v.Max - curve.PointAtStart.Z);
+
+      var surface = NurbsSurface.CreateRuledSurface(curveA, curveB);
+
+      if (curve is LineCurve)
+      {
+        var plane = new Plane(Point3d.Origin, curve.PointAtEnd - curve.PointAtStart, Vector3d.ZAxis);
+        plane.ClosestParameter(curve.PointAtStart, out var t0, out var _);
+        plane.ClosestParameter(curve.PointAtEnd, out var t1, out var _);
+        surface.SetDomain(0, new Interval(t0, t1));
+      }
+
+      surface.SetDomain(1, new Interval(v.Min, v.Max));
+
+      return surface;
+    }
   }
 
   [Kernel.Attributes.Name("Level")]
@@ -224,33 +244,31 @@ namespace RhinoInside.Revit.GH.Types
     public Grid(ARDB.Grid grid) : base(grid) { }
 
     #region IGH_PreviewData
+    Point3d[] _BoundaryPoints;
     internal IList<Point3d> BoundaryPoints
     {
       get
       {
-        if (Value is ARDB.Grid grid)
+        if (_BoundaryPoints is null)
         {
-          var points = grid.Curve?.Tessellate().ConvertAll(GeometryDecoder.ToPoint3d);
-          if (points is object)
+          if (Value is ARDB.Grid grid)
           {
-            var bbox = BoundingBox;
-            var polyline = new List<Point3d>(points.Length * 2);
+            if (grid.Curve?.Tessellate().ConvertAll(GeometryDecoder.ToPoint3d) is Point3d[] polyline)
+            {
+              var bbox = grid.GetExtents().ToBoundingBox();
+              _BoundaryPoints = new Point3d[polyline.Length * 2];
 
-            for (int p = 0; p < points.Length; ++p)
-              points[p] = new Point3d(points[p].X, points[p].Y, bbox.Min.Z);
-
-            polyline.AddRange(points);
-
-            for (int p = 0; p < points.Length; ++p)
-              points[p] = new Point3d(points[p].X, points[p].Y, bbox.Max.Z);
-
-            polyline.AddRange(points.Reverse());
-
-            return polyline;
+              for (int p = 0; p < polyline.Length; ++p)
+              {
+                _BoundaryPoints[p] = new Point3d(polyline[p].X, polyline[p].Y, bbox.Min.Z);
+                _BoundaryPoints[_BoundaryPoints.Length - p - 1] = new Point3d(polyline[p].X, polyline[p].Y, bbox.Max.Z);
+              }
+            }
           }
+          else _BoundaryPoints = Array.Empty<Point3d>();
         }
 
-        return default;
+        return _BoundaryPoints;
       }
     }
 
@@ -377,24 +395,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Location
-    public override BoundingBox GetBoundingBox(Transform xform)
-    {
-      if (Value is ARDB.Grid grid)
-      {
-        var bbox = grid.GetExtents().ToBoundingBox();
-        var curve = grid.Curve.ToCurve();
-
-        var curveA = curve.DuplicateCurve(); curveA.Translate(0.0, 0.0, bbox.Min.Z - curve.PointAtStart.Z);
-        var curveB = curve.DuplicateCurve(); curveB.Translate(0.0, 0.0, bbox.Max.Z - curve.PointAtStart.Z);
-
-        bbox = BoundingBox.Empty;
-        bbox.Union(curveA.GetBoundingBox(xform));
-        bbox.Union(curveB.GetBoundingBox(xform));
-        return bbox;
-      }
-
-      return NaN.BoundingBox;
-    }
+    public override BoundingBox GetBoundingBox(Transform xform) => new BoundingBox(BoundaryPoints, xform);
 
     public override Plane Location
     {
@@ -435,23 +436,8 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Curve is Curve curve)
         {
-          var bbox = BoundingBox;
-          var curveA = curve.DuplicateCurve(); curveA.Translate(0.0, 0.0, bbox.Min.Z - curve.PointAtStart.Z);
-          var curveB = curve.DuplicateCurve(); curveB.Translate(0.0, 0.0, bbox.Max.Z - curve.PointAtStart.Z);
-
-          var surface = NurbsSurface.CreateRuledSurface(curveA, curveB);
-
-          if (curve is LineCurve)
-          {
-            var plane = new Plane(Point3d.Origin, curve.PointAtEnd - curve.PointAtStart, Vector3d.ZAxis);
-            plane.ClosestParameter(curve.PointAtStart, out var t0, out var _);
-            plane.ClosestParameter(curve.PointAtEnd, out var t1, out var _);
-            surface.SetDomain(0, new Interval(t0, t1));
-          }
-
-          surface.SetDomain(1, new Interval(bbox.Min.Z, bbox.Max.Z));
-
-          return surface;
+          var bbox = ClippingBox;
+          return CreateVerticalSurface(curve, new Interval(bbox.Min.Z, bbox.Max.Z));
         }
 
         return default;
@@ -470,9 +456,49 @@ namespace RhinoInside.Revit.GH.Types
     public MultiSegmentGrid(ARDB.MultiSegmentGrid grid) : base(grid) { }
 
     #region IGH_PreviewData
+    Point3d[] _BoundaryPoints;
+    internal IList<Point3d> BoundaryPoints
+    {
+      get
+      {
+        if (_BoundaryPoints is null)
+        {
+          if (Curve is Curve curve)
+          {
+            var tol = GeometryTolerance.Model;
+            using (var pline = curve.ToPolyline(curve.SpanCount, 1, 100.0 * tol.AngleTolerance, 0.1, 1.0, tol.ShortCurveTolerance, tol.ShortCurveTolerance, 0.0, keepStartPoint: true))
+            {
+              if (pline?.ToPolyline() is Polyline polyline)
+              {
+                double minZ, maxZ; minZ = maxZ = curve.PointAtStart.Z;
+                foreach (var segment in Value.GetGridIds().Select(x => Document.GetElement(x) as ARDB.Grid))
+                {
+                  using (var extents = segment.GetExtents())
+                  {
+                    minZ = Math.Min(minZ, extents.MinimumPoint.Z * Revit.ModelUnits);
+                    maxZ = Math.Max(maxZ, extents.MaximumPoint.Z * Revit.ModelUnits);
+                  }
+                }
+
+                _BoundaryPoints = new Point3d[polyline.Count * 2];
+                for (int p = 0; p < polyline.Count; ++p)
+                {
+                  _BoundaryPoints[p] = new Point3d(polyline[p].X, polyline[p].Y, minZ);
+                  _BoundaryPoints[_BoundaryPoints.Length - p - 1] = new Point3d(polyline[p].X, polyline[p].Y, maxZ);
+                }
+              }
+            }
+          }
+          else _BoundaryPoints = Array.Empty<Point3d>();
+        }
+
+        return _BoundaryPoints;
+      }
+    }
+
     protected override void DrawViewportWires(GH_PreviewWireArgs args)
     {
-      if (Segments is IEnumerable<Grid> segments)
+      if (BoundaryPoints is IList<Point3d> boundary && boundary.Count > 0)
       {
         var viewport = args.Viewport;
         var isParallelProjection = viewport.IsParallelProjection;
@@ -486,51 +512,19 @@ namespace RhinoInside.Revit.GH.Types
                      cameraDirection.IsParallelTo(Vector3d.ZAxis) != 0 ? +1 :
                      0;
 
-        var tags = new List<Point3d>(16);
-        foreach (var grid in segments)
+        if (camDir != -1)
+          args.Pipeline.DrawPatternedPolyline(boundary, args.Color, 0x00001C47, args.Thickness, true);
+
+        if (camDir == +1)
         {
-          using (var curve = grid.Value.Curve)
-          {
-            var start = curve.GetEndPoint(grid.Value.IsCurved ? 0 : 1).ToPoint3d();
-            var end = curve.GetEndPoint(grid.Value.IsCurved ? 1 : 0).ToPoint3d();
-            var direction = end - start;
+          var origin = Value.GetSketch().SketchPlane.GetPlane().Origin.ToPoint3d();
 
-            if (camDir == -1)
-            {
-              if (grid.Value.IsCurved) continue;
-              if (cameraDirection.IsParallelTo(direction) == 0) continue;
-            }
-
-            if (grid.BoundaryPoints is IList<Point3d> boundary && boundary.Count > 0)
-            {
-              args.Pipeline.DrawPatternedPolyline(boundary, args.Color, 0x00001C47, args.Thickness, true);
-
-              if(camDir == -1)
-              {
-                var tagA = boundary.First();
-                var tagB = boundary.Last();
-                if (center.DistanceTo(near.ClosestPoint(tagA)) > center.DistanceTo(near.ClosestPoint(tagB)))
-                  args.Pipeline.DrawDot(tagA, Value.Name, args.Color, System.Drawing.Color.White);
-                else
-                  args.Pipeline.DrawDot(tagB, Value.Name, args.Color, System.Drawing.Color.White);
-              }
-              else if (camDir == +1)
-              {
-                tags.Add(start);
-                tags.Add(end);
-              }
-            }
-          }
-        }
-
-        if (camDir == +1 && tags.Count > 0)
-        {
-          var tagA = tags.First();
-          var tagB = tags.Last();
+          var tagA = boundary[0]; tagA.Z = origin.Z;
+          var tagB = boundary[boundary.Count / 2]; tagB.Z = origin.Z;
           if (center.DistanceTo(near.ClosestPoint(tagA)) > center.DistanceTo(near.ClosestPoint(tagB)))
-            args.Pipeline.DrawDot(tagA, Value.Name, args.Color, System.Drawing.Color.White);
+            args.Pipeline.DrawDot(tagA, Value.Text, args.Color, System.Drawing.Color.White);
           else
-            args.Pipeline.DrawDot(tagB, Value.Name, args.Color, System.Drawing.Color.White);
+            args.Pipeline.DrawDot(tagB, Value.Text, args.Color, System.Drawing.Color.White);
         }
       }
     }
@@ -598,17 +592,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Location
-    public IEnumerable<Grid> Segments => Value?.GetGridIds().Select(GetElement<Grid>);
-
-    public override BoundingBox GetBoundingBox(Transform xform)
-    {
-      var bbox = NaN.BoundingBox;
-
-      foreach (var segment in Segments ?? Array.Empty<Grid>())
-        bbox.Union(segment.GetBoundingBox(xform));
-
-      return bbox;
-    }
+    public override BoundingBox GetBoundingBox(Transform xform) => new BoundingBox(BoundaryPoints, xform);
 
     public override Plane Location
     {
@@ -628,38 +612,44 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override Curve Curve
+    public override Curve Curve => Sketch?.Profiles.FirstOrDefault();
+
+    public override Surface Surface
     {
       get
       {
-        if (Segments is IEnumerable<Grid> segments)
-        {
-          var polyCurve = new PolyCurve();
-          foreach (var segment in segments)
-            polyCurve.AppendSegment(segment.Curve);
-
-          return polyCurve;
-        }
-
-        return null;
+        var bbox = ClippingBox;
+        return Grid.CreateVerticalSurface(Curve, new Interval(bbox.Min.Z, bbox.Max.Z));
       }
     }
 
-    public override Brep PolySurface
+    public override void SetCurve(Curve curve, bool keepJoins = false)
     {
-      get
+      if (Value is ARDB.MultiSegmentGrid element && curve is object)
       {
-        var breps = Brep.JoinBreps(Segments?.Select(x => Brep.CreateFromSurface(x.Surface)), GeometryTolerance.Model.VertexTolerance);
-        switch (breps?.Length)
+        if (element.GetSketch() is ARDB.Sketch sketch)
         {
-          case null:
-          case 0: return null;
-          case 1: return breps[0];
-          default: return Brep.MergeBreps(breps, RhinoMath.UnsetValue);
+          var tol = GeometryTolerance.Model;
+          var axisPlane = sketch.SketchPlane.GetPlane().ToPlane();
+
+          curve = curve.ProjectToPlane(axisPlane);
+          curve.CombineShortSegments(tol.ShortCurveTolerance);
+          curve = curve.ToArcsAndLines(tol.VertexTolerance, 10.0 * tol.AngleTolerance, tol.ShortCurveTolerance, 0.0) ?? curve;
+          curve = curve.Simplify(CurveSimplifyOptions.RebuildLines | CurveSimplifyOptions.RebuildArcs | CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? curve;
+
+          if (Sketch.SetProfile(element.GetSketch(), new Curve[] { curve }, Vector3d.ZAxis))
+            return;
         }
+
+        throw new InvalidOperationException("Curve can not be set for this element.");
       }
     }
+    #endregion
 
+    #region Properties
+    public Sketch Sketch => GetElement<Sketch>(Value?.GetSketch());
+
+    public IEnumerable<Grid> Segments => Value?.GetGridIds().Select(GetElement<Grid>);
     #endregion
   }
 
