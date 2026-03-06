@@ -218,6 +218,28 @@ namespace Rhino.Geometry
 
       return new BoundingBox(value.GetCorners(), xform);
     }
+
+    public static IEnumerable<Plane> ToPlanes(this Box box)
+    {
+      var plane = box.Plane;
+      yield return new Plane(plane.PointAt(0.0, 0.0, box.Z.T0), plane.YAxis, plane.XAxis);
+      yield return new Plane(plane.PointAt(0.0, box.Y.T0, 0.0), plane.XAxis, plane.ZAxis);
+      yield return new Plane(plane.PointAt(box.X.T0, 0.0, 0.0), plane.ZAxis, plane.YAxis);
+      yield return new Plane(plane.PointAt(box.X.T1, 0.0, 0.0), plane.YAxis, plane.ZAxis);
+      yield return new Plane(plane.PointAt(0.0, box.Y.T1, 0.0), plane.ZAxis, plane.XAxis);
+      yield return new Plane(plane.PointAt(0.0, 0.0, box.Z.T1), plane.XAxis, plane.YAxis);
+    }
+
+    public static IEnumerable<PlaneSurface> ToSurfaces(this Box box)
+    {
+      var plane = box.Plane;
+      yield return new PlaneSurface(new Plane(plane.PointAt(0.0, 0.0, box.Z.T0), plane.YAxis, plane.XAxis), box.Y, box.X);
+      yield return new PlaneSurface(new Plane(plane.PointAt(0.0, box.Y.T0, 0.0), plane.XAxis, plane.ZAxis), box.X, box.Z);
+      yield return new PlaneSurface(new Plane(plane.PointAt(box.X.T0, 0.0, 0.0), plane.ZAxis, plane.YAxis), box.Z, box.Y);
+      yield return new PlaneSurface(new Plane(plane.PointAt(box.X.T1, 0.0, 0.0), plane.YAxis, plane.ZAxis), box.Y, box.Z);
+      yield return new PlaneSurface(new Plane(plane.PointAt(0.0, box.Y.T1, 0.0), plane.ZAxis, plane.XAxis), box.Z, box.X);
+      yield return new PlaneSurface(new Plane(plane.PointAt(0.0, 0.0, box.Z.T1), plane.XAxis, plane.YAxis), box.X, box.Y);
+    }
   }
 
   static class ExtrusionExtension
@@ -1537,11 +1559,13 @@ namespace Rhino.Display
         projection.SetFrustum(left * scaleFactor, right * scaleFactor, bottom * scaleFactor, top * scaleFactor, near * scaleFactor, far * scaleFactor);
       }
 
-      if (!viewport.SetViewProjection(projection, updateTargetLocation: true))
+      if (!viewport.SetViewProjection(projection, updateTargetLocation: false))
         return false;
 
       var cplane = viewport.GetConstructionPlane();
-      cplane.Plane.Transform(scaleTransform);
+      var location = cplane.Plane;
+      location.Transform(scaleTransform);
+      cplane.Plane = location;
       cplane.GridSpacing *= scaleFactor;
       cplane.SnapSpacing *= scaleFactor;
       viewport.SetConstructionPlane(cplane);

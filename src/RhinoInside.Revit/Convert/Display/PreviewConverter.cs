@@ -222,6 +222,16 @@ namespace RhinoInside.Revit.Convert.Display
             }
             break;
           }
+          case ARDB.Mesh mesh:
+          {
+            if (mesh.TryGetNakedEdges(out var edges))
+            {
+              foreach (var edge in edges)
+                yield return edge.ToPolylineCurve();
+            }
+
+            break;
+          }
           case ARDB.Solid solid:
           {
             if (solid.Faces.IsEmpty)
