@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -207,5 +210,125 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return area.Value * 0.5;
     }
 #endif
+
+    #region Naked Edges
+    public static bool TryGetNakedEdges(this Mesh mesh, out PolyLine[] edges)
+    {
+      if (mesh.NumTriangles > 0)
+      {
+        var polylines = JoinLines(GetNakedEdges(mesh));
+        if (polylines.Count > 0)
+        {
+          edges = new PolyLine[polylines.Count];
+
+          var vertices = mesh.Vertices;
+          var index = 0;
+          foreach (var pline in polylines)
+            edges[index++] = PolyLine.Create(pline.Select(x => vertices[x]).ToArray());
+        }
+        else edges = Array.Empty<PolyLine>(); // A totally closed mesh with no naked edges.
+
+        return true;
+      }
+
+      edges = Array.Empty<PolyLine>();
+      return false;
+    }
+
+    static ISet<(int V0, int V1)> GetNakedEdges(this Mesh mesh)
+    {
+      static (int V0, int V1) Edge(int v0, int v1) => v0 < v1 ? (v0, v1) : (v1, v0);
+      var edges = new SortedSet<(int V0, int V1)>();
+
+      var numTriangles = mesh.NumTriangles;
+      for (int t = 0; t < numTriangles; ++t)
+      {
+        var triangle = mesh.get_Triangle(t);
+        var v0 = (int) triangle.get_Index(0);
+        var v1 = (int) triangle.get_Index(1);
+        var v2 = (int) triangle.get_Index(2);
+
+        var edge0 = Edge(v0, v1);
+        if (!edges.Remove(edge0)) edges.Add(edge0);
+        var edge1 = Edge(v1, v2);
+        if (!edges.Remove(edge1)) edges.Add(edge1);
+        var edge2 = Edge(v2, v0);
+        if (!edges.Remove(edge2)) edges.Add(edge2);
+      }
+
+      return edges;
+    }
+
+    static List<List<int>> JoinLines(ISet<(int A, int B)> segments)
+    {
+      var adjacency = new Dictionary<int, List<(int A, int B)>>();
+      {
+        foreach (var segment in segments)
+        {
+          if (!adjacency.ContainsKey(segment.A)) adjacency[segment.A] = new List<(int A, int B)>();
+          if (!adjacency.ContainsKey(segment.B)) adjacency[segment.B] = new List<(int A, int B)>();
+
+          adjacency[segment.A].Add(segment);
+          adjacency[segment.B].Add(segment);
+        }
+      }
+
+      var polylines = new List<List<int>>();
+
+      // Open polylines
+      {
+        foreach (int start in adjacency.Where(x => x.Value.Count != 2).Select(x => x.Key))
+        {
+          if (adjacency[start].All(segments.Contains))
+            continue;
+
+          var poly = new List<int>();
+
+          int current = start;
+          while (true)
+          {
+            poly.Add(current);
+
+            var next = adjacency[current].FirstOrDefault(segments.Contains);
+            if (next.Equals(default) && !segments.Contains(next))
+              break;
+
+            segments.Remove(next);
+
+            current = (next.A == current) ? next.B : next.A;
+            if (adjacency[current].Count != 2)
+            {
+              poly.Add(current);
+              break;
+            }
+          }
+
+          polylines.Add(poly);
+        }
+      }
+
+      // Closed polylines
+      {
+        while (segments.Count > 0)
+        {
+          var first = segments.First();
+          segments.Remove(first);
+          int start = first.A;
+          int current = first.B;
+          var loop = new List<int> { start, current };
+          while (current != start)
+          {
+            var next = adjacency[current].First(segments.Contains);
+            segments.Remove(next);
+            current = (next.A == current) ? next.B : next.A;
+            loop.Add(current);
+          }
+          polylines.Add(loop);
+        }
+      }
+
+      return polylines;
+    }
+    #endregion
   }
 }
