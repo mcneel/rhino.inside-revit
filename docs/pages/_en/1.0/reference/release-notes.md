@@ -11,6 +11,7 @@ group: Deployment & Configs
 ### WIP
 
 ### RC
+- Fixed an installer issue on Revit 2026, when it runs automated.
 - Added 'Load Document' component.
 - Added 'Link Revit File' component.
 - Added 'Link IFC File' component.
