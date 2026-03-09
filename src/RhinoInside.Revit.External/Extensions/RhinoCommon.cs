@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Win32.SafeHandles;
-using Rhino.Render;
+using Rhino.Display;
+using Rhino.DocObjects.Tables;
+using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Numerical;
 
@@ -1403,6 +1405,22 @@ namespace Rhino.DocObjects
 
 namespace Rhino.DocObjects.Tables
 {
+  static class LinetypeExtension
+  {
+    public static bool Scale(this Linetype linetype, double scaleFactor)
+    {
+#if RHINO_8
+      if (linetype.WidthUnits == UnitSystem.Unset)
+      {
+        linetype.Width *= scaleFactor;
+        return true;
+      }
+#endif
+
+      return false;
+    }
+  }
+
   static class MaterialTableExtension
   {
     public static Material FindName(this MaterialTable table, string name)
@@ -1467,6 +1485,19 @@ namespace Rhino.DocObjects.Tables
       }
 
       return false;
+    }
+  }
+
+  static class ConstructionPlaneExtension
+  {
+    public static bool Scale(this ConstructionPlane cplane, double scaleFactor)
+    {
+      var location = cplane.Plane;
+      location.Transform(Transform.Scale(Point3d.Origin, scaleFactor));
+      cplane.Plane = location;
+      cplane.GridSpacing *= scaleFactor;
+      cplane.SnapSpacing *= scaleFactor;
+      return true;
     }
   }
 }
@@ -1563,11 +1594,7 @@ namespace Rhino.Display
         return false;
 
       var cplane = viewport.GetConstructionPlane();
-      var location = cplane.Plane;
-      location.Transform(scaleTransform);
-      cplane.Plane = location;
-      cplane.GridSpacing *= scaleFactor;
-      cplane.SnapSpacing *= scaleFactor;
+      cplane.Scale(scaleFactor);
       viewport.SetConstructionPlane(cplane);
       return true;
     }

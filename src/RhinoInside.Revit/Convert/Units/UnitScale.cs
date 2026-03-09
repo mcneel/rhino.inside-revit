@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using Rhino;
 using Rhino.Display;
 using Rhino.DocObjects;
+using Rhino.DocObjects.Tables;
 
 namespace RhinoInside.Revit.Convert.Units
 {
@@ -448,42 +449,154 @@ namespace RhinoInside.Revit.Convert.Units
       if (scaleFactor == 1.0)
         return;
 
-      switch (space)
+      // Viewports
       {
-        case ActiveSpace.ModelSpace:
+        foreach (var view in space == ActiveSpace.PageSpace ? doc.Views.GetPageViews() : doc.Views.GetStandardRhinoViews())
+          view.MainViewport.Scale(scaleFactor);
+      }
 
-          foreach (var view in doc.Views)
+      // Object Attributes
+      {
+#if RHINO_8
+        var settings = new ObjectEnumeratorSettings
+        {
+          ActiveObjects = true,
+          ReferenceObjects = false,
+          HiddenObjects = true,
+          LockedObjects = true,
+          IncludeLights = false,
+          IncludeGrips = false,
+          IncludePhantoms = false,
+        };
+
+        foreach (var rhinoObject in doc.Objects.GetObjectList(settings))
+        {
+          if (rhinoObject.Attributes.Space != space) continue;
+          if (space == ActiveSpace.ModelSpace && rhinoObject.Attributes.ViewportId != Guid.Empty) continue;
+
+          using (var customLinetype = rhinoObject.Attributes.GetCustomLinetype())
           {
-            if (view is RhinoPageView page)
-            {
-              foreach (var detail in page.GetDetailViews())
-              {
-                detail.Viewport.Scale(scaleFactor);
-                detail.CommitViewportChanges();
-              }
-            }
-            else view.MainViewport.Scale(scaleFactor);
+            if (customLinetype?.Scale(scaleFactor) is true)
+              rhinoObject.Attributes.SetCustomLinetype(customLinetype);
           }
 
-          doc.ModelSpaceHatchScale *= scaleFactor;
-          doc.Linetypes.LinetypeScale *= scaleFactor;
+          using (var style = rhinoObject.Attributes.GetCustomSectionStyle())
+          {
+            using (var linetype = style?.GetBoundaryLinetype())
+            {
+              if (linetype?.Scale(scaleFactor) is true)
+              {
+                style.SetBoundaryLinetype(linetype);
+                rhinoObject.Attributes.SetCustomSectionStyle(style);
+              }
+            }
+          }
+        }
+#endif
+      }
 
+      if (space == ActiveSpace.ModelSpace)
+      {
+        // Annotation Properties
+        {
+          doc.ModelSpaceHatchScale *= scaleFactor;
+          doc.ModelSpaceTextScale *= scaleFactor;
+        }
+
+        // Grid Defauls
+        {
+#if RHINO_8
+          var grids = doc.GetGridDefaults();
+          grids.GridSpacing *= scaleFactor;
+          grids.SnapSpacing *= scaleFactor;
+          doc.SetGridDefaults(grids);
+#endif
+        }
+
+        // Named Construction Planes
+        {
+          foreach (var cplane in doc.NamedConstructionPlanes)
+          {
+            cplane.Scale(scaleFactor);
+            doc.NamedConstructionPlanes.Add(cplane);
+          }
+        }
+
+#if RHINO_8
+        // Ground plane
+        {
+          var groundPlane = doc.RenderSettings.GroundPlane;
+          groundPlane.Altitude *= scaleFactor;
+        }
+#endif
+
+        // Details
+        {
+          foreach (var detail in doc.Objects.GetObjectList(new ObjectEnumeratorSettings() { ObjectTypeFilter = ObjectType.Detail }).OfType<DetailViewObject>())
+          {
+            detail.Viewport.Scale(scaleFactor);
+            detail.CommitViewportChanges();
+          }
+        }
+
+#if RHINO_8
+        // Linetypes
+        {
+          foreach (var linetype in doc.Linetypes)
+          {
+            if (linetype.Scale(scaleFactor))
+              doc.Linetypes.Modify(linetype, linetype.Index, quiet: true);
+          }
+        }
+
+        // Layers
+        {
+          foreach (var layer in doc.Layers)
+          {
+            if (layer.GetCustomSectionStyle() is SectionStyle style)
+            {
+              if (style.GetBoundaryLinetype() is Linetype linetype)
+              {
+                if (linetype.Scale(scaleFactor))
+                {
+                  style.SetBoundaryLinetype(linetype);
+                  layer.SetCustomSectionStyle(style);
+                  doc.Layers.Modify(layer, layer.Index, quiet: true);
+                }
+              }
+            }
+          }
+        }
+#endif
+        // Annotation styles
+        {
           foreach (var style in doc.DimStyles)
           {
+            if (style.IsDeleted) continue;
+            if (style.IsReference) continue;
+
             style.DimensionScale *= scaleFactor;
             doc.DimStyles.Modify(style, style.Index, quiet: true);
           }
+        }
 
-          foreach(var annotation in doc.Objects.OfType<AnnotationObjectBase>())
+        // Annotations
+        {
+          foreach (var annotation in doc.Objects.GetObjectList(new ObjectEnumeratorSettings() { ObjectTypeFilter = ObjectType.Annotation }).OfType<AnnotationObjectBase>())
           {
+            if (annotation.IsDeleted) continue;
+            if (annotation.IsReference) continue;
+            if (annotation.Attributes.Space != space) continue;
+            if (space == ActiveSpace.ModelSpace && annotation.Attributes.ViewportId != Guid.Empty) continue;
+
             var geometry = annotation.AnnotationGeometry;
-            if(geometry.IsPropertyOverridden(DimensionStyle.Field.DimensionScale))
+            if (geometry.IsPropertyOverridden(DimensionStyle.Field.DimensionScale))
+            {
               geometry.DimensionScale *= scaleFactor;
-
-            annotation.CommitChanges();
+              annotation.CommitChanges();
+            }
           }
-
-          break;
+        }
       }
     }
 
@@ -497,6 +610,6 @@ namespace RhinoInside.Revit.Convert.Units
       SetUnitScale(doc, ActiveSpace.ModelSpace, value, scale);
     public static void SetPageUnitScale(RhinoDoc doc, UnitScale value, bool scale /*= true*/) =>
       SetUnitScale(doc, ActiveSpace.PageSpace, value, scale);
-    #endregion
+#endregion
   }
 }
