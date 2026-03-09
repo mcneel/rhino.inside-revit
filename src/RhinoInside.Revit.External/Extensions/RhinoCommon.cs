@@ -1401,6 +1401,18 @@ namespace Rhino.DocObjects
       );
     }
   }
+
+  public static class RhinoDocExtension
+  {
+    public static ActiveSpace CurrentActiveSpace(this RhinoDoc doc)
+    {
+#if RHINO_8
+      return doc.ActiveSpace;
+#else
+      return doc.Views.ModelSpaceIsActive ? ActiveSpace.ModelSpace : ActiveSpace.PageSpace;
+#endif
+    }
+  }
 }
 
 namespace Rhino.DocObjects.Tables

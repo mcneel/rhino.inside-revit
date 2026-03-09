@@ -420,10 +420,13 @@ namespace RhinoInside.Revit.Convert.Units
     {
       if (doc is null) return Millimeters;
       if (space == ActiveSpace.None)
-        space = doc.Views.ModelSpaceIsActive ? ActiveSpace.ModelSpace : ActiveSpace.PageSpace;
+        space = doc.CurrentActiveSpace();
 
-      var system = space == ActiveSpace.ModelSpace ? doc.ModelUnitSystem : doc.PageUnitSystem;
-      return  system == UnitSystem.CustomUnits && doc.GetCustomUnitSystem(space == ActiveSpace.ModelSpace, out var name, out var meters) ?
+      if (space != ActiveSpace.ModelSpace && space != ActiveSpace.PageSpace)
+        space = ActiveSpace.ModelSpace;
+
+      var system = space == ActiveSpace.PageSpace ? doc.PageUnitSystem : doc.ModelUnitSystem;
+      return  system == UnitSystem.CustomUnits && doc.GetCustomUnitSystem(space != ActiveSpace.PageSpace, out var name, out var meters) ?
         new UnitScale(system, Ratio.Rationalize(meters), name) :
         new UnitScale(system);
     }
@@ -434,18 +437,30 @@ namespace RhinoInside.Revit.Convert.Units
         throw new ArgumentNullException(nameof(doc));
 
       if (space == ActiveSpace.None)
-        space = doc.Views.ModelSpaceIsActive ? ActiveSpace.ModelSpace : ActiveSpace.PageSpace;
+        space = doc.CurrentActiveSpace();
 
-      var scaleFactor = (double) ((scale ? GetUnitScale(doc, space) : None) / value);
+      if (space != ActiveSpace.ModelSpace && space != ActiveSpace.PageSpace)
+        space = ActiveSpace.ModelSpace;
 
       var (system, meters, name) = value;
-      if (system == UnitSystem.CustomUnits)
-        doc.SetCustomUnitSystem(space == ActiveSpace.ModelSpace, name, meters, scale);
-      else if (space == ActiveSpace.ModelSpace)
-        doc.AdjustModelUnitSystem(system, scale);
-      else if (space == ActiveSpace.PageSpace)
-        doc.AdjustPageUnitSystem(system, scale);
+      switch (space)
+      {
+        case ActiveSpace.ModelSpace:
+          if (system == UnitSystem.CustomUnits)
+            doc.SetCustomUnitSystem(modelUnits: true, name, meters, scale);
+          else
+            doc.AdjustModelUnitSystem(system, scale);
+          break;
+        case ActiveSpace.PageSpace:
+          if (system == UnitSystem.CustomUnits)
+            doc.SetCustomUnitSystem(modelUnits: false, name, meters, scale);
+          else
+            doc.AdjustPageUnitSystem(system, scale);
+          break;
+      }
 
+#if !RHINO_9
+      var scaleFactor = (double) ((scale ? GetUnitScale(doc, space) : None) / value);
       if (scaleFactor == 1.0)
         return;
 
@@ -598,6 +613,7 @@ namespace RhinoInside.Revit.Convert.Units
           }
         }
       }
+#endif
     }
 
     public static UnitScale GetActiveScale (RhinoDoc doc) => GetUnitScale(doc, ActiveSpace.None);
