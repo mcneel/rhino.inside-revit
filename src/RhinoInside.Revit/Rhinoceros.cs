@@ -679,19 +679,21 @@ namespace RhinoInside.Revit
               switch (result)
               {
                 case ARUI.TaskDialogResult.CommandLink2:
+                  UnitScale.SetModelUnitScale(doc, RevitModelUnitScale, scale: true);
                   doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
                   doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, RevitModelUnitScale);
-                  UnitScale.SetModelUnitScale(doc, RevitModelUnitScale, scale: true);
                   AdjustViewConstructionPlanes(doc);
+                  doc.ClearUndoRecords(true);
                   break;
 
                 case ARUI.TaskDialogResult.CommandLink3:
+                  UnitScale.SetModelUnitScale(doc, GH.Guest.ModelUnitScale, scale: true);
                   doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = (int) Arithmetic.Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
                   doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, GH.Guest.ModelUnitScale);
-                  UnitScale.SetModelUnitScale(doc, GH.Guest.ModelUnitScale, scale: true);
                   AdjustViewConstructionPlanes(doc);
+                  doc.ClearUndoRecords(true);
                   break;
 
                 default:
@@ -739,6 +741,7 @@ namespace RhinoInside.Revit
           rhinoDoc.Linetypes.LinetypeScale = 100.0;
 
           AdjustViewConstructionPlanes(rhinoDoc);
+          rhinoDoc.ClearUndoRecords(true);
         }
       }
       finally
