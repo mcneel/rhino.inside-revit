@@ -23,6 +23,10 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.36 RC2" version="v1.36.9557.17877" pre_release=true time="03/03/2026" %}
+
+- Miscellaneous improvements and bug fixes
+
 {% include ltr/release-header.html title="v1.36 RC1" version="v1.36.9544.15028" pre_release=true time="02/17/2026" %}
 
 - Added support for linked elements on query components.
