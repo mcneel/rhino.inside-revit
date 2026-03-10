@@ -244,37 +244,42 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if
       (
-        view.SketchPlane is object &&
+        view.SketchPlane is SketchPlane sketchPlane &&
         view.GetSketchGridId() is ElementId sketchGridId &&
         view.Document.GetElement(sketchGridId) is Element sketchGrid
       )
       {
+        name = sketchGrid.Name;
+        gridSpacing = sketchGrid.get_Parameter(BuiltInParameter.SKETCH_GRID_SPACING_PARAM)?.AsDouble() ?? double.NaN;
+        if (gridSpacing <= 0.0) gridSpacing = double.NaN;
+
+        // If it is visible it will have geometry.
         using (var options = new Options() { View = view })
         {
-          var geometry = sketchGrid.get_Geometry(options);
-
-          using (geometry is object || view.Document.IsReadOnly ? default : view.Document.RollBackScope())
+          if
+          (
+            sketchGrid.get_Geometry(options) is GeometryElement geometry &&
+            geometry.FirstOrDefault() is Solid solid && solid.Faces.Size == 1 &&
+            solid.Faces.get_Item(0) is Face face
+          )
           {
-            // SketchGrid need to be displayed at least once to have geometry.
-            if (geometry is null && view.Document.IsModifiable)
-            {
-              view.ShowActiveWorkPlane();
-              geometry = sketchGrid.get_Geometry(options);
-            }
-
-            if (geometry?.FirstOrDefault() is Solid solid && solid.Faces.Size == 1)
-            {
-              if (solid.Faces.get_Item(0) is Face face)
-              {
-                name = sketchGrid.Name;
-                gridSpacing = sketchGrid.get_Parameter(BuiltInParameter.SKETCH_GRID_SPACING_PARAM)?.AsDouble() ?? double.NaN;
-
-                surface = face.GetSurface();
-                bboxUV = face.GetBoundingBox();
-                return true;
-              }
-            }
+            surface = face.GetSurface();
+            bboxUV = face.GetBoundingBox();
+            return true;
           }
+        }
+
+        // Else use the view outline
+        var plane = sketchPlane.GetPlane();
+        var coordSystem = Transform.Identity;
+        coordSystem.SetCoordSystem(plane.Origin, (UnitXYZ) plane.XVec, (UnitXYZ) plane.YVec, (UnitXYZ) plane.Normal);
+
+        if (XYZExtension.TryGetBoundingBox(view.GetModelClipBox().GetCorners(), out var bboxXYZ, coordSystem))
+        {
+          surface = plane;
+          var (min, max) = bboxXYZ;
+          bboxUV = new BoundingBoxUV(min.X, min.Y, max.X, max.Y);
+          return true;
         }
       }
 

@@ -29,6 +29,93 @@ namespace RhinoInside.Revit.GH.Parameters
       new string[] { "Transform", "Plane", "Line", "Box", "Rectangle", "Surface", "Shader", "Work Plane" }
     );
 
+    protected override void Menu_AppendBakeItem(ToolStripDropDown menu)
+    {
+      base.Menu_AppendBakeItem(menu);
+
+      if (VolatileData.DataCount == 1)
+      {
+        if (VolatileData.AllData(true).FirstOrDefault() is Types.View view && !view.Value.IsTemplate)
+        {
+          Menu_AppendItem(menu, $"Set View", Menu_SetView, true, false);
+          Menu_AppendItem(menu, $"Set CPlane", Menu_SetCPlane, view.SketchPlane is object, false);
+        }
+      }
+    }
+
+    private void Menu_SetCPlane(object sender, EventArgs e)
+    {
+      if
+      (
+        Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc &&
+        VolatileData.AllData(true).FirstOrDefault() is Types.View view &&
+        view.SketchPlane is Types.SketchPlane plane
+      )
+      {
+        bool wasVisible = Rhinoceros.MainWindow.Visible;
+
+        try
+        {
+          Rhinoceros.MainWindow.Visible = true;
+          Rhinoceros.MainWindow.BringToFront();
+          PrepareForPrompt();
+
+          if (Rhino.Input.RhinoGet.GetView($"Pick a viewport to set '{plane.Value.Name}' work plane as CPlane", out var rhinoView) == Rhino.Commands.Result.Success)
+          {
+            var cplane = rhinoView.ActiveViewport.GetConstructionPlane();
+            cplane.Name = plane.Value.Name;
+            cplane.Plane = plane.Location;
+
+            rhinoView.ActiveViewport.PushConstructionPlane(cplane);
+            rhinoView.Redraw();
+          }
+        }
+        finally
+        {
+          RecoverFromPrompt();
+          Rhinoceros.MainWindow.Visible = wasVisible;
+        }
+      }
+    }
+
+    private void Menu_SetView(object sender, EventArgs e)
+    {
+      if
+      (
+        Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc &&
+        VolatileData.AllData(true).FirstOrDefault() is Types.View view &&
+        (view.TryGetViewport(true, out var vport, out var cplane) || view.TryGetViewport(false, out vport, out cplane))
+      )
+      {
+        bool wasVisible = Rhinoceros.MainWindow.Visible;
+
+        try
+        {
+          Rhinoceros.MainWindow.Visible = true;
+          Rhinoceros.MainWindow.BringToFront();
+          PrepareForPrompt();
+
+          if (Rhino.Input.RhinoGet.GetView($"Pick a viewport to set '{view.Value.Name}' view", out var rhinoView) == Rhino.Commands.Result.Success)
+          {
+            rhinoView.MainViewport.Name = view.FullName;
+            rhinoView.MainViewport.PushViewProjection();
+            vport.FrustumAspect = rhinoView.MainViewport.FrustumAspect;
+            rhinoView.MainViewport.SetViewProjection(vport, false);
+            rhinoView.ActiveViewport.PushConstructionPlane(cplane);
+
+            rhinoView.Redraw();
+          }
+        }
+        finally
+        {
+          RecoverFromPrompt();
+          Rhinoceros.MainWindow.Visible = wasVisible;
+          vport?.Dispose();
+        }
+      }
+    }
+
+
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {
       base.Menu_AppendActions(menu);
@@ -126,54 +213,6 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override Types.IGH_View InstantiateT() => new Types.View();
 
     #region UI
-    protected override void Menu_AppendBakeItem(ToolStripDropDown menu)
-    {
-      base.Menu_AppendBakeItem(menu);
-
-      if (VolatileData.DataCount == 1)
-      {
-        if (VolatileData.AllData(true).FirstOrDefault() is Types.View view && !view.Value.IsTemplate)
-        {
-          Menu_AppendItem(menu, $"Set CPlane", Menu_SetCPlane, view.SketchPlane is object, false);
-        }
-      }
-    }
-
-    private void Menu_SetCPlane(object sender, EventArgs e)
-    {
-      if
-      (
-        VolatileData.AllData(true).FirstOrDefault() is Types.View view &&
-        view.SketchPlane is Types.SketchPlane plane &&
-        Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc
-      )
-      {
-        bool wasVisible = Rhinoceros.MainWindow.Visible;
-
-        try
-        {
-          Rhinoceros.MainWindow.Visible = true;
-          Rhinoceros.MainWindow.BringToFront();
-          PrepareForPrompt();
-
-          if (Rhino.Input.RhinoGet.GetView($"Pick a viewport to set '{plane.Value.Name}' work plane as CPlane", out var rhinoView) == Rhino.Commands.Result.Success)
-          {
-            var cplane = rhinoView.ActiveViewport.GetConstructionPlane();
-            cplane.Name = plane.Value.Name;
-            cplane.Plane = plane.Location;
-
-            rhinoView.ActiveViewport.PushConstructionPlane(cplane);
-            rhinoView.Redraw();
-          }
-        }
-        finally
-        {
-          RecoverFromPrompt();
-          Rhinoceros.MainWindow.Visible = wasVisible;
-        }
-      }
-    }
-
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
       if (SourceCount != 0) return;
