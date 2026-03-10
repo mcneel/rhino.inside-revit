@@ -74,7 +74,10 @@ namespace RhinoInside.Revit.GH.Parameters
         Menu_AppendBakeItem(menu);
 
         // Runtime messages
-        Menu_AppendRuntimeMessages(menu);
+        if (RuntimeMessageLevel == GH_RuntimeMessageLevel.Blank)
+          Menu_AppendSeparator(menu);
+        else
+          Menu_AppendRuntimeMessages(menu);
 
         // Custom items.
         AppendAdditionalMenuItems(menu);
