@@ -124,6 +124,7 @@
     </InstallUISequence>
 
     <InstallExecuteSequence>
+      <AppSearch Before="CostFinalize" />
       <Custom Action="OverwriteWixSetDefaultPerUserFolder" After="WixSetDefaultPerUserFolder" />
       <Custom Action="OverwriteWixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
       <Custom Action="SetARPINSTALLLOCATION" After="InstallValidate"/>
