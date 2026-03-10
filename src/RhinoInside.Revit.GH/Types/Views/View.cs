@@ -670,8 +670,8 @@ namespace RhinoInside.Revit.GH.Types
               {
                 cplane.Name = name;
                 cplane.Plane = plane.ToPlane();
-                cplane.GridSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
-                cplane.SnapSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
+                if (!double.IsNaN(spacing)) cplane.GridSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
+                if (!double.IsNaN(spacing)) cplane.SnapSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
                 var min = bboxUV.Min.ToPoint2d();
                 min.X = Math.Round(min.X / cplane.GridSpacing) * cplane.GridSpacing;
                 min.Y = Math.Round(min.Y / cplane.GridSpacing) * cplane.GridSpacing;
@@ -711,6 +711,87 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      return false;
+    }
+
+    internal bool TryGetViewport(bool useUIView,out ViewportInfo vport, out ConstructionPlane cplane)
+    {
+      if (Value.TryGetViewportInfo(useUIView, out vport))
+      {
+        var rhinoDoc = Rhino.RhinoDoc.ActiveDoc;
+        var modelScale = UnitScale.GetModelScale(rhinoDoc);
+        bool imperial = Rhino.Geometry.UnitSystemExtension.IsImperial(rhinoDoc.ModelUnitSystem);
+        var spacing = imperial ?
+        UnitScale.Convert(1.0, UnitScale.Yards, modelScale) :
+        UnitScale.Convert(1.0, UnitScale.Meters, modelScale);
+
+        cplane = new Rhino.DocObjects.ConstructionPlane()
+        {
+          Plane = (Value.SketchPlane?.GetPlane().ToPlane()) ?? vport.FrustumNearPlane,
+          GridSpacing = spacing,
+          SnapSpacing = spacing,
+          GridLineCount = 70,
+          ThickLineFrequency = imperial ? 6 : 5,
+          DepthBuffered = true,
+          Name = Value.Name,
+        };
+
+        if
+        (
+          Value.TryGetSketchGridSurface(out var name, out var surface, out var bboxUV, out spacing) &&
+          surface is ARDB.Plane plane
+        )
+        {
+          cplane.Name = name;
+          cplane.Plane = plane.ToPlane();
+          if (!double.IsNaN(spacing)) cplane.GridSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
+          if (!double.IsNaN(spacing)) cplane.SnapSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
+          var min = bboxUV.Min.ToPoint2d();
+          min.X = Math.Round(min.X / cplane.GridSpacing) * cplane.GridSpacing;
+          min.Y = Math.Round(min.Y / cplane.GridSpacing) * cplane.GridSpacing;
+          var max = bboxUV.Max.ToPoint2d();
+          max.X = Math.Round(max.X / cplane.GridSpacing) * cplane.GridSpacing;
+          max.Y = Math.Round(max.Y / cplane.GridSpacing) * cplane.GridSpacing;
+          var gridUCount = Math.Max(1, (int) Math.Round((max.X - min.X) / cplane.GridSpacing * 0.5));
+          var gridVCount = Math.Max(1, (int) Math.Round((max.Y - min.Y) / cplane.GridSpacing * 0.5));
+          cplane.GridLineCount = Math.Max(gridUCount, gridVCount);
+          cplane.Plane = new Rhino.Geometry.Plane
+          (
+            cplane.Plane.PointAt
+            (
+              min.X + gridUCount * cplane.GridSpacing,
+              min.Y + gridVCount * cplane.GridSpacing
+            ),
+            cplane.Plane.XAxis, cplane.Plane.YAxis
+          );
+          cplane.ShowAxes = false;
+          cplane.ShowZAxis = false;
+        }
+
+        // Make screen port a bit smaller than Revit one.
+        {
+          var port = vport.ScreenPort;
+          port.Width /= 3; port.Height /= 3;
+          vport.ScreenPort = port;
+        }
+
+        if (!useUIView && vport.IsParallelProjection)
+        {
+          vport.DollyExtents
+          (
+            new Rhino.Geometry.BoundingBox
+            (
+              new Rhino.Geometry.Point3d(vport.FrustumLeft, vport.FrustumBottom, vport.FrustumNear),
+              new Rhino.Geometry.Point3d(vport.FrustumRight, vport.FrustumTop, vport.FrustumFar)
+            ), 1.1
+          );
+        }
+
+        return true;
+      }
+
+      vport = default;
+      cplane = default;
       return false;
     }
     #endregion
