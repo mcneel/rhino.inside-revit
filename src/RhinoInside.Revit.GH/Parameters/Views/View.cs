@@ -97,7 +97,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
           if (Rhino.Input.RhinoGet.GetView($"Pick a viewport to set '{view.Value.Name}' view", out var rhinoView) == Rhino.Commands.Result.Success)
           {
-            rhinoView.MainViewport.Name = view.FullName;
+            //rhinoView.MainViewport.Name = view.FullName;
             rhinoView.MainViewport.PushViewProjection();
             vport.FrustumAspect = rhinoView.MainViewport.FrustumAspect;
             rhinoView.MainViewport.SetViewProjection(vport, false);
