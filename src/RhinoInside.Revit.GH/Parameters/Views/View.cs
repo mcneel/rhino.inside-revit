@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.GUI;
 using Grasshopper.Kernel;
+using Rhino.Display;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
@@ -125,6 +126,54 @@ namespace RhinoInside.Revit.GH.Parameters
     protected override Types.IGH_View InstantiateT() => new Types.View();
 
     #region UI
+    protected override void Menu_AppendBakeItem(ToolStripDropDown menu)
+    {
+      base.Menu_AppendBakeItem(menu);
+
+      if (VolatileData.DataCount == 1)
+      {
+        if (VolatileData.AllData(true).FirstOrDefault() is Types.View view && !view.Value.IsTemplate)
+        {
+          Menu_AppendItem(menu, $"Set CPlane", Menu_SetCPlane, view.SketchPlane is object, false);
+        }
+      }
+    }
+
+    private void Menu_SetCPlane(object sender, EventArgs e)
+    {
+      if
+      (
+        VolatileData.AllData(true).FirstOrDefault() is Types.View view &&
+        view.SketchPlane is Types.SketchPlane plane &&
+        Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc
+      )
+      {
+        bool wasVisible = Rhinoceros.MainWindow.Visible;
+
+        try
+        {
+          Rhinoceros.MainWindow.Visible = true;
+          Rhinoceros.MainWindow.BringToFront();
+          PrepareForPrompt();
+
+          if (Rhino.Input.RhinoGet.GetView($"Pick a viewport to set '{plane.Value.Name}' work plane as CPlane", out var rhinoView) == Rhino.Commands.Result.Success)
+          {
+            var cplane = rhinoView.ActiveViewport.GetConstructionPlane();
+            cplane.Name = plane.Value.Name;
+            cplane.Plane = plane.Location;
+
+            rhinoView.ActiveViewport.PushConstructionPlane(cplane);
+            rhinoView.Redraw();
+          }
+        }
+        finally
+        {
+          RecoverFromPrompt();
+          Rhinoceros.MainWindow.Visible = wasVisible;
+        }
+      }
+    }
+
     protected override void Menu_AppendPromptOne(ToolStripDropDown menu)
     {
       if (SourceCount != 0) return;
