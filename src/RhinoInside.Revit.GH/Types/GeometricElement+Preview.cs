@@ -65,6 +65,8 @@ namespace RhinoInside.Revit.GH.Types
       out ARDB.Material[] materials, out Mesh[] meshes, out Curve[] wires
     )
     {
+      if (element is null) { materials = default; meshes = default; wires = default; return; }
+
       bool voidGeometry = element is ARDB.GenericForm form && !form.IsSolid;
 
       using
@@ -324,6 +326,14 @@ namespace RhinoInside.Revit.GH.Types
 
       void IDisposable.Dispose()
       {
+        if (materials is object)
+        {
+          foreach (var material in materials)
+            material.Dispose();
+
+          materials = null;
+        }
+
         if (meshes is object)
         {
           foreach (var mesh in meshes)
@@ -354,8 +364,8 @@ namespace RhinoInside.Revit.GH.Types
     Preview _GeometryPreview;
     Preview GeometryPreview
     {
-      get { return _GeometryPreview ?? (_GeometryPreview = Preview.OrderNew(this)); }
-      set { if (_GeometryPreview != value) _GeometryPreview = value; }
+      get => _GeometryPreview ??= Preview.OrderNew(this);
+      set => _GeometryPreview = value;
     }
 
     public Rhino.Display.DisplayMaterial[] TryGetPreviewMaterials()
@@ -387,7 +397,7 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void SubInvalidateGraphics()
     {
-      using (_GeometryPreview) _GeometryPreview = null;
+      /*using (_GeometryPreview) */_GeometryPreview = null;
       _MeshingParameters = null;
 
       base.SubInvalidateGraphics();
