@@ -742,13 +742,13 @@ namespace RhinoInside.Revit.Convert.Render
 
       if (asset.FindByName(Generic.GenericReflectivityAt0deg) is AssetPropertyDouble reflectivity0)
       {
-        material.Reflectivity = RhinoMath.Clamp(reflectivity0.Value, 0.0, 1.0); ;
+        material.Reflectivity = Arithmetic.Clamp(reflectivity0.Value, 0.0, 1.0); ;
         material.ReflectivityColor = metal ? material.Diffuse : Color4f.White;
       }
 
       if (asset.FindByName(Generic.GenericReflectivityAt90deg) is AssetPropertyDouble reflectivity90)
       {
-        material.Shine = RhinoMath.Clamp(reflectivity90.Value, 0.0, 1.0);
+        material.Shine = Arithmetic.Clamp(reflectivity90.Value, 0.0, 1.0);
         material.Specular = metal ? material.Diffuse : Color4f.White;
       }
 
@@ -2091,7 +2091,7 @@ namespace RhinoInside.Revit.Convert.Render
                 bitmap.SetProperty(UnifiedBitmap.UnifiedbitmapInvert, inverted);
 
               if (value.Fields.TryGetValue("rdk-texture-adjust-multiplier", out double multiplier))
-                bitmap.SetProperty(UnifiedBitmap.UnifiedbitmapRGBAmount, multiplier);
+                bitmap.SetProperty(UnifiedBitmap.UnifiedbitmapRGBAmount, Arithmetic.Clamp(multiplier, 0.0, 1.0));
             }
           }
         }
