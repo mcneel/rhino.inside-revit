@@ -73,7 +73,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
           type = data as TOutput;
           if (type is null)
-            return data.CastTo(out type);
+            return data.ConvertTo(out type);
         }
 
         return true;
@@ -111,6 +111,24 @@ namespace RhinoInside.Revit.GH.Parameters
         }
       }
     }
+  }
+
+  public class MassInstance : GraphicalElement<Types.MassInstance, ARDB.FamilyInstance>
+  {
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.hidden;
+    public override Guid ComponentGuid => new Guid("35AEE8DF-087D-47CC-8243-8B991C994FC5");
+
+    public MassInstance() : base
+    (
+      name: "Mass",
+      nickname: "Mass",
+      description: "Contains a collection of Revit mass instance elements",
+      category: "Params",
+      subcategory: "Revit Elements"
+    )
+    { }
+
+    public override bool AllowElement(ARDB.Element elem) => Types.MassInstance.IsValidElement(elem);
   }
 
   public class Mullion : GraphicalElement<Types.Mullion, ARDB.Mullion>
@@ -152,7 +170,5 @@ namespace RhinoInside.Revit.GH.Parameters
     { }
 
     public override bool AllowElement(ARDB.Element elem) => Types.Panel.IsValidElement(elem);
-
   }
-
 }

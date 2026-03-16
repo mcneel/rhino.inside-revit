@@ -138,14 +138,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 #endif
 
-    public static bool IsElementWithoutSketch(this SketchEditScope scope, Element element)
-    {
-      return element.GetSketch() is null;
-    }
-
     public static bool ElementNeedsNewSketch(this SketchEditScope scope, Element element)
     {
-      return element is Wall || element.GetSketch() is null;
+      return element is Wall || !element.GetSketchId().IsValid();
     }
 
     public static Sketch StartWithNewSketch(this SketchEditScope scope, Element element)

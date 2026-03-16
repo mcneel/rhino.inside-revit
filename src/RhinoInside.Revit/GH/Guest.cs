@@ -141,6 +141,8 @@ namespace RhinoInside.Revit.GH
     #region Grasshopper Editor
     static readonly GH_RhinoScriptInterface Script = new GH_RhinoScriptInterface();
 
+    WindowHandle IGuest.MainWindow => (WindowHandle) (Script.IsEditorLoaded() ? Instances.DocumentEditor.Handle : WindowHandle.Zero.Handle);
+
     /// <summary>
     /// Returns the loaded state of the Grasshopper Main window.
     /// </summary>
@@ -222,12 +224,14 @@ namespace RhinoInside.Revit.GH
       OpenDocument(filename);
     }
 
+    GH_Document DefinitionEnabled;
     void ActivationGate_Enter(object sender, EventArgs e)
     {
-      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      if (DefinitionEnabled is GH_Document definition)
       {
+        definition.Enabled = true;
         definition.ForcePreview(false);
-        definition.Enabled = Instances.ActiveCanvas?.Visible is true || definition.KeepOpen();
+        DefinitionEnabled = null;
       }
 
       if (EnableSolutions.HasValue)
@@ -239,10 +243,11 @@ namespace RhinoInside.Revit.GH
 
     void ActivationGate_Exit(object sender, EventArgs e)
     {
-      if (Instances.ActiveCanvas?.Document is GH_Document definition)
+      if (Instances.ActiveCanvas?.Document is GH_Document definition && definition.Enabled)
       {
-        definition.Enabled = false;
+        DefinitionEnabled = definition;
         definition.ForcePreview(Instances.ActiveCanvas?.Visible is true || definition.KeepOpen());
+        definition.Enabled = false;
       }
     }
 
@@ -254,7 +259,7 @@ namespace RhinoInside.Revit.GH
       doc.SolutionEnd += Grasshopper_SolutionEnd;
 
       // If we don't disable the solutions Grasshopper will
-      // evaluate doc before notifiy us the document is being active.
+      // evaluate doc before notify us the document is being active.
       if (GH_Document.EnableSolutions && !External.ActivationGate.IsOpen)
       {
         GH_Document.EnableSolutions = false;
@@ -511,7 +516,7 @@ namespace RhinoInside.Revit.GH
     }
 
     void Grasshopper_Activated(object sender, EventArgs e) => AuditUnits(Revit.ActiveUIDocument?.Document);
-    void Grasshopper_DocumentChanged(GH_Canvas sender, GH_CanvasDocumentChangedEventArgs e) { }
+    void Grasshopper_DocumentChanged(GH_Canvas sender, GH_CanvasDocumentChangedEventArgs e) => DefinitionEnabled = null;
 
     internal static void AuditUnits(ARDB.Document document)
     {
@@ -545,6 +550,7 @@ namespace RhinoInside.Revit.GH
       var added    = e.GetAddedElementIds().AsReadOnlyElementIdSet();
       var deleted  = e.GetDeletedElementIds().AsReadOnlyElementIdSet();
       var modified = e.GetModifiedElementIds().AsReadOnlyElementIdSet();
+      if (document.IsLinked) return;
 
       if (added.Count > 0 || deleted.Count > 0 || modified.Count > 0)
       {
@@ -552,11 +558,7 @@ namespace RhinoInside.Revit.GH
         {
           var activeDefinition = definition.SolutionState == GH_ProcessStep.Process;
 
-          // Prevent delayed solutions.
-          if (activeDefinition)
-            continue;
-
-          var change = new DocumentChangedEvent()
+          var change = activeDefinition ? null: new DocumentChangedEvent()
           {
             Operation = e.Operation,
             Document = document,
@@ -582,13 +584,13 @@ namespace RhinoInside.Revit.GH
               if (obj is Kernel.IGH_ReferenceParam persistentParam)
               {
                 if (persistentParam.NeedsToBeExpired(document, added, deleted, modified))
-                  change.ExpiredObjects.Add(persistentParam);
+                  change?.ExpiredObjects.Add(persistentParam);
               }
               else if (obj is Kernel.IGH_ReferenceComponent persistentComponent)
               {
                 if (persistentComponent.NeedsToBeExpired(document, added, deleted, modified))
                 {
-                  change.ExpiredObjects.Add(persistentComponent);
+                  change?.ExpiredObjects.Add(persistentComponent);
                 }
                 else
                 {
@@ -601,7 +603,7 @@ namespace RhinoInside.Revit.GH
                         if (activeDefinition && recipient.Phase == GH_SolutionPhase.Blank)
                           continue;
 
-                        change.ExpiredObjects.Add(recipient.Attributes.GetTopLevel.DocObject as IGH_ActiveObject);
+                        change?.ExpiredObjects.Add(recipient.Attributes.GetTopLevel.DocObject as IGH_ActiveObject);
                       }
                     }
                   }
@@ -610,7 +612,11 @@ namespace RhinoInside.Revit.GH
             } catch { }
           }
 
-          if (change.ExpiredObjects.Count > 0)
+          // Prevent delayed solutions but notify components & params about changes.
+          if (activeDefinition)
+            continue;
+
+          if (change?.ExpiredObjects.Count > 0)
             DocumentChangedEvent.Enqueue(change);
         }
       }
@@ -658,7 +664,7 @@ namespace RhinoInside.Revit.GH
         }
 #if DEBUG
         else if (!System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.Escape))
-        {          
+        {
           value.Definition.ScheduleSolution
           (
             delay: 500,
@@ -693,13 +699,13 @@ namespace RhinoInside.Revit.GH
     readonly Queue<ARDB.TransactionGroup> ActiveTransactionGroups = new Queue<ARDB.TransactionGroup>();
     readonly Stack<GH_Document> ActiveDocumentStack = new Stack<GH_Document>();
 
-    internal void StartTransactionGroups()
+    void StartTransactionGroups()
     {
       var name = ActiveDocumentStack.Peek().GetTransactionName();
-      StartTransactionGroups(name, true);
+      StartTransactionGroups(name);
     }
 
-    internal void StartTransactionGroups(string name, bool forcedModal)
+    void StartTransactionGroups(string name)
     {
       using (var documents = Revit.ActiveDBApplication.Documents)
       {
@@ -719,7 +725,7 @@ namespace RhinoInside.Revit.GH
 
           var group = new ARDB.TransactionGroup(doc, name)
           {
-            IsFailureHandlingForcedModal = forcedModal
+            IsFailureHandlingForcedModal = true
           };
           group.Start();
 
@@ -728,21 +734,48 @@ namespace RhinoInside.Revit.GH
       }
     }
 
-    internal void CommitTransactionGroups()
+    Queue<string> CommitTransactionGroups()
     {
+      var groups = new Queue<string>();
       while (ActiveTransactionGroups.Count > 0)
       {
         try
         {
           using (var group = ActiveTransactionGroups.Dequeue())
           {
+            groups.Enqueue(group.GetName());
+
             if (group.IsValidObject)
               group.Assimilate();
           }
         }
         catch { }
       }
+
+      return groups;
     }
+
+    internal IDisposable PauseTransactionGroups()
+    {
+      return new TransactionGroupsPause(this, CommitTransactionGroups());
+    }
+
+    class TransactionGroupsPause : IDisposable
+    {
+      readonly Guest Guest;
+      readonly Queue<string> Groups;
+      public TransactionGroupsPause(Guest guest, Queue<string> groups)
+      {
+        Guest = guest;
+        Groups = groups;
+      }
+      void IDisposable.Dispose()
+      {
+        while (Groups.Count > 0)
+          Guest.Instance.StartTransactionGroups(Groups.Dequeue());
+      }
+    }
+
     #endregion
 
     #region Element Tracking
@@ -868,7 +901,7 @@ namespace RhinoInside.Revit.GH
 
           if (allowModelessHandling)
           {
-            try { deletedIds = revitDocument.GetDependentElements(elementIds, out modifiedIds, CompoundElementFilter.ElementIsNotInternalFilter(revitDocument)); }
+            try { deletedIds = revitDocument.GetDependentElements(elementIds, out modifiedIds, ElementFilters.ElementIsNotInternalFilter(revitDocument)); }
             catch (Autodesk.Revit.Exceptions.ArgumentException) { deletedIds = elementIds; modifiedIds = ElementIdExtension.EmptySet; }
           }
 
@@ -877,7 +910,8 @@ namespace RhinoInside.Revit.GH
             if (tx.Start() == ARDB.TransactionStatus.Started)
             {
               // Untrack elements on revitDocument owned by deleted callSites
-              foreach (var element in elements)
+              // We check for IsValidObject because it may been deleted while deleting the dependent elements above.
+              foreach (var element in elements.Where(x => x.IsValidObject))
               {
                 if (ElementTracking.TrackedElementsDictionary.Remove(element))
                   element.Pinned = false;
