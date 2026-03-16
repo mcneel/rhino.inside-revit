@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Win32.SafeHandles;
+using Rhino.Display;
+using Rhino.DocObjects.Tables;
+using Rhino.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.Numerical;
 
@@ -14,8 +17,19 @@ namespace Rhino.Geometry
     public static readonly Point3d Point3d = new Point3d(Value, Value, Value);
     public static readonly Vector3d Vector3d = new Vector3d(Value, Value, Value);
     public static readonly Plane Plane = new Plane(Point3d, Vector3d, Vector3d);
+    public static readonly Line Line = new Line(Point3d, Point3d);
+    public static readonly Rectangle3d Rectangle = new Rectangle3d(Plane, Interval, Interval);
+    public static readonly Circle Circle = new Circle(Plane, Value);
+    public static readonly Arc Arc = new Arc(Circle, Interval);
     public static readonly BoundingBox BoundingBox = new BoundingBox(Point3d, Point3d);
-    public static readonly Box Box = new Box(Plane, BoundingBox);
+    public static readonly Box Box = new Box(Plane, Interval, Interval, Interval);
+    public static readonly Transform Transform = new Transform()
+    {
+      M00 = Value, M01 = Value, M02 = Value, M03 = Value,
+      M10 = Value, M11 = Value, M12 = Value, M13 = Value,
+      M20 = Value, M21 = Value, M22 = Value, M23 = Value,
+      M30 = Value, M31 = Value, M32 = Value, M33 = Value,
+    };
   }
 
   readonly struct EpsilonEqualityComparer :
@@ -205,6 +219,28 @@ namespace Rhino.Geometry
       //  return value.BoundingBox;
 
       return new BoundingBox(value.GetCorners(), xform);
+    }
+
+    public static IEnumerable<Plane> ToPlanes(this Box box)
+    {
+      var plane = box.Plane;
+      yield return new Plane(plane.PointAt(0.0, 0.0, box.Z.T0), plane.YAxis, plane.XAxis);
+      yield return new Plane(plane.PointAt(0.0, box.Y.T0, 0.0), plane.XAxis, plane.ZAxis);
+      yield return new Plane(plane.PointAt(box.X.T0, 0.0, 0.0), plane.ZAxis, plane.YAxis);
+      yield return new Plane(plane.PointAt(box.X.T1, 0.0, 0.0), plane.YAxis, plane.ZAxis);
+      yield return new Plane(plane.PointAt(0.0, box.Y.T1, 0.0), plane.ZAxis, plane.XAxis);
+      yield return new Plane(plane.PointAt(0.0, 0.0, box.Z.T1), plane.XAxis, plane.YAxis);
+    }
+
+    public static IEnumerable<PlaneSurface> ToSurfaces(this Box box)
+    {
+      var plane = box.Plane;
+      yield return new PlaneSurface(new Plane(plane.PointAt(0.0, 0.0, box.Z.T0), plane.YAxis, plane.XAxis), box.Y, box.X);
+      yield return new PlaneSurface(new Plane(plane.PointAt(0.0, box.Y.T0, 0.0), plane.XAxis, plane.ZAxis), box.X, box.Z);
+      yield return new PlaneSurface(new Plane(plane.PointAt(box.X.T0, 0.0, 0.0), plane.ZAxis, plane.YAxis), box.Z, box.Y);
+      yield return new PlaneSurface(new Plane(plane.PointAt(box.X.T1, 0.0, 0.0), plane.YAxis, plane.ZAxis), box.Y, box.Z);
+      yield return new PlaneSurface(new Plane(plane.PointAt(0.0, box.Y.T1, 0.0), plane.ZAxis, plane.XAxis), box.Z, box.X);
+      yield return new PlaneSurface(new Plane(plane.PointAt(0.0, 0.0, box.Z.T1), plane.XAxis, plane.YAxis), box.X, box.Y);
     }
   }
 
@@ -766,6 +802,25 @@ namespace Rhino.Geometry
     /// <returns>true if the curve has kinks within tolerance and results into a PolyCurve.</returns>
     public static bool TryGetPolyCurve(this Curve curve, out PolyCurve polyCurve, double angleToleranceRadians)
     {
+      if (GetSubCurves(curve, angleToleranceRadians) is Curve[] segments)
+      {
+        polyCurve = new PolyCurve();
+        foreach (var segment in segments)
+          polyCurve.AppendSegment(segment);
+
+        return true;
+      }
+
+      polyCurve = default;
+      return false;
+    }
+
+#if !RHINO_8
+    public static Curve[] GetSubCurves(this Curve curve) => GetSubCurves(curve).ToArray();
+#endif
+
+    private static Curve[] GetSubCurves(Curve curve, double angleToleranceRadians = Math.PI / 180.0)
+    {
       var kinks = default(List<double>);
 
       var continuity = curve.IsClosed ? Continuity.G2_locus_continuous : Continuity.G2_continuous;
@@ -780,16 +835,9 @@ namespace Rhino.Geometry
       }
 
       if (kinks is object && kinks.Count > (curve.IsClosed ? 1 : 0) && curve.Split(kinks) is Curve[] segments)
-      {
-        polyCurve = new PolyCurve();
-        foreach (var segment in segments)
-          polyCurve.AppendSegment(segment);
+        return curve.Split(kinks);
 
-        return true;
-      }
-
-      polyCurve = default;
-      return false;
+      return null;
     }
 
     static bool TryEvaluateCurvature
@@ -1235,30 +1283,22 @@ namespace Rhino.Geometry
     }
 
     public static bool TryGetUserString(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value) =>
-      TryGetUserString(geometry, key, out value, Autodesk.Revit.DB.ElementId.InvalidElementId);
+      TryGetUserString(geometry, key, out value, ElementIdExtension.Invalid);
 
     public static bool TryGetUserString(this GeometryBase geometry, string key, out Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def)
     {
-#if REVIT_2024
-      if (geometry.TryGetUserString(key, out long id, def.ToValue()))
+      if (geometry.TryGetUserString(key, out var id, def.ToValue()))
       {
         value = new Autodesk.Revit.DB.ElementId(id);
         return true;
       }
-#else
-      if (geometry.TryGetUserString(key, out int id, def.ToValue()))
-      {
-        value = new Autodesk.Revit.DB.ElementId(id);
-        return true;
-      }
-#endif
 
       value = def;
       return false;
     }
 
     public static bool TrySetUserString(this GeometryBase geometry, string key, Autodesk.Revit.DB.ElementId value) =>
-      geometry.TrySetUserString(key, value.ToValue(), Autodesk.Revit.DB.ElementId.InvalidElementId.ToValue());
+      geometry.TrySetUserString(key, value.ToValue(), ElementIdExtension.Invalid.ToValue());
 
     public static bool TrySetUserString(this GeometryBase geometry, string key, Autodesk.Revit.DB.ElementId value, Autodesk.Revit.DB.ElementId def) =>
       geometry.TrySetUserString(key, value.ToValue(), def.ToValue());
@@ -1361,10 +1401,46 @@ namespace Rhino.DocObjects
       );
     }
   }
+
+  public static class RhinoDocExtension
+  {
+    public static ActiveSpace CurrentActiveSpace(this RhinoDoc doc)
+    {
+#if RHINO_8
+      return doc.ActiveSpace;
+#else
+      return doc.Views.ModelSpaceIsActive ? ActiveSpace.ModelSpace : ActiveSpace.PageSpace;
+#endif
+    }
+  }
 }
 
 namespace Rhino.DocObjects.Tables
 {
+  static class LinetypeExtension
+  {
+    public static bool Scale(this Linetype linetype, double scaleFactor)
+    {
+#if RHINO_8
+      if (linetype.WidthUnits == UnitSystem.Unset)
+      {
+        linetype.Width *= scaleFactor;
+        return true;
+      }
+#endif
+
+      return false;
+    }
+  }
+
+  static class MaterialTableExtension
+  {
+    public static Material FindName(this MaterialTable table, string name)
+    {
+      return table.FirstOrDefault(x => !x.IsReference && !x.IsDeleted && string.Equals(x.Name, name, StringComparison.InvariantCultureIgnoreCase));
+    }
+  }
+
   static class NamedConstructionPlaneTableExtension
   {
     public static int Add(this NamedConstructionPlaneTable table, ConstructionPlane cplane)
@@ -1421,6 +1497,19 @@ namespace Rhino.DocObjects.Tables
       }
 
       return false;
+    }
+  }
+
+  static class ConstructionPlaneExtension
+  {
+    public static bool Scale(this ConstructionPlane cplane, double scaleFactor)
+    {
+      var location = cplane.Plane;
+      location.Transform(Transform.Scale(Point3d.Origin, scaleFactor));
+      cplane.Plane = location;
+      cplane.GridSpacing *= scaleFactor;
+      cplane.SnapSpacing *= scaleFactor;
+      return true;
     }
   }
 }
@@ -1513,15 +1602,36 @@ namespace Rhino.Display
         projection.SetFrustum(left * scaleFactor, right * scaleFactor, bottom * scaleFactor, top * scaleFactor, near * scaleFactor, far * scaleFactor);
       }
 
-      if (!viewport.SetViewProjection(projection, updateTargetLocation: true))
+      if (!viewport.SetViewProjection(projection, updateTargetLocation: false))
         return false;
 
       var cplane = viewport.GetConstructionPlane();
-      cplane.Plane.Transform(scaleTransform);
-      cplane.GridSpacing *= scaleFactor;
-      cplane.SnapSpacing *= scaleFactor;
+      cplane.Scale(scaleFactor);
       viewport.SetConstructionPlane(cplane);
       return true;
     }
+  }
+}
+
+namespace Rhino.Render
+{
+  static class RenderMaterialExtension
+  {
+    public static RenderMaterial FindName(this RenderMaterialTable table, string name)
+    {
+      return table.FirstOrDefault(x => !x.IsReference() && string.Equals(x.Name, name, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+#if !RHINO_8
+    public static RenderMaterial Find(this RenderMaterialTable table, Guid id)
+    {
+      return table.FirstOrDefault(x => x.Id == id);
+    }
+
+    public static DocObjects.Material ToMaterial(this RenderMaterial material, RenderTexture.TextureGeneration generation)
+    {
+      return material.SimulatedMaterial(generation);
+    }
+#endif
   }
 }

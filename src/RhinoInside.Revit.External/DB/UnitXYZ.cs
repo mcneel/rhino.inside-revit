@@ -4,8 +4,8 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB
 {
-  using Numerical;
   using Extensions;
+  using Numerical;
 
   /// <summary>
   /// This class represents a unit length vector.
@@ -135,7 +135,7 @@ namespace RhinoInside.Revit.External.DB
       var dotOtherNormal = DotProduct(other, normal);
 
       var x = dotThisOther - dotOtherNormal * dotThisNormal;
-      var y = normal.TripleProduct(this, other);
+      var y = TripleProduct(this, other, normal);
 
       var angle = Math.Atan2(y, x);
       return angle < 0.0 ? angle + Constant.Tau : angle;

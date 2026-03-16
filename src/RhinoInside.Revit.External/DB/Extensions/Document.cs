@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// The document's name.
     /// </summary>
     /// <param name="doc"></param>
-    /// <returns>The file name of the document's disk file.</returns>
+    /// <returns>The file name of the document's disk file including the extension.</returns>
     /// <remarks>
     /// This method returns an non empty string even if the project has not been saved yet.
     /// </remarks>
@@ -137,6 +137,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return title;
     }
+
+    internal static string Tooltip(this Document doc) => doc.GetName().TripleDot(64);
     #endregion
 
     #region File
@@ -344,7 +346,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Nomen
     internal static bool TryGetElement<T>(this Document doc, out T element, string nomen, string parentName = default, BuiltInCategory? categoryId = default) where T : Element
     {
-      var nomenParameter = ElementExtension.GetNomenParameter(typeof(T));
+      var nomenParameter = ElementNaming.GetNomenParameter(typeof(T));
 
       if (typeof(ElementType).IsAssignableFrom(typeof(T)))
       {
@@ -359,7 +361,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             Cast<ElementType>().
             Where(x => x.FamilyName.Equals(parentName, ElementNaming.ComparisonType)).
             OfType<T>().
-            FirstOrDefault(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType));
+            FirstOrDefault(x => x.GetNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType));
         }
       }
       else if (typeof(View).IsAssignableFrom(typeof(T)))
@@ -378,7 +380,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           element = enumerable.Cast<View>().
             Where(x => !x.IsTemplate && x.ViewType.ToString() == parentName).
             OfType<T>().
-            FirstOrDefault(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType));
+            FirstOrDefault(x => x.GetNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType));
         }
       }
       else if (typeof(AppearanceAssetElement).IsAssignableFrom(typeof(T)))
@@ -400,7 +402,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
           element = enumerable.
             OfType<T>().
-            FirstOrDefault(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType));
+            FirstOrDefault(x => x.GetNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType));
         }
       }
 
@@ -451,11 +453,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
       TryParseNomenId(nomen.Trim(), out nomen, out var _);
 
       var last = doc.GetNamesakeElements(nomen, type, parentName, categoryId).
-        OrderBy(ElementExtension.GetElementNomen, ElementNaming.NameComparer).LastOrDefault();
+        OrderBy(ElementNaming.GetNomen, ElementNaming.NameComparer).LastOrDefault();
 
       if (last is object)
       {
-        if (TryParseNomenId(last.GetElementNomen(), out nomen, out var id))
+        if (TryParseNomenId(last.GetNomen(), out nomen, out var id))
           return id + 1;
 
         return 1;
@@ -494,32 +496,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static IList<Element> GetNamesakeElements(this Document doc, string name, Type type, string parentName = default, BuiltInCategory? categoryId = default)
     {
-      var enumerable = Enumerable.Empty<Element>();
-
       if (string.IsNullOrWhiteSpace(name))
-        return enumerable.ToList();
+        return Array.Empty<Element>();
 
-      var nomenParameter = ElementExtension.GetNomenParameter(type);
-      using (var elementCollector = new FilteredElementCollector(doc))
+      var enumerable = Enumerable.Empty<Element>();
+      var nomenParameter = ElementNaming.GetNomenParameter(type);
+      using (var collector = new FilteredElementCollector(doc))
       {
         var isElementType = typeof(ElementType).IsAssignableFrom(type);
-        var collector =
-          (isElementType ? elementCollector.WhereElementIsElementType() : elementCollector.WhereElementIsNotElementType()).
+        var elements =
+          (isElementType ? collector.WhereElementIsElementType() : collector.WhereElementIsNotElementType()).
           WhereCategoryIdEqualsTo(categoryId).
           WhereElementIsKindOf(type);
 
         if(nomenParameter != BuiltInParameter.INVALID)
-          collector = collector.WhereParameterBeginsWith(nomenParameter, name);
+          elements = elements.WhereParameterBeginsWith(nomenParameter, name);
 
         if (string.IsNullOrWhiteSpace(parentName))
         {
-          enumerable = collector;
+          enumerable = elements;
         }
         else
         {
           if (isElementType)
           {
-            enumerable = collector.
+            enumerable = elements.
               WhereParameterEqualsTo(BuiltInParameter.ALL_MODEL_FAMILY_NAME, parentName).
               Cast<ElementType>().Where(x => x.FamilyName.Equals(parentName, ElementNaming.ComparisonType));
           }
@@ -527,15 +528,17 @@ namespace RhinoInside.Revit.External.DB.Extensions
           {
             if (Enum.TryParse(parentName, out ViewType viewType))
             {
-              enumerable = collector.
-                Cast<View>().Where(x => !x.IsTemplate && x.ViewType == viewType);
+              enumerable = elements.Cast<View>().Where
+              (
+                x => !x.IsTemplate && x.ViewType == viewType
+              );
             }
           }
           else if (typeof(FillPatternElement).IsAssignableFrom(type))
           {
             if (Enum.TryParse(parentName, out FillPatternTarget target))
             {
-              enumerable = collector.Cast<FillPatternElement>().Where
+              enumerable = elements.Cast<FillPatternElement>().Where
               (
                 x =>
                 {
@@ -555,12 +558,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
           (
             x =>
             {
-              TryParseNomenId(x.GetElementNomen(nomenParameter), out var prefix, out var _);
+              TryParseNomenId(x.GetNomen(nomenParameter), out var prefix, out var _);
               return prefix.Equals(name, ElementNaming.ComparisonType);
             }
           ).
           ToList();
       }
+    }
+
+    internal static bool TryGetNamesakeElement<T>(this Document target, Document source, ElementId elementId, out T namesake)
+    {
+      if (target.GetElement(LookupElement(target, source, elementId)) is T element)
+      {
+        namesake = element;
+        return true;
+      }
+      namesake = default;
+      return false;
     }
 
     internal static ElementId LookupElement(this Document target, Document source, ElementId elementId)
@@ -570,7 +584,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       if (source.GetElement(elementId) is Element element)
       {
-        var nomen = element.GetElementNomen(out var nomenParameter);
+        var nomen = element.GetNomen(out var nomenParameter);
 
         if (element is ElementType type)
         {
@@ -583,7 +597,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               WhereParameterEqualsTo(nomenParameter, nomen).
               Cast<ElementType>().
               Where(x => x.FamilyName.Equals(type.FamilyName, ElementNaming.ComparisonType)).
-              Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
+              Where(x => x.GetNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
               Select(x => x.Id).
               FirstOrDefault() ?? ElementIdExtension.Invalid;
           }
@@ -599,7 +613,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               Cast<View>().
               Where(x => x.IsTemplate == view.IsTemplate).
               Where(x => x.ViewType == view.ViewType).
-              Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
+              Where(x => x.GetNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
               Select(x => x.Id).
               FirstOrDefault() ?? ElementIdExtension.Invalid;
           }
@@ -612,10 +626,28 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           return AppearanceAssetElement.GetAppearanceAssetElementByName(target, asset.Name)?.Id ?? ElementIdExtension.Invalid;
         }
+        else if (element is LinePatternElement linePattern)
+        {
+          return LinePatternElement.GetLinePatternElementByName(target, linePattern.Name)?.Id ?? ElementIdExtension.Invalid;
+        }
         else if (element is FillPatternElement fillPattern)
         {
           using (var pattern = fillPattern.GetFillPattern())
             return FillPatternElement.GetFillPatternElementByName(target, pattern.Target, fillPattern.Name)?.Id ?? ElementIdExtension.Invalid;
+        }
+        else if (element is GraphicsStyle graphicsStyle)
+        {
+          using (var collector = new FilteredElementCollector(target))
+          {
+            return collector.WhereElementIsNotElementType().
+              WhereElementIsKindOf(typeof(GraphicsStyle)).
+              WhereCategoryIdEqualsTo(ElementIdExtension.Invalid).
+              Cast<GraphicsStyle>().
+              Where(x => x.GraphicsStyleType == graphicsStyle.GraphicsStyleType).
+              Where(x => x.Name.Equals(nomen, ElementNaming.ComparisonType)).
+              Select(x => x.Id).
+              FirstOrDefault() ?? ElementIdExtension.Invalid;
+          }
         }
         else
         {
@@ -627,7 +659,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               WhereElementIsKindOf(element.GetType()).
               WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.Invalid).
               WhereParameterEqualsTo(nomenParameter, nomen).
-              Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
+              Where(x => x.GetNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
               Select(x => x.Id).
               FirstOrDefault() ?? ElementIdExtension.Invalid;
             }
@@ -636,7 +668,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
               return collector.WhereElementIsNotElementType().
               WhereElementIsKindOf(element.GetType()).
               WhereCategoryIdEqualsTo(element.Category?.Id ?? ElementIdExtension.Invalid).
-              Where(x => x.GetElementNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
+              Where(x => x.GetNomen(nomenParameter).Equals(nomen, ElementNaming.ComparisonType)).
               Select(x => x.Id).
               FirstOrDefault() ?? ElementIdExtension.Invalid;
             }
@@ -743,7 +775,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (BuiltInCategoriesWithParametersDocument?.IsValidObject != true || !doc.IsEquivalent(BuiltInCategoriesWithParametersDocument))
       {
         BuiltInCategoriesWithParametersDocument = doc;
-        BuiltInCategoriesWithParameters = BuiltInCategoryExtension.BuiltInCategories.Where
+        BuiltInCategoriesWithParameters = BuiltInCategories.Values.Where
         (
           bic =>
           {
@@ -1097,7 +1129,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           //  (
           //    var collector = new FilteredElementCollector(document, view.Id).
           //    WherePasses(new ElementCategoryFilter(ElementId.InvalidElementId, inverted: true)).
-          //    WherePasses(External.DB.CompoundElementFilter.ElementHasBoundingBoxFilter)
+          //    WherePasses(External.DB.ElementFilters.ElementHasBoundingBoxFilter)
           //  )
           //  {
           //    var elements = collector.ToElementIds();
@@ -1438,6 +1470,27 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return null;
+    }
+    #endregion
+
+    #region Structural
+    public static bool IsPhysicalElement(this Document document, ElementId id)
+    {
+#if REVIT_2023
+      return Autodesk.Revit.DB.Structure.AnalyticalToPhysicalAssociationManager.IsPhysicalElement(document, id);
+#else
+      return document.GetElement(id)?.get_Parameter(BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL) is object;
+#endif
+    }
+
+    public static bool IsAnalyticalElement(this Document document, ElementId id)
+    {
+#if REVIT_2023
+
+      return Autodesk.Revit.DB.Structure.AnalyticalToPhysicalAssociationManager.IsAnalyticalElement(document, id);
+#else
+      return document.GetElement(id) is Autodesk.Revit.DB.Structure.AnalyticalModel;
+#endif
     }
     #endregion
   }

@@ -83,10 +83,10 @@ namespace RhinoInside.Revit.GH.Types
     public override bool IsEmpty => Value == ARDB.CategoryType.Invalid;
     public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
     {
-      { (int) ARDB.CategoryType.Model,            "Model"       },
-      { (int) ARDB.CategoryType.Annotation,       "Annotation"  },
-      { (int) ARDB.CategoryType.Internal,         "Internal"    },
-      { (int) ARDB.CategoryType.AnalyticalModel,  "Analytical"  },
+      { (int) ARDB.CategoryType.Model,            "Model"             },
+      { (int) ARDB.CategoryType.Annotation,       "Annotation"        },
+      { (int) ARDB.CategoryType.Internal,         "Internal"          },
+      { (int) ARDB.CategoryType.AnalyticalModel,  "Analytical Model"  },
     };
   }
 

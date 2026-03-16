@@ -8,12 +8,15 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Worksets
 {
-  [ComponentVersion(introduced: "1.2")]
+  using External.DB;
+
+  [ComponentVersion(introduced: "1.2", updated:"1.36")]
   public class QueryWorksets : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("311316BA-81C7-495C-8A20-B7974091D6B1");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
     protected override string IconTag => "Q";
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.Empty;
 
     public override bool NeedsToBeExpired
     (
@@ -44,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.WorksetKind>>
         ("Kind", "K", "Workset kind", defaultValue: ARDB.WorksetKind.UserWorkset, optional: true),
       ParamDefinition.Create<Param_String>
@@ -58,11 +61,11 @@ namespace RhinoInside.Revit.GH.Components.Worksets
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Kind", out Types.WorksetKind kind)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
 
-      using (var collector = new ARDB.FilteredWorksetCollector(doc))
+      using (var collector = new ARDB.FilteredWorksetCollector(source.SourceDocument.Value))
       {
         var worksetCollector = collector;
 
@@ -77,7 +80,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
         DA.SetDataList
         (
           "Worksets",
-          worksets.Select(x => new Types.Workset(doc, x)).
+          worksets.Select(x => new Types.Workset(source.SourceDocument.Value, x)).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

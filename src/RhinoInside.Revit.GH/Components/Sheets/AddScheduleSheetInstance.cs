@@ -86,7 +86,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           if (!Params.TryGetData(DA, "Point", out Point3d? point)) return null;
 
           if (view.IsTitleblockRevisionSchedule)
-            throw new Exceptions.RuntimeArgumentException("Sheet", $"{view.GetElementNomen()} is not a Schedule that can be added to a sheet.");
+            throw new Exceptions.RuntimeArgumentException("Sheet", $"{view.GetNomen()} is not a Schedule that can be added to a sheet.");
 
           if (point is null)
           {

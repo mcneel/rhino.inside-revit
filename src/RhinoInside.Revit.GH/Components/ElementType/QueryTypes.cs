@@ -9,7 +9,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
   using External.DB;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.4")]
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("7B00F940-4C6E-4F3F-AB81-C3EED430DE96");
@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ElementKind>>("Kind", "K", "Kind to match", ElementKind.System | ElementKind.Component, optional: true),
       ParamDefinition.Create<Parameters.Category>                     ("Category", "C", optional: true),
       ParamDefinition.Create<Param_String>                            ("Family Name", "FN", optional: true),
@@ -53,50 +53,51 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Kind", out Types.ElementKind kind)) return;
       if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
       if (!Params.TryGetData(DA, "Family Name", out string familyName)) return;
       if (!Params.TryGetData(DA, "Type Name", out string typeName)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      if (!(category?.Document is null || doc.Equals(category.Document)))
-        throw new System.ArgumentException("Wrong Document.", "Category");
-
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      if (category?.AssertValidElementSource(source) != false || category.Id.IsBuiltInId() || !category.Id.IsValid())
       {
-        var elementCollector = collector.WherePasses(ElementFilter);
+        using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
+        {
+          var elementCollector = collector.WherePasses(ElementFilter);
 
-        if (kind is object)
-          elementCollector = elementCollector.WherePasses(CompoundElementFilter.ElementKindFilter(kind.Value, elementType: true));
+          if (kind is object)
+            elementCollector = elementCollector.WherePasses(ElementFilters.ElementKindFilter(kind.Value, elementType: true));
 
-        if (category is object)
-          elementCollector.WhereCategoryIdEqualsTo(category.Id);
+          if (category is object)
+            elementCollector.WhereCategoryIdEqualsTo(category.Id);
 
-        if (filter is object)
-          elementCollector = elementCollector.WherePasses(filter);
+          if (filter is object)
+            elementCollector = elementCollector.WherePasses(filter, source.SourceInstance.Value);
 
-        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, ref familyName, out var familyNameFilter))
-          elementCollector = elementCollector.WherePasses(familyNameFilter);
+          if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_FAMILY_NAME, ref familyName, out var familyNameFilter))
+            elementCollector = elementCollector.WherePasses(familyNameFilter);
 
-        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref typeName, out var nameFilter))
-          elementCollector = elementCollector.WherePasses(nameFilter);
+          if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref typeName, out var nameFilter))
+            elementCollector = elementCollector.WherePasses(nameFilter);
 
-        var elementTypes = elementCollector.Cast<ARDB.ElementType>();
+          var elementTypes = elementCollector.Cast<ARDB.ElementType>();
 
-        if (familyName is object)
-          elementTypes = elementTypes.Where(x => x.FamilyName.IsSymbolNameLike(familyName));
+          if (familyName is object)
+            elementTypes = elementTypes.Where(x => x.FamilyName.IsSymbolNameLike(familyName));
 
-        if (typeName is object)
-          elementTypes = elementTypes.Where(x => x.Name.IsSymbolNameLike(typeName));
+          if (typeName is object)
+            elementTypes = elementTypes.Where(x => x.Name.IsSymbolNameLike(typeName));
 
-        DA.SetDataList
-        (
-          "Types",
-          elementTypes.
-          Select(Types.ElementType.FromElement).
-          TakeWhileIsNotEscapeKeyDown(this)
-        );
+          DA.SetDataList
+          (
+            "Types",
+            elementTypes.
+            Select(Types.ElementType.FromElement).
+            FromSource(source).
+            TakeWhileIsNotEscapeKeyDown(this)
+          );
+        }
       }
     }
 
