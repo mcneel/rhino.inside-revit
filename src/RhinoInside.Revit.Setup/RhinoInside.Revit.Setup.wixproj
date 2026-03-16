@@ -3,8 +3,7 @@
   <Import Project="../Product.targets" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>3.10</ProductVersion>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <ProjectGuid>25d80b8c-f993-445c-993f-a39c8772f40b</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputName>RhinoInside.Revit</OutputName>
@@ -69,7 +68,7 @@
   </Target>
   <Target Name="BeforeBuild">
     <!-- Read the version from the RhinoInside.Revit.dll -->
-    <GetAssemblyIdentity AssemblyFiles="..\RhinoInside.Revit\bin\Release-2024-R8\net481\RhinoInside.Revit.dll">
+    <GetAssemblyIdentity AssemblyFiles="..\RhinoInside.Revit.Loader\bin\Release-2026\net8.0-windows\RhinoInside.Revit.Loader.dll">
       <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
     </GetAssemblyIdentity>
     <!-- Create the MSBuild properties -->

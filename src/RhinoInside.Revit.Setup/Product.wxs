@@ -16,7 +16,7 @@
              Description="$(var.ProductName)"
              Keywords="Installer;Rhino;Inside;Revit"
              Comments="$(var.ProductVersion)"
-             InstallerVersion="301"
+             InstallerVersion="500"
              Platform="$(var.Platform)"
              InstallScope="perMachine"
              InstallPrivileges="elevated"
@@ -95,17 +95,15 @@
     <WixVariable Id="WixUIDialogBmp" Value="Dialog.png" />
     <WixVariable Id="WixUIBannerBmp" Value="Banner.png" />
 
-    <CustomAction
-            Id="OverwriteWixSetDefaultPerMachineFolder"
-            Property="WixPerMachineFolder"
-            Value="[CommonAppDataFolder]Autodesk\Revit\Addins"
-    />
-    <CustomAction
-            Id="OverwriteWixSetDefaultPerUserFolder"
-            Property="WixPerUserFolder"
-            Value="[AppDataFolder]Autodesk\Revit\Addins"
-    />
-    <CustomAction Id="SetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[APPLICATIONFOLDER]"/>
+    <CustomAction Id="OverwriteWixSetDefaultPerMachineFolder"
+                  Property="WixPerMachineFolder"
+                  Value="[CommonAppDataFolder]Autodesk\Revit\Addins"/>
+    <CustomAction Id="OverwriteWixSetDefaultPerUserFolder"
+                  Property="WixPerUserFolder"
+                  Value="[AppDataFolder]Autodesk\Revit\Addins"/>
+    <CustomAction Id="SetARPINSTALLLOCATION"
+                  Property="ARPINSTALLLOCATION"
+                  Value="[APPLICATIONFOLDER]"/>
 
     <?if $(var.ExpirationPeriod) > 0 ?>
 
@@ -124,7 +122,6 @@
     </InstallUISequence>
 
     <InstallExecuteSequence>
-      <AppSearch Before="CostFinalize" />
       <Custom Action="OverwriteWixSetDefaultPerUserFolder" After="WixSetDefaultPerUserFolder" />
       <Custom Action="OverwriteWixSetDefaultPerMachineFolder" After="WixSetDefaultPerMachineFolder" />
       <Custom Action="SetARPINSTALLLOCATION" After="InstallValidate"/>
