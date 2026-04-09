@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
         ARDB.UpdaterRegistry.RegisterUpdater(this, isOptional: true);
 
-        var filter = ERDB.CompoundElementFilter.ElementIsNotInternalFilter(doc);
+        var filter = ERDB.ElementFilters.ElementIsNotInternalFilter(doc);
         ARDB.UpdaterRegistry.AddTrigger(UpdaterId, filter, ARDB.Element.GetChangeTypeAny());
         ARDB.UpdaterRegistry.AddTrigger(UpdaterId, filter, ARDB.Element.GetChangeTypeElementDeletion());
       }
@@ -308,7 +308,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
         if (Simulated)
         {
-          Status = ARDB.TransactionStatus.RolledBack;
+          TransactionStatus = ARDB.TransactionStatus.RolledBack;
         }
         else
         {
@@ -415,12 +415,12 @@ namespace RhinoInside.Revit.GH.Components.Elements.Obsolete
                              ToList();
 
       
-      var options = new External.DB.TransactionHandlingOptions
+      var options = new ERDB.TransactionHandlingOptions
       {
         FailuresPreprocessor = CreateFailuresPreprocessor()
       };
 
-      using (var chain = new External.DB.TransactionChain(options, Name))
+      using (var chain = new ERDB.TransactionChain(options, Name))
       {
         foreach (var group in elementsToDelete)
         {

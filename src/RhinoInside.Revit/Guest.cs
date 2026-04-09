@@ -34,5 +34,7 @@ namespace RhinoInside.Revit
     string Name { get; }
 
     GuestResult EntryPoint(object sender, EventArgs args);
+
+    Microsoft.Win32.SafeHandles.WindowHandle MainWindow { get; }
   }
 }

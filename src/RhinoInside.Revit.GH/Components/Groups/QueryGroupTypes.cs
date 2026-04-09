@@ -6,9 +6,10 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Groups
 {
+  using External.DB;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.11")]
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryGroupTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("97E9C6BB-8442-4F77-BCA1-6BE8AAFBDC96");
@@ -30,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Category>("Category", "C", "Category to look for a group type", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_String>("Name", "N", "Group name", optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true, relevance: ParamRelevance.Occasional)
@@ -44,37 +45,40 @@ namespace RhinoInside.Revit.GH.Components.Groups
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Category", out Types.Category category)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      if (category?.AssertValidElementSource(source) != false || category.Id.IsBuiltInId() || !category.Id.IsValid())
       {
-        var typesCollector = collector.WherePasses(ElementFilter);
+        using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
+        {
+          var typesCollector = collector.WherePasses(ElementFilter);
 
-        if (category is object)
-          typesCollector.WhereCategoryIdEqualsTo(category.Id);
+          if (category is object)
+            typesCollector.WhereCategoryIdEqualsTo(category.Id);
 
-        if (filter is object)
-          typesCollector = typesCollector.WherePasses(filter);
+          if (filter is object)
+            typesCollector = typesCollector.WherePasses(filter, source.SourceInstance.Value);
 
-        if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
-          typesCollector = typesCollector.WherePasses(nameFilter);
+          if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref name, out var nameFilter))
+            typesCollector = typesCollector.WherePasses(nameFilter);
 
-        var groupTypes = typesCollector.Cast<ARDB.GroupType>();
+          var groupTypes = typesCollector.Cast<ARDB.GroupType>();
 
-        if (!string.IsNullOrEmpty(name))
-          groupTypes = groupTypes.Where(x => x.Name.IsSymbolNameLike(name));
+          if (!string.IsNullOrEmpty(name))
+            groupTypes = groupTypes.Where(x => x.Name.IsSymbolNameLike(name));
 
-        DA.SetDataList
-        (
-          "Types",
-          groupTypes.
-          Select(Types.Element.FromElement).
-          TakeWhileIsNotEscapeKeyDown(this)
-        );
+          DA.SetDataList
+          (
+            "Types",
+            groupTypes.
+            Select(Types.Element.FromElement).
+            FromSource(source).
+            TakeWhileIsNotEscapeKeyDown(this)
+          );
+        }
       }
     }
   }

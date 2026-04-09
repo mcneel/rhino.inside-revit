@@ -302,7 +302,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
     public static PolylineCurve ToRhino(ARDB.PolyLine polyline)
     {
-      return new PolylineCurve(polyline.GetCoordinates().Select(x => AsPoint3d(x)));
+      return new PolylineCurve(polyline.GetCoordinates().Select(AsPoint3d));
     }
     #endregion
 

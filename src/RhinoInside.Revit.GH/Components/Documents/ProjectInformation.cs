@@ -71,10 +71,10 @@ namespace RhinoInside.Revit.GH.Components.Documents
     {
       var info = default(ARDB.ProjectInfo);
 
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Project", out var doc)) return;
-      if (doc.IsFamilyDocument || (info = doc.ProjectInformation) == null)
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, "Project", out var doc)) return;
+      if (doc.Value.IsFamilyDocument || (info = doc.Value.ProjectInformation) == null)
       {
-        info = doc.ProjectInformation;
+        info = doc.Value.ProjectInformation;
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "'Project' is not a valid Project document");
         return;
       }
@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
       if (update)
       {
-        StartTransaction(doc);
+        StartTransaction(doc.Value);
         if (organizationName != null) info.OrganizationName = organizationName;
         if (organizationDescription != null) info.OrganizationDescription = organizationDescription;
         if (buildingName != null) info.BuildingName = buildingName;

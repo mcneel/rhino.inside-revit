@@ -187,7 +187,7 @@ namespace RhinoInside.Revit.GH
 
         case ARDB.StorageType.ElementId:
           var element = new Types.Element();
-          if (!element.CastFrom(value))
+          if (!element.ConvertFrom(value))
             throw new InvalidCastException();
 
           var elementId = element.Id;

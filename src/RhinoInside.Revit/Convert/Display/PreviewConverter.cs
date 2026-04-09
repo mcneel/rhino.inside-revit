@@ -222,6 +222,16 @@ namespace RhinoInside.Revit.Convert.Display
             }
             break;
           }
+          case ARDB.Mesh mesh:
+          {
+            if (mesh.TryGetNakedEdges(out var edges))
+            {
+              foreach (var edge in edges)
+                yield return edge.ToPolylineCurve();
+            }
+
+            break;
+          }
           case ARDB.Solid solid:
           {
             if (solid.Faces.IsEmpty)
@@ -233,7 +243,7 @@ namespace RhinoInside.Revit.Convert.Display
           }
           case ARDB.Face face:
           {
-            foreach (var wire in face.GetEdgesAsCurveLoops().SelectMany(x => x.GetPreviewWires()))
+            foreach (var wire in face.GetEdgesAsCurveLoops().SelectMany(GetPreviewWires))
               yield return wire;
             break;
           }
