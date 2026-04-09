@@ -24,6 +24,7 @@ namespace RhinoInside.Revit.Setup
         ValidateInstallLocation(session, "REVIT2024_INSTALLLOCATION");
         ValidateInstallLocation(session, "REVIT2025_INSTALLLOCATION");
         ValidateInstallLocation(session, "REVIT2026_INSTALLLOCATION");
+        ValidateInstallLocation(session, "REVIT2027_INSTALLLOCATION");
       }
 
       return ActionResult.Success;

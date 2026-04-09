@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
 #if REVIT_2021
-    const ViewType   ViewType_SystemsAnalysisReport   = ViewType.SystemsAnalysisReport;
+    const ViewType ViewType_SystemsAnalysisReport = ViewType.SystemsAnalysisReport;
     const ViewFamily ViewFamily_SystemsAnalysisReport = ViewFamily.SystemsAnalysisReport;
 #else
     const ViewType   ViewType_SystemsAnalysisReport   = (ViewType) 126;
@@ -52,29 +52,33 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       switch (viewType)
       {
-        case ViewType.FloorPlan:              return ViewFamily.FloorPlan;
-        case ViewType.CeilingPlan:            return ViewFamily.CeilingPlan;
-        case ViewType.Elevation:              return ViewFamily.Elevation;
-        case ViewType.ThreeD:                 return ViewFamily.ThreeDimensional;
-        case ViewType.Schedule:               return ViewFamily.Schedule;
-        case ViewType.DrawingSheet:           return ViewFamily.Sheet;
-        case ViewType.ProjectBrowser:         return ViewFamily.Invalid;
-        case ViewType.Report:                 return ViewFamily.Invalid;
-        case ViewType.DraftingView:           return ViewFamily.Drafting;
-        case ViewType.Legend:                 return ViewFamily.Legend;
-        case ViewType.SystemBrowser:          return ViewFamily.Invalid;
-        case ViewType.EngineeringPlan:        return ViewFamily.StructuralPlan;
-        case ViewType.AreaPlan:               return ViewFamily.AreaPlan;
-        case ViewType.Section:                return ViewFamily.Section;
-        case ViewType.Detail:                 return ViewFamily.Detail;
-        case ViewType.CostReport:             return ViewFamily.CostReport;
-        case ViewType.LoadsReport:            return ViewFamily.LoadsReport;
-        case ViewType.PresureLossReport:      return ViewFamily.PressureLossReport;
-        case ViewType.ColumnSchedule:         return ViewFamily.GraphicalColumnSchedule;
-        case ViewType.PanelSchedule:          return ViewFamily.PanelSchedule;
-        case ViewType.Walkthrough:            return ViewFamily.Walkthrough;
-        case ViewType.Rendering:              return ViewFamily.ImageView;
-        case ViewType_SystemsAnalysisReport:  return ViewFamily_SystemsAnalysisReport;
+        case ViewType.FloorPlan: return ViewFamily.FloorPlan;
+        case ViewType.CeilingPlan: return ViewFamily.CeilingPlan;
+        case ViewType.Elevation: return ViewFamily.Elevation;
+        case ViewType.ThreeD: return ViewFamily.ThreeDimensional;
+        case ViewType.Schedule: return ViewFamily.Schedule;
+        case ViewType.DrawingSheet: return ViewFamily.Sheet;
+        case ViewType.ProjectBrowser: return ViewFamily.Invalid;
+        case ViewType.Report: return ViewFamily.Invalid;
+        case ViewType.DraftingView: return ViewFamily.Drafting;
+        case ViewType.Legend: return ViewFamily.Legend;
+        case ViewType.SystemBrowser: return ViewFamily.Invalid;
+        case ViewType.EngineeringPlan: return ViewFamily.StructuralPlan;
+        case ViewType.AreaPlan: return ViewFamily.AreaPlan;
+        case ViewType.Section: return ViewFamily.Section;
+        case ViewType.Detail: return ViewFamily.Detail;
+        case ViewType.CostReport: return ViewFamily.CostReport;
+        case ViewType.LoadsReport: return ViewFamily.LoadsReport;
+#if REVIT_2027
+        case ViewType.PressureLossReport: return ViewFamily.PressureLossReport;
+#else
+        case ViewType.PresureLossReport: return ViewFamily.PressureLossReport;
+#endif
+        case ViewType.ColumnSchedule: return ViewFamily.GraphicalColumnSchedule;
+        case ViewType.PanelSchedule: return ViewFamily.PanelSchedule;
+        case ViewType.Walkthrough: return ViewFamily.Walkthrough;
+        case ViewType.Rendering: return ViewFamily.ImageView;
+        case ViewType_SystemsAnalysisReport: return ViewFamily_SystemsAnalysisReport;
       }
 
       return ViewFamily.Invalid;
@@ -305,10 +309,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
         var (min, max) = outline;
         return new Rectangle
         (
-          left    : (int) Math.Round(min.U * 12.0 * DPI),
-          top     : (int) Math.Round(min.V * 12.0 * DPI),
-          right   : (int) Math.Round(max.U * 12.0 * DPI),
-          bottom  : (int) Math.Round(max.V * 12.0 * DPI)
+          left: (int) Math.Round(min.U * 12.0 * DPI),
+          top: (int) Math.Round(min.V * 12.0 * DPI),
+          right: (int) Math.Round(max.U * 12.0 * DPI),
+          bottom: (int) Math.Round(max.V * 12.0 * DPI)
         );
       }
     }
@@ -523,9 +527,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var dependents = view.GetDependentElements(GetViewerFilter(view.Id));
       switch (dependents.Count)
       {
-        case 0:   return null;
-        case 1:   return view.Document.GetElement(dependents[0]);
-        default:  throw new NotSupportedException();
+        case 0: return null;
+        case 1: return view.Document.GetElement(dependents[0]);
+        default: throw new NotSupportedException();
       }
     }
 
@@ -608,7 +612,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (view.Document.GetElement(id) is T element)
       {
         // Check if is visible in the view.
-        if(view.GetVisibleElements(new ElementId[] { element.Id }, accurate: true).Contains(element.Id))
+        if (view.GetVisibleElements(new ElementId[] { element.Id }, accurate: true).Contains(element.Id))
           return element;
       }
 
@@ -790,7 +794,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       (
         filter,
         modelClipBox.Enabled && view.CropBoxActive ?
-        ElementFilters.BoundingBoxIntersectsFilter(modelClipBox.ToOutLine(), view.Document.Application.VertexTolerance, clipped):
+        ElementFilters.BoundingBoxIntersectsFilter(modelClipBox.ToOutLine(), view.Document.Application.VertexTolerance, clipped) :
         ElementFilters.ElementHasBoundingBoxFilter
       );
 
@@ -830,7 +834,11 @@ namespace RhinoInside.Revit.External.DB.Extensions
           case ViewType.Report:
           case ViewType.CostReport:
           case ViewType.LoadsReport:
+#if REVIT_2027
+          case ViewType.PressureLossReport:
+#else
           case ViewType.PresureLossReport:
+#endif
           case ViewType_SystemsAnalysisReport:
             return clipped ? ElementFilters.Empty : ElementFilters.Universe;
         }
@@ -970,9 +978,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
               {
                 switch (elementValue)
                 {
-                  case ImportInstance _:           elementCategoryType = 6;      break;
-                  case PointCloudInstance _:       elementCategoryType = 7;      break;
-                  default: elementCategoryType = (int)  elementCategory.CategoryType; break;
+                  case ImportInstance _: elementCategoryType = 6; break;
+                  case PointCloudInstance _: elementCategoryType = 7; break;
+                  default: elementCategoryType = (int) elementCategory.CategoryType; break;
                 }
 
                 if (isCategoryTypeHidden[(int) elementCategoryType]) continue;
@@ -1056,7 +1064,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return ElementIdExtension.EmptySet;
     }
-    #endregion
+#endregion
   }
 
   public static class ViewPlanExtension
@@ -1076,16 +1084,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var levelId = viewRange.GetLevelId(plane);
       if (levelId == PlanViewRange.Current) { } // just use the current
       else if (levelId == PlanViewRange.LevelBelow) level = level.Document.GetNearestBaseLevel(level.ProjectElevation, out var _);
-      else if (levelId == PlanViewRange.LevelAbove) level = level.Document.GetNearestTopLevel (level.ProjectElevation, out var _);
+      else if (levelId == PlanViewRange.LevelAbove) level = level.Document.GetNearestTopLevel(level.ProjectElevation, out var _);
       else if (levelId == PlanViewRange.Unlimited)
       {
         switch (plane)
         {
-          case PlanViewPlane.CutPlane:        return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMax);
-          case PlanViewPlane.TopClipPlane:    return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMax);
+          case PlanViewPlane.CutPlane: return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMax);
+          case PlanViewPlane.TopClipPlane: return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMax);
           case PlanViewPlane.BottomClipPlane: return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMin);
-          case PlanViewPlane.ViewDepthPlane:  return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMin);
-          case PlanViewPlane.UnderlayBottom:  return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMin);
+          case PlanViewPlane.ViewDepthPlane: return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMin);
+          case PlanViewPlane.UnderlayBottom: return new BoundingValue(level.ProjectElevation, BoundingValue.Bounding.DisabledMin);
         }
       }
       else level = level.Document.GetElement(levelId) as Level;
