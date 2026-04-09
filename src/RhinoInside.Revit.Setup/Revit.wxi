@@ -79,6 +79,27 @@
                       Name="Version"/>
     </Property>
 
+    <Property Id="REVIT2027_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2027InstallLocation" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2700-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <Property Id="SHARED_COMPONENTS_2027_INSTALLPATH" Secure="yes" Value ="C:\Program Files\Common Files\Autodesk Shared\Components\2027">
+      <RegistrySearch Id="Components2027InstallPath" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Autodesk\SharedComponents\2027"
+                      Name="InstallPath"/>
+    </Property>
+
+    <Property Id="SHARED_COMPONENTS_2027_VERSION" Value=".">
+      <RegistrySearch Id="Components2027Version" Type="raw" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Autodesk\SharedComponents\2027"
+                      Name="Version"/>
+    </Property>
+
     <InstallUISequence>
       <Custom Action="ValidateRevitInstallLocations" After="AppSearch"/>
     </InstallUISequence>
@@ -103,6 +124,7 @@
           <Directory Id="REVIT2024_INSTALLLOCATION" Name="Revit 2024"/>
           <Directory Id="REVIT2025_INSTALLLOCATION" Name="Revit 2025"/>
           <Directory Id="REVIT2026_INSTALLLOCATION" Name="Revit 2026"/>
+          <Directory Id="REVIT2027_INSTALLLOCATION" Name="Revit 2027"/>
         </Directory>
       </Directory>
     </DirectoryRef>

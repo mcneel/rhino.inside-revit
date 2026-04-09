@@ -12,7 +12,9 @@ namespace RhinoInside.Revit
   class Distribution
   {
     #region MinimumRevitVersion
-#if REVIT_2026
+#if REVIT_2027
+    public static readonly Version MinimumRevitVersion = new Version(2027, 0);
+#elif REVIT_2026
     public static readonly Version MinimumRevitVersion = new Version(2026, 0);
 #elif REVIT_2025
     public static readonly Version MinimumRevitVersion = new Version(2025, 0);
@@ -133,16 +135,16 @@ namespace RhinoInside.Revit
       {
         var distributions = new Distribution[]
         {
-        new Distribution(9),
-        new Distribution(8),
+          new Distribution(9),
+          new Distribution(8),
 #if NETFRAMEWORK
-        new Distribution(7),
+          new Distribution(7),
 #endif
 #if DEBUG
-        new Distribution(9, dev: true),
-        new Distribution(8, dev: true),
+          new Distribution(9, dev: true),
+          new Distribution(8, dev: true),
 #if NETFRAMEWORK
-        new Distribution(7, dev: true),
+          new Distribution(7, dev: true),
 #endif
 #endif
         };

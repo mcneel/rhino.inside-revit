@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.27")]
   public class AddAreaBoundaryConditions : ElementTrackerComponent
   {
@@ -127,13 +128,15 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     ARDB.Structure.BoundaryConditions Create(ARDB.Document doc, Types.GeometryFace face)
     {
-      return doc.Create.NewAreaBoundaryConditions
-      (
+#if REVIT_2027
+      return ARDB.Structure.BoundaryConditions.CreateAreaBoundaryConditions(doc,
+#else
+      return doc.Create.NewAreaBoundaryConditions(
+#endif
         face.GetReference(),
         ARDB.Structure.TranslationRotationValue.Fixed, 0.0,
         ARDB.Structure.TranslationRotationValue.Fixed, 0.0,
-        ARDB.Structure.TranslationRotationValue.Fixed, 0.0
-      );
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0);
     }
 
     ARDB.Structure.BoundaryConditions Reconstruct
