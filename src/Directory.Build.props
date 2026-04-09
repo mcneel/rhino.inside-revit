@@ -65,6 +65,7 @@
       Debug-2026-R8;
       Debug-2025-R9;
       Debug-2026-R9;
+      Debug-2027-R9;
       Release-2017-R7;
       Release-2018-R7;
       Release-2019-R7;
@@ -85,6 +86,7 @@
       Release-2026-R8;
       Release-2025-R9;
       Release-2026-R9;
+      Release-2027-R9;
     </Configurations>
     <MSBuildProjectExtensionsPath>obj\$(Configuration)</MSBuildProjectExtensionsPath>
   </PropertyGroup>

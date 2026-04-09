@@ -276,6 +276,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
         }
       }
 
+#if REVIT_2027
+      using (var intersection = lineX.Intersect(lineY, CurveIntersectResultOption.Detailed))
+      {
+        if (intersection.Result == SetComparisonResult.Overlap)
+        {
+          var overlaps = intersection.GetOverlaps();
+          if (overlaps.Count == 1)
+          {
+            origin = overlaps[0].Point;
+            basisX = (UnitXYZ) lineX.Direction;
+            basisY = (UnitXYZ) lineY.Direction;
+          }
+        }
+      }
+#else
       if (lineX.Intersect(lineY, out var result) == SetComparisonResult.Overlap)
       {
         if (result.Size == 1)
@@ -285,6 +300,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           basisY = (UnitXYZ) lineY.Direction;
         }
       }
+#endif
 
       return (origin, basisX, basisY);
     }

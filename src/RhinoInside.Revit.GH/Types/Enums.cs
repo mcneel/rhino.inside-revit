@@ -241,7 +241,11 @@ namespace RhinoInside.Revit.GH.Types
       { (int) ARDB.ViewType.Detail,               "Detail" },
       { (int) ARDB.ViewType.CostReport,           "Cost Report" },
       { (int) ARDB.ViewType.LoadsReport,          "Loads Report" },
-      { (int) ARDB.ViewType.PresureLossReport,    "Presure Loss Report" },
+#if REVIT_2027
+      { (int) ARDB.ViewType.PressureLossReport,   "Pressure Loss Report" },
+#else
+      { (int) ARDB.ViewType.PresureLossReport,    "Pressure Loss Report" },
+#endif
       { (int) ARDB.ViewType.ColumnSchedule,       "Column Schedule" },
       { (int) ARDB.ViewType.PanelSchedule,        "Panel Schedule" },
       { (int) ARDB.ViewType.Walkthrough,          "Walkthrough" },
