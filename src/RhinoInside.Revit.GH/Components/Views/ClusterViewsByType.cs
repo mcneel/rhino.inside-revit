@@ -71,7 +71,11 @@ namespace RhinoInside.Revit.GH.Components.Views
           case ARDB.ViewType.Legend:                param = new Parameters.View() { NickName = "LE" }; break;
           case ARDB.ViewType.LoadsReport:           param = new Parameters.View() { NickName = "LR" }; break;
           case ARDB.ViewType.PanelSchedule:         param = new Parameters.View() { NickName = "PS" }; break;
+#if REVIT_2027
+          case ARDB.ViewType.PressureLossReport:    param = new Parameters.View() { NickName = "PLR" }; break;
+#else
           case ARDB.ViewType.PresureLossReport:     param = new Parameters.View() { NickName = "PLR" }; break;
+#endif
           case ARDB.ViewType.Rendering:             param = new Parameters.View() { NickName = "R" }; break;
           case ARDB.ViewType.Report:                param = new Parameters.View() { NickName = "RT" }; break;
           case ARDB.ViewType.Section:               param = new Parameters.SectionView() { NickName = "SE" }; break;

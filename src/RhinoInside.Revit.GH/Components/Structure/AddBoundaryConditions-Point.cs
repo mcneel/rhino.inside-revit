@@ -1,13 +1,12 @@
 using System;
-using Autodesk.Revit.DB.Structure;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
+  using Convert.Geometry;
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.27")]
   public class AddPointBoundaryConditions : ElementTrackerComponent
   {
@@ -97,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             point
           );
 
-          DA.SetData(_BoundaryConditions_, new PointBoundaryConditions(boundaryConditions));
+          DA.SetData(_BoundaryConditions_, new Types.PointBoundaryConditions(boundaryConditions));
           return boundaryConditions;
         }
       );
@@ -116,15 +115,19 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     ARDB.Structure.BoundaryConditions Create(ARDB.Document doc, Types.GeometryPoint point)
     {
-
-      var bConditions = doc.Create.NewPointBoundaryConditions(point.GetReference(),
-                                                              TranslationRotationValue.Fixed, 0.0,
-                                                              TranslationRotationValue.Fixed, 0.0,
-                                                              TranslationRotationValue.Fixed, 0.0,
-                                                              TranslationRotationValue.Fixed, 0.0,
-                                                              TranslationRotationValue.Fixed, 0.0,
-                                                              TranslationRotationValue.Fixed, 0.0);
-      return bConditions;
+#if REVIT_2027
+      return ARDB.Structure.BoundaryConditions.CreatePointBoundaryConditions(doc,
+#else
+      return doc.Create.NewPointBoundaryConditions(
+#endif
+        point.GetReference(),
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0,
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0,
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0,
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0,
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0,
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0
+      );
     }
 
     ARDB.Structure.BoundaryConditions Reconstruct

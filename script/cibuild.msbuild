@@ -23,6 +23,7 @@
 
     <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-R9;Platform=2025"/>
     <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-R9;Platform=2026"/>
+    <MSBuild Projects="..\src\RhinoInside.Revit.sln" Targets="Restore;Build" Properties="Configuration=Release-R9;Platform=2027"/>
   </Target>
 
   <Target Name="BuildInstaller">

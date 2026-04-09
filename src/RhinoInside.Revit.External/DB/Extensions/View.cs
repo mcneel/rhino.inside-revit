@@ -34,6 +34,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
         return uiDoc.GetOpenUIViews().Any(x => x.ViewId == view.Id);
     }
 
+#if REVIT_2027
+    const ViewType   ViewType_PressureLossReport = ViewType.PressureLossReport;
+#else
+    const ViewType   ViewType_PressureLossReport = ViewType.PresureLossReport;
+#endif
+
 #if REVIT_2021
     const ViewType   ViewType_SystemsAnalysisReport   = ViewType.SystemsAnalysisReport;
     const ViewFamily ViewFamily_SystemsAnalysisReport = ViewFamily.SystemsAnalysisReport;
@@ -63,7 +69,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case ViewType.Detail:                 return ViewFamily.Detail;
         case ViewType.CostReport:             return ViewFamily.CostReport;
         case ViewType.LoadsReport:            return ViewFamily.LoadsReport;
-        case ViewType.PresureLossReport:      return ViewFamily.PressureLossReport;
+        case ViewType_PressureLossReport:      return ViewFamily.PressureLossReport;
         case ViewType.ColumnSchedule:         return ViewFamily.GraphicalColumnSchedule;
         case ViewType.PanelSchedule:          return ViewFamily.PanelSchedule;
         case ViewType.Walkthrough:            return ViewFamily.Walkthrough;
@@ -497,7 +503,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           case ViewType.Report:
           case ViewType.CostReport:
           case ViewType.LoadsReport:
-          case ViewType.PresureLossReport:
+          case ViewType_PressureLossReport:
           case ViewType_SystemsAnalysisReport:
             return clipped ? CompoundElementFilter.Empty : CompoundElementFilter.Universe;
         }

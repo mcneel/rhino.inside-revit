@@ -59,8 +59,22 @@
             <Directory Id="INSTALLFOLDER_2026_R9" Name="R9" />
           </Directory>
         </Directory>
+        <Directory Id="APPLICATIONFOLDER2027" Name="2027">
+          <Directory Id="INSTALLFOLDER_2027" Name="$(var.ApplicationFolderName)">
+            <Directory Id="INSTALLFOLDER_2027_R9" Name="R9" />
+          </Directory>
+        </Directory>
       </Directory>
-      
+
+      <Directory Id="CommonFiles64Folder">
+        <Directory Id="AutodeskSharedFolder" Name="Autodesk Shared">
+          <Directory Id="ComponentsFolder" Name="Components">
+            <Directory Id="SHARED_COMPONENTS_2026_FOLDER" Name="2026" />
+            <Directory Id="SHARED_COMPONENTS_2027_FOLDER" Name="2027" />
+          </Directory>
+        </Directory>
+      </Directory>
+
       <Directory Id="CommonAppDataFolder">
         <Directory Id="McNeelFolder" Name="McNeel">
           <Directory Id="RhinoInsideFolder" Name="Rhino.Inside">
@@ -70,14 +84,6 @@
                 </Directory>
               </Directory>
             </Directory>
-          </Directory>
-        </Directory>
-      </Directory>
-
-      <Directory Id="CommonFiles64Folder">
-        <Directory Id="AutodeskSharedFolder" Name="Autodesk Shared">
-          <Directory Id="ComponentsFolder" Name="Components">
-            <Directory Id="SHARED_COMPONENTS_2026_FOLDER" Name="2026" />
           </Directory>
         </Directory>
       </Directory>
@@ -93,6 +99,8 @@
     <SetProperty Id="INSTALLFOLDER_2025" Value="[APPLICATIONFOLDER]2025\[ApplicationFolderName]\" After="CostFinalize"/>
     <SetProperty Id="INSTALLFOLDER_2026" Value="[APPLICATIONFOLDER]2026\[ApplicationFolderName]\" After="CostFinalize"/>
     <SetProperty Id="SHARED_COMPONENTS_2026_FOLDER" Value="[SHARED_COMPONENTS_2026_INSTALLPATH][SHARED_COMPONENTS_2026_VERSION]" Before="CostInitialize"/>
+    <SetProperty Id="INSTALLFOLDER_2027" Value="[APPLICATIONFOLDER]2027\[ApplicationFolderName]\" After="CostFinalize"/>
+    <SetProperty Id="SHARED_COMPONENTS_2027_FOLDER" Value="[SHARED_COMPONENTS_2027_INSTALLPATH][SHARED_COMPONENTS_2027_VERSION]" Before="CostInitialize"/>
 
   </Fragment>
 
@@ -445,6 +453,36 @@
         <File Id="Addins.2026.R9.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\$(var.Configuration)-2026-R9\net8.0-windows\RhinoInside.Revit.GH.gha"/>
         <File Id="Addins.2026.R9.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
         <File Id="Addins.2026.R9.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
+      </Component>
+
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="Addins.2027.RhinoInsideRevit">
+
+      <Component Win64="yes" Id="Revit.2027.opennurbs_private.manifest" Guid="{4C00DD4D-965E-4C51-8CBA-A2CFC2576F5E}" Directory="SHARED_COMPONENTS_2027_FOLDER">
+        <Condition>Privileged</Condition>
+        <File Id="Revit.2027.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
+      </Component>
+
+      <Component Win64="yes" Id="Addins.2027.RhinoInsideRevit.addin" Guid="{A9EE9806-684E-4335-91C0-FCAF3D94E05D}" Directory="APPLICATIONFOLDER2027">
+        <File Id="Addins.2027.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.Loader\Properties\RhinoInside.Revit.addin" Name="$(var.RiRAddinFileName)"/>
+      </Component>
+
+      <Component Win64="yes" Id="Addins.2027.RhinoInsideRevit" Guid="{CD3381CD-5813-4C5D-85AF-29A95CAFB995}" Directory="INSTALLFOLDER_2027">
+        <File Id="Addins.2027.RhinoInside.Revit.Loader.dll" Source="..\RhinoInside.Revit.Loader\bin\$(var.Configuration)-2027\net10.0-windows\RhinoInside.Revit.Loader.dll"/>
+      </Component>
+
+      <Component Win64="yes" Id="Addins.2027.R9.RhinoInsideRevit" Guid="{843F2FC1-5B70-4F63-8D65-5DBB37079449}" Directory="INSTALLFOLDER_2027_R9">
+        <File Id="Addins.2027.R9.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\$(var.Configuration)-2027-R9\net10.0-windows\RhinoInside.Revit.dll"/>
+        <File Id="Addins.2027.R9.RhinoInside.Revit.xml" Source="..\RhinoInside.Revit\bin\$(var.Configuration)-2027-R9\net10.0-windows\RhinoInside.Revit.xml"/>
+        <File Id="Addins.2027.R9.RhinoInside.Revit.External.dll" Source="..\RhinoInside.Revit.External\bin\$(var.Configuration)-2027-R9\net10.0-windows\RhinoInside.Revit.External.dll"/>
+        <File Id="Addins.2027.R9.RhinoInside.Revit.AddIn.dll" Source="..\RhinoInside.Revit.AddIn\bin\$(var.Configuration)-2027-R9\net10.0-windows\RhinoInside.Revit.AddIn.dll"/>
+        <File Id="Addins.2027.R9.Lokad.ILPack.dll" Source="..\RhinoInside.Revit.AddIn\bin\$(var.Configuration)-2027-R9\net10.0-windows\Lokad.ILPack.dll"/>
+        <File Id="Addins.2027.R9.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\$(var.Configuration)-2027-R9\net10.0-windows\RhinoInside.Revit.GH.gha"/>
+        <File Id="Addins.2027.R9.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+        <File Id="Addins.2027.R9.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
     </ComponentGroup>

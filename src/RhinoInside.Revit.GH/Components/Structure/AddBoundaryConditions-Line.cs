@@ -1,12 +1,11 @@
 using System;
-using Autodesk.Revit.DB.Structure;
 using Grasshopper.Kernel;
-using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Structure
 {
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.27")]
   public class AddLineBoundaryConditions : ElementTrackerComponent
   {
@@ -96,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             curve
           );
 
-          DA.SetData(_BoundaryConditions_, new LineBoundaryConditions(boundaryConditions));
+          DA.SetData(_BoundaryConditions_, new Types.LineBoundaryConditions(boundaryConditions));
           return boundaryConditions;
         }
       );
@@ -112,13 +111,16 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     ARDB.Structure.BoundaryConditions Create(ARDB.Document doc, Types.GeometryCurve curve)
     {
-      var bConditions = doc.Create.NewLineBoundaryConditions(curve.GetReference(),
-                                                             TranslationRotationValue.Fixed, 0.0,
-                                                             TranslationRotationValue.Fixed, 0.0,
-                                                             TranslationRotationValue.Fixed, 0.0,
-                                                             TranslationRotationValue.Fixed, 0.0);
-
-      return bConditions;
+#if REVIT_2027
+      return ARDB.Structure.BoundaryConditions.CreateLineBoundaryConditions(doc,
+#else
+      return doc.Create.NewLineBoundaryConditions(
+#endif
+        curve.GetReference(),
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0,
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0,
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0,
+        ARDB.Structure.TranslationRotationValue.Fixed, 0.0);
     }
 
     ARDB.Structure.BoundaryConditions Reconstruct
