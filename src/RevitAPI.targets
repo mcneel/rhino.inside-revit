@@ -63,7 +63,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.Contains('2027'))">
     <RevitVersion>2027</RevitVersion>
-    <RevitApiVersion>2027.0.0-*</RevitApiVersion>
+    <RevitApiVersion>2027.0.0</RevitApiVersion>
     <DefineConstants>$(DefineConstants);REVIT_2017;REVIT_2018;REVIT_2019;REVIT_2020;REVIT_2021;REVIT_2022;REVIT_2023;REVIT_2024;REVIT_2025;REVIT_2026;REVIT_2027</DefineConstants>
     <TargetFramework>net10.0-windows</TargetFramework>
   </PropertyGroup>
