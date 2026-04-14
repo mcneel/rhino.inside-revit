@@ -11,7 +11,6 @@ group: Deployment & Configs
 ### WIP
 
 ### RC
-- Fixed an installer issue on Revit 2026, when it runs automated.
 - Added 'Load Document' component.
 - Added 'Link Revit File' component.
 - Added 'Link IFC File' component.
@@ -23,6 +22,12 @@ group: Deployment & Configs
 {% endcapture %}
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.36 RC3" version="v1.36.9600.15802" pre_release=true time="04/14/2026" %}
+
+- Adds support for Revit 2027
+- Fixed an installer issue on Revit 2026, when it runs automated.
+- Miscellaneous improvements and bug fixes
 
 {% include ltr/release-header.html title="v1.36 RC2" version="v1.36.9557.17877" pre_release=true time="03/03/2026" %}
 
@@ -40,6 +45,11 @@ group: Deployment & Configs
 - Fix on 'Add Model Element' for slanted walls.
 - Fixed: Creating Wall by Profile creates a new wall when the profile is moved.
   [Issue #1277](https://github.com/mcneel/rhino.inside-revit/issues/1277)
+
+{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9600.14957" time="04/14/2026" %}
+
+- Adds support for Revit 2027
+- Fixed an installer issue on Revit 2026, when it runs automated.
 
 {% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9540.6370" time="02/17/2026" %}
 
