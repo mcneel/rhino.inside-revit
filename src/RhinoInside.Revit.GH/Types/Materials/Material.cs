@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using Rhino;
+using Rhino.Display;
 using Rhino.DocObjects;
+using Rhino.DocObjects.Tables;
 using Rhino.Render;
 using ARDB = Autodesk.Revit.DB;
 #if RHINO_8
@@ -14,6 +17,7 @@ namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Render;
   using Convert.System.Drawing;
+  using External.DB;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Material")]
@@ -26,7 +30,7 @@ namespace RhinoInside.Revit.GH.Types
     public Material(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public Material(ARDB.Material value) : base(value) { }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       switch (source)
       {
@@ -39,12 +43,12 @@ namespace RhinoInside.Revit.GH.Types
           break;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo<Q>(out target))
+      if (base.ConvertTo<Q>(out target))
         return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(Grasshopper.Kernel.Types.GH_Colour)))
@@ -55,15 +59,14 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(Grasshopper.Kernel.Types.GH_Material)))
       {
-        if (RhinoDoc.ActiveDoc is RhinoDoc doc)
-        {
-          if(Value?.ToRenderMaterial(doc) is Rhino.Render.RenderMaterial renderMaterial)
-            target = (Q) (object) new Grasshopper.Kernel.Types.GH_Material(renderMaterial);
-          else
-            target = default;
+        if (IsEmpty)
+          target = (Q) (object) new Grasshopper.Kernel.Types.GH_Material(DefaultRenderMaterial);
+        else if (Value?.ToRenderMaterial(RhinoDoc.ActiveDoc) is RenderMaterial renderMaterial)
+          target = (Q) (object) new Grasshopper.Kernel.Types.GH_Material(renderMaterial);
+        else
+          target = default;
 
-          return true;
-        }
+        return true;
       }
 
 #if RHINO_8
@@ -94,99 +97,129 @@ namespace RhinoInside.Revit.GH.Types
       if (idMap.TryGetValue(Id, out guid))
         return true;
 
-      if (Value is ARDB.Material material)
+      var material = Value;
+      if (material is object || IsEmpty)
       {
         // 2. Check if already exist
-        var index = doc.Materials.Find(material.Name, true);
-        var mat = index < 0 ?
-          new Rhino.DocObjects.Material() { Name = material.Name } :
-          doc.Materials[index];
+        var target = doc.RenderMaterials.FindName(material?.Name ?? DefaultRenderMaterialName);
 
         // 3. Update if necessary
-        if (index < 0 || overwrite)
+        if (target is null || overwrite)
         {
-#if REVIT_2018
-          if (AppearanceAsset is AppearanceAssetElement asset)
+          var source = material?.ToRenderMaterial(doc) ?? DefaultRenderMaterial;
+          if (target is object)
           {
-            if (asset.BakeRenderMaterial(overwrite, doc, material.Name, out var renderMaterialId))
-            {
-              if (RenderContent.FromId(doc, renderMaterialId) is RenderMaterial renderMaterial)
-              {
-#if RHINO_8
-                try
-                {
-                  renderMaterial.BeginChange(RenderContent.ChangeContexts.Program);
-
-                  if (!material.UseRenderAppearanceForShading)
-                  {
-                    var slot = renderMaterial.TextureChildSlotName(RenderMaterial.StandardChildSlots.Diffuse);
-                    if (!renderMaterial.ChildSlotOn(slot))
-                    {
-                      var diffuse = RenderContent.Create(ContentUuids.SingleColorTextureType, renderMaterial, slot, default, doc) as RenderTexture;
-                      diffuse.Name = material.Name;
-                      diffuse.Fields.Set("color-one", renderMaterial.Fields.GetField(RenderMaterial.BasicMaterialParameterNames.Diffuse).GetValue<Rhino.Display.Color4f>());
-                      renderMaterial.SetChildSlotAmount(slot, 100.0, RenderContent.ChangeContexts.Program);
-                      renderMaterial.SetChildSlotOn(slot, true, RenderContent.ChangeContexts.Program);
-                    }
-                  }
-
-                  renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Diffuse, material.Color.ToColor());
-                }
-                finally { renderMaterial.EndChange(); }
-#endif
-                renderMaterial.SimulateMaterial(ref mat, RenderTexture.TextureGeneration.Allow);
-
-                if (mat.Name != material.Name)
-                {
-                  mat.Name = material.Name;
-                  mat.RenderMaterialInstanceId = Guid.Empty;
-                }
-                else mat.RenderMaterialInstanceId = renderMaterialId;
-              }
-            }
+            target.BeginChange(RenderContent.ChangeContexts.Program);
+            if (!target.Replace(source)) target.MatchData(source);
+            target.EndChange();
           }
-          else
-#endif
+          else if (doc.RenderMaterials.Add(source))
           {
-            mat.DiffuseColor = material.Color.ToColor();
-            mat.Shine = material.Shininess / 128.0 * Rhino.DocObjects.Material.MaxShine;
-            mat.Reflectivity = 1.0 / Math.Exp((1.0 - (material.Smoothness / 100.0)) * 10);
-            mat.Transparency = material.Transparency / 100.0;
+            target = source;
           }
-
-          if (index < 0) { index = doc.Materials.Add(mat); mat = doc.Materials[index]; }
-          else if (overwrite) doc.Materials.Modify(mat, index, true);
         }
 
-        idMap.Add(Id, guid = mat.Id);
-        return true;
+        if (target is object)
+        {
+          guid = target.Id;
+          if (Id.IsValid()) idMap.Add(Id, guid);
+          return true;
+        }
       }
 
       return false;
     }
 
-    internal System.Drawing.Color ObjectColor
+    internal bool BakeSharedMaterial
+    (
+      IDictionary<ARDB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      out Guid guid
+    )
     {
-      get
-      {
-        if (Value is ARDB.Material material)
-        {
-          var color = System.Drawing.Color.FromArgb
-          (
-            255 - (int) Math.Round(material.Transparency / 100.0 * 255.0),
-            material.Color.ToColor()
-          );
+      // We create this fake id because a material may be baked as shared or not.
+      var id = new ARDB.ElementId(-Id.ToValue());
 
-          return color;
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(id, out guid))
+        return true;
+
+      if (BakeElement(idMap, overwrite, doc, null, out var materialId))
+      {
+        // 2. Check if already exist
+        var target = doc.Materials.FindName(materialId.ToString());
+        if (target is object && target.RenderMaterialInstanceId != materialId) overwrite = true;
+
+        // 3. Update if necessary
+        if (target is null || overwrite)
+        {
+          var source = new Rhino.DocObjects.Material
+          {
+            Name = materialId.ToString(),
+            RenderMaterialInstanceId = materialId
+          };
+
+          if (target is object)
+            doc.Materials.Modify(source, target.Index, quiet: true);
+          else
+            target = doc.Materials[doc.Materials.Add(source)];
         }
 
-        return System.Drawing.Color.Empty;
+        if (target is object)
+        {
+          idMap.Add(id, (guid = target.Id));
+          return true;
+        }
       }
+
+      return false;
+    }
+
+    internal System.Drawing.Color ObjectColor => Value.ToShadingMaterial(out var _, out var _);
+    #endregion
+
+    #region DefaultRenderMaterial
+    internal const string DefaultRenderMaterialName = "<None>";
+
+    static RenderMaterial _DefaultRenderMaterial => CreateDefaultMaterial();
+    static RenderMaterial DefaultRenderMaterial => _DefaultRenderMaterial.MakeCopy() as RenderMaterial;
+
+    static RenderMaterial CreateDefaultMaterial()
+    {
+      var color = new ColorRGBA(default(ARDB.Material).ToShadingMaterial(out var shininess, out var smoothness).ToArgb());
+      var rgba = new Color4f((float) color.R, (float) color.G, (float) color.B, (float) color.A);
+
+      var hsl = ColorHSL.CreateFromRGBA(color);
+      var emissionRGBA = ColorRGBA.CreateFromHSL(new ColorHSL(hsl.H, hsl.S * 0.5, hsl.L * 0.25));
+      var emission = new Color4f((float) emissionRGBA.R, (float) emissionRGBA.G, (float) emissionRGBA.B, (float) emissionRGBA.A);
+
+      var transparency = 1.0 - rgba.A;
+      var renderMaterial = RenderContentType.NewContentFromTypeId(ContentUuids.BasicMaterialType) as RenderMaterial;
+      renderMaterial.Hidden = true;
+      renderMaterial.Name = DefaultRenderMaterialName;
+      renderMaterial.Notes = "Default Revit Material";
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Diffuse, rgba);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Shine, shininess);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Specular, Color4f.White);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Transparency, transparency);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.TransparencyColor, Color4f.White);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Emission, emission);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Reflectivity, smoothness);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.ReflectivityColor, Color4f.White);
+      renderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Ior, transparency < 0.5 ? 1.0 : transparency + 0.52);
+      renderMaterial.Fields.Set("polish-amount", smoothness);
+      renderMaterial.Fields.Set("clarity-amount", smoothness);
+      renderMaterial.Fields.Set("fresnel-enabled", true);
+
+      return renderMaterial;
     }
     #endregion
 
     #region ModelContent
 #if RHINO_8
+    static readonly ModelRenderMaterial DefaultModelRenderMaterial = new ModelRenderMaterial(_DefaultRenderMaterial);
+
     internal ModelContent ToModelContent(IDictionary<ARDB.ElementId, ModelContent> idMap)
     {
       if (idMap.TryGetValue(Id, out var modelContent))
@@ -200,31 +233,11 @@ namespace RhinoInside.Revit.GH.Types
           RenderMaterial = material.ToRenderMaterial(Grasshopper.Instances.ActiveRhinoDoc)
         };
 
-#if RHINO_8
-        attributes.RenderMaterial.BeginChange(RenderContent.ChangeContexts.Program);
-
-        if (!material.UseRenderAppearanceForShading)
-        {
-          var slot = attributes.RenderMaterial.TextureChildSlotName(RenderMaterial.StandardChildSlots.Diffuse);
-          if (!attributes.RenderMaterial.ChildSlotOn(slot))
-          {
-            var diffuse = RenderContentType.NewContentFromTypeId(ContentUuids.SingleColorTextureType) as RenderTexture;
-            diffuse.Name = material.Name;
-            diffuse.Fields.Set("color-one", attributes.RenderMaterial.Fields.GetField(RenderMaterial.BasicMaterialParameterNames.Diffuse).GetValue<Rhino.Display.Color4f>());
-            attributes.RenderMaterial.SetChild(diffuse, slot);
-            attributes.RenderMaterial.SetChildSlotAmount(slot, 100.0, RenderContent.ChangeContexts.Program);
-            attributes.RenderMaterial.SetChildSlotOn(slot, true, RenderContent.ChangeContexts.Program);
-          }
-        }
-
-        attributes.RenderMaterial.Fields.Set(RenderMaterial.BasicMaterialParameterNames.Diffuse, material.Color.ToColor());
-#endif
-
         idMap.Add(Id, modelContent = attributes.ToModelData() as ModelContent);
         return modelContent;
       }
 
-      return null;
+      return IsEmpty ? DefaultModelRenderMaterial : null;
     }
 #endif
     #endregion
@@ -372,7 +385,7 @@ namespace RhinoInside.Revit.GH.Types
         if (value is object && Value is ARDB.Material material)
         {
           var intValue = (int) Math.Round(value.Value * 100.0);
-          if(0.0 > intValue || intValue > 100)
+          if (0.0 > intValue || intValue > 100)
             throw new ArgumentOutOfRangeException(nameof(Transparency), "Valid value range for transparency is [0.0, 1.0]");
 
           if (material.Transparency != intValue)

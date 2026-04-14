@@ -149,7 +149,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// The dot product of of vector <paramref name="a"/> and vector <paramref name="b"/>.
     /// </summary>
     /// <remarks>
-    /// Geometrically equal to the cosinus of the angle span between a and b times |a| ⋅ |b|.
+    /// Geometrically equal to the cosine of the angle span between a and b times |a| ⋅ |b|.
     /// </remarks>
     /// <param name="a"></param>
     /// <param name="b"></param>
