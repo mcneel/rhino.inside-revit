@@ -10,6 +10,8 @@ namespace RhinoInside.Revit.Setup
     {
       if (!session.EvaluateCondition("Installed"))
       {
+        //System.Diagnostics.Debugger.Launch();
+
         for (int version = 2018; version <= 2027; ++ version)
           ValidateInstallLocation(session, $"REVIT{version}_INSTALLLOCATION");
       }
@@ -19,8 +21,6 @@ namespace RhinoInside.Revit.Setup
 
     private static void ValidateInstallLocation(Session session, string property)
     {
-      //System.Diagnostics.Debugger.Launch();
-
       var installLocation = session[property] ?? string.Empty;
 
       // If installLocation is relative we assume is under "%PROGRAMFILES%\Autodesk"
