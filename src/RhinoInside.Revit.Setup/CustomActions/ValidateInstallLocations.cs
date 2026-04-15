@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using Microsoft.Deployment.WindowsInstaller;
-using OS = System.Environment;
 
 namespace RhinoInside.Revit.Setup
 {
@@ -15,16 +10,8 @@ namespace RhinoInside.Revit.Setup
     {
       if (!session.EvaluateCondition("Installed"))
       {
-        ValidateInstallLocation(session, "REVIT2018_INSTALLLOCATION");
-        ValidateInstallLocation(session, "REVIT2019_INSTALLLOCATION");
-        ValidateInstallLocation(session, "REVIT2020_INSTALLLOCATION");
-        ValidateInstallLocation(session, "REVIT2021_INSTALLLOCATION");
-        ValidateInstallLocation(session, "REVIT2022_INSTALLLOCATION");
-        ValidateInstallLocation(session, "REVIT2023_INSTALLLOCATION");
-        ValidateInstallLocation(session, "REVIT2024_INSTALLLOCATION");
-        ValidateInstallLocation(session, "REVIT2025_INSTALLLOCATION");
-        ValidateInstallLocation(session, "REVIT2026_INSTALLLOCATION");
-        ValidateInstallLocation(session, "REVIT2027_INSTALLLOCATION");
+        for (int version = 2018; version <= 2027; ++ version)
+          ValidateInstallLocation(session, $"REVIT{version}_INSTALLLOCATION");
       }
 
       return ActionResult.Success;
