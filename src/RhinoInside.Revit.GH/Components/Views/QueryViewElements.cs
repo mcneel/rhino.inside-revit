@@ -7,8 +7,8 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
+  using External.DB;
   using External.DB.Extensions;
-  using RhinoInside.Revit.External.DB;
 
   [ComponentVersion(introduced: "1.16")]
   public class QueryViewElements : ElementCollectorComponent
@@ -46,6 +46,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       if (!Params.GetData(DA, "View", out Types.View view, x => x.IsValid)) return;
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
+      if (filter?.IsEmpty() is true) return;
 
       using (var collector = new ARDB.FilteredElementCollector(view.Document, view.Id))
       {
@@ -60,13 +61,13 @@ namespace RhinoInside.Revit.GH.Components.Views
 
           elementCollector = elementCollector.WherePasses
           (
-            ERDB.CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
+            ERDB.ElementFilters.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
           );
         }
         else
         {
           // Default category filtering
-          var hiddenCategories = BuiltInCategoryExtension.GetHiddenInUIBuiltInCategories(view.Document).ToList();
+          var hiddenCategories = view.Document.GetHiddenInUIBuiltInCategories().ToList();
           hiddenCategories.Add(ARDB.BuiltInCategory.OST_SectionBox);  // 'Section Boxes' has little sense here!?!?
           hiddenCategories.Add(ARDB.BuiltInCategory.INVALID);         // `ScheduleSheetInstance` Viewer has no Category, so we filter here
 
@@ -83,7 +84,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         (
           "Elements",
           elementCollector.
-          Select(Types.Element.FromElement).
+          Select(view.GetElement<Types.Element>).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }
@@ -95,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Views
   {
     public override Guid ComponentGuid => new Guid("92B3F600-40FB-4DD3-992B-68B68D284167");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsViewSpecificFilter();
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.ElementIsViewSpecificFilter();
 
     public QueryViewOwnedElements() : base
     (
@@ -140,13 +141,13 @@ namespace RhinoInside.Revit.GH.Components.Views
 
           elementCollector = elementCollector.WherePasses
           (
-            ERDB.CompoundElementFilter.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
+            ERDB.ElementFilters.ElementCategoryFilter(ids, inverted: false, view.Document.IsFamilyDocument)
           );
         }
         else
         {
           // Default category filtering
-          var hiddenCategories = BuiltInCategoryExtension.GetHiddenInUIBuiltInCategories(view.Document).
+          var hiddenCategories = view.Document.GetHiddenInUIBuiltInCategories().
             Append(ARDB.BuiltInCategory.INVALID). // `ScheduleSheetInstance` Viewer has no Category, so we filter here
             ToList();
 
@@ -163,8 +164,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         (
           "Elements",
           elementCollector.
-          Select(Types.GraphicalElement.FromElement).
-          OfType<Types.GraphicalElement>().
+          Select(view.GetElement<Types.GraphicalElement>).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

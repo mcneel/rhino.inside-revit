@@ -7,7 +7,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.LinePatternElements
 {
-  [ComponentVersion(introduced: "1.11")]
+  using External.DB;
+
+  [ComponentVersion(introduced: "1.11", updated:"1.36")]
   public class QueryFillPatterns : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("71C06438-EC02-4A64-A818-49F4F6C5AD55");
@@ -36,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition (new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Fill pattern name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.Param_Enum<Types.FillPatternTarget>>("Type", "T", "Fill pattern type", defaultValue: ARDB.FillPatternTarget.Drafting, GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional)
@@ -50,8 +52,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
 
       string name = null;
       DA.GetData("Name", ref name);
@@ -59,12 +60,12 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
       Params.TryGetData(DA, "Type", out ARDB.FillPatternTarget? type);
       Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var patternsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          patternsCollector = patternsCollector.WherePasses(filter);
+          patternsCollector = patternsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         var patterns = collector.Cast<ARDB.FillPatternElement>().Select(x => new Types.FillPatternElement(x));
 
@@ -78,6 +79,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
         (
           "Fill Patterns",
           patterns.
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

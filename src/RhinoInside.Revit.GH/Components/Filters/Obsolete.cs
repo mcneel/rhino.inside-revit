@@ -97,7 +97,7 @@ namespace RhinoInside.Revit.GH.Components.Filters.Obsolete
           }
         );
 
-        filter = CompoundElementFilter.Union(filters);
+        filter = ElementFilters.Union(filters);
       }
 
       DA.SetData("Filter", filter);

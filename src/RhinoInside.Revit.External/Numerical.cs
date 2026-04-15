@@ -425,7 +425,7 @@ namespace RhinoInside.Revit.Numerical
     {
       x = Math.Abs(x);
 
-      return 1.0 - x <= tolerance;
+      return Math.Abs(1.0 - x) <= tolerance;
     }
 
     internal static bool IsUnit2(double x, double y, double tolerance = 0.5 * Constant.Delta)
@@ -439,7 +439,7 @@ namespace RhinoInside.Revit.Numerical
 
       u /= v;
 
-      return 1.0 - (Math.Sqrt(1.0 + (u * u)) * v) < tolerance;
+      return Math.Abs(1.0 - (Math.Sqrt(1.0 + (u * u)) * v)) < tolerance;
     }
 
     internal static bool IsUnit3(double x, double y, double z, double tolerance = 0.5 * Constant.Delta)
@@ -454,7 +454,7 @@ namespace RhinoInside.Revit.Numerical
 
       u /= w; v /= w;
 
-      return 1.0 - (Math.Sqrt(1.0 + (u * u + v * v)) * w) <= tolerance;
+      return Math.Abs(1.0 - (Math.Sqrt(1.0 + (u * u + v * v)) * w)) <= tolerance;
     }
     #endregion
 

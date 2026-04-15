@@ -365,19 +365,21 @@ namespace Grasshopper.Kernel
     }
 
     internal static IEnumerable<TSource> TakeWhileIsNotEscapeKeyDown<TSource>
-      (this IEnumerable<TSource> source, IGH_DocumentObject documentObject)
+      (this IEnumerable<TSource> source, IGH_DocumentObject documentObject, int frequency = 2)
     {
       if (source is null) throw new ArgumentNullException(nameof(source));
       if (documentObject is null) throw new ArgumentNullException(nameof(documentObject));
 
-      var document = documentObject.OnPingDocument();
+      int index = 0;
       foreach (var item in source)
       {
-        if (GH_Document.IsEscapeKeyDown())
+        index++;
+        if ((index % frequency == 0) && GH_Document.IsEscapeKeyDown())
         {
-          document?.RequestAbortSolution();
+          documentObject.OnPingDocument()?.RequestAbortSolution();
           break;
         }
+
         yield return item;
       }
     }
