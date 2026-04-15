@@ -102,10 +102,10 @@
 
     <CustomAction Id="OverwriteWixSetDefaultPerMachineFolder"
                   Property="WixPerMachineFolder"
-                  Value="[CommonAppDataFolder]Autodesk\Revit\Addins"/>
+                  Value="[CommonAppDataFolder]McNeel\Rhino.Inside\Revit\$(var.MajorMinorVersion)"/>
     <CustomAction Id="OverwriteWixSetDefaultPerUserFolder"
                   Property="WixPerUserFolder"
-                  Value="[AppDataFolder]Autodesk\Revit\Addins"/>
+                  Value="[AppDataFolder]McNeel\Rhino.Inside\Revit\$(var.MajorMinorVersion)"/>
     <CustomAction Id="SetARPINSTALLLOCATION"
                   Property="ARPINSTALLLOCATION"
                   Value="[APPLICATIONFOLDER]"/>

@@ -2,104 +2,83 @@
 <Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Fragment>
 
+    <SetDirectory Id="ADDIN_DATA_FOLDER" Action="SetADDIN_DATA_FOLDER_MACHINE" Value="[CommonAppDataFolder]Autodesk\Revit\Addins">ALLUSERS=1</SetDirectory>
+    <SetDirectory Id="ADDIN_DATA_FOLDER" Action="SetADDIN_DATA_FOLDER_USER" Value="[AppDataFolder]Autodesk\Revit\Addins">NOT ALLUSERS</SetDirectory>
+
+    <SetDirectory Id="ADDIN_FILES_FOLDER" Action="SetADDIN_FILES_FOLDER_MACHINE" Value="[ProgramFiles64Folder]Autodesk\Revit\Addins">ALLUSERS=1</SetDirectory>
+    <SetDirectory Id="ADDIN_FILES_FOLDER" Action="SetADDIN_FILES_FOLDER_USER" Value="[AppDataFolder]Autodesk\Revit\Addins">NOT ALLUSERS</SetDirectory>
+
     <DirectoryRef Id="TARGETDIR">
       <Directory Id="APPLICATIONFOLDER">
-        <Directory Id="APPLICATIONFOLDER2018" Name="2018">
+        <Directory Id="SamplesFolder" Name="Samples">
+        </Directory>
+      </Directory>
+
+      <Directory Id="ADDIN_DATA_FOLDER">
+        <Directory Id="ADDIN_FOLDER_2018" Name="2018">
           <Directory Id="INSTALLFOLDER_2018" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2018_R7" Name="R7" />
             <Directory Id="INSTALLFOLDER_2018_R8" Name="R8" />
           </Directory>
         </Directory>
-        <Directory Id="APPLICATIONFOLDER2019" Name="2019">
+        <Directory Id="ADDIN_FOLDER_2019" Name="2019">
           <Directory Id="INSTALLFOLDER_2019" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2019_R7" Name="R7" />
             <Directory Id="INSTALLFOLDER_2019_R8" Name="R8" />
           </Directory>
         </Directory>
-        <Directory Id="APPLICATIONFOLDER2020" Name="2020">
+        <Directory Id="ADDIN_FOLDER_2020" Name="2020">
           <Directory Id="INSTALLFOLDER_2020" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2020_R7" Name="R7" />
             <Directory Id="INSTALLFOLDER_2020_R8" Name="R8" />
           </Directory>
         </Directory>
-        <Directory Id="APPLICATIONFOLDER2021" Name="2021">
+        <Directory Id="ADDIN_FOLDER_2021" Name="2021">
           <Directory Id="INSTALLFOLDER_2021" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2021_R7" Name="R7" />
             <Directory Id="INSTALLFOLDER_2021_R8" Name="R8" />
           </Directory>
         </Directory>
-        <Directory Id="APPLICATIONFOLDER2022" Name="2022">
+        <Directory Id="ADDIN_FOLDER_2022" Name="2022">
           <Directory Id="INSTALLFOLDER_2022" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2022_R7" Name="R7" />
             <Directory Id="INSTALLFOLDER_2022_R8" Name="R8" />
           </Directory>
         </Directory>
-        <Directory Id="APPLICATIONFOLDER2023" Name="2023">
+        <Directory Id="ADDIN_FOLDER_2023" Name="2023">
           <Directory Id="INSTALLFOLDER_2023" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2023_R7" Name="R7" />
             <Directory Id="INSTALLFOLDER_2023_R8" Name="R8" />
           </Directory>
         </Directory>
-        <Directory Id="APPLICATIONFOLDER2024" Name="2024">
+        <Directory Id="ADDIN_FOLDER_2024" Name="2024">
           <Directory Id="INSTALLFOLDER_2024" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2024_R7" Name="R7" />
             <Directory Id="INSTALLFOLDER_2024_R8" Name="R8" />
           </Directory>
         </Directory>
-        <Directory Id="APPLICATIONFOLDER2025" Name="2025">
+        <Directory Id="ADDIN_FOLDER_2025" Name="2025">
           <Directory Id="INSTALLFOLDER_2025" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2025_R8" Name="R8" />
             <Directory Id="INSTALLFOLDER_2025_R9" Name="R9" />
           </Directory>
         </Directory>
-        <Directory Id="APPLICATIONFOLDER2026" Name="2026">
+        <Directory Id="ADDIN_FOLDER_2026" Name="2026">
           <Directory Id="INSTALLFOLDER_2026" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2026_R8" Name="R8" />
             <Directory Id="INSTALLFOLDER_2026_R9" Name="R9" />
           </Directory>
         </Directory>
-        <Directory Id="APPLICATIONFOLDER2027" Name="2027">
+      </Directory>
+
+      <Directory Id="ADDIN_FILES_FOLDER">
+        <Directory Id="ADDIN_FOLDER_2027" Name="2027">
           <Directory Id="INSTALLFOLDER_2027" Name="$(var.ApplicationFolderName)">
             <Directory Id="INSTALLFOLDER_2027_R9" Name="R9" />
           </Directory>
         </Directory>
       </Directory>
-
-      <Directory Id="CommonFiles64Folder">
-        <Directory Id="AutodeskSharedFolder" Name="Autodesk Shared">
-          <Directory Id="ComponentsFolder" Name="Components">
-            <Directory Id="SHARED_COMPONENTS_2026_FOLDER" Name="2026" />
-            <Directory Id="SHARED_COMPONENTS_2027_FOLDER" Name="2027" />
-          </Directory>
-        </Directory>
-      </Directory>
-
-      <Directory Id="CommonAppDataFolder">
-        <Directory Id="McNeelFolder" Name="McNeel">
-          <Directory Id="RhinoInsideFolder" Name="Rhino.Inside">
-            <Directory Id="RiRFolder" Name="Revit">
-              <Directory Id="CurrentRiRFolder" Name="$(var.MajorMinorVersion)">
-                <Directory Id="SamplesFolder" Name="Samples">
-                </Directory>
-              </Directory>
-            </Directory>
-          </Directory>
-        </Directory>
-      </Directory>
     </DirectoryRef>
-
-    <SetProperty Id="INSTALLFOLDER_2018" Value="[APPLICATIONFOLDER]2018\[ApplicationFolderName]\" After="CostFinalize"/>
-    <SetProperty Id="INSTALLFOLDER_2019" Value="[APPLICATIONFOLDER]2019\[ApplicationFolderName]\" After="CostFinalize"/>
-    <SetProperty Id="INSTALLFOLDER_2020" Value="[APPLICATIONFOLDER]2020\[ApplicationFolderName]\" After="CostFinalize"/>
-    <SetProperty Id="INSTALLFOLDER_2021" Value="[APPLICATIONFOLDER]2021\[ApplicationFolderName]\" After="CostFinalize"/>
-    <SetProperty Id="INSTALLFOLDER_2022" Value="[APPLICATIONFOLDER]2022\[ApplicationFolderName]\" After="CostFinalize"/>
-    <SetProperty Id="INSTALLFOLDER_2023" Value="[APPLICATIONFOLDER]2023\[ApplicationFolderName]\" After="CostFinalize"/>
-    <SetProperty Id="INSTALLFOLDER_2024" Value="[APPLICATIONFOLDER]2024\[ApplicationFolderName]\" After="CostFinalize"/>
-    <SetProperty Id="INSTALLFOLDER_2025" Value="[APPLICATIONFOLDER]2025\[ApplicationFolderName]\" After="CostFinalize"/>
-    <SetProperty Id="INSTALLFOLDER_2026" Value="[APPLICATIONFOLDER]2026\[ApplicationFolderName]\" After="CostFinalize"/>
-    <SetProperty Id="SHARED_COMPONENTS_2026_FOLDER" Value="[SHARED_COMPONENTS_2026_INSTALLPATH][SHARED_COMPONENTS_2026_VERSION]" Before="CostInitialize"/>
-    <SetProperty Id="INSTALLFOLDER_2027" Value="[APPLICATIONFOLDER]2027\[ApplicationFolderName]\" After="CostFinalize"/>
-    <SetProperty Id="SHARED_COMPONENTS_2027_FOLDER" Value="[SHARED_COMPONENTS_2027_INSTALLPATH][SHARED_COMPONENTS_2027_VERSION]" Before="CostInitialize"/>
 
   </Fragment>
 
@@ -111,7 +90,7 @@
         <File Id="Revit.2018.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
-      <Component Win64="yes" Id="Addins.2018.RhinoInsideRevit.addin" Guid="{D49A455F-C51E-451B-B1B8-2AA62E6A9D1C}" Directory="APPLICATIONFOLDER2018">
+      <Component Win64="yes" Id="Addins.2018.RhinoInsideRevit.addin" Guid="{D49A455F-C51E-451B-B1B8-2AA62E6A9D1C}" Directory="ADDIN_FOLDER_2018">
         <File Id="Addins.2018.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.Loader\Properties\RhinoInside.Revit.addin" Name="$(var.RiRAddinFileName)"/>
       </Component>
 
@@ -150,7 +129,7 @@
         <File Id="Revit.2019.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
-      <Component Win64="yes" Id="Addins.2019.RhinoInsideRevit.addin" Guid="{4C2C8AC5-3DD6-4B2C-B568-35BA015F8A66}" Directory="APPLICATIONFOLDER2019">
+      <Component Win64="yes" Id="Addins.2019.RhinoInsideRevit.addin" Guid="{4C2C8AC5-3DD6-4B2C-B568-35BA015F8A66}" Directory="ADDIN_FOLDER_2019">
         <File Id="Addins.2019.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.Loader\Properties\RhinoInside.Revit.addin" Name="$(var.RiRAddinFileName)"/>
       </Component>
 
@@ -189,7 +168,7 @@
         <File Id="Revit.2020.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
-      <Component Win64="yes" Id="Addins.2020.RhinoInsideRevit.addin" Guid="{F35F4F5C-B259-4E02-A615-807630BB23C4}" Directory="APPLICATIONFOLDER2020">
+      <Component Win64="yes" Id="Addins.2020.RhinoInsideRevit.addin" Guid="{F35F4F5C-B259-4E02-A615-807630BB23C4}" Directory="ADDIN_FOLDER_2021">
         <File Id="Addins.2020.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.Loader\Properties\RhinoInside.Revit.addin" Name="$(var.RiRAddinFileName)"/>
       </Component>
 
@@ -228,7 +207,7 @@
         <File Id="Revit.2021.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
-      <Component Win64="yes" Id="Addins.2021.RhinoInsideRevit.addin" Guid="{973A5BCA-285D-4A43-BA31-EC261E4A4246}" Directory="APPLICATIONFOLDER2021">
+      <Component Win64="yes" Id="Addins.2021.RhinoInsideRevit.addin" Guid="{973A5BCA-285D-4A43-BA31-EC261E4A4246}" Directory="ADDIN_FOLDER_2020">
         <File Id="Addins.2021.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.Loader\Properties\RhinoInside.Revit.addin" Name="$(var.RiRAddinFileName)"/>
       </Component>
 
@@ -266,7 +245,7 @@
         <File Id="Revit.2022.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
-      <Component Win64="yes" Id="Addins.2022.RhinoInsideRevit.addin" Guid="{0C36977A-87D0-460C-A6C4-630C1E525ADD}" Directory="APPLICATIONFOLDER2022">
+      <Component Win64="yes" Id="Addins.2022.RhinoInsideRevit.addin" Guid="{0C36977A-87D0-460C-A6C4-630C1E525ADD}" Directory="ADDIN_FOLDER_2022">
         <File Id="Addins.2022.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.Loader\Properties\RhinoInside.Revit.addin" Name="$(var.RiRAddinFileName)"/>
       </Component>
 
@@ -305,7 +284,7 @@
         <File Id="Revit.2023.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
-      <Component Win64="yes" Id="Addins.2023.RhinoInsideRevit.addin" Guid="{0ECD4A06-202D-48B5-84AA-688BEBAB4D6B}" Directory="APPLICATIONFOLDER2023">
+      <Component Win64="yes" Id="Addins.2023.RhinoInsideRevit.addin" Guid="{0ECD4A06-202D-48B5-84AA-688BEBAB4D6B}" Directory="ADDIN_FOLDER_2023">
         <File Id="Addins.2023.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.Loader\Properties\RhinoInside.Revit.addin" Name="$(var.RiRAddinFileName)"/>
       </Component>
 
@@ -344,7 +323,7 @@
         <File Id="Revit.2024.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
-      <Component Win64="yes" Id="Addins.2024.RhinoInsideRevit.addin" Guid="{FF874E50-D777-4DE2-B0AF-AE560E9F4D74}" Directory="APPLICATIONFOLDER2024">
+      <Component Win64="yes" Id="Addins.2024.RhinoInsideRevit.addin" Guid="{FF874E50-D777-4DE2-B0AF-AE560E9F4D74}" Directory="ADDIN_FOLDER_2024">
         <File Id="Addins.2024.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.Loader\Properties\RhinoInside.Revit.addin" Name="$(var.RiRAddinFileName)"/>
       </Component>
 
@@ -383,7 +362,7 @@
         <File Id="Revit.2025.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
-      <Component Win64="yes" Id="Addins.2025.RhinoInsideRevit.addin" Guid="{603EA728-90F3-4D58-B0C4-73DDB0985D52}" Directory="APPLICATIONFOLDER2025">
+      <Component Win64="yes" Id="Addins.2025.RhinoInsideRevit.addin" Guid="{603EA728-90F3-4D58-B0C4-73DDB0985D52}" Directory="ADDIN_FOLDER_2025">
         <File Id="Addins.2025.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.Loader\Properties\RhinoInside.Revit.addin" Name="$(var.RiRAddinFileName)"/>
       </Component>
 
@@ -424,7 +403,7 @@
         <File Id="Revit.2026.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
-      <Component Win64="yes" Id="Addins.2026.RhinoInsideRevit.addin" Guid="{BE91AD66-CB37-496C-BB31-10666D33D734}" Directory="APPLICATIONFOLDER2026">
+      <Component Win64="yes" Id="Addins.2026.RhinoInsideRevit.addin" Guid="{BE91AD66-CB37-496C-BB31-10666D33D734}" Directory="ADDIN_FOLDER_2026">
         <File Id="Addins.2026.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.Loader\Properties\RhinoInside.Revit.addin" Name="$(var.RiRAddinFileName)"/>
       </Component>
 
@@ -465,7 +444,7 @@
         <File Id="Revit.2027.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
-      <Component Win64="yes" Id="Addins.2027.RhinoInsideRevit.addin" Guid="{A9EE9806-684E-4335-91C0-FCAF3D94E05D}" Directory="APPLICATIONFOLDER2027">
+      <Component Win64="yes" Id="Addins.2027.RhinoInsideRevit.addin" Guid="{A9EE9806-684E-4335-91C0-FCAF3D94E05D}" Directory="ADDIN_FOLDER_2027">
         <File Id="Addins.2027.RhinoInside.Revit.addin" Source="..\RhinoInside.Revit.Loader\Properties\RhinoInside.Revit.addin" Name="$(var.RiRAddinFileName)"/>
       </Component>
 
