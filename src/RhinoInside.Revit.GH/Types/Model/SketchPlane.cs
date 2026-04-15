@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Types
     public SketchPlane() : base() { }
     public SketchPlane(ARDB.SketchPlane sketchPlane) : base(sketchPlane) { }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       var value = source;
 
@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Types
       if (value is ARDB.DatumPlane datum)
         return SetValue(datum.GetSketchPlane());
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
     public override BoundingBox GetBoundingBox(Transform xform)
@@ -98,7 +98,7 @@ namespace RhinoInside.Revit.GH.Types
         throw new ArgumentException("Invalid Element", nameof(grid));
     }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       var value = source;
 
@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.GH.Types
       if (value is ARDB.View view)
         return SetValue(view.Document.GetElement(view.GetSketchGridId()));
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
     public override BoundingBox GetBoundingBox(Transform xform)

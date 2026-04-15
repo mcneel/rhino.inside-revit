@@ -57,7 +57,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_Goo
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       target = default;
 
@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Types
         return target is object;
       }
 
-      return base.CastTo(out target);
+      return base.ConvertTo(out target);
     }
     #endregion
 
@@ -277,7 +277,7 @@ namespace RhinoInside.Revit.GH.Types
             (
               x =>
               {
-                try { return x.PlanarizedCurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
+                try { return x.PlanarizedCurveLoops.ToPolyCurves(); }
                 catch { return Array.Empty<PolyCurve>(); }
               }
             ).
@@ -301,7 +301,7 @@ namespace RhinoInside.Revit.GH.Types
             (
               x =>
               {
-                try { return x.CurveLoops.ToArray(GeometryDecoder.ToPolyCurve); }
+                try { return x.CurveLoops.ToPolyCurves(); }
                 catch { return Array.Empty<PolyCurve>(); }
               }
             ).

@@ -142,9 +142,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static BuiltInCategory ToBuiltInCategory(this Category category)
     {
 #if REVIT_2023
-      return category.BuiltInCategory;
+      return category?.BuiltInCategory ?? BuiltInCategory.INVALID;
 #else
-      return category.Id.ToBuiltInCategory();
+      return category?.Id.ToBuiltInCategory() ?? BuiltInCategory.INVALID;
 #endif
     }
 

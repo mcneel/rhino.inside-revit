@@ -198,7 +198,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
           case ARDB.ElementIdParameterValue id:
             var element = new Types.Element();
-            if (!element.CastFrom(value))
+            if (!element.ConvertFrom(value))
               throw new InvalidCastException();
 
             id.Value = parameter.Document.LookupElement(element.Document, element.Id);

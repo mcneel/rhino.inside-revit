@@ -91,12 +91,12 @@ namespace RhinoInside.Revit.GH.Components.Elements
       else Params.TrySetData(DA, "Element", () => element);
 
       Params.GetData(DA, "Filter", out ARDB.ElementFilter filter);
-      filter = CompoundElementFilter.Intersect
+      filter = ElementFilters.Intersect
       (
         new ARDB.ExclusionFilter(new ARDB.ElementId[] { element.Id }),
-        filter ?? CompoundElementFilter.Union
+        filter ?? ElementFilters.Union
         (
-          CompoundElementFilter.ElementIsNotInternalFilter(element.Document),
+          ElementFilters.ElementIsNotInternalFilter(element.Document),
           new ARDB.ElementClassFilter(typeof(ARDB.ExtensibleStorage.DataStorage))
         )
       );

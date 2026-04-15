@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
       else Params.TrySetData(DA, "Document", () => doc);
 
       Params.TrySetData(DA, "Edited", () => doc.IsModified);
