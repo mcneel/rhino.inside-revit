@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           Name = "Work Plane",
           NickName = "WP",
-          Description = $"Work Plane.{OS.NewLine}Face references are also accepted.",
+          Description = $"Work Plane.{OS.NewLine}Element or face references are also accepted.",
           Optional = true
         }, ParamRelevance.Primary
       ),
@@ -144,7 +144,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
       if (!Params.GetData(DA, "Location", out Plane? location, x => x.IsValid)) return;
       if (!Params.GetData(DA, "Type", out Types.FamilySymbol type, x => x.IsValid)) return;
       if (!Parameters.Level.GetDataOrDefault(this, DA, "Schedule Level", out Types.Level level, doc, location.Value.Origin.Z)) return;
@@ -185,7 +185,7 @@ namespace RhinoInside.Revit.GH.Components
             if
             (
               !(workPlane is Types.GeometryFace) &&
-              workPlane.CastTo(out Types.GraphicalElement graphicalElement) &&
+              workPlane.ConvertTo(out Types.GraphicalElement graphicalElement) &&
               !(graphicalElement is Types.DatumPlane)
             )
             {

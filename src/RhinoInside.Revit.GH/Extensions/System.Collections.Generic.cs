@@ -54,13 +54,52 @@ namespace System.Collections.Generic
       if (index > 0)
         values = values.Skip(index);
 
+      var comparer = EqualityComparer<T>.Default;
       foreach (var item in values)
       {
-        if (item.Equals(value))
+        if (comparer.Equals(item, value))
           yield return index;
 
         index++;
       }
+    }
+
+    public static IEnumerable<T> TakeButLast<T>(this IEnumerable<T> source, out T last) where T : class
+    {
+      if (source == null) throw new ArgumentNullException(nameof(source));
+
+      last = default;
+      using var e = source.GetEnumerator();
+      if (!e.MoveNext()) Array.Empty<T>();
+
+      var count = (source as IList)?.Count - 1 ?? 0;
+      var queue = new Queue<T>(count);
+      last = e.Current;
+      while (e.MoveNext())
+      {
+        queue.Enqueue(last);
+        last = e.Current;
+      }
+      return queue;
+    }
+
+    public static IEnumerable<T> TakeButLast<T>(this IEnumerable<T> source, out T? last) where T : struct
+    {
+      if (source == null) throw new ArgumentNullException(nameof(source));
+
+      last = default;
+      using var e = source.GetEnumerator();
+      if (!e.MoveNext()) Array.Empty<T>();
+
+      var count = (source as IList)?.Count - 1 ?? 0;
+      var queue = new Queue<T>(count);
+      last = e.Current;
+      while (e.MoveNext())
+      {
+        queue.Enqueue(last.Value);
+        last = e.Current;
+      }
+      return queue;
     }
 
     public static IEnumerable<TResult> ZipOrLast<TFirst, TSecond, TResult>(this IEnumerable<TFirst> first, IEnumerable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector)

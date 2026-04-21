@@ -316,7 +316,7 @@ namespace RhinoInside.Revit.GH.Parameters
               {
                 await External.ActivationGate.Yield();
 
-                if (uiDocument.TryGetRevitCommandId(ARUI.PostableCommand.TypeProperties, out var TypePropertiesId))
+                if (uiDocument.Application.TryGetRevitCommandId(ARUI.PostableCommand.TypeProperties, out var TypePropertiesId))
                 {
                   var selection = uiDocument.Selection;
                   var current = selection.GetElementIds();
@@ -395,7 +395,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
           type = data as TOutput;
           if (type is null)
-            return data.CastTo(out type);
+            return data.ConvertTo(out type);
         }
 
         return true;
@@ -451,7 +451,7 @@ namespace RhinoInside.Revit.GH.Parameters
 
           type = data as TOutput;
           if (type is null)
-            return data.CastTo(out type);
+            return data.ConvertTo(out type);
         }
 
         return true;

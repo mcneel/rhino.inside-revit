@@ -6,9 +6,10 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
+  using External.DB;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.2.1")]
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryViews : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("DF691659-B75B-4455-AF5F-8A5DE485FA05");
@@ -29,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ViewDiscipline>>("Discipline", "D", "View discipline", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ViewFamily>>("View Family", "VF", "View family", optional: true),
       ParamDefinition.Create<Param_String>("View Name", "VN", "View name", optional: true),
@@ -66,12 +67,9 @@ namespace RhinoInside.Revit.GH.Components.Views
       base.AddedToDocument(document);
     }
 
-
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
-
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Discipline", out ARDB.ViewDiscipline? viewDiscipline)) return;
       if (!Params.TryGetData(DA, "View Family", out ARDB.ViewFamily? viewFamily)) return;
       if (!Params.TryGetData(DA, "View Name", out string viewName)) return;
@@ -84,12 +82,14 @@ namespace RhinoInside.Revit.GH.Components.Views
       if (!Params.TryGetData(DA, "Is Printable", out bool? isPrintable)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      assembly = source.SourceDocument.AssertNamesakeElement(assembly) as Types.AssemblyInstance;
+
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var viewsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          viewsCollector = viewsCollector.WherePasses(filter);
+          viewsCollector = viewsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (viewDiscipline.HasValue && TryGetFilterIntegerParam(ARDB.BuiltInParameter.VIEW_DISCIPLINE, (int) viewDiscipline, out var viewDisciplineFilter))
           viewsCollector = viewsCollector.WherePasses(viewDisciplineFilter);
@@ -132,7 +132,8 @@ namespace RhinoInside.Revit.GH.Components.Views
         (
           "Views",
           views.
-          Select(Types.View.FromElement).
+          OfType<Types.View>().
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

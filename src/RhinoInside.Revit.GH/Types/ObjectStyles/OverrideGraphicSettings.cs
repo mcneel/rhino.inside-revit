@@ -115,7 +115,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (GH_Convert.ToColor(source, out var color, GH_Conversion.Both))
       {
@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
   }
 }
