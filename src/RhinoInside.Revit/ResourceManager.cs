@@ -83,15 +83,26 @@ namespace System.Resources.Extensions
     /// <param name="assembly"></param>
     public static void AssemblyLoaded(Assembly assembly)
     {
-      if (assembly.GetReferencedAssemblies().Any(x => x.Name == "mscorlib"))
+      if (assembly.GetReferencedAssemblies().Any(x => string.Equals(x.Name, "mscorlib", StringComparison.OrdinalIgnoreCase)))
       {
-        var resourcesTypeName = $"{assembly.GetName().Name}.Properties.Resources";
-        if (assembly.GetType(resourcesTypeName) is Type assemblyPropertiesResourcesType)
+        foreach (var resourceName in assembly.GetManifestResourceNames())
         {
-          if (assemblyPropertiesResourcesType.GetField("resourceMan", BindingFlags.Static | BindingFlags.NonPublic) is FieldInfo resourceMan)
+          if (resourceName.EndsWith(".Properties.Resources.resources", StringComparison.OrdinalIgnoreCase))
           {
-            if(resourceMan.FieldType == typeof(Resources.ResourceManager) && resourceMan.GetValue(null) is null)
-              resourceMan.SetValue(null, new ResourceManager(resourcesTypeName, assembly));
+            var resourcesTypeName = resourceName.Substring(0, resourceName.Length - ".resources".Length);
+            if
+            (
+              assembly.GetType(resourcesTypeName) is Type resourcesType &&
+              resourcesType.GetField("resourceMan", BindingFlags.Static | BindingFlags.NonPublic) is FieldInfo resourceMan &&
+              resourceMan.FieldType == typeof(Resources.ResourceManager) &&
+              resourceMan.GetValue(null) is null
+            )
+            {
+              var manager = new Resources.ResourceManager(resourcesTypeName, assembly);
+              var resourceSet = manager.GetResourceSet(CultureInfo.InvariantCulture, createIfNotExists: true, tryParents: false);
+              if (resourceSet.GetType().FullName == "System.Resources.RuntimeResourceSet")
+                resourceMan.SetValue(null, new ResourceManager(resourcesTypeName, assembly));
+            }
           }
         }
       }
