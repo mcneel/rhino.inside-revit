@@ -16,7 +16,7 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
-{% include ltr/release-header.html title="v1.36 RC4" version="v1.36.9607.16169" pre_release=true time="04/21/2026" %}
+{% include ltr/release-header.html title="v1.36 RC4" version="v1.36.9607.19391" pre_release=true time="04/21/2026" %}
 
 - Fixed 'Host Boundary Profile' when used on walls that already have an Sketch.
 - Fixed inconsistency in 'Add Wall (Profile)' curve handling. [#1355](https://github.com/mcneel/rhino.inside-revit/issues/1355)
@@ -28,7 +28,7 @@ group: Deployment & Configs
 - Added 'Cluster References' component.
 - Enabled 'Element Curve' component to edit multi-segment grids.
 
-{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9607.16352" time="04/21/2026" %}
+{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9607.19178" time="04/21/2026" %}
 
 - Enabled .NET Framework assemblies in Revit 2027
 
