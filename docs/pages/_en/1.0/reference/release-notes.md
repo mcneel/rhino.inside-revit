@@ -16,6 +16,10 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9607.16352" time="04/21/2026" %}
+
+- Enabled .NET Framework assemblies in Revit 2027
+
 {% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9600.14957" time="04/14/2026" %}
 
 - Adds support for Revit 2027
