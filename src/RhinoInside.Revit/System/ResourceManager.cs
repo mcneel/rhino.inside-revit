@@ -87,21 +87,23 @@ namespace System.Resources.Extensions
       {
         foreach (var resourceName in assembly.GetManifestResourceNames())
         {
-          if (resourceName.EndsWith(".Properties.Resources.resources", StringComparison.OrdinalIgnoreCase))
+          if (resourceName.EndsWith(".resources", StringComparison.OrdinalIgnoreCase))
           {
             var resourcesTypeName = resourceName.Substring(0, resourceName.Length - ".resources".Length);
-            if
-            (
-              assembly.GetType(resourcesTypeName) is Type resourcesType &&
-              resourcesType.GetField("resourceMan", BindingFlags.Static | BindingFlags.NonPublic) is FieldInfo resourceMan &&
-              resourceMan.FieldType == typeof(Resources.ResourceManager) &&
-              resourceMan.GetValue(null) is null
-            )
+            if(assembly.GetType(resourcesTypeName) is Type resourcesType)
             {
-              var manager = new Resources.ResourceManager(resourcesTypeName, assembly);
-              var resourceSet = manager.GetResourceSet(CultureInfo.InvariantCulture, createIfNotExists: true, tryParents: false);
-              if (resourceSet.GetType().FullName == "System.Resources.RuntimeResourceSet")
-                resourceMan.SetValue(null, new ResourceManager(resourcesTypeName, assembly));
+              foreach (var field in resourcesType.GetFields(BindingFlags.Static | BindingFlags.NonPublic).Where(x => x.FieldType == typeof(Resources.ResourceManager)))
+              {
+                if (field.GetValue(null) is object) continue;
+
+                var manager = new Resources.ResourceManager(resourcesTypeName, assembly);
+                var resourceSet = manager.GetResourceSet(CultureInfo.InvariantCulture, createIfNotExists: true, tryParents: false);
+                if (resourceSet.GetType().FullName == "System.Resources.RuntimeResourceSet")
+                {
+                  field.SetValue(null, new ResourceManager(resourcesTypeName, assembly));
+                  continue;
+                }
+              }
             }
           }
         }
