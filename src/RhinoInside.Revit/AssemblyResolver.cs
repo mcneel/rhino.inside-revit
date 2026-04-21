@@ -92,6 +92,11 @@ namespace RhinoInside.Revit
       var loadedAssembly = args.LoadedAssembly;
       if (loadedAssembly.ReflectionOnly || loadedAssembly.IsDynamic) return;
 
+#if NET10_0_OR_GREATER
+      if (System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(loadedAssembly) == InternalContext)
+        System.Resources.Extensions.ResourceManager.AssemblyLoaded(loadedAssembly);
+#endif
+
       var assemblyName = loadedAssembly.GetName();
       if (references.TryGetValue(assemblyName.Name, out var location))
         location.Activate(loadedAssembly);
