@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
 
       if (!Params.TryGetDataList(DA, "Elements", out IList<Types.Element> elements)) return;
       else Params.TrySetDataList(DA, "Elements", () => elements);
@@ -136,8 +136,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
           {
             foreach (var sourceElement in sourceSystem)
             {
-              var element = Types.Element.FromElementId(doc.Value, doc.Value.LookupElement(sourceElement.element.Document, sourceElement.element.Id));
-              duplicates[sourceElement.index] = element;
+              doc.Value.TryGetNamesakeElement(sourceElement.element.Document, sourceElement.element.Id, out ARDB.Element element);
+              duplicates[sourceElement.index] = Types.Element.FromElement(element);
             }
           }
 
@@ -179,7 +179,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 if
                 (
                   // element.CanBeRenamed() && // More precise but slow.
-                  ElementExtension.GetNomenParameter(element.Value.GetType()) != ARDB.BuiltInParameter.INVALID &&
+                  ElementNaming.GetNomenParameter(element.Value.GetType()) != ARDB.BuiltInParameter.INVALID &&
                   element.Nomen == copiedElement.source.Value.name
                 )
                 {

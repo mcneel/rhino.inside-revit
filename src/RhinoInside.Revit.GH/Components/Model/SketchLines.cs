@@ -128,7 +128,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
           {
             var segment = x[0].GeometryCurve;
             var point = segment.Evaluate(segment.GetRawParameter(0.5), normalized: false).ToPoint3d();
-            var loop = brep.
+            var loop = brep?.
               Loops.
               OrderBy(e => e.To3dCurve() is Curve lc && lc.ClosestPoint(point, out var t, tol.VertexTolerance) ? lc.PointAt(t).DistanceTo(point) : double.PositiveInfinity).
               FirstOrDefault();

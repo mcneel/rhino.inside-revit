@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc))
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc))
         return;
 
       var view = doc.Value.GetDefault3DView();

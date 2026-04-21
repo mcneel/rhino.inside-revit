@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       switch (filterElement)
       {
-        case null: return CompoundElementFilter.Empty;
+        case null: return ElementFilters.Empty;
         case ParameterFilterElement parameterFilterElement: return parameterFilterElement.ToElementFilter();
         case SelectionFilterElement selectionFilterElement: return selectionFilterElement.ToElementFilter();
         default: throw new System.NotImplementedException($"{nameof(ToElementFilter)} is not implemented for {filterElement.GetType()}");
@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static ElementFilter ToElementFilter(this ParameterFilterElement filterElement)
     {
-      return CompoundElementFilter.ElementCategoryFilter(filterElement.GetCategories()).Intersect(filterElement.GetElementFilter());
+      return ElementFilters.ElementCategoryFilter(filterElement.GetCategories()).Intersect(filterElement.GetElementFilter());
     }
   }
 
@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
   {
     public static ElementFilter ToElementFilter(this SelectionFilterElement filterElement)
     {
-      return CompoundElementFilter.ExclusionFilter(filterElement.GetElementIds(), inverted: true);
+      return ElementFilters.ExclusionFilter(filterElement.GetElementIds(), inverted: true);
     }
   }
 }
