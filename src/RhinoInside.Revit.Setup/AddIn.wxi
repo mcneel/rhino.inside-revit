@@ -74,6 +74,7 @@
       <Directory Id="ADDIN_FILES_FOLDER">
         <Directory Id="ADDIN_FOLDER_2027" Name="2027">
           <Directory Id="INSTALLFOLDER_2027" Name="$(var.ApplicationFolderName)">
+            <Directory Id="INSTALLFOLDER_2027_R8" Name="R8" />
             <Directory Id="INSTALLFOLDER_2027_R9" Name="R9" />
           </Directory>
         </Directory>
@@ -450,6 +451,17 @@
 
       <Component Win64="yes" Id="Addins.2027.RhinoInsideRevit" Guid="{CD3381CD-5813-4C5D-85AF-29A95CAFB995}" Directory="INSTALLFOLDER_2027">
         <File Id="Addins.2027.RhinoInside.Revit.Loader.dll" Source="..\RhinoInside.Revit.Loader\bin\$(var.Configuration)-2027\net10.0-windows\RhinoInside.Revit.Loader.dll"/>
+      </Component>
+
+      <Component Win64="yes" Id="Addins.2027.R8.RhinoInsideRevit" Guid="{FE081D06-ED53-448B-B6BD-EC74D55F97DC}" Directory="INSTALLFOLDER_2027_R8">
+        <File Id="Addins.2027.R8.RhinoInside.Revit.dll" Source="..\RhinoInside.Revit\bin\$(var.Configuration)-2027-R8\net10.0-windows\RhinoInside.Revit.dll"/>
+        <File Id="Addins.2027.R8.RhinoInside.Revit.xml" Source="..\RhinoInside.Revit\bin\$(var.Configuration)-2027-R8\net10.0-windows\RhinoInside.Revit.xml"/>
+        <File Id="Addins.2027.R8.RhinoInside.Revit.External.dll" Source="..\RhinoInside.Revit.External\bin\$(var.Configuration)-2027-R8\net10.0-windows\RhinoInside.Revit.External.dll"/>
+        <File Id="Addins.2027.R8.RhinoInside.Revit.AddIn.dll" Source="..\RhinoInside.Revit.AddIn\bin\$(var.Configuration)-2027-R8\net10.0-windows\RhinoInside.Revit.AddIn.dll"/>
+        <File Id="Addins.2027.R8.Lokad.ILPack.dll" Source="..\RhinoInside.Revit.AddIn\bin\$(var.Configuration)-2027-R8\net10.0-windows\Lokad.ILPack.dll"/>
+        <File Id="Addins.2027.R8.RhinoInside.Revit.GH.gha" Source="..\RhinoInside.Revit.GH\bin\$(var.Configuration)-2027-R8\net10.0-windows\RhinoInside.Revit.GH.gha"/>
+        <File Id="Addins.2027.R8.RhinoInside.Revit.Native.dll" Source="..\RhinoInside.Revit.Native\bin\x64\$(var.Configuration)\RhinoInside.Revit.Native.dll"/>
+        <File Id="Addins.2027.R8.opennurbs_private.manifest" Source="opennurbs_private.manifest"/>
       </Component>
 
       <Component Win64="yes" Id="Addins.2027.R9.RhinoInsideRevit" Guid="{843F2FC1-5B70-4F63-8D65-5DBB37079449}" Directory="INSTALLFOLDER_2027_R9">
