@@ -137,7 +137,7 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
       if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Type", out Types.FamilySymbol type)) return;
       if (!Params.TryGetData(DA, "Work Plane", out Types.GeometryObject workPlane)) return;
@@ -203,7 +203,7 @@ namespace RhinoInside.Revit.GH.Components
                 if
                 (
                   !(workPlane is Types.GeometryFace) &&
-                  workPlane.CastTo(out Types.GraphicalElement graphicalElement) &&
+                  workPlane.ConvertTo(out Types.GraphicalElement graphicalElement) &&
                   !(graphicalElement is Types.DatumPlane)
                 )
                 {
@@ -249,7 +249,7 @@ namespace RhinoInside.Revit.GH.Components
               {
                 if (Types.GeometryFace.FromReference(doc.Value, reference) is Types.GeometryFace face)
                 {
-                  var brep = face.PolySurface;
+                  var brep = face.UntrimmedSurface;
                   if
                   (
                     brep is object &&

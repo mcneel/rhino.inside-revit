@@ -27,12 +27,12 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Properties
-    protected override void ResetValue()
+    protected override void SubInvalidateGraphics()
     {
       using (_PolySurface) _PolySurface = null;
       using (_Mesh) _Mesh = null;
 
-      base.ResetValue();
+      base.SubInvalidateGraphics();
     }
     public override Plane Location => base.Location;
 

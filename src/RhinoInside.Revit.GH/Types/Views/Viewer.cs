@@ -34,9 +34,9 @@ namespace RhinoInside.Revit.GH.Types
         throw new ArgumentException("Invalid Element", nameof(element));
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target))
+      if (base.ConvertTo(out target))
         return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(View)))
@@ -225,6 +225,7 @@ namespace RhinoInside.Revit.GH.Types
     #region ISketchAccess
     Sketch _Sketch;
     public Sketch Sketch => _Sketch ??= GetElement<Sketch>(Value?.GetSketchId());
+    public Plane SketchPlane => Sketch?.Location ?? NaN.Plane;
     #endregion
 
     #region Properties

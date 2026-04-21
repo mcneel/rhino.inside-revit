@@ -99,17 +99,17 @@ namespace RhinoInside.Revit.GH.Components.Filters
               if (degenerate == 3)
                 return new ARDB.BoundingBoxContainsPointFilter(bbox.Center.ToXYZ(), Math.Abs(tolerance) / Revit.ModelUnits, inverted);
               else if (strict)
-                return CompoundElementFilter.BoundingBoxIsInsideFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+                return ElementFilters.BoundingBoxIsInsideFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
               else
-                return CompoundElementFilter.BoundingBoxIntersectsFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
+                return ElementFilters.BoundingBoxIntersectsFilter(bbox.ToOutline(), tolerance / Revit.ModelUnits, inverted);
             }
           );
 
-          filter = inverted ? CompoundElementFilter.Intersect(filters.ToArray()) : CompoundElementFilter.Union(filters.ToArray());
+          filter = inverted ? ElementFilters.Intersect(filters.ToArray()) : ElementFilters.Union(filters.ToArray());
         }
 
         if (inverted)
-          filter = filter.Intersect(CompoundElementFilter.ElementHasBoundingBoxFilter);
+          filter = filter.Intersect(ElementFilters.ElementHasBoundingBoxFilter);
       }
 
       DA.SetData("Filter", filter);
@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!Params.GetData(DA, "Tolerance", out double? tolerance)) return;
       if (!Params.GetData(DA, "Inverted", out bool? inverted)) return;
 
-      var limits = CompoundElementFilter.BoundingBoxLimits;
+      var limits = ElementFilters.BoundingBoxLimits;
       var zMin = baseElevation?.Value.IsElevation(out var be) is true ? be : double.NegativeInfinity;
       var zMax = topElevation ?.Value.IsElevation(out var te) is true ? te : double.PositiveInfinity;
       var min = new ARDB.XYZ(-limits, -limits, Math.Max(zMin, -limits));
@@ -156,11 +156,11 @@ namespace RhinoInside.Revit.GH.Components.Filters
         switch (strict)
         {
           case true:
-            DA.SetData("Filter", CompoundElementFilter.BoundingBoxIsInsideFilter(outline, GeometryEncoder.ToInternalLength(tolerance.Value), inverted.Value));
+            DA.SetData("Filter", ElementFilters.BoundingBoxIsInsideFilter(outline, GeometryEncoder.ToInternalLength(tolerance.Value), inverted.Value));
             break;
 
           case false:
-            DA.SetData("Filter", CompoundElementFilter.BoundingBoxIntersectsFilter(outline, GeometryEncoder.ToInternalLength(tolerance.Value), inverted.Value));
+            DA.SetData("Filter", ElementFilters.BoundingBoxIntersectsFilter(outline, GeometryEncoder.ToInternalLength(tolerance.Value), inverted.Value));
             break;
         }
       }

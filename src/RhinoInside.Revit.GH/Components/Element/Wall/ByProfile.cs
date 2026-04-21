@@ -96,11 +96,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
 #if REVIT_2021
       if (slantAngle == 0.0)
       {
-        element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(1 /*ARDB.WallCrossSection.Vertical*/);
+        element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.Vertical);
       }
       else
       {
-        element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(0 /*ARDB.WallCrossSection.SingleSlanted*/);
+        element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.SingleSlanted);
         element.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).Update(slantAngle);
       }
 #endif
@@ -305,17 +305,17 @@ namespace RhinoInside.Revit.GH.Components.Walls
           // Walls are created with the last LocationLine used in the Revit editor!!
           //newWall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(ARDB.WallLocationLine.WallCenterline);
 
-          // We turn off analytical model off by default
+          // We turn off analytical model by default
           newWall.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
 
 #if REVIT_2021
           if (angle == 0.0)
           {
-            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(1 /*ARDB.WallCrossSection.Vertical*/);
+            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.Vertical);
           }
           else
           {
-            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(0 /*ARDB.WallCrossSection.SingleSlanted*/);
+            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.SingleSlanted);
             newWall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).Update(angle);
           }
 #endif
