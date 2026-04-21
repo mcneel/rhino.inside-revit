@@ -56,7 +56,7 @@ namespace System.Runtime.Loader
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal readonly struct ContextualReflectionScope : IDisposable
+    public readonly struct ContextualReflectionScope : IDisposable
     {
       private readonly AssemblyLoadContext _previous;
 
