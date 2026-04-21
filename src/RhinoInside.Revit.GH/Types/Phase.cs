@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Types
     public Phase(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public Phase(ARDB.Phase value) : base(value) { }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       var value = source;
       if (source is IGH_Goo goo)
@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Types
           return true;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
     public int? SequenceNumber => Value?.get_Parameter(ARDB.BuiltInParameter.PHASE_SEQUENCE_NUMBER).AsInteger();

@@ -22,4 +22,4 @@ here. This folder is for adding functionality that the external assembly might
 have but does not have.
 
 #### See also
-[Microsoft Extension Methods Design Gidelines](https://docs.microsoft.com/en-us/dotnet/standard/design-guidelines/extension-methods)
+[Microsoft Extension Methods Design Guidelines](https://docs.microsoft.com/en-us/dotnet/standard/design-guidelines/extension-methods)

@@ -1,12 +1,14 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Rhino.Geometry;
+using Rhino.Geometry.Intersect;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   using Convert.Geometry;
+  using External.DB;
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Host")]
@@ -80,6 +82,125 @@ namespace RhinoInside.Revit.GH.Types
 
         return base.Location;
       }
+    }
+
+    public virtual Plane SketchPlane
+    {
+      get => Location;
+    }
+
+    internal bool SetSketchPlane(Plane plane)
+    {
+      if (Value is ARDB.HostObject host)
+      {
+        var modified = false;
+        var normal = plane.Normal;
+        var vertical = normal.EpsilonEquals(Vector3d.ZAxis, Rhino.RhinoMath.ZeroTolerance);
+        var horizontal = Math.Abs(normal * Vector3d.ZAxis) < Rhino.RhinoMath.ZeroTolerance;
+
+        if (vertical == Value is ARDB.Wall)
+          return false;
+
+        if (Value is ARDB.Wall wallElement && !horizontal)
+        {
+#if REVIT_2021
+          if(wallElement.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).AsEnum<ARDB.WallCrossSection>() == ARDB.WallCrossSection.Tapered)
+#endif
+            return false;
+        }
+
+        if (host.Location is ARDB.LocationCurve locationCurve && locationCurve.Curve is ARDB.Line locationLine)
+        {
+          if (Intersection.PlanePlane(Level.Location, plane, out var line))
+          {
+            using (var scope = Document.CommitScope())
+            {
+              var pinned = host.Pinned;
+              var mid0 = locationLine.Evaluate(0.5, normalized: true);
+              var mid1 = line.ClosestPoint(mid0.ToPoint3d(), false).ToXYZ();
+              if (!mid0.AlmostEqualPoints(mid1))
+              {
+                host.Pinned = false;
+                modified = locationCurve.Move(mid1 - mid0);
+              }
+
+              var angle0 = Vector3d.VectorAngle(Vector3d.XAxis, locationLine.Direction.ToVector3d(), Vector3d.ZAxis);
+              var angle1 = Vector3d.VectorAngle(Vector3d.XAxis, line.Direction, Vector3d.ZAxis);
+              var angle = angle1 - angle0;
+              if (Math.Abs(angle) > GeometryTolerance.Internal.DefaultTolerance)
+              {
+                host.Pinned = false;
+                using (var axis = ARDB.Line.CreateUnbound(mid1, UnitXYZ.BasisZ))
+                  modified = locationCurve.Rotate(axis, angle);
+              }
+
+              if (this is Wall wall)
+              {
+                var orientation = new Vector3d(normal.X, normal.Y, 0.0); orientation.Unitize();
+                var direction = new Vector3d(orientation.Y, -orientation.X, 0.0); direction.Unitize();
+                var slantAngle = -Math.Atan2(-direction * Vector3d.CrossProduct(orientation, normal), orientation * normal);
+                if (Math.Abs(wall.SlantAngle - slantAngle) > GeometryTolerance.Internal.DefaultTolerance)
+                {
+                  wall.SlantAngle = slantAngle;
+                  modified = true;
+                }
+              }
+
+              if (modified)
+              {
+                if (host.Pinned != pinned) host.Pinned = pinned;
+                scope.Commit();
+                InvalidateGraphics();
+              }
+            }
+          }
+        }
+        else if (host.Location is ARDB.Location location && vertical)
+        {
+          using (var scope = Document.CommitScope())
+          {
+            var pinned = host.Pinned;
+            var source = SketchPlane.Origin.ToXYZ();
+            var target = plane.Origin.ToXYZ();
+
+            if (!source.AlmostEqualPoints(target))
+            {
+              host.Pinned = false;
+              modified = location.Move(target - source);
+            }
+
+            if (modified)
+            {
+              if (host.Pinned != pinned) host.Pinned = pinned;
+              scope.Commit();
+              InvalidateGraphics();
+            }
+          }
+        }
+
+        if (modified)
+          InvalidateGraphics();
+      }
+
+      return true;
+    }
+
+    internal bool SetProfile(IList<Curve> boundaries, Vector3d normal)
+    {
+      if (Value?.GetSketch() is ARDB.Sketch sketch)
+      {
+        using (var scope = Document.CommitScope())
+        {
+          if (Sketch.SetProfile(sketch, boundaries, normal))
+          {
+            InvalidateGraphics();
+            scope.Commit();
+            return true;
+          }
+        }
+      }
+
+      return false;
     }
 
     internal bool SetSlabShape(IList<Point3d> points, IList<Line> creases, out IList<Point3d> skipedPoints, out IList<Line> skipedCreases)

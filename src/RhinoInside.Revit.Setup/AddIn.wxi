@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  
   <Fragment>
 
     <SetDirectory Id="ADDIN_DATA_FOLDER" Action="SetADDIN_DATA_FOLDER_MACHINE" Value="[CommonAppDataFolder]Autodesk\Revit\Addins">ALLUSERS=1</SetDirectory>

@@ -128,7 +128,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc))
         return;
 
       bool update = false;
@@ -141,7 +141,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       update |= Params.GetData(DA, "Deck Profile", out Types.FamilySymbol deckProfile);
       update |= Params.GetData(DA, "Deck Usage", out Types.DeckEmbeddingType deckType);
 
-      var layer = update ? new Types.CompoundStructureLayer(doc)
+      var layer = update ? new Types.CompoundStructureLayer(doc.Value)
       {
         Function = function?.IsValid == true ? function :
         new Types.LayerFunction(width == 0.0 ? ARDB.MaterialFunctionAssignment.Membrane : ARDB.MaterialFunctionAssignment.Structure),
