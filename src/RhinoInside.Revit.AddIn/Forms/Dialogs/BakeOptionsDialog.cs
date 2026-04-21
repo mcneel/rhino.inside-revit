@@ -101,7 +101,7 @@ namespace RhinoInside.Revit.AddIn.Forms
     }
 
     IEnumerable<ARDB.Category> DirectShapeCategories =>
-      BuiltInCategoryExtension.BuiltInCategories.
+      BuiltInCategories.Values.
       Where(categoryId => ARDB.DirectShape.IsValidCategoryId(new ARDB.ElementId(categoryId), Document)).
       Select(categoryId => Document.GetCategory(categoryId)).
       Where(x => x is object);

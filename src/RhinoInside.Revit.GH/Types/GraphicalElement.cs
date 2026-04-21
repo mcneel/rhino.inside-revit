@@ -144,10 +144,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual BoundingBox GetBoundingBox(Transform xform)
     {
-      if (Value is ARDB.Element element)
-        return element.GetBoundingBoxXYZ().ToBox().GetBoundingBox(xform);
-
-      return NaN.BoundingBox;
+      return Value?.GetBoundingBoxXYZ()?.ToBox().GetBoundingBox(xform) ?? NaN.BoundingBox;
     }
     #endregion
 
@@ -271,7 +268,7 @@ namespace RhinoInside.Revit.GH.Types
     protected virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       target = default;
 
@@ -305,11 +302,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         try
         {
-          var plane = Location;
-          if (!plane.IsValid || !plane.Origin.IsValid)
-            return false;
-
-          target = (Q) (object) new GH_Plane(plane);
+          target = (Q) (object) new GH_Plane(Location);
           return true;
         }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return false; }
@@ -317,31 +310,25 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
       {
-        var position = Position;
-        if (!position.IsValid)
-          return false;
-
-        target = (Q) (object) new GH_Point(position);
+        target = (Q) (object) new GH_Point(Position);
         return true;
       }
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Vector)))
       {
-        var direction = Direction;
-        if (!direction.IsValid || direction.IsZero)
-          return false;
-
-        target = (Q) (object) new GH_Vector(direction);
+        target = (Q) (object) new GH_Vector(Direction);
         return true;
       }
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Transform)))
       {
         var plane = Location;
-        if (!plane.IsValid || !plane.Origin.IsValid)
-          return false;
-
-        target = (Q) (object) new GH_Transform(Transform.PlaneToPlane(Plane.WorldXY, plane));
+        target = (Q) (object)
+        (
+          plane.IsValid ?
+          new GH_Transform(new Grasshopper.Kernel.Types.Transforms.Orientation(Plane.WorldXY, plane)) :
+          new GH_Transform(NaN.Transform)
+        );
         return true;
       }
 
@@ -423,7 +410,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 #endif
 
-      return base.CastTo(out target);
+      return base.ConvertTo(out target);
     }
 
     #region ModelContent
@@ -461,21 +448,26 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.Element element)
         {
+          // Try to return an element aligned Box
           var plane = Location;
-          if (!plane.IsValid)
-            return element.GetBoundingBoxXYZ().ToBox();
-
-          var bbox = GetBoundingBox(Transform.ChangeBasis(Plane.WorldXY, plane));
-          if (bbox.IsValid)
+          if (plane.IsValid)
           {
-            return new Box
-            (
-              plane,
-              new Interval(bbox.Min.X, bbox.Max.X),
-              new Interval(bbox.Min.Y, bbox.Max.Y),
-              new Interval(bbox.Min.Z, bbox.Max.Z)
-            );
+            var EABB = GetBoundingBox(Transform.ChangeBasis(Plane.WorldXY, plane));
+            if (EABB.IsValid)
+            {
+              return new Box
+              (
+                plane,
+                new Interval(EABB.Min.X, EABB.Max.X),
+                new Interval(EABB.Min.Y, EABB.Max.Y),
+                new Interval(EABB.Min.Z, EABB.Max.Z)
+              );
+            }
           }
+
+          // Try to return an axis aligned Box
+          if (element.GetBoundingBoxXYZ() is ARDB.BoundingBoxXYZ AABB)
+            return AABB.ToBox();
         }
 
         return NaN.Box;
@@ -487,10 +479,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var box = Box;
-        if (box.IsValid)
-          return new Rectangle3d(box.Plane, box.X, box.Y);
-
-        return Rectangle3d.Unset;
+        return box.IsValid ? new Rectangle3d(box.Plane, box.X, box.Y) : NaN.Rectangle;
       }
     }
 
@@ -499,10 +488,7 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         var box = BoundingBox;
-        if (!box.IsValid)
-          return NaN.Interval;
-
-        return new Interval(box.Min.Z, box.Max.Z);
+        return box.IsValid ? new Interval(box.Min.Z, box.Max.Z) : NaN.Interval;
       }
     }
 
@@ -565,7 +551,7 @@ namespace RhinoInside.Revit.GH.Types
               if (bbox.IsValid)
               {
                 // If we have nothing better, the center of the BoundingBox will do the job.
-                origin = BoundingBox.Center;
+                origin = bbox.Center;
                 axis = Vector3d.XAxis;
                 perp = Vector3d.YAxis;
               }
@@ -772,6 +758,48 @@ namespace RhinoInside.Revit.GH.Types
           if (WorkPlaneFlipped != value)
             throw new MissingMemberException(element.GetType().FullName, nameof(WorkPlaneFlipped));
         }
+      }
+    }
+    #endregion
+
+    #region Structure
+    public bool IsPhysicalElement => Document?.IsPhysicalElement(Id) is true;
+    public virtual bool Structural => false;
+    #endregion
+
+    #region AnalyticalModel
+    public bool? EnableAnalyticalModel
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.AsBoolean();
+      set { if (value is object) Value?.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(value.Value); }
+    }
+
+    public AnalyticalElement[] AnalyticalElements
+    {
+      get
+      {
+        if (!IsValid) return null;
+
+        if (IsPhysicalElement)
+        {
+#if REVIT_2023
+          if (ARDB.Structure.AnalyticalToPhysicalAssociationManager.GetAnalyticalToPhysicalAssociationManager(Document) is ARDB.Structure.AnalyticalToPhysicalAssociationManager manager)
+          {
+#if REVIT_2024
+            return manager.GetAssociatedElementIds(Id).Select(GetElement<AnalyticalElement>).ToArray();
+#else
+            var id = manager.GetAssociatedElementId(Id);
+            if (id.IsValid())
+              return new AnalyticalElement[] { GetElement<AnalyticalElement>(id) };
+#endif
+          }
+#else
+          if (Value.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.AsBoolean() is true)
+            return Value.GetDependents<ARDB.Structure.AnalyticalModel>().Select(x => GetElement<AnalyticalElement>(x)).ToArray();
+#endif
+        }
+
+        return Array.Empty<AnalyticalElement>();
       }
     }
     #endregion

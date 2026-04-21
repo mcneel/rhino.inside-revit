@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
         }
         else familyAndType = string.Empty;
 
-        elementNomen = $"{PS}{element.GetElementNomen(out var nomenParameter)}";
+        elementNomen = $"{PS}{element.GetNomen(out var nomenParameter)}";
         if (nomenParameter == ARDB.BuiltInParameter.INVALID) elementNomen = string.Empty;
       }
 

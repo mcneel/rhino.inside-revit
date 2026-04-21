@@ -1,6 +1,6 @@
 using System;
-using System.Linq;
 using System.Drawing;
+using System.Linq;
 using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
@@ -64,7 +64,7 @@ namespace RhinoInside.Revit.GH.Types
       if (ReferenceDocument is ARDB.Document && Document is ARDB.Document document)
       {
         if (document.IsLinked || document.IsFamilyDocument)
-          InstanceId = $"{InstanceId} @ {document.GetTitle()}";
+          InstanceId = $"{InstanceId} @ {document.GetName()}";
       }
       else InstanceId = $"{InstanceId} @ {ReferenceDocumentId:B}";
 
@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.ElementId)))
       {
@@ -153,7 +153,7 @@ namespace RhinoInside.Revit.GH.Types
     }
     string IGH_ItemDescription.Name => DisplayName;
     string IGH_ItemDescription.Identity => IsLinked ? $"{{{ReferenceId?.ToString("D")}:{Id?.ToString("D")}}}" : $"{{{Id?.ToString("D")}}}";
-    string IGH_ItemDescription.Description => Document?.GetTitle();
+    string IGH_ItemDescription.Description => Document?.GetName();
     #endregion
 
     #region IGH_Reference
@@ -163,7 +163,13 @@ namespace RhinoInside.Revit.GH.Types
     public abstract ARDB.Document ReferenceDocument { get; }
     public abstract ARDB.ElementId ReferenceId { get; }
 
-    public bool IsLinked => ReferenceDocument is object && !ReferenceDocument.IsEquivalent(Document);
+    public bool IsLinked => !ReferenceDocument.IsEquivalent(Document);
+    internal IGH_ElementSource Source => IsLinked ?
+      RevitLinkInstance.FromElementId(ReferenceDocument, ReferenceId) as IGH_ElementSource :
+      Types.Document.FromValue(Document);
+    public string UniqueId =>
+      Document is ARDB.Document document && External.DB.ReferenceId.TryParse(ReferenceUniqueId, out var referenceId, ReferenceDocument) ?
+      referenceId.Element.ToString(document) : default;
     #endregion
 
     #region Reference Transform
@@ -183,14 +189,47 @@ namespace RhinoInside.Revit.GH.Types
 
     ModelTransform _ReferenceTransform = ModelTransform.Identity;
     protected bool HasReferenceTransform => _ReferenceTransform != ModelTransform.Identity;
-    protected void ResetReferenceTransform() => _ReferenceTransform = ModelTransform.Identity;
+    protected void ResetReferenceTransform()
+    {
+      _ReferenceTransform = ModelTransform.Identity;
+    }
 
     public Rhino.Geometry.Transform ReferenceTransform
     {
       get => _ReferenceTransform.Value;
-      protected set => _ReferenceTransform = new ModelTransform(value);
+      protected set
+      {
+        _ReferenceTransform = new ModelTransform(value);
+        InvalidateGraphics();
+      }
     }
     public Rhino.Geometry.Transform ElementTransform => _ReferenceTransform.Inverse;
+
+    internal sealed override T TransformFrom<T>(T value)
+    {
+      if (value is null) return default;
+      return HasReferenceTransform ? TransformData(value, ElementTransform) : base.TransformTo(value);
+    }
+    internal sealed override T TransformTo<T>(T value)
+    {
+      if (value is null) return default;
+      return HasReferenceTransform ? TransformData(value, ReferenceTransform) : base.TransformTo(value);
+    }
+    #endregion
+
+    #region DcoumentObject
+    protected override void ResetValue()
+    {
+      InvalidateGraphics();
+      base.ResetValue();
+    }
+
+    protected internal void InvalidateGraphics()
+    {
+      SubInvalidateGraphics();
+    }
+
+    protected virtual void SubInvalidateGraphics() { }
     #endregion
 
     public Reference() { }
@@ -236,7 +275,7 @@ namespace RhinoInside.Revit.GH.Types
           return GetElement<T>(id.HostElementId);
 
         if (IsLinked && id.LinkInstanceId.IsValid() && id.LinkInstanceId != ReferenceId)
-          throw new Exceptions.RuntimeArgumentException(nameof(id), $"Invalid Document");
+          throw new Exceptions.RuntimeArgumentException(nameof(id), "Invalid Document");
 
         return (T) Element.FromLinkElementId(ReferenceDocument, id);
       }
@@ -252,7 +291,7 @@ namespace RhinoInside.Revit.GH.Types
           return (T) Element.FromLinkElementId(ReferenceDocument, new ARDB.LinkElementId(ReferenceId, element.Id));
 
         if (!ReferenceDocument.IsEquivalent(element.Document))
-          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid Document");
+          throw new Exceptions.RuntimeArgumentException(nameof(element), "Invalid Document");
 
         return (T) Element.FromElement(element);
       }
@@ -265,17 +304,16 @@ namespace RhinoInside.Revit.GH.Types
       if (element is object)
       {
         if (IsLinked && Document.IsEquivalent(element.Document))
-          return (T) Element.FromLinkElement(ReferenceDocument.GetElement(ReferenceId) as ARDB.RevitLinkInstance, element);
+          return (T) element.AsLinked(ReferenceDocument.GetElement(ReferenceId) as ARDB.RevitLinkInstance);
 
         if (element.Document is object && !ReferenceDocument.IsEquivalent(element.Document))
-          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid Document");
+          throw new Exceptions.RuntimeArgumentException(nameof(element), "Invalid Document");
 
         return element;
       }
 
       return null;
     }
-
 
     internal T GetElementFromReference<T>(ARDB.Reference reference) where T : Element
     {
@@ -285,6 +323,23 @@ namespace RhinoInside.Revit.GH.Types
     internal T GetGeometryObjectFromReference<T>(ARDB.Reference reference) where T : GeometryObject
     {
       return GeometryObject.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
+    }
+
+    internal GeometryElement GetGeometryElementFromReference(ARDB.Reference reference)
+    {
+      return GeometryObject.FromLinkElementId(ReferenceDocument, GetAbsoluteReference(reference).ToLinkElementId()) as GeometryElement;
+    }
+
+    internal bool AssertValidElementSource(IGH_ElementSource source, bool acceptLinked = false)
+    {
+      switch (source)
+      {
+        case null: return false;
+        case Document document: return document.Value.Equals(Document);
+        case RevitLinkInstance instance: return instance.SourceDocument.Equals(Document) || (acceptLinked && instance.ReferenceDocument.Equals(ReferenceDocument));
+      }
+
+      throw new Exceptions.RuntimeArgumentException("Source", "Invalid source model");
     }
   }
 }

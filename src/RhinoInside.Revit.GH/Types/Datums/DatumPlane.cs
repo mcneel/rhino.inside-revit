@@ -1,0 +1,930 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
+using Rhino;
+using Rhino.DocObjects;
+using Rhino.DocObjects.Tables;
+using Rhino.Geometry;
+using ARDB = Autodesk.Revit.DB;
+
+namespace RhinoInside.Revit.GH.Types
+{
+  using Convert.Geometry;
+  using Convert.System.Collections.Generic;
+  using External.DB.Extensions;
+
+  [Kernel.Attributes.Name("Datum")]
+  public class DatumPlane : GraphicalElement
+  {
+    protected override Type ValueType => typeof(ARDB.DatumPlane);
+    public new ARDB.DatumPlane Value => base.Value as ARDB.DatumPlane;
+    public static explicit operator ARDB.DatumPlane(DatumPlane value) => value?.Value;
+
+    public DatumPlane() { }
+    public DatumPlane(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public DatumPlane(ARDB.DatumPlane plane) : base(plane) { }
+
+    protected internal static Surface CreateVerticalSurface(Curve curve, Interval v)
+    {
+      var curveA = curve.DuplicateCurve(); curveA.Translate(0.0, 0.0, v.Min - curve.PointAtStart.Z);
+      var curveB = curve.DuplicateCurve(); curveB.Translate(0.0, 0.0, v.Max - curve.PointAtStart.Z);
+
+      var surface = NurbsSurface.CreateRuledSurface(curveA, curveB);
+
+      if (curve is LineCurve)
+      {
+        var plane = new Plane(Point3d.Origin, curve.PointAtEnd - curve.PointAtStart, Vector3d.ZAxis);
+        plane.ClosestParameter(curve.PointAtStart, out var t0, out var _);
+        plane.ClosestParameter(curve.PointAtEnd, out var t1, out var _);
+        surface.SetDomain(0, new Interval(t0, t1));
+      }
+
+      surface.SetDomain(1, new Interval(v.Min, v.Max));
+
+      return surface;
+    }
+  }
+
+  [Kernel.Attributes.Name("Level")]
+  public sealed class Level : DatumPlane, Bake.IGH_BakeAwareElement
+  {
+    protected override Type ValueType => typeof(ARDB.Level);
+    public new ARDB.Level Value => base.Value as ARDB.Level;
+    public static explicit operator ARDB.Level(Level value) => value?.Value;
+
+    public Level() { }
+    public Level(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    public Level(ARDB.Level level) : base(level) { }
+
+    public override bool ConvertFrom(object source)
+    {
+      var value = source;
+
+      if (value is View view)
+      {
+        SetValue(view.Document, view.GenLevelId);
+        return true;
+      }
+      else if (value is GraphicalElement element)
+      {
+        SetValue(element.Document, element.LevelId ?? ARDB.ElementId.InvalidElementId);
+        return true;
+      }
+
+      return base.ConvertFrom(source);
+    }
+
+    public override BoundingBox GetBoundingBox(Transform xform) => NaN.BoundingBox;
+
+    #region IGH_PreviewData
+    protected override bool GetClippingBox(out BoundingBox clippingBox)
+    {
+      clippingBox = NaN.BoundingBox;
+      return false;
+    }
+
+    protected override bool IsVisible(Rhino.Display.DisplayPipeline pipeline) =>
+      pipeline.Viewport.IsParallelProjection &&
+      pipeline.Viewport.CameraDirection.IsPerpendicularTo(Vector3d.ZAxis);
+
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      var height = Elevation;
+      if (double.IsNaN(height))
+        return;
+
+      var viewportBBox = args.Viewport.GetFrustumBoundingBox();
+      var length = viewportBBox.Diagonal.Length;
+      args.Viewport.GetFrustumCenter(out var center);
+
+      var point = new Point3d(center.X, center.Y, height);
+      var from = point - args.Viewport.CameraX * length;
+      var to = point + args.Viewport.CameraX * length;
+
+      args.Pipeline.DrawPatternedLine(from, to, args.Color, 0x00000F0F, args.Thickness);
+    }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<ARDB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is ARDB.Level level)
+      {
+        var name = level.Name;
+
+        // 2. Check if already exist
+        var index = doc.NamedConstructionPlanes.Find(name);
+
+        // 3. Update if necessary
+        if (index < 0 || overwrite)
+        {
+          var cplane = CreateConstructionPlane(name, Location, doc);
+
+          if (index < 0) index = doc.NamedConstructionPlanes.Add(cplane);
+          else if (overwrite) doc.NamedConstructionPlanes.Modify(cplane, index, true);
+        }
+
+        // TODO: Create a V5 Uuid out of the name
+        //guid = new Guid(0, 0, 0, BitConverter.GetBytes((long) index));
+        //idMap.Add(Id, guid);
+
+        return true;
+      }
+
+      return false;
+    }
+    #endregion
+
+    #region Properties
+    public override Plane Location
+    {
+      get
+      {
+        if (Value is ARDB.Level level)
+        {
+          var levelType = level.Document.GetElement(level.GetTypeId()) as ARDB.LevelType;
+          var position = LevelExtension.GetBasePointLocation(level.Document, levelType.GetElevationBase());
+
+          return new Plane
+          (
+            new Point3d(position.X * Revit.ModelUnits, position.Y * Revit.ModelUnits, level.GetElevation() * Revit.ModelUnits),
+            Vector3d.XAxis,
+            Vector3d.YAxis
+          );
+        }
+
+        return NaN.Plane;
+      }
+    }
+
+    /// <summary>
+    /// Signed distance along the Z axis from the World XY plane.
+    /// </summary>
+    /// <remarks>
+    /// World XY plane origin is refered as "Internal Origin" in Revit UI.
+    /// </remarks>
+    public double Elevation
+    {
+      get => Value?.GetElevation() * Revit.ModelUnits ?? double.NaN;
+      set => Value?.SetElevation(value / Revit.ModelUnits);
+    }
+
+    public ProjectElevation ProjectElevation
+    {
+      get => new ProjectElevation(this);
+      set
+      {
+        if (value is null) return;
+        if (value.IsElevation(out var elevation))
+        {
+          Value?.SetElevation(elevation / Revit.ModelUnits);
+        }
+        else if (value.Value.IsOffset(out var offset) && ProjectElevation.Value.IsRelative(out var _, out var baseElement))
+        {
+          Value?.SetElevation(new External.DB.ElevationElementReference(offset, baseElement).Elevation);
+        }
+      }
+    }
+
+    public bool? IsStructural
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_IS_STRUCTURAL).AsInteger() != 0;
+      set
+      {
+        if (value is null || IsStructural == value) return;
+        Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_IS_STRUCTURAL).Update(value.Value ? 1 : 0);
+      }
+    }
+
+    public bool? IsBuildingStory
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).AsInteger() != 0;
+      set
+      {
+        if (value is null || IsBuildingStory == value) return;
+        Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_IS_BUILDING_STORY).Update(value.Value ? 1 : 0);
+      }
+    }
+
+    public double? ComputationHeight
+    {
+      get => Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.AsDouble() * Revit.ModelUnits;
+      set
+      {
+        if (value is null || ComputationHeight == value) return;
+        Value?.get_Parameter(ARDB.BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT).Update(value.Value);
+      }
+    }
+    #endregion
+  }
+
+  [Kernel.Attributes.Name("Grid")]
+  public sealed class Grid : DatumPlane, Bake.IGH_BakeAwareElement
+  {
+    protected override Type ValueType => typeof(ARDB.Grid);
+    public new ARDB.Grid Value => base.Value as ARDB.Grid;
+
+    public Grid() { }
+    public Grid(ARDB.Grid grid) : base(grid) { }
+
+    #region IGH_PreviewData
+    Point3d[] _BoundaryPoints;
+    internal IList<Point3d> BoundaryPoints
+    {
+      get
+      {
+        if (_BoundaryPoints is null)
+        {
+          if (Value is ARDB.Grid grid)
+          {
+            if (grid.Curve?.Tessellate().ConvertAll(GeometryDecoder.ToPoint3d) is Point3d[] polyline)
+            {
+              var bbox = grid.GetExtents().ToBoundingBox();
+              _BoundaryPoints = new Point3d[polyline.Length * 2];
+
+              for (int p = 0; p < polyline.Length; ++p)
+              {
+                _BoundaryPoints[p] = new Point3d(polyline[p].X, polyline[p].Y, bbox.Min.Z);
+                _BoundaryPoints[_BoundaryPoints.Length - p - 1] = new Point3d(polyline[p].X, polyline[p].Y, bbox.Max.Z);
+              }
+            }
+          }
+          else _BoundaryPoints = Array.Empty<Point3d>();
+        }
+
+        return _BoundaryPoints;
+      }
+    }
+
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (Value is ARDB.Grid grid)
+      {
+        var viewport = args.Viewport;
+        var isParallelProjection = viewport.IsParallelProjection;
+        var cameraDirection = viewport.CameraDirection;
+
+        var camDir = !isParallelProjection ? 0 :
+                     cameraDirection.IsPerpendicularTo(Vector3d.ZAxis) ? -1 :
+                     cameraDirection.IsParallelTo(Vector3d.ZAxis) != 0 ? +1 :
+                     0;
+
+        using (var curve = grid.Curve)
+        {
+          var start = curve.GetEndPoint(grid.IsCurved ? 0 : 1).ToPoint3d();
+          var end = curve.GetEndPoint(grid.IsCurved ? 1 : 0).ToPoint3d();
+          var direction = end - start;
+
+          if (camDir == -1)
+          {
+            if (grid.IsCurved) return;
+            if (cameraDirection.IsParallelTo(direction) == 0)
+              return;
+          }
+
+          if (BoundaryPoints is IList<Point3d> boundary && boundary.Count > 0)
+          {
+            args.Pipeline.DrawPatternedPolyline(boundary, args.Color, 0x00001C47, args.Thickness, true);
+
+            if(camDir != 0)
+            {
+              args.Viewport.GetFrustumNearPlane(out var near);
+              args.Viewport.GetFrustumCenter(out var center);
+              center = near.ClosestPoint(center);
+
+              Point3d tagA = default, tagB = default;
+              switch (camDir)
+              {
+                case -1:
+                  tagA = boundary.First();
+                  tagB = boundary.Last();
+                  break;
+
+                case +1:
+                  tagA = start;
+                  tagB = end;
+                  break;
+              }
+
+              if (center.DistanceTo(near.ClosestPoint(tagA)) > center.DistanceTo(near.ClosestPoint(tagB)))
+                args.Pipeline.DrawDot(tagA, grid.Name, args.Color, System.Drawing.Color.White);
+              else
+                args.Pipeline.DrawDot(tagB, grid.Name, args.Color, System.Drawing.Color.White);
+            }
+          }
+        }
+      }
+    }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<ARDB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is ARDB.Grid grid)
+      {
+        att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
+        att.Name = grid.Name;
+        att.WireDensity = -1;
+        att.CastsShadows = false;
+        att.ReceivesShadows = false;
+        if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
+          att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+
+        // 2. Check if already exist
+        var gridObject = doc.Objects.OfType<SurfaceObject>().Where
+        (
+          x => !x.IsInstanceDefinitionGeometry &&
+          x.Attributes.LayerIndex == att.LayerIndex &&
+          x.ObjectType == ObjectType.Surface &&
+          x.Name == att.Name
+        ).
+        FirstOrDefault();
+
+        // 3. Update if necessary
+        if (gridObject is null || overwrite)
+        {
+          if (gridObject is null)
+          {
+            guid = doc.Objects.Add(Surface, att);
+          }
+          else
+          {
+            guid = gridObject.Id;
+            doc.Objects.ModifyAttributes(guid, att, true);
+            doc.Objects.Replace(guid, Surface);
+          }
+        }
+        else guid = gridObject.Id;
+
+        idMap.Add(Id, guid);
+        return true;
+      }
+
+      return false;
+    }
+    #endregion
+
+    #region Location
+    public override BoundingBox GetBoundingBox(Transform xform) => new BoundingBox(BoundaryPoints, xform);
+
+    public override Plane Location
+    {
+      get
+      {
+        if (Curve is Curve curve)
+        {
+          var start = curve.PointAtStart;
+          var end = curve.PointAtEnd;
+          var axis = end - start;
+          var origin = (start * 0.5) + (end * 0.5);
+          var perp = axis.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance);
+          return new Plane(origin, axis, perp);
+        }
+
+        return NaN.Plane;
+      }
+    }
+
+    public override Curve Curve
+    {
+      get
+      {
+        if (Value is ARDB.Grid grid)
+        {
+          return grid.IsCurved ?
+            grid.Curve.ToCurve() :
+            grid.Curve.CreateReversed().ToCurve();
+        }
+
+        return default;
+      }
+    }
+
+    public override Surface Surface
+    {
+      get
+      {
+        if (Curve is Curve curve)
+        {
+          var bbox = ClippingBox;
+          return CreateVerticalSurface(curve, new Interval(bbox.Min.Z, bbox.Max.Z));
+        }
+
+        return default;
+      }
+    }
+    #endregion
+  }
+
+  [Kernel.Attributes.Name("Multi-Grid")]
+  public sealed class MultiSegmentGrid : GraphicalElement, Bake.IGH_BakeAwareElement
+  {
+    protected override Type ValueType => typeof(ARDB.MultiSegmentGrid);
+    public new ARDB.MultiSegmentGrid Value => base.Value as ARDB.MultiSegmentGrid;
+
+    public MultiSegmentGrid() { }
+    public MultiSegmentGrid(ARDB.MultiSegmentGrid grid) : base(grid) { }
+
+    #region IGH_PreviewData
+    Point3d[] _BoundaryPoints;
+    internal IList<Point3d> BoundaryPoints
+    {
+      get
+      {
+        if (_BoundaryPoints is null)
+        {
+          if (Curve is Curve curve)
+          {
+            var tol = GeometryTolerance.Model;
+            using (var pline = curve.ToPolyline(curve.SpanCount, 1, 100.0 * tol.AngleTolerance, 0.1, 1.0, tol.ShortCurveTolerance, tol.ShortCurveTolerance, 0.0, keepStartPoint: true))
+            {
+              if (pline?.ToPolyline() is Polyline polyline)
+              {
+                double minZ, maxZ; minZ = maxZ = curve.PointAtStart.Z;
+                foreach (var segment in Value.GetGridIds().Select(x => Document.GetElement(x) as ARDB.Grid))
+                {
+                  using (var extents = segment.GetExtents())
+                  {
+                    minZ = Math.Min(minZ, extents.MinimumPoint.Z * Revit.ModelUnits);
+                    maxZ = Math.Max(maxZ, extents.MaximumPoint.Z * Revit.ModelUnits);
+                  }
+                }
+
+                _BoundaryPoints = new Point3d[polyline.Count * 2];
+                for (int p = 0; p < polyline.Count; ++p)
+                {
+                  _BoundaryPoints[p] = new Point3d(polyline[p].X, polyline[p].Y, minZ);
+                  _BoundaryPoints[_BoundaryPoints.Length - p - 1] = new Point3d(polyline[p].X, polyline[p].Y, maxZ);
+                }
+              }
+            }
+          }
+          else _BoundaryPoints = Array.Empty<Point3d>();
+        }
+
+        return _BoundaryPoints;
+      }
+    }
+
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (BoundaryPoints is IList<Point3d> boundary && boundary.Count > 0)
+      {
+        var viewport = args.Viewport;
+        var isParallelProjection = viewport.IsParallelProjection;
+        var cameraDirection = viewport.CameraDirection;
+        viewport.GetFrustumNearPlane(out var near);
+        viewport.GetFrustumCenter(out var center);
+        center = near.ClosestPoint(center);
+
+        var camDir = !isParallelProjection ? 0 :
+                     cameraDirection.IsPerpendicularTo(Vector3d.ZAxis) ? -1 :
+                     cameraDirection.IsParallelTo(Vector3d.ZAxis) != 0 ? +1 :
+                     0;
+
+        if (camDir != -1)
+          args.Pipeline.DrawPatternedPolyline(boundary, args.Color, 0x00001C47, args.Thickness, true);
+
+        if (camDir == +1)
+        {
+          var origin = Value.GetSketch().SketchPlane.GetPlane().Origin.ToPoint3d();
+
+          var tagA = boundary[0]; tagA.Z = origin.Z;
+          var tagB = boundary[boundary.Count / 2]; tagB.Z = origin.Z;
+          if (center.DistanceTo(near.ClosestPoint(tagA)) > center.DistanceTo(near.ClosestPoint(tagB)))
+            args.Pipeline.DrawDot(tagA, Value.Text, args.Color, System.Drawing.Color.White);
+          else
+            args.Pipeline.DrawDot(tagB, Value.Text, args.Color, System.Drawing.Color.White);
+        }
+      }
+    }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<ARDB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is ARDB.MultiSegmentGrid grid)
+      {
+        att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
+        att.Name = grid.Name;
+        att.WireDensity = -1;
+        att.CastsShadows = false;
+        att.ReceivesShadows = false;
+        if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
+          att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+
+        // 2. Check if already exist
+        var gridObject = doc.Objects.OfType<SurfaceObject>().Where
+        (
+          x => !x.IsInstanceDefinitionGeometry &&
+          x.Attributes.LayerIndex == att.LayerIndex &&
+          x.ObjectType == ObjectType.Brep &&
+          x.Name == att.Name
+        ).
+        FirstOrDefault();
+
+        // 3. Update if necessary
+        if (gridObject is null || overwrite)
+        {
+          if (gridObject is null)
+          {
+            guid = doc.Objects.Add(PolySurface, att);
+          }
+          else
+          {
+            guid = gridObject.Id;
+            doc.Objects.ModifyAttributes(guid, att, true);
+            doc.Objects.Replace(guid, PolySurface);
+          }
+        }
+        else guid = gridObject.Id;
+
+        idMap.Add(Id, guid);
+        return true;
+      }
+
+      return false;
+    }
+    #endregion
+
+    #region Location
+    public override BoundingBox GetBoundingBox(Transform xform) => new BoundingBox(BoundaryPoints, xform);
+
+    public override Plane Location
+    {
+      get
+      {
+        if (Curve is Curve curve)
+        {
+          var start = curve.PointAtStart;
+          var end = curve.PointAtEnd;
+          var axis = end - start;
+          var origin = (start * 0.5) + (end * 0.5);
+          var perp = axis.RightDirection(GeometryDecoder.Tolerance.DefaultTolerance);
+          return new Plane(origin, axis, perp);
+        }
+
+        return NaN.Plane;
+      }
+    }
+
+    public override Curve Curve => Sketch?.Profiles.FirstOrDefault();
+
+    public override Surface Surface
+    {
+      get
+      {
+        var bbox = ClippingBox;
+        return Grid.CreateVerticalSurface(Curve, new Interval(bbox.Min.Z, bbox.Max.Z));
+      }
+    }
+
+    public override void SetCurve(Curve curve, bool keepJoins = false)
+    {
+      if (Value is ARDB.MultiSegmentGrid element && curve is object)
+      {
+        if (element.GetSketch() is ARDB.Sketch sketch)
+        {
+          InvalidateGraphics();
+
+          var tol = GeometryTolerance.Model;
+          var axisPlane = sketch.SketchPlane.GetPlane().ToPlane();
+
+          curve = curve.ProjectToPlane(axisPlane);
+          curve.CombineShortSegments(tol.ShortCurveTolerance);
+          curve = curve.ToArcsAndLines(tol.VertexTolerance, 10.0 * tol.AngleTolerance, tol.ShortCurveTolerance, 0.0) ?? curve;
+          curve = curve.Simplify(CurveSimplifyOptions.RebuildLines | CurveSimplifyOptions.RebuildArcs | CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? curve;
+
+          if (Sketch.SetProfile(element.GetSketch(), new Curve[] { curve }, Vector3d.ZAxis))
+            return;
+        }
+
+        throw new InvalidOperationException("Curve can not be set for this element.");
+      }
+    }
+    #endregion
+
+    #region Properties
+    public Sketch Sketch => GetElement<Sketch>(Value?.GetSketch());
+
+    public IEnumerable<Grid> Segments => Value?.GetGridIds().Select(GetElement<Grid>);
+    #endregion
+  }
+
+  [Kernel.Attributes.Name("Reference Plane")]
+  public sealed class ReferencePlane : DatumPlane, Bake.IGH_BakeAwareElement
+  {
+    protected override Type ValueType => typeof(ARDB.ReferencePlane);
+    public new ARDB.ReferencePlane Value => base.Value as ARDB.ReferencePlane;
+    public static explicit operator ARDB.ReferencePlane(ReferencePlane value) => value?.Value;
+
+    public ReferencePlane() { }
+    public ReferencePlane(ARDB.ReferencePlane value) : base(value) { }
+
+    #region IGH_PreviewData
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (args.Viewport.IsParallelProjection)
+      {
+        if (Value is ARDB.ReferencePlane referencePlane)
+        {
+          if (args.Viewport.CameraDirection.IsPerpendicularTo(referencePlane.Normal.ToVector3d()))
+          {
+            var from = referencePlane.FreeEnd.ToPoint3d();
+            var to = referencePlane.BubbleEnd.ToPoint3d();
+            args.Pipeline.DrawPatternedLine(from, to, args.Color, 0x00000F0F, args.Thickness);
+          }
+        }
+      }
+    }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<ARDB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      if (Value is ARDB.ReferencePlane)
+      {
+        var name = ToString();
+
+        // 2. Check if already exist
+        var index = doc.NamedConstructionPlanes.Find(name);
+
+        // 3. Update if necessary
+        if (index < 0 || overwrite)
+        {
+          var cplane = CreateConstructionPlane(name, Location, doc);
+
+          if (index < 0) index = doc.NamedConstructionPlanes.Add(cplane);
+          else if (overwrite) doc.NamedConstructionPlanes.Modify(cplane, index, true);
+        }
+
+        // TODO: Create a V5 Uuid out of the name
+        //guid = new Guid(0, 0, 0, BitConverter.GetBytes((long) index));
+        //idMap.Add(Id, guid);
+
+        return true;
+      }
+
+      return false;
+    }
+    #endregion
+
+    #region Category
+    public override Category Subcategory
+    {
+      get
+      {
+        var paramId = ARDB.BuiltInParameter.CLINE_SUBCATEGORY;
+        if (paramId != ARDB.BuiltInParameter.INVALID && Value is ARDB.Element element)
+        {
+          using (var parameter = element.get_Parameter(paramId))
+          {
+            if (parameter?.AsElementId() is ARDB.ElementId categoryId)
+            {
+              var category = new Category(Document, categoryId);
+              return category.APIObject?.Parent is null ? new Category() : category;
+            }
+          }
+        }
+
+        return default;
+      }
+
+      set
+      {
+        var paramId = ARDB.BuiltInParameter.CLINE_SUBCATEGORY;
+        if (value is object && Value is ARDB.Element element)
+        {
+          using (var parameter = element.get_Parameter(paramId))
+          {
+            if (parameter is null)
+            {
+              if (value.Id != ARDB.ElementId.InvalidElementId)
+                throw new Exceptions.RuntimeErrorException($"{((IGH_Goo) this).TypeName} '{DisplayName}' does not support assignment of a Subcategory.");
+            }
+            else
+            {
+              AssertValidDocument(value, nameof(Subcategory));
+              parameter.Update(value);
+            }
+          }
+        }
+      }
+    }
+    #endregion
+
+    #region Location
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      if (Value is ARDB.ReferencePlane referencePlane)
+      {
+        return new BoundingBox
+        (
+          new Point3d[]
+          {
+              referencePlane.FreeEnd.ToPoint3d(),
+              referencePlane.BubbleEnd.ToPoint3d()
+          },
+          xform
+        );
+      }
+
+      return NaN.BoundingBox;
+    }
+
+    public override Plane Location
+    {
+      get
+      {
+        return Value is ARDB.ReferencePlane referencePlane ?
+          referencePlane.GetPlane().ToPlane() :
+          NaN.Plane;
+      }
+    }
+
+    public override Curve Curve
+    {
+      get => Value is ARDB.ReferencePlane referencePlane ?
+          new LineCurve(referencePlane.BubbleEnd.ToPoint3d(), referencePlane.FreeEnd.ToPoint3d()) :
+          default;
+    }
+    #endregion
+  }
+
+  [Kernel.Attributes.Name("Reference Point")]
+  public sealed class ReferencePoint : GraphicalElement, Bake.IGH_BakeAwareElement
+  {
+    protected override Type ValueType => typeof(ARDB.ReferencePoint);
+    public new ARDB.ReferencePoint Value => base.Value as ARDB.ReferencePoint;
+
+    public ReferencePoint() { }
+    public ReferencePoint(ARDB.ReferencePoint value) : base(value) { }
+
+    #region IGH_PreviewData
+    protected override void DrawViewportWires(GH_PreviewWireArgs args)
+    {
+      if (Value is ARDB.ReferencePoint referencePoint)
+      {
+        args.Pipeline.DrawPoint
+        (
+          referencePoint.Position.ToPoint3d(),
+          Rhino.Display.PointStyle.RoundControlPoint,
+          Grasshopper.CentralSettings.PreviewPointRadius,
+          args.Color
+        );
+
+        var showPlanes = Value.CoordinatePlaneVisibility;
+        if
+        (
+          showPlanes == ARDB.CoordinatePlaneVisibility.Always ||
+          (showPlanes == ARDB.CoordinatePlaneVisibility.WhenSelected && args.Color == System.Drawing.Color.FromArgb(args.Color.A, GH_Document.DefaultSelectedPreviewColour)))
+        {
+          var xyId = new string[]
+          {
+             Value.GetCoordinatePlaneReferenceYZ().ConvertToStableRepresentation(Document),
+             Value.GetCoordinatePlaneReferenceXZ().ConvertToStableRepresentation(Document),
+             Value.GetCoordinatePlaneReferenceXY().ConvertToStableRepresentation(Document)
+          };
+          var location = Location;
+          //if (!Value.ShowNormalReferencePlaneOnly)
+          {
+            args.Pipeline.DrawDirectionArrow(location.Origin, location.XAxis, System.Drawing.Color.DarkRed);
+            args.Pipeline.DrawDirectionArrow(location.Origin, location.YAxis, System.Drawing.Color.DarkGreen);
+          }
+          args.Pipeline.DrawDirectionArrow(location.Origin, location.ZAxis, System.Drawing.Color.DarkBlue);
+        }
+      }
+    }
+    #endregion
+
+    #region IGH_BakeAwareElement
+    bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>
+      BakeElement(new Dictionary<ARDB.ElementId, Guid>(), true, doc, att, out guid);
+
+    public bool BakeElement
+    (
+      IDictionary<ARDB.ElementId, Guid> idMap,
+      bool overwrite,
+      RhinoDoc doc,
+      ObjectAttributes att,
+      out Guid guid
+    )
+    {
+      // 1. Check if is already cloned
+      if (idMap.TryGetValue(Id, out guid))
+        return true;
+
+      // 3. Update if necessary
+      if (Value is ARDB.ReferencePoint point)
+      {
+        att = att?.Duplicate() ?? doc.CreateDefaultAttributes();
+        att.Name = DisplayName;
+        if (Category.BakeElement(idMap, false, doc, att, out var layerGuid))
+          att.LayerIndex = doc.Layers.FindId(layerGuid).Index;
+
+        guid = doc.Objects.AddPoint(point.Position.ToPoint3d(), att);
+
+        if (guid != Guid.Empty)
+        {
+          idMap.Add(Id, guid);
+          return true;
+        }
+      }
+
+      return false;
+    }
+    #endregion
+
+    #region Location
+    public override BoundingBox GetBoundingBox(Transform xform)
+    {
+      if (Value is ARDB.ReferencePoint referencePoint)
+      {
+        return new BoundingBox
+        (
+          new Point3d[]
+          {
+              referencePoint.Position.ToPoint3d(),
+              referencePoint.Position.ToPoint3d()
+          },
+          xform
+        );
+      }
+
+      return NaN.BoundingBox;
+    }
+
+    public override Plane Location
+    {
+      get
+      {
+        if (Value is ARDB.ReferencePoint referencePoint)
+        {
+          using (var transform = referencePoint.GetCoordinateSystem())
+            return new Plane(transform.Origin.ToPoint3d(), transform.BasisX.ToVector3d(), transform.BasisY.ToVector3d());
+        }
+
+        return NaN.Plane;
+      }
+    }
+    #endregion
+  }
+}

@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       Params.TrySetData(DA, "Discipline", () => category.CategoryDiscipline);
       Params.TrySetData(DA, "Type", () => category.CategoryType);
       Params.TrySetData(DA, "Parent", () => category.Parent);
-      Params.TrySetData(DA, "Name", () => category.FullName);
+      Params.TrySetData(DA, "Name", () => category.CompleteNomen);
       Params.TrySetData(DA, "Is Visible UI", () => category.IsVisibleInUI);
       Params.TrySetData(DA, "Is Subcategory", () => category.IsSubcategory);
       Params.TrySetData(DA, "Allows Subcategories", () => category.CanAddSubcategory);

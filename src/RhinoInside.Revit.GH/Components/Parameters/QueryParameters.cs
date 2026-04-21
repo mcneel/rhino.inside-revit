@@ -11,7 +11,7 @@ using DBXS = RhinoInside.Revit.External.DB.Schemas;
 
 namespace RhinoInside.Revit.GH.Components.ParameterElements
 {
-  [ComponentVersion(introduced: "1.0", updated: "1.4")]
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryParameters : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("D82D9FC3-FC74-4C54-AAE1-CB4D806741DB");
@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ParameterScope>>("Scope", "S", "Parameter scope", optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Parameter name", optional: true),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ParameterType>>("Type", "T", "Parameter type", optional: true),
@@ -70,13 +70,13 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Scope", out Types.ParameterScope scope, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Name", out string name, x => x is object)) return;
       if (!Params.TryGetData(DA, "Type", out Types.ParameterType type, x => x.IsValid)) return;
       if (!Params.TryGetData(DA, "Group", out Types.ParameterGroup group, x => x.IsValid)) return;
 
-      var parameters = doc.GetParameterDefinitions
+      var parameters = source.SourceDocument.Value.GetParameterDefinitions
       (
         scope is object ? scope.Value :
         ERDB.ParameterScope.Instance | ERDB.ParameterScope.Type | ERDB.ParameterScope.Global
@@ -98,7 +98,8 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
       (
         "Parameter",
         parameters.
-        Select(x => new Types.ParameterKey(doc, x)).
+        Select(x => new Types.ParameterKey(source.SourceDocument.Value, x)).
+        FromSource(source).
         TakeWhileIsNotEscapeKeyDown(this)
       );
     }
