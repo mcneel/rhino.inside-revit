@@ -138,11 +138,6 @@ namespace RhinoInside.Revit.GH.Parameters
       Where(x => x.IsValid);
 
     #region UI
-    protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
-    protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
-    protected override GH_GetterResult Prompt_Plural(ref List<T> values) => GH_GetterResult.cancel;
-    protected override GH_GetterResult Prompt_Singular(ref T value) => GH_GetterResult.cancel;
-
     public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
     {
       base.AppendAdditionalMenuItems(menu);
@@ -188,7 +183,7 @@ namespace RhinoInside.Revit.GH.Parameters
     protected ToolStripMenuItem Menu_AppendPromptNew(ToolStrip menu, ARUI.PostableCommand postableCommand, string text = default)
     {
       var activeApp = Revit.ActiveUIApplication;
-      var postable = activeApp.ActiveUIDocument.TryGetRevitCommandId(postableCommand, out var commandId);
+      var postable = activeApp.TryGetRevitCommandId(postableCommand, out var commandId);
 
       return Menu_AppendItem
       (

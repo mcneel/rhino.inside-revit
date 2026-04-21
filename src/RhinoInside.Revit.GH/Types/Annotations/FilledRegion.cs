@@ -26,6 +26,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region ISketchAccess
     public Sketch Sketch => GetElement<Sketch>(Value?.GetSketchId());
+    public Plane SketchPlane => Sketch?.Location ?? NaN.Plane;
     #endregion
 
     #region Location
@@ -71,7 +72,7 @@ namespace RhinoInside.Revit.GH.Types
         var geometry = new List<GeometryBase>();
         var attributes = new List<ObjectAttributes>();
 
-        var type = element.Document.GetElement(element.GetTypeId()) as ARDB.FilledRegionType;
+        var type = element.Document.GetNamesakeElement(element.GetTypeId()) as ARDB.FilledRegionType;
 #if REVIT_2019
         var pattern = Types.Element.FromElementId(type.Document, type.ForegroundPatternId) as Types.FillPatternElement;
 #else
@@ -90,7 +91,7 @@ namespace RhinoInside.Revit.GH.Types
         var offset = fillPattern.GetFillGrid(0).Offset * Revit.ModelUnits;
         if (fillPattern.Target != ARDB.FillPatternTarget.Drafting && doc.ModelSpaceHatchScalingEnabled)
         {
-          var view = element.Document.GetElement(element.OwnerViewId) as ARDB.View;
+          var view = element.Document.GetNamesakeElement(element.OwnerViewId) as ARDB.View;
           angle -= element.GetSketch().SketchPlane.GetPlane().XVec.AngleOnPlaneTo(view.RightDirection, view.ViewDirection);
           offset /= doc.ModelSpaceHatchScale;
         }

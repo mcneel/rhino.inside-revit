@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Views
   public class ViewExportImage : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("4A962A0C-46A0-4A5F-B727-6747B715A975");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     protected override string IconTag => "IMG";
 
     public ViewExportImage() : base
@@ -277,7 +277,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         if (folder?.Any(x => Path.GetInvalidPathChars().Contains(x)) is true)
           throw new Exceptions.RuntimeArgumentException("Folder", $"'{folder}' is not a valid folder name", folder);
 
-        if (folder?.IsFullyQualifiedPath() is false)
+        if (folder is object && !PathExtension.TryGetFullyQualifiedPath(ref folder))
           throw new Exceptions.RuntimeArgumentException("Folder", $"'{folder}' is not a valid absolute path", folder);
       }
 
@@ -387,7 +387,7 @@ namespace RhinoInside.Revit.GH.Components.Views
             {
               // By default adjust Crop to visible in view elements projected-box
               if (!view.Value.CropBoxActive && !cropExtents.HasValue)
-                cropExtents = view.GetElementsBoundingRectangle(modelToProjection, filter);
+                cropExtents = view.GetElementsOutline(modelToProjection, filter);
 
               // Adjust Crop Box
               if (cropExtents.HasValue)

@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
   using External.DB.Extensions;
   using Convert.Geometry;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.9")]
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class HostObjectBoundaryProfile : TransactionalComponent
   {
     public override Guid ComponentGuid => new Guid("7CE0BD56-A2AC-4D49-A39B-7B34FE897265");
@@ -39,8 +39,18 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
         {
           Name = "Host",
           NickName = "H",
-          Description = "Host to acces boundary profile",
+          Description = "Host to access boundary profile",
         }
+      ),
+      new ParamDefinition
+      (
+        new Param_Plane()
+        {
+          Name = "Plane",
+          NickName = "P",
+          Description = "Sketch plane",
+          Optional = true
+        },ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -70,7 +80,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
           Name = "Host",
           NickName = "H",
           Description = "Accessed Host element",
-        },ParamRelevance.Occasional
+        },ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -96,94 +106,106 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Host", out Types.HostObject host, x => x.IsValid)) return;
+      if (!Params.TryGetData(DA, "Plane", out Plane? plane, x => x.IsValid)) return;
+      if (plane is object)
+      {
+        if (!host.SetSketchPlane(plane.Value))
+        {
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Input 'Plane' is not valid for this Host. '{{{host.Id}}}'");
+          return;
+        }
+      }
+
       if (Params.GetDataList(DA, "Profile", out IList<Curve> profiles) && profiles.OfType<Curve>().Any())
       {
 #if REVIT_2022
-        // TODO: Compare with current profiles, maybe no transaction is necessary
-
-        var hostDocument = host.Document;
-        using (var scope = new ARDB.SketchEditScope(hostDocument, NickName))
+        plane ??= host.SketchPlane;
+        if (!host.SetProfile(profiles, plane.Value.Normal))
         {
-          if (scope.IsSketchEditingSupportedForSketchBasedElement(host.Value))
+          var hostDocument = host.Document;
+          using (var scope = new ARDB.SketchEditScope(hostDocument, Name))
           {
-            var sketch = host.Value.GetSketch();
-            var sketchId = sketch?.Id ?? ARDB.ElementId.InvalidElementId;
+            if (scope.IsSketchEditingSupportedForSketchBasedElement(host.Value))
+            {
+              var sketch = host.Value.GetSketch();
+              var sketchId = sketch?.Id ?? ARDB.ElementId.InvalidElementId;
 
-            if (scope.ElementNeedsNewSketch(host.Value))
-            {
-              sketch = scope.StartWithNewSketch(host.Value);
-            }
-            else if (scope.IsSketchEditingSupported(sketchId))
-            {
-              scope.Start(sketchId);
-            }
-            else sketch = null;
-
-            if (sketch is object)
-            {
-              using (var tx = NewTransaction(hostDocument))
+              if (scope.ElementNeedsNewSketch(host.Value))
               {
-                tx.Start();
+                sketch = scope.StartWithNewSketch(host.Value);
+              }
+              else if (scope.IsSketchEditingSupported(sketchId))
+              {
+                scope.Start(sketchId);
+              }
+              else sketch = null;
 
-                // Delete previous profiles
+              if (sketch is object)
+              {
+                using (var tx = NewTransaction(hostDocument))
                 {
-                  foreach (var modelProfile in sketch.GetProfileCurveElements())
-                    hostDocument.Delete(modelProfile.Select(x => x.Id).ToArray());
-                }
+                  tx.Start();
 
-                // Create new profiles
-                using (var create = hostDocument.Create())
-                {
-                  var tol = GeometryTolerance.Model;
-                  var sketchPlane = sketch.SketchPlane;
-                  var projectionPlane = sketchPlane.GetPlane().ToPlane();
-
-                  foreach (var profile in profiles.OfType<Curve>())
+                  // Delete previous profiles
                   {
-                    var loop = profile.ProjectToPlane(projectionPlane);
-
-                    var segments = loop.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
-                      polyCurve.DuplicateSegments() : new Curve[] { loop };
-
-                    foreach (var segment in segments)
-                      create.NewModelCurve(segment.ToCurve(), sketchPlane);
+                    foreach (var modelProfile in sketch.GetProfileCurveElements())
+                      hostDocument.Delete(modelProfile.Select(x => x.Id).ToArray());
                   }
-                }
 
-                // Commit Scope
-                using (var uiApplication = new ARUI.UIApplication(hostDocument.Application))
-                {
-                  EventHandler<ARUI.Events.DialogBoxShowingEventArgs> DialogBoxShowing = null;
-                  try
+                  // Create new profiles
+                  using (var create = hostDocument.Create())
                   {
-                    uiApplication.DialogBoxShowing += DialogBoxShowing = (sender, args) =>
-                    {
-                      if (args.DialogId == "TaskDialog_Sketch_Edits_Discarded")
-                        args.OverrideResult(1001 /*IDYES*/);
-                    };
+                    var tol = GeometryTolerance.Model;
+                    var sketchPlane = sketch.SketchPlane;
+                    var projectionPlane = sketchPlane.GetPlane().ToPlane();
 
-                    host.InvalidateGraphics();
-
-                    if (CommitTransaction(hostDocument, tx) == ARDB.TransactionStatus.Committed)
+                    foreach (var profile in profiles.OfType<Curve>())
                     {
-                      scope.Commit(CreateFailuresPreprocessor());
+                      var loop = profile.ProjectToPlane(projectionPlane);
+
+                      var segments = loop.TryGetPolyCurve(out var polyCurve, tol.AngleTolerance) ?
+                        polyCurve.DuplicateSegments() : new Curve[] { loop };
+
+                      foreach (var segment in segments)
+                        create.NewModelCurve(segment.ToCurve(), sketchPlane);
                     }
-                    else scope.Cancel();
                   }
-                  catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return; }
-                  finally { uiApplication.DialogBoxShowing -= DialogBoxShowing; }
+
+                  // Commit Scope
+                  using (var uiApplication = new ARUI.UIApplication(hostDocument.Application))
+                  {
+                    EventHandler<ARUI.Events.DialogBoxShowingEventArgs> DialogBoxShowing = null;
+                    try
+                    {
+                      uiApplication.DialogBoxShowing += DialogBoxShowing = (sender, args) =>
+                      {
+                        if (args.DialogId == "TaskDialog_Sketch_Edits_Discarded")
+                          args.OverrideResult(1001 /*IDYES*/);
+                      };
+
+                      host.InvalidateGraphics();
+
+                      if (CommitTransaction(hostDocument, tx) == ARDB.TransactionStatus.Committed)
+                      {
+                        scope.Commit(CreateFailuresPreprocessor());
+                      }
+                      else scope.Cancel();
+                    }
+                    catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return; }
+                    finally { uiApplication.DialogBoxShowing -= DialogBoxShowing; }
+                  }
                 }
               }
-            }
-            else
-            {
-              if (sketchId == ARDB.ElementId.InvalidElementId)
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Host element is not sketch based. {{{host.Id}}}");
               else
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Host element sketch is not editable. {{{host.Id}}}");
+              {
+                if (sketchId == ARDB.ElementId.InvalidElementId)
+                  AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Host element is not sketch based. {{{host.Id}}}");
+                else
+                  AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Host element sketch is not editable. {{{host.Id}}}");
+              }
             }
+            else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Host sketch does not support editing. {{{host.Id}}}");
           }
-          else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Host sketch does not support editing. {{{host.Id}}}");
         }
 #else
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Edit Boundary Profile is only supported on Revit 2022 or above.");
@@ -193,11 +215,14 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
       {
         Params.TrySetData(DA, "Host", () => host);
+        Params.TrySetData(DA, "Plane", () => host.SketchPlane);
 
         if (host is Types.ISketchAccess access && access.Sketch is Types.Sketch sketch)
         {
-          Params.TrySetData(DA, "Plane", () => sketch.ProfilesPlane);
-          Params.TrySetDataList(DA, "Profile", () => sketch.Profiles);
+          if (sketch.IsValid)
+            Params.TrySetDataList(DA, "Profile", () => sketch.Profiles);
+          else
+            Params.TrySetDataList(DA, "Profile", () => Array.Empty<Curve>());
         }
       }
     }

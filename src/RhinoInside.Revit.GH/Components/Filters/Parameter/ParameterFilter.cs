@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     const string _RuleBasedFilter_ = "Rule-based Filter";
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
 
       ReconstructElement<ARDB.ParameterFilterElement>
       (

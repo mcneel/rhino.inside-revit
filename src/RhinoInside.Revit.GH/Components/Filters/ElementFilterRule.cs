@@ -231,7 +231,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
         var goo = default(GH_String);
         if (DA.GetData("Value", ref goo) && goo.Value is string value)
-          rule = CompoundElementFilter.FilterStringRule(provider, ruleEvaluator, value);
+          rule = ElementFilters.FilterStringRule(provider, ruleEvaluator, value);
       }
       else
       {
@@ -451,7 +451,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
         var goo = default(GH_String);
         if (DA.GetData("Value", ref goo))
-          rule = CompoundElementFilter.FilterStringRule(provider, ruleEvaluator, goo.Value);
+          rule = ElementFilters.FilterStringRule(provider, ruleEvaluator, goo.Value);
       }
 
       if (rule is object)

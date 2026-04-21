@@ -8,12 +8,14 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using Autodesk.Revit.DB.Structure;
   using Convert.Geometry;
   using External.DB.Extensions;
 
   interface ISketchAccess
   {
     Sketch Sketch { get; }
+    Plane SketchPlane { get; }
   }
 
   [Kernel.Attributes.Name("Sketch")]
@@ -25,7 +27,7 @@ namespace RhinoInside.Revit.GH.Types
     public Sketch() : base() { }
     public Sketch(ARDB.Sketch sketch) : base(sketch) { }
 
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is Element element)
       {
@@ -37,7 +39,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
     #region IGH_PreviewData
@@ -120,7 +122,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (!_TrimmedSurface.HasValue && Value is ARDB.Sketch sketch)
         {
-          var loops = sketch.Profile.ToCurveMany().Where(x => x.IsClosed).ToArray();
+          var loops = sketch.Profile.ToPolyCurves();
           var plane = sketch.SketchPlane.GetPlane().ToPlane();
 
           if (loops.Length > 0)
@@ -167,7 +169,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (Value is ARDB.Sketch sketch)
         {
-          var slopeArrow = sketch.GetDependentElements(ERDB.CompoundElementFilter.ElementClassFilter(typeof(ARDB.CurveElement))).
+          var slopeArrow = sketch.GetDependentElements(ERDB.ElementFilters.ElementClassFilter(typeof(ARDB.CurveElement))).
             Select(Document.GetElement).FirstOrDefault(x => x.get_Parameter(ARDB.BuiltInParameter.SPECIFY_SLOPE_OR_OFFSET) is object);
 
           return GetElement<CurveElement>(slopeArrow);
@@ -186,7 +188,7 @@ namespace RhinoInside.Revit.GH.Types
       if (normal.IsParallelTo(plane.Normal, tol.AngleTolerance) == 0)
         return false;
 
-      var profiles = sketch.Profile.ToArray(GeometryDecoder.ToPolyCurve);
+      var profiles = sketch.Profile.ToCurves();
       if (profiles.Length != boundaries.Count)
         return false;
 
@@ -196,6 +198,7 @@ namespace RhinoInside.Revit.GH.Types
       switch (sketch.GetOwner())
       {
         // FilledRegion needs the constraints to be edited from the Revi UI latter!!
+        case ARDB.Wall _:     constraintsRemoved = true;  break;
         case ARDB.FilledRegion _:     constraintsRemoved = true;  break;
         case ARDB.FootPrintRoof _:    splitClosed = false;        break;
 #if REVIT_2022
@@ -208,7 +211,7 @@ namespace RhinoInside.Revit.GH.Types
         if (constraintsRemoved) return;
         var constraintsIds = sketch.GetDependentElements
         (
-          ERDB.CompoundElementFilter.Intersect
+          ERDB.ElementFilters.Intersect
           (
           new ARDB.ElementClassFilter(typeof(ARDB.Dimension)),
           new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_WeakDims)

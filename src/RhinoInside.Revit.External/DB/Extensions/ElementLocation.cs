@@ -248,8 +248,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       UnitXYZ basisX = default;
       UnitXYZ basisY = default;
 
-      var viewX = mark.Document.GetElement(mark.GetViewId(1)) as View;
-      var viewY = mark.Document.GetElement(mark.GetViewId(0)) as View;
+      var viewX = !mark.IsAvailableIndex(1) ? mark.Document.GetElement(mark.GetViewId(1)) as View : null;
+      var viewY = !mark.IsAvailableIndex(0) ? mark.Document.GetElement(mark.GetViewId(0)) as View : null;
 
       var lineX = viewX is object ? Line.CreateUnbound(new XYZ(viewX.Origin.X, viewX.Origin.Y, 0.0), viewX.RightDirection) : default;
       var lineY = viewY is object ? Line.CreateUnbound(new XYZ(viewY.Origin.X, viewY.Origin.Y, 0.0), viewY.RightDirection) : default;
@@ -314,20 +314,37 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region AnalyticalElement
     public static (XYZ Origin, UnitXYZ BasisX, UnitXYZ BasisY) GetLocation(this AnalyticalElement element)
     {
-#if REVIT_2023
-      using (var transform = element.GetTransform())
-#else
-      using (var transform = element.GetLocalCoordinateSystem())
+#if !REVIT_2023
+      if (element.IsEnabled())
 #endif
       {
-        return (transform.Origin, transform.BasisX.ToUnitXYZ(), transform.BasisY.ToUnitXYZ());
+        try
+        {
+#if REVIT_2023
+        using (var transform = element.GetTransform())
+#else
+          using (var transform = element.GetLocalCoordinateSystem())
+#endif
+          {
+            if (transform is object)
+              return (transform.Origin, transform.BasisX.ToUnitXYZ(), transform.BasisY.ToUnitXYZ());
+          }
+        }
+        catch { }
+
+#if !REVIT_2023
+        if (element.IsSinglePoint())
+          return (element.GetPoint(), UnitXYZ.BasisX, UnitXYZ.BasisY);
+#endif
       }
+
+      return (default, default, default);
     }
 
     public static void SetLocation(this AnalyticalElement element, XYZ newOrigin, UnitXYZ newBasisX, UnitXYZ newBasisY)
     {
       ElementLocation.SetLocation(element, newOrigin, newBasisX, newBasisY, GetLocation, out var _);
     }
-    #endregion
+#endregion
   }
 }
