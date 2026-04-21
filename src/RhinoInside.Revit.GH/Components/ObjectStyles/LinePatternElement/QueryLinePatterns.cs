@@ -7,6 +7,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.LinePatternElements
 {
+  using External.DB;
+
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryLinePatterns : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("A94000FD-8BCD-49D5-9F00-09BEDB88A123");
@@ -35,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition (new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Line pattern name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional)
     };
@@ -48,23 +51,22 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
 
       string name = null;
       DA.GetData("Name", ref name);
 
       Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var patternsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          patternsCollector = patternsCollector.WherePasses(filter);
+          patternsCollector = patternsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         var patterns =
-          Enumerable.Repeat(new Types.LinePatternElement(doc, ARDB.LinePatternElement.GetSolidPatternId()), 1).
+          Enumerable.Repeat(new Types.LinePatternElement(source.SourceDocument.Value, ARDB.LinePatternElement.GetSolidPatternId()), 1).
           Concat(collector.Cast<ARDB.LinePatternElement>().Select(x => new Types.LinePatternElement(x)));
 
         if (!string.IsNullOrEmpty(name))
@@ -74,6 +76,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
         (
           "Line Patterns",
           patterns.
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

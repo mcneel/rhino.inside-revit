@@ -46,15 +46,19 @@ namespace RhinoInside.Revit.GH.Types
 
     protected override void ResetValue()
     {
-      using (_DisplayMaterial)  _DisplayMaterial = null;
-      using (_Mesh)             _Mesh = default;
-
+      using (_DisplayMaterial) _DisplayMaterial = null;
       base.ResetValue();
     }
 
-    public override bool CastTo<Q>(out Q target)
+    protected override void SubInvalidateGraphics()
     {
-      if (base.CastTo(out target))
+      using (_Mesh)             _Mesh = default;
+      base.SubInvalidateGraphics();
+    }
+
+    public override bool ConvertTo<Q>(out Q target)
+    {
+      if (base.ConvertTo(out target))
         return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Material)))
@@ -314,9 +318,9 @@ namespace RhinoInside.Revit.GH.Types
       base.ResetValue();
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target))
+      if (base.ConvertTo(out target))
         return true;
 
       if (typeof(Q).IsAssignableFrom(typeof(GH_Material)))

@@ -8,8 +8,8 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using External.DB.Extensions;
 
-  [Kernel.Attributes.Name("Linked Element")]
-  public class Instance : GraphicalElement
+  [Kernel.Attributes.Name("Instance Element")]
+  public class Instance : GeometricElement
   {
     protected override Type ValueType => typeof(ARDB.Instance);
     public new ARDB.Instance Value => base.Value as ARDB.Instance;
@@ -63,7 +63,6 @@ namespace RhinoInside.Revit.GH.Types
               args.Pipeline.DrawPatternedLine(edge.From, edge.To, args.Color, 0x00003333, args.Thickness);
 
           args.Pipeline.PopModelTransform();
-          return;
         }
       }
 

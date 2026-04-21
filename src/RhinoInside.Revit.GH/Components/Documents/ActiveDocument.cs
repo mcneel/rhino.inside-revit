@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (Parameters.Document.TryGetDocumentOrCurrent(this, default, default, out var Document))
+      if (Parameters.Document.TryGetCurrentDocument(this, out var Document))
         DA.SetData("Active Document", Document);
     }
 

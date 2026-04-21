@@ -6,12 +6,17 @@ using Autodesk.Revit.DB;
 namespace RhinoInside.Revit.External.DB.Extensions
 {
   using Numerical;
+
   struct GeometryObjectEqualityComparer :
     IEqualityComparer<double>,
     IEqualityComparer<UV>,
+    IEqualityComparer<BoundingBoxUV>,
     IEqualityComparer<XYZ>,
+    IEqualityComparer<BoundingBoxXYZ>,
+    IEqualityComparer<PlaneEquation>,
     IEqualityComparer<Point>,
     IEqualityComparer<PolyLine>,
+    IEqualityComparer<Mesh>,
     IEqualityComparer<Line>,
     IEqualityComparer<Arc>,
     IEqualityComparer<Ellipse>,
@@ -19,6 +24,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     IEqualityComparer<NurbSpline>,
     IEqualityComparer<CylindricalHelix>,
     IEqualityComparer<Curve>,
+    IEqualityComparer<Edge>,
+    IEqualityComparer<Face>,
+    IEqualityComparer<Solid>,
     IEqualityComparer<GeometryObject>
   {
     static int CombineHash(params int[] values)
@@ -88,6 +96,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <param name="tolerance"></param>
     /// <returns>A geometry comparer.</returns>
     public static readonly GeometryObjectEqualityComparer Default = new GeometryObjectEqualityComparer(Constant.DefaultTolerance);
+    private static readonly GeometryObjectEqualityComparer UVComparer = new GeometryObjectEqualityComparer(Constant.DefaultTolerance * 1000.0);
 
     /// <summary>
     /// IEqualityComparer for <see cref="{T}"/> that compares geometrically.
@@ -102,18 +111,18 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region UV
-    public bool Equals(UV x, UV y) => Euclidean.IsZero2(x.U - y.U, x.V - y.V, Tolerance);
+    public bool Equals(UV x, UV y) => Euclidean.IsZero2(x.U - y.U, x.V - y.V, UVComparer.Tolerance);
     public int GetHashCode(UV obj) => CombineHash
     (
-      GetHashCode(obj.U),
-      GetHashCode(obj.V)
+      UVComparer.GetHashCode(obj?.U ?? 0.0),
+      UVComparer.GetHashCode(obj?.V ?? 0.0)
     );
     #endregion
 
     #region BoundingBoxUV
     public bool Equals(BoundingBoxUV x, BoundingBoxUV y)
     {
-      return Default.Equals(x.Min, y.Max);
+      return Equals(x.Min, y.Min) && Equals(x.Max, y.Max);
     }
 
     public int GetHashCode(BoundingBoxUV value) => CombineHash
@@ -183,6 +192,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
       GetHashCode(value.Min),
       GetHashCode(value.Max),
       GetHashCode(value.Transform.Origin)
+    );
+    #endregion
+
+    #region PlaneEquation
+    public bool Equals(PlaneEquation left, PlaneEquation right) => Equals(left.Point, right.Point) && Euclidean.IsZero1(left.Offset - right.Offset, Tolerance);
+    public int GetHashCode(PlaneEquation obj) => CombineHash
+    (
+      GetHashCode(obj.Point),
+      GetHashCode(obj.Offset)
     );
     #endregion
 
@@ -417,8 +435,111 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region Curve
-    public bool Equals(Curve left, Curve right) => Equals((GeometryObject) left, right);
-    public int GetHashCode(Curve value) => GetHashCode((GeometryObject) value);
+    public bool Equals(Curve left, Curve right)
+    {
+      if (left.GetType() != right.GetType()) return false;
+
+      switch (left)
+      {
+        case Line line: return Equals(line, (Line) right);
+        case Arc arc: return Equals(arc, (Arc) right);
+        case Ellipse ellipse: return Equals(ellipse, (Ellipse) right);
+        case HermiteSpline hermite: return Equals(hermite, (HermiteSpline) right);
+        case NurbSpline spline: return Equals(spline, (NurbSpline) right);
+        case CylindricalHelix helix: return Equals(helix, (CylindricalHelix) right);
+      }
+
+      return false;
+    }
+
+    public int GetHashCode(Curve value)
+    {
+      switch (value)
+      {
+        case null: return 0;
+        case Line line: return GetHashCode(line);
+        case Arc arc: return GetHashCode(arc);
+        case Ellipse ellipse: return GetHashCode(ellipse);
+        case HermiteSpline hermite: return GetHashCode(hermite);
+        case NurbSpline spline: return GetHashCode(spline);
+        case CylindricalHelix helix: return GetHashCode(helix);
+      }
+
+      throw new NotImplementedException($"{nameof(GeometryObjectEqualityComparer)} is not implemented for {value.GetType()}.");
+    }
+    #endregion
+
+    #region Edge
+    public bool Equals(Edge left, Edge right)
+    {
+      //if (!Equals(left.ApproximateLength, right.ApproximateLength, 0.1)) return false;
+      return Equals(left.AsCurve(), right.AsCurve());
+    }
+
+    public int GetHashCode(Edge value) => GetHashCode(value.AsCurve());
+    #endregion
+
+    #region Surface
+    private bool Equals(Plane left, Plane right)
+    {
+      if (!Equals(left.Origin, right.Origin)) return false;
+      if (!Equals(left.XVec, right.XVec)) return false;
+      if (!Equals(left.YVec, right.YVec)) return false;
+      return true;
+    }
+
+    private bool Equals(RuledSurface left, RuledSurface right)
+    {
+      var hasFirstProfilePoint = left.HasFirstProfilePoint();
+      if (hasFirstProfilePoint != right.HasFirstProfilePoint()) return false;
+
+      var hasSecondProfilePoint = left.HasSecondProfilePoint();
+      if (hasSecondProfilePoint != right.HasSecondProfilePoint()) return false;
+
+      if (hasFirstProfilePoint)
+      {
+        var firstProfilePoint = left.GetFirstProfilePoint();
+        if (!Equals(firstProfilePoint, right.GetFirstProfilePoint())) return false;
+      }
+      else if (!Equals(left.GetFirstProfileCurve(), right.GetFirstProfileCurve()))
+        return false;
+
+      if (hasSecondProfilePoint)
+      {
+        var secondProfilePoint = left.GetSecondProfilePoint();
+        if (!Equals(secondProfilePoint, right.GetSecondProfilePoint())) return false;
+      }
+      else if (!Equals(left.GetSecondProfileCurve(), right.GetSecondProfileCurve()))
+        return false;
+
+      return true;
+    }
+
+    private bool Equals(Surface left, Surface right)
+    {
+      if (left.MatchesParametricOrientation() != right.MatchesParametricOrientation()) return false;
+
+      switch (left)
+      {
+        case Plane leftPlaneSurface: return right is Plane rightPlaneSurface && Equals(leftPlaneSurface, rightPlaneSurface);
+        case RuledSurface leftRuledSurface: return right is RuledSurface rightRuledSurface && Equals(leftRuledSurface, rightRuledSurface);
+      }
+
+      return false;
+    }
+
+    private int GetHashCode(Surface value) => CombineHash
+    (
+      value.GetType().GetHashCode(),
+#if REVIT_2019
+      GetHashCode(value.DistanceTo(XYZExtension.Zero, out var uv)),
+      GetHashCode(uv),
+#endif
+#if REVIT_2021
+      GetHashCode(value.GetBoundingBoxUV()),
+#endif
+      value.MatchesParametricOrientation().GetHashCode()
+    );
     #endregion
 
     #region Face
@@ -437,7 +558,24 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var rightEdges = right.EdgeLoops;
       if (leftEdges.Size != rightEdges.Size) return false;
 
-      return Equals(left.Triangulate(), right.Triangulate());
+      if (left.MatchesSurfaceOrientation() != right.MatchesSurfaceOrientation()) return false;
+      if (!Equals(left.GetSurface(), right.GetSurface())) return false;
+
+      for (int l = 0; l < leftEdges.Size; ++l)
+      {
+        var leftTrims = leftEdges.get_Item(l);
+        var rightTrims = rightEdges.get_Item(l);
+        if (leftTrims.Size != rightTrims.Size) return false;
+
+        for (int t = 0; t < leftTrims.Size; ++t)
+        {
+          var leftTrim = leftTrims.get_Item(l);
+          var rightTrim = rightTrims.get_Item(l);
+          if (!Equals(leftTrim.AsCurveFollowingFace(left), rightTrim.AsCurveFollowingFace(right))) return false;
+        }
+      }
+
+      return true;
     }
 
     public int GetHashCode(Face value)
@@ -496,14 +634,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
       {
         case Point point: return Equals(point, (Point) right);
         case PolyLine polyLine: return Equals(polyLine, (PolyLine) right);
-        case Line line: return Equals(line, (Line) right);
-        case Arc arc: return Equals(arc, (Arc) right);
-        case Ellipse ellipse: return Equals(ellipse, (Ellipse) right);
-        case HermiteSpline hermite: return Equals(hermite, (HermiteSpline) right);
-        case NurbSpline spline: return Equals(spline, (NurbSpline) right);
-        case CylindricalHelix helix: return Equals(helix, (CylindricalHelix) right);
-        case Solid solid: return Equals(solid, (Solid) right);
+        case Mesh mesh: return Equals(mesh, (Mesh) right);
+
+        case Curve curve : return Equals(curve, (Curve) right);
+        case Edge edge : return Equals(edge, (Edge) right);
         case Face face: return Equals(face, (Face) right);
+        case Solid solid: return Equals(solid, (Solid) right);
       }
 
       throw new NotImplementedException($"{nameof(GeometryObjectEqualityComparer)} is not implemented for {left.GetType()}.");
@@ -513,14 +649,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
       switch (value)
       {
         case null: return 0;
-        case Line line: return GetHashCode(line);
-        case Arc arc: return GetHashCode(arc);
-        case Ellipse ellipse: return GetHashCode(ellipse);
-        case HermiteSpline hermite: return GetHashCode(hermite);
-        case NurbSpline spline: return GetHashCode(spline);
-        case CylindricalHelix helix: return GetHashCode(helix);
-        case Solid solid: return GetHashCode(solid);
+        case Point point: return GetHashCode(point);
+        case PolyLine polyLine: return GetHashCode(polyLine);
+        case Mesh mesh: return GetHashCode(mesh);
+
+        case Curve curve: return GetHashCode(curve);
+        case Edge edge: return GetHashCode(edge);
         case Face face: return GetHashCode(face);
+        case Solid solid: return GetHashCode(solid);
       }
 
       throw new NotImplementedException($"{nameof(GeometryObjectEqualityComparer)} is not implemented for {value.GetType()}.");
@@ -530,17 +666,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
   public static class GeometryObjectExtension
   {
-    internal static bool IsValid(this GeometryObject geometry) => geometry?.IsValidObject() ?? false;
-
-    internal static bool IsValidObject(this GeometryObject geometry)
+    internal static bool IsEmpty(this GeometryObject geometry)
     {
-#if REVIT_2021
-      try { return geometry.Id >= 0; }
-#else
-      // TODO : Test this, type by type, and use a faster fail check.
-      try { return geometry.TryGetLocation(out var _, out var _, out var _);}
-#endif
-      catch { return false; }
+      switch (geometry)
+      {
+        case PolyLine pline: return pline.NumberOfCoordinates == 0;
+        case Mesh mesh: return mesh.NumTriangles == 0;
+        case Solid solid: return solid.Faces.IsEmpty;
+      }
+
+      return false;
     }
 
     public static bool AlmostEquals<G>(this G left, G right)
@@ -608,13 +743,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
           return edge.AsCurve().TryGetLocation(out origin, out basisX, out basisY);
 
         case Face face:
-          using (var derivatives = face.ComputeDerivatives(new UV(0.5, 0.5), normalized: true))
-          {
-            origin = derivatives.Origin;
 
-            // Make sure is orthonormal.
-            return UnitXYZ.Orthonormalize(derivatives.BasisX, derivatives.BasisY, out basisX, out basisY, out _);
+          if (face.Triangulate().ComputeSurfaceArea(out origin, out var zDir) > 0.0)
+          {
+            var xDir = XYZExtension.CrossProduct(zDir, UnitXYZ.BasisZ);
+            if (xDir.IsZeroVector()) xDir = zDir.Z < 0.0 ? -UnitXYZ.BasisX : UnitXYZ.BasisX;
+            var yDir = XYZExtension.CrossProduct(zDir, xDir);
+            if (yDir.Z < 0.0) { xDir = -xDir; yDir = -yDir; }
+
+            basisX = xDir.ToUnitXYZ();
+            basisY = yDir.ToUnitXYZ();
+
+            return true;
           }
+          break;
 
         case Solid solid:
           if (!solid.Faces.IsEmpty)

@@ -522,22 +522,31 @@ namespace RhinoInside.Revit.GH.Parameters
       if
       (
         VolatileData.AllData(true).FirstOrDefault() is Types.GraphicalElement element &&
-        Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc doc &&
-        (doc.Views.ActiveView ?? doc.Views.FirstOrDefault()) is RhinoView view &&
-        view.ActiveViewport is RhinoViewport vport
+        Rhino.RhinoDoc.ActiveDoc is Rhino.RhinoDoc doc
       )
       {
-        var location = element.Location;
-        if (location.IsValid)
+        bool wasVisible = Rhinoceros.MainWindow.Visible;
+
+        try
         {
-          view.BringToFront();
-          doc.Views.ActiveView = view;
+          Rhinoceros.MainWindow.Visible = true;
+          Rhinoceros.MainWindow.BringToFront();
+          PrepareForPrompt();
 
-          var cplane = vport.GetConstructionPlane();
-          cplane.Plane = location;
-          vport.PushConstructionPlane(cplane);
+          if (Rhino.Input.RhinoGet.GetView($"Pick a viewport to set '{element.Value.Name}' location as CPlane", out var rhinoView) == Rhino.Commands.Result.Success)
+          {
+            var cplane = rhinoView.ActiveViewport.GetConstructionPlane();
+            cplane.Name = element.Value.Name;
+            cplane.Plane = element.Location;
 
-          view.Redraw();
+            rhinoView.ActiveViewport.PushConstructionPlane(cplane);
+            rhinoView.Redraw();
+          }
+        }
+        finally
+        {
+          RecoverFromPrompt();
+          Rhinoceros.MainWindow.Visible = wasVisible;
         }
       }
     }
@@ -570,7 +579,7 @@ namespace RhinoInside.Revit.GH.Parameters
     private async void Menu_ExternaliseData(object sender, EventArgs e)
     {
       var activeApp = Revit.ActiveUIApplication;
-      if (activeApp.ActiveUIDocument.TryGetRevitCommandId(ARUI.PostableCommand.SaveSelection, out var commandId))
+      if (activeApp.TryGetRevitCommandId(ARUI.PostableCommand.SaveSelection, out var commandId))
       {
         using (var scope = new External.UI.EditScope(activeApp))
         {
@@ -780,11 +789,11 @@ namespace RhinoInside.Revit.GH.Parameters
                 }
 
                 var dataCount = m_data.DataCount;
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{dataCount}/{dataCount + filteredElementsCount} {(dataCount != 1 ? GH_Convert.ToPlural(TypeName) : TypeName)} collected from document '{doc.GetTitle()}'");
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{dataCount}/{dataCount + filteredElementsCount} {(dataCount != 1 ? GH_Convert.ToPlural(TypeName) : TypeName)} collected from document '{doc.Tooltip()}'");
               }
               else
               {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect '{NickName}' elements from document '{doc.GetTitle()}'");
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to collect '{NickName}' elements from document '{doc.Tooltip()}'");
               }
             }
           }

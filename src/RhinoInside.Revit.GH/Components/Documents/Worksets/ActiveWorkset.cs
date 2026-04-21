@@ -36,7 +36,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
 
       if (doc.Value.GetWorksetTable() is ARDB.WorksetTable table)
       {

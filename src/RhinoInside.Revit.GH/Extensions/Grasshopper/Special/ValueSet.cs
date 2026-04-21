@@ -1375,7 +1375,7 @@ namespace Grasshopper.Special
     protected virtual void SortItems()
     {
       // Show elements sorted Alphabetically.
-      ListItems = ListItems.OrderBy(x => x.Name).ThenBy(x => x.Identity).ToList();
+      ListItems = ListItems.OrderBy(x => x.Name, RhinoInside.Revit.External.DB.Extensions.ElementNaming.NameComparer).ThenBy(x => x.Identity).ToList();
     }
 
     public sealed override void PostProcessData()

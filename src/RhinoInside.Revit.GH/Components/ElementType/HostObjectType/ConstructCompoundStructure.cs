@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc))
         return;
 
       bool update = false;
@@ -147,8 +147,8 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       if(update)
       {
         var structure = sampleHeight.HasValue ?
-          new Types.CompoundStructure(doc, sampleHeight.Value) :
-          new Types.CompoundStructure(doc);
+          new Types.CompoundStructure(doc.Value, sampleHeight.Value) :
+          new Types.CompoundStructure(doc.Value);
 
         structure.SetLayers(exterior, core, interior);
 

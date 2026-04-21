@@ -14,9 +14,9 @@ namespace RhinoInside.Revit.GH.Types
     protected ViewInstance() { }
     public ViewInstance(ARDB.Element element) : base(element) { }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target))
+      if (base.ConvertTo(out target))
         return true;
 
       if (typeof(ViewSheet).IsAssignableFrom(typeof(Q)))

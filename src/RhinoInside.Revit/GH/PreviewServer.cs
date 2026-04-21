@@ -1,18 +1,14 @@
 #if REVIT_2018
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-
-using ARUI = Autodesk.Revit.UI;
-using ARDB = Autodesk.Revit.DB;
-using ARDBES = Autodesk.Revit.DB.ExternalService;
-using ARDB3D = Autodesk.Revit.DB.DirectContext3D;
-
 using Grasshopper;
-using Grasshopper.Kernel;
 using Grasshopper.GUI.Canvas;
+using Grasshopper.Kernel;
+using ARDB = Autodesk.Revit.DB;
+using ARDB3D = Autodesk.Revit.DB.DirectContext3D;
 
 namespace RhinoInside.Revit.GH
 {
@@ -284,22 +280,6 @@ namespace RhinoInside.Revit.GH
 
       public override void Draw(ARDB.DisplayStyle displayStyle)
       {
-        if (Node.ActiveObject is IGH_PreviewObject preview)
-        {
-          if (preview.Hidden || !preview.IsPreviewCapable)
-            return;
-        }
-
-        var topObject = Node.ActiveObject.Attributes?.GetTopLevel?.DocObject ?? Node.ActiveObject;
-        if (topObject is IGH_PreviewObject topPreview)
-        {
-          if (topPreview.Hidden || !topPreview.IsPreviewCapable)
-            return;
-        }
-
-        if (ActiveDefinition.PreviewFilter == GH_PreviewFilter.Selected && !topObject.Attributes.Selected)
-          return;
-
         base.Draw(displayStyle);
       }
     }
@@ -478,6 +458,47 @@ namespace RhinoInside.Revit.GH
       return outline.ToOutline();
     }
 
+    private static bool IsBoundingBoxBelowPlane(Rhino.Geometry.Point3d min, Rhino.Geometry.Point3d max, double[] equation)
+    {
+      var A = equation[0];
+      var B = equation[1];
+      var C = equation[2];
+      var D = equation[3];
+
+      var x = (A >= 0.0) ? max.X : min.X;
+      var y = (B >= 0.0) ? max.Y : min.Y;
+      var z = (C >= 0.0) ? max.Z : min.Z;
+
+      return A * x + B * y + C * z < -D;
+    }
+
+    public static bool IsBoundingBoxVisible(Rhino.Geometry.BoundingBox clippingBox, Rhino.Geometry.BoundingBox? cropBox, double[][] planes)
+    {
+      if (!clippingBox.IsValid)
+        return false;
+
+      if (cropBox.HasValue && !Rhino.Geometry.BoundingBox.Intersection(cropBox.Value, clippingBox).IsValid)
+        return false;
+
+      if (planes.Length > 0)
+      {
+        var min = clippingBox.Min;
+        var max = clippingBox.Max;
+
+        var clipped = false;
+        foreach (var plane in planes)
+        {
+          clipped = IsBoundingBoxBelowPlane(min, max, plane);
+          if (clipped) break;
+        }
+
+        if (clipped)
+          return false;
+      }
+
+      return true;
+    }
+
     public override void RenderScene(ARDB.View dBView, ARDB.DisplayStyle displayStyle)
     {
       if (IsBusy) return;
@@ -491,18 +512,32 @@ namespace RhinoInside.Revit.GH
             ARDB.Transform.Identity.ScaleBasis(GeometryEncoder.ModelScaleFactor)
           );
 
-          var CropBox = dBView.CropBox.ToBoundingBox();
-          var CropBoxActive = dBView.CropBoxActive;
+          var CropBox = dBView.CropBoxActive ? dBView.CropBox.ToBoundingBox() : default(Rhino.Geometry.BoundingBox?);
+          var ClipPlanes = ARDB3D.DrawContext.GetClipPlanes().
+            Select(x => new Rhino.Geometry.Plane(x.Origin.ToPoint3d(), x.Normal.ToVector3d()).GetPlaneEquation()).
+            ToArray();
 
           foreach (var node in PreviewNodes.Values)
           {
+            if (IsInterrupted)
+              break;
+
+            if (node.ActiveObject is IGH_PreviewObject preview)
+            {
+              if (preview.Hidden || !preview.IsPreviewCapable)
+                continue;
+
+              if (ActiveDefinition.PreviewFilter == GH_PreviewFilter.Selected && !node.ActiveObject.Attributes.Selected)
+                return;
+
+              if (!IsBoundingBoxVisible(preview.ClippingBox, CropBox, ClipPlanes))
+                continue;
+            }
+
             foreach (var primitive in node.Primitives)
             {
-              if (IsInterrupted)
-                break;
-
-              if (CropBoxActive && !Rhino.Geometry.BoundingBox.Intersection(CropBox, primitive.ClippingBox).IsValid)
-                continue;
+              //if (!IsBoundingBoxVisible(primitive.ClippingBox, CropBox, ClipPlanes))
+              //  continue;
 
               primitive.Draw(displayStyle);
             }

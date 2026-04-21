@@ -119,7 +119,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 }
               }
 
-              var visibleElements = GetVisibleElements(viewValue, ids);
+              var visibleElements = viewValue.GetVisibleElements(ids);
               if (visibleElements.Count > 0)
               {
                 for (int i = 0; i < elements.Count; i++)
@@ -135,7 +135,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 {
                   ids.ExceptWith(visibleElements);
 
-                  visibleElements = GetVisibleElements(placedView, ids);
+                  visibleElements = placedView.GetVisibleElements(ids);
                   if (visibleElements.Count > 0)
                   {
                     for (int i = 0; i < elements.Count; i++)
@@ -152,137 +152,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
           return visible;
         }
       );
-    }
-
-    static ISet<ARDB.ElementId> GetVisibleElements(ARDB.View viewValue, ICollection<ARDB.ElementId> ids)
-    {
-      if (ids.Count > 0 && !viewValue.IsTemplate)
-      {
-        var viewDocument = viewValue.Document;
-        var viewId = viewValue.Id;
-
-        if (viewValue.GetClipFilter(clipped: false) is ARDB.ElementFilter clipFilter)
-        {
-          using (var collector = new ARDB.FilteredElementCollector(viewDocument, ids))
-            ids = collector.WherePasses(clipFilter).ToElementIds();
-        }
-
-        if (ids.Count > 0)
-        {
-          var documentIsWorkshared = viewDocument.IsWorkshared;
-          var modelClipBox = viewValue.GetModelClipBox();
-          var isModelClipped = modelClipBox.GetPlaneEquations(out var modelClipPlanes, Numerical.Tolerance.Default);
-          var annotationClipBox = viewValue.GetAnnotationClipBox();
-          var isAnnotationClipped = annotationClipBox.GetPlaneEquations(out var annotationClipPlanes, Numerical.Tolerance.Default);
-          var areViewGraphicsOverridesAllowed = viewValue.AreGraphicsOverridesAllowed();
-          var isCategoryTypeHidden = new bool[]
-          {
-            true,
-            viewValue.AreModelCategoriesHidden,
-            viewValue.AreAnnotationCategoriesHidden,
-            false, // ??
-            false, // ??
-            viewValue.AreAnalyticalModelCategoriesHidden,
-            viewValue.AreImportCategoriesHidden,
-            viewValue.ArePointCloudsHidden
-          };
-
-          var visibleIds = new List<ARDB.ElementId>(ids.Count);
-          var viewPhaseFilter = ((viewValue.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE_FILTER)?.AsElement()) as ARDB.PhaseFilter);
-          var viewPhase = viewValue.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElementId() ?? ElementIdExtension.Invalid;
-
-          using (var elementVisibilityFilter = viewValue.GetElementVisibilityFilter(viewDocument, hidden: true))
-          {
-            foreach (var elementValue in ids.Select(viewDocument.GetElement))
-            {
-              var elementCategory = elementValue.Category;
-              if (elementCategory is null) continue;
-
-              var elementCategoryType = 0;
-              {
-                switch (elementValue)
-                {
-                  case ARDB.ImportInstance _:           elementCategoryType = 6;      break;
-                  case ARDB.PointCloudInstance _:       elementCategoryType = 7;      break;
-                  default: elementCategoryType = (int)  elementCategory.CategoryType; break;
-                }
-
-                if (isCategoryTypeHidden[(int) elementCategoryType]) continue;
-              }
-
-              if (documentIsWorkshared && !viewValue.IsWorksetVisible(elementValue.WorksetId)) continue;
-
-              if (elementValue.ViewSpecific)
-              {
-                if (elementValue.OwnerViewId != viewId) continue;
-                if (isAnnotationClipped && elementCategoryType == (int) ARDB.CategoryType.Annotation)
-                {
-                  if (elementValue.get_BoundingBox(viewValue) is ARDB.BoundingBoxXYZ bbox)
-                  {
-                    var bboxMin = bbox.Transform.OfPoint(bbox.Min);
-                    var bboxMax = bbox.Transform.OfPoint(bbox.Max);
-
-                    if (annotationClipPlanes.X.Min?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
-                    if (annotationClipPlanes.X.Max?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
-                    if (annotationClipPlanes.Y.Min?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
-                    if (annotationClipPlanes.Y.Max?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
-                  }
-                  else continue;
-                }
-              }
-              else
-              {
-                if (viewPhaseFilter is object && viewPhase.IsValid() && elementValue.HasPhases())
-                {
-                  var status = elementValue.GetPhaseStatus(viewPhase);
-                  if (status != ARDB.ElementOnPhaseStatus.None)
-                  {
-                    var presentation = viewPhaseFilter.GetPhaseStatusPresentation(status);
-                    if (presentation == ARDB.PhaseStatusPresentation.DontShow) continue;
-                  }
-                }
-
-                if (isModelClipped)
-                {
-                  if (elementValue.get_BoundingBox(viewValue) is ARDB.BoundingBoxXYZ bbox)
-                  {
-                    var bboxMin = bbox.Transform.OfPoint(bbox.Min);
-                    var bboxMax = bbox.Transform.OfPoint(bbox.Max);
-
-                    if (modelClipPlanes.X.Min?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
-                    if (modelClipPlanes.X.Max?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
-                    if (modelClipPlanes.Y.Min?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
-                    if (modelClipPlanes.Y.Max?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
-                    if (modelClipPlanes.Z.Min?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
-                    if (modelClipPlanes.Z.Max?.IsAboveOutline(bboxMin, bboxMax) is true) continue;
-                  }
-                  else continue;
-                }
-              }
-
-              if (areViewGraphicsOverridesAllowed)
-              {
-                if (viewValue.GetCategoryHidden(elementCategory.Id)) continue;
-                if (elementValue.IsHidden(viewValue)) continue;
-                if (elementVisibilityFilter?.PassesFilter(elementValue) is true) continue;
-              }
-
-              visibleIds.Add(elementValue.Id);
-            }
-          }
-
-          if (visibleIds.Count > 0)
-          {
-            using (var filter = CompoundElementFilter.ExclusionFilter(visibleIds, inverted: true))
-            using (var collector = new ARDB.FilteredElementCollector(viewDocument, viewId).WherePasses(filter))
-            {
-              return collector.ToReadOnlyElementIdSet();
-            }
-          }
-        }
-      }
-
-      return ElementIdExtension.EmptySet;
     }
   }
 }
