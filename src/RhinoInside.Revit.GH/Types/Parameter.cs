@@ -136,15 +136,15 @@ namespace RhinoInside.Revit.GH.Types
       if (IsReferencedData)
         return Value;
 
-      if (CastTo(out ARDB.ExternalDefinitionCreationOptions external))
+      if (ConvertTo(out ARDB.ExternalDefinitionCreationOptions external))
         return external;
 
       return null;
     }
 
-    public sealed override bool CastFrom(object source)
+    public sealed override bool ConvertFrom(object source)
     {
-      if (base.CastFrom(source))
+      if (base.ConvertFrom(source))
         return true;
 
       var document = Revit.ActiveDBDocument;
@@ -197,10 +197,10 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
-      return base.CastFrom(source);
+      return base.ConvertFrom(source);
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(GH_Guid)))
       {
@@ -255,7 +255,7 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
 
-      return base.CastTo(out target);
+      return base.ConvertTo(out target);
     }
 
     new class Proxy : Element.Proxy
@@ -606,7 +606,22 @@ namespace RhinoInside.Revit.GH.Types
     ERDB.Schemas.ParameterGroup group;
     public ERDB.Schemas.ParameterGroup Group
     {
-      get => group ??= Value?.GetDefinition()?.GetGroupType();
+      get
+      {
+        if (group is null)
+        {
+//#if REVIT_2026
+//          try
+//          {
+//            if (Id is object && Id.TryGetBuiltInParameter(out var builtInParameter))
+//              return group = ARDB.ParameterUtils.GetBuiltInParameterGroupTypeId((ERDB.Schemas.ParameterId)builtInParameter);
+//          }
+//          catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+//#endif
+          group = Value?.GetDefinition()?.GetGroupType();
+        }
+        return group;
+      }
       set
       {
         if (IsReferencedData)
@@ -916,7 +931,7 @@ namespace RhinoInside.Revit.GH.Types
       //    case ARDB.StorageType.ElementId:
       //      if (parameter.HasValue)
       //      {
-      //        if (Document.GetElement(parameter.AsElementId()) is ARDB.Element value)
+      //        if (Document.GetNamesakeElement(parameter.AsElementId()) is ARDB.Element value)
       //          if (value.Category is ARDB.Category category)
       //            if (category.Id.TryGetBuiltInCategory(out var categoryId))
       //            {
@@ -1040,7 +1055,7 @@ namespace RhinoInside.Revit.GH.Types
 
     #region IGH_Goo
     public override bool IsValid => base.IsValid && Value is object;
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is ARDB.Parameter parameter)
       {
@@ -1051,7 +1066,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(ARDB.Parameter)))
       {

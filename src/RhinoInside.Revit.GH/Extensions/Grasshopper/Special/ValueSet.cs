@@ -1375,7 +1375,7 @@ namespace Grasshopper.Special
     protected virtual void SortItems()
     {
       // Show elements sorted Alphabetically.
-      ListItems = ListItems.OrderBy(x => x.Name).ThenBy(x => x.Identity).ToList();
+      ListItems = ListItems.OrderBy(x => x.Name, RhinoInside.Revit.External.DB.Extensions.ElementNaming.NameComparer).ThenBy(x => x.Identity).ToList();
     }
 
     public sealed override void PostProcessData()
@@ -1411,7 +1411,7 @@ namespace Grasshopper.Special
         Title = Name,
         Description =
         @"<p>This component is a special interface object that allows for quick picking an item from a list.</p>" +
-        @"<p>Double click on it and use the name input box to enter an exact name, alternativelly you can enter a name pattern. " +
+        @"<p>Double click on it and use the name input box to enter an exact name, alternatively you can enter a name pattern. " +
         @"If a pattern is used, this param list will be filled up with all the items that match it.</p>" +
         @"<p>Several kind of patterns are supported, the method used depends on the first pattern character:</p>" +
         @"<dl>" +
@@ -1419,7 +1419,7 @@ namespace Grasshopper.Special
         @"<dt><b>></b></dt><dd>Ends with</dd>" +
         @"<dt><b>?</b></dt><dd>Contains, same as a regular search</dd>" +
         @"<dt><b>:</b></dt><dd>Wildcards, see Microsoft.VisualBasic " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/operators/like-operator#pattern-options\">LikeOperator</a></dd>" +
-        @"<dt><b>;</b></dt><dd>Regular expresion, see " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference\">here</a> as reference</dd>" +
+        @"<dt><b>;</b></dt><dd>Regular expression, see " + "<a target=\"_blank\" href=\"https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference\">here</a> as reference</dd>" +
         @"</dl>"
       };
 
@@ -1472,6 +1472,7 @@ namespace Grasshopper.Special
     #endregion
   }
 
+#if !RHINO_9
   [EditorBrowsable(EditorBrowsableState.Never)]
   public class ValuePicker : ValueSet<IGH_Goo>
   {
@@ -1492,4 +1493,5 @@ namespace Grasshopper.Special
     )
     { }
   }
+#endif
 }

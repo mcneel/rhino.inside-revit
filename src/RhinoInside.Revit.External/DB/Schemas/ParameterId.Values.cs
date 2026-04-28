@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Autodesk.Revit.DB;
 
+#if !REVIT_2025
 namespace RhinoInside.Revit.External.DB.Schemas
 {
   public partial class ParameterId
@@ -3359,3 +3360,4 @@ namespace RhinoInside.Revit.External.DB.Schemas
     public static ParameterId ZoneVolumeGross => new ParameterId("autodesk.revit.parameter:zoneVolumeGross-1.0.0");
   }
 }
+#endif

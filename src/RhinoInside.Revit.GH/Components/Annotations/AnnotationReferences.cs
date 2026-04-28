@@ -138,7 +138,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Reference", out Types.GeometryObject reference, x => x.IsValid)) return;
-      if (!reference.CastTo(out Types.GraphicalElement referenceElement)) return;
+      if (!reference.ConvertTo(out Types.GraphicalElement referenceElement)) return;
       
       if (!Params.TryGetData(DA, "View", out Types.View view, x => x.IsValid)) return;
 
@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       }
 
       if (typesList.Count == 0) return;
-      var filter = CompoundElementFilter.ElementClassFilter(typesList);
+      var filter = ElementFilters.ElementClassFilter(typesList);
 
       IEnumerable<ARDB.Element> annotationElements = null;
 

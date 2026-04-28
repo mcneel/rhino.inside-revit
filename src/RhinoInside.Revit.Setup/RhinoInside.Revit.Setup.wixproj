@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="../Product.targets"/>
+  <Import Project="../Product.targets" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>3.10</ProductVersion>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <ProjectGuid>25d80b8c-f993-445c-993f-a39c8772f40b</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputName>RhinoInside.Revit</OutputName>
@@ -52,6 +51,16 @@
     <Content Include="AddIn.wxi" />
     <Content Include="Revit.wxi" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="CustomActions\RhinoInside.Revit.Setup.Actions.csproj">
+      <Name>RhinoInside.Revit.Setup.Actions</Name>
+      <Project>{bdc88979-6d70-4ae8-9dbc-f34d3d46e3c2}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
   <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
@@ -59,7 +68,7 @@
   </Target>
   <Target Name="BeforeBuild">
     <!-- Read the version from the RhinoInside.Revit.dll -->
-    <GetAssemblyIdentity AssemblyFiles="..\RhinoInside.Revit\bin\Release-2024-R8\net481\RhinoInside.Revit.dll">
+    <GetAssemblyIdentity AssemblyFiles="..\RhinoInside.Revit.Loader\bin\Release-2026\net8.0-windows\RhinoInside.Revit.Loader.dll">
       <Output TaskParameter="Assemblies" ItemName="AsmInfo" />
     </GetAssemblyIdentity>
     <!-- Create the MSBuild properties -->

@@ -83,10 +83,10 @@ namespace RhinoInside.Revit.GH.Types
     public override bool IsEmpty => Value == ARDB.CategoryType.Invalid;
     public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
     {
-      { (int) ARDB.CategoryType.Model,            "Model"       },
-      { (int) ARDB.CategoryType.Annotation,       "Annotation"  },
-      { (int) ARDB.CategoryType.Internal,         "Internal"    },
-      { (int) ARDB.CategoryType.AnalyticalModel,  "Analytical"  },
+      { (int) ARDB.CategoryType.Model,            "Model"             },
+      { (int) ARDB.CategoryType.Annotation,       "Annotation"        },
+      { (int) ARDB.CategoryType.Internal,         "Internal"          },
+      { (int) ARDB.CategoryType.AnalyticalModel,  "Analytical Model"  },
     };
   }
 
@@ -241,7 +241,11 @@ namespace RhinoInside.Revit.GH.Types
       { (int) ARDB.ViewType.Detail,               "Detail" },
       { (int) ARDB.ViewType.CostReport,           "Cost Report" },
       { (int) ARDB.ViewType.LoadsReport,          "Loads Report" },
-      { (int) ARDB.ViewType.PresureLossReport,    "Presure Loss Report" },
+#if REVIT_2027
+      { (int) ARDB.ViewType.PressureLossReport,   "Pressure Loss Report" },
+#else
+      { (int) ARDB.ViewType.PresureLossReport,    "Pressure Loss Report" },
+#endif
       { (int) ARDB.ViewType.ColumnSchedule,       "Column Schedule" },
       { (int) ARDB.ViewType.PanelSchedule,        "Panel Schedule" },
       { (int) ARDB.ViewType.Walkthrough,          "Walkthrough" },

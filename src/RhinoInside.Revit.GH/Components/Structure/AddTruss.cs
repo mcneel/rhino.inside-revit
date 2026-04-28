@@ -97,7 +97,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
 
       ReconstructElement<ARDB.Structure.Truss>
       (
@@ -133,7 +133,7 @@ namespace RhinoInside.Revit.GH.Components.Structure
             );
           }
 
-          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Truss", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_Truss)) return null;
+          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_Truss)) return null;
 
           // Compute
           truss = Reconstruct(truss, doc.Value, curve, sketchPlane.Value, type.Value);

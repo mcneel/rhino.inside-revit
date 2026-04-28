@@ -25,11 +25,13 @@ The {{ site.terms.rir }} installer is also available on [Food4Rhino Website]({{ 
 
 Revit {{ site.terms.revit_versions }} is required to install  {{ site.terms.rir }}.
 
-- [Revit 2020.0](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2020-product-updates.html)
-- [Revit 2021.1](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2021-product-updates.html)
-- [Revit 2022.1](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2022-product-updates.html)
-- [Revit 2023.0](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2023-product-updates.html)
-- [Revit 2024.0](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2024-product-updates.html)
+- [Revit 2020](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2020-product-updates.html)
+- [Revit 2021](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2021-product-updates.html)
+- [Revit 2022](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2022-product-updates.html)
+- [Revit 2023](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2023-product-updates.html)
+- [Revit 2024](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2024-product-updates.html)
+- [Revit 2025](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2025-product-updates.html)
+- [Revit 2026](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2026-product-updates.html)
 
 Let's install {{ site.terms.rhino }} first
 

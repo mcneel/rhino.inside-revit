@@ -16,6 +16,83 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.36 RC4" version="v1.36.9607.19391" pre_release=true time="04/21/2026" %}
+
+- Fixed 'Host Boundary Profile' when used on walls that already have an Sketch.
+- Fixed inconsistency in 'Add Wall (Profile)' curve handling. [#1355](https://github.com/mcneel/rhino.inside-revit/issues/1355)
+- Added 'Load Document' component.
+- Added 'Link Revit File' component.
+- Added 'Link IFC File' component.
+- Added 'Link CAD File' component.
+- Added 'Query CAD Models' component.
+- Added 'Cluster References' component.
+- Enabled 'Element Curve' component to edit multi-segment grids.
+
+{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9607.19178" time="04/21/2026" %}
+
+- Enabled .NET Framework assemblies in Revit 2027
+
+{% include ltr/release-header.html title="v1.36 RC3" version="v1.36.9600.15802" pre_release=true time="04/14/2026" %}
+
+- Adds support for Revit 2027
+- Fixed an installer issue on Revit 2026, when it runs automated.
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9600.14957" time="04/14/2026" %}
+
+- Adds support for Revit 2027
+- Fixed an installer issue on Revit 2026, when it runs automated.
+
+{% include ltr/release-header.html title="v1.36 RC2" version="v1.36.9557.17877" pre_release=true time="03/03/2026" %}
+
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.36 RC1" version="v1.36.9544.15028" pre_release=true time="02/17/2026" %}
+
+- Added support for linked elements on query components.
+- Added 'Query Geometry References' component.
+- Added 'Query Namesake Element' component.
+- Added 'Element Analytical Associations'
+- Added 'Analytical Associations'
+- Now 'Query Elements' give elements in reverse order when 'Limit' is negative.
+- Improved 'Host Boundary Profile' to accept a plane as an input.
+- Fix on 'Add Model Element' for slanted walls.
+- Fixed: Creating Wall by Profile creates a new wall when the profile is moved.
+  [Issue #1277](https://github.com/mcneel/rhino.inside-revit/issues/1277)
+
+{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9540.6370" time="02/17/2026" %}
+
+- Fixed 'Host Boundary Profile' when used on walls that already have an Sketch.
+- Fixed: Inconsistency in 'Add Wall (Profile)' curve handling.
+  [Issue #1355](https://github.com/mcneel/rhino.inside-revit/issues/1355)
+
+{% include ltr/release-header.html title="v1.35" version="v1.35.9525.16240" time="01/29/2026" %}
+
+- Public release with misc improvements and bug fixes listed below
+- Fixed: Dynamo Python Node (CPython3) allocates a Rhino license.
+  [Issue #1365](https://github.com/mcneel/rhino.inside-revit/issues/1365)
+- Fixed: Add shared parameter errors when switching to instance / type.
+  [Issue #1275](https://github.com/mcneel/rhino.inside-revit/issues/1275)
+- Fixed: Inspect Element error on Pipe Element.
+  [Issue #1353](https://github.com/mcneel/rhino.inside-revit/issues/1353)
+- Fixed the 'AddTruss' Component to update the type.
+
+{% include ltr/release-header.html title="v1.34" version="v1.34.9525.15935" time="01/29/2026" %}
+
+- Public release with misc improvements and bug fixes listed below
+
+{% include ltr/release-header.html title="v1.34 RC1" version="v1.34.9439.19982" pre_release=true time="11/11/2025" %}
+
+- Miscellaneous improvements and bug fixes
+
+{% include ltr/release-header.html title="v1.33" version="v1.33.9347.9430" time="11/11/2025" %}
+
+- Public release with misc improvements and bug fixes listed below
+
+{% include ltr/release-header.html title="v1.33 RC2" version="v1.33.9347.9430" pre_release=true time="08/05/2025" %}
+
+- Miscellaneous improvements and bug fixes
+
 {% include ltr/release-header.html title="v1.33 RC1" version="v1.33.9328.12948" pre_release=true time="07/16/2025" %}
 
 - Import command now works with file types other than 3DM.
@@ -151,7 +228,8 @@ This enables:
 
 {% include ltr/release-header.html title="v1.24 RC3" version="v1.24.9019.19949" pre_release=true time="09/10/2024" %}
 
-- Fixed an issue when an old version of Eto was already loaded [Issue #1028](https://github.com/mcneel/rhino.inside-revit/issues/1028)
+- Fixed an issue when an old version of Eto was already loaded
+  [Issue #1028](https://github.com/mcneel/rhino.inside-revit/issues/1028)
 - Fix on 'Host Shape' when input points overlap corners.
 - Fixed 'Deconstruct Curtain Grid' when panels are not `FamilyInstance`.
 - Fixed `ModelText.Location` property.

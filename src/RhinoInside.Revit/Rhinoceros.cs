@@ -124,13 +124,18 @@ namespace RhinoInside.Revit
         RhinoApp.CommandWindowCaptureEnabled = false;
       }
 
-      FormUtilities.ApplicationName = FormUtilities.ApplicationName.Replace("Rhino ", "Rhino.Inside ");
       Rhino.Runtime.PythonScript.AddRuntimeAssembly(Assembly.GetExecutingAssembly());
 
+      return External.ActivationGate.AddGateWindow(InitMainWindow(), Core.ActivationEvent);
+    }
+
+    private static IntPtr InitMainWindow()
+    {
       MainWindow = (WindowHandle) RhinoApp.MainWindowHandle();
       MainWindow.ExtendedWindowStyles |= ExtendedWindowStyles.AppWindow;
 
-      return External.ActivationGate.AddGateWindow(MainWindow.Handle, Core.ActivationEvent);
+      FormUtilities.ApplicationName = FormUtilities.ApplicationName.Replace("Rhino ", "Rhino.Inside ");
+      return MainWindow.Handle;
     }
 
     internal static bool InitGrasshopper(Assembly assembly)
@@ -472,6 +477,65 @@ namespace RhinoInside.Revit
 
       guests = null;
     }
+
+    /// <summary>
+    /// Toggles minimized windows into its normal state or normal ones into minimized.
+    /// </summary>
+    /// <returns>Resulting minimized state.</returns>
+    internal static bool? ToggleMinimizedWindows()
+    {
+      var activeWindow = WindowHandle.ActiveWindow;
+      WindowHandle.ActiveWindow = Revit.MainWindow;
+
+      try
+      {
+        switch (MainWindow.WindowStyle)
+        {
+          case ProcessWindowStyle.Hidden: break;
+          case ProcessWindowStyle.Normal: MainWindow.Minimize(true); return true;
+          case ProcessWindowStyle.Maximized: break;
+          case ProcessWindowStyle.Minimized: MainWindow.Minimize(false); return false;
+        }
+
+        if (guests is null)
+          return default;
+
+        var action = default(bool?);
+        foreach (var guestInfo in guests)
+        {
+          if (guestInfo.Guest is null)
+            continue;
+
+          if (guestInfo.CheckInResult != GuestResult.Succeeded)
+            continue;
+
+          try
+          {
+            var guestWindow = guestInfo.Guest.MainWindow;
+            if (guestWindow.IsInvalid)
+              continue;
+
+            switch (guestWindow.WindowStyle)
+            {
+              case ProcessWindowStyle.Hidden: continue;
+              case ProcessWindowStyle.Normal: action ??= true; break;
+              case ProcessWindowStyle.Maximized: continue;
+              case ProcessWindowStyle.Minimized: action ??= false; break;
+            }
+
+            if (action.HasValue)
+              guestWindow.Minimize(action.Value);
+          }
+          catch (Exception) { }
+        }
+
+        return action;
+      }
+      finally
+      {
+        WindowHandle.ActiveWindow = activeWindow;
+      }
+    }
     #endregion
 
     #region Document
@@ -615,19 +679,21 @@ namespace RhinoInside.Revit
               switch (result)
               {
                 case ARUI.TaskDialogResult.CommandLink2:
+                  UnitScale.SetModelUnitScale(doc, RevitModelUnitScale, scale: true);
                   doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = distanceDisplayPrecision;
                   doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, RevitModelUnitScale);
-                  UnitScale.SetModelUnitScale(doc, RevitModelUnitScale, scale: true);
                   AdjustViewConstructionPlanes(doc);
+                  doc.ClearUndoRecords(true);
                   break;
 
                 case ARUI.TaskDialogResult.CommandLink3:
+                  UnitScale.SetModelUnitScale(doc, GH.Guest.ModelUnitScale, scale: true);
                   doc.ModelAngleToleranceRadians = revitTol.AngleTolerance;
                   doc.ModelDistanceDisplayPrecision = (int) Arithmetic.Clamp(Grasshopper.CentralSettings.FormatDecimalDigits, 0, 7);
                   doc.ModelAbsoluteTolerance = UnitScale.Convert(revitTol.VertexTolerance, UnitScale.Internal, GH.Guest.ModelUnitScale);
-                  UnitScale.SetModelUnitScale(doc, GH.Guest.ModelUnitScale, scale: true);
                   AdjustViewConstructionPlanes(doc);
+                  doc.ClearUndoRecords(true);
                   break;
 
                 default:
@@ -675,6 +741,7 @@ namespace RhinoInside.Revit
           rhinoDoc.Linetypes.LinetypeScale = 100.0;
 
           AdjustViewConstructionPlanes(rhinoDoc);
+          rhinoDoc.ClearUndoRecords(true);
         }
       }
       finally

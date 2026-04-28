@@ -92,6 +92,11 @@ namespace RhinoInside.Revit
       var loadedAssembly = args.LoadedAssembly;
       if (loadedAssembly.ReflectionOnly || loadedAssembly.IsDynamic) return;
 
+#if NET10_0_OR_GREATER
+      if (System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(loadedAssembly) == InternalContext)
+        System.Resources.Extensions.ResourceManager.AssemblyLoaded(loadedAssembly);
+#endif
+
       var assemblyName = loadedAssembly.GetName();
       if (references.TryGetValue(assemblyName.Name, out var location))
         location.Activate(loadedAssembly);
@@ -110,6 +115,7 @@ namespace RhinoInside.Revit
         ResolvingUnmanagedDll += ResolveUnmanagedDll;
 #endif
       }
+
       protected override Assembly Load(AssemblyName assemblyName)
       {
         if (ResolveAssembly(assemblyName) is Assembly solved)
@@ -164,7 +170,7 @@ namespace RhinoInside.Revit
             var assemblyPath = new Uri(location.assemblyName.CodeBase).LocalPath;
             if
             (
-              (requested.Name.Equals("System", StringComparison.OrdinalIgnoreCase)  ||
+              (requested.Name.Equals("System", StringComparison.OrdinalIgnoreCase) ||
               requested.Name.StartsWith("System.", StringComparison.OrdinalIgnoreCase)) &&
               ($"{Path.GetDirectoryName(assemblyPath)}\\".Equals(SystemPath, StringComparison.OrdinalIgnoreCase) ||
               Path.GetDirectoryName(assemblyPath).Equals(Path.Combine(SystemPath, "netcore"), StringComparison.OrdinalIgnoreCase))
@@ -177,9 +183,15 @@ namespace RhinoInside.Revit
 #endif
             if (loadedAssembly is null)
             {
+#if DEBUG
+              Debug.Assert(location.assemblyName.Version >= requested.Version);
+#else
               // Never return an older assembly.
               if (location.assemblyName.Version >= requested.Version)
+#endif
+              {
                 loadedAssembly = LoadFromAssemblyPath(assemblyPath);
+              }
             }
 
             // Add again loaded assembly
@@ -210,29 +222,45 @@ namespace RhinoInside.Revit
       }
 
 #if NET
-      IntPtr ResolveUnmanagedDll(Assembly assembly, string dll)
+      IntPtr ResolveUnmanagedDll(Assembly assembly, string libraryName)
       {
-        if (!Path.IsPathFullyQualified(dll))
+        if (!Path.IsPathFullyQualified(libraryName))
         {
           var assemblyName = assembly.GetName();
 #pragma warning disable SYSLIB0044 // Type or member is obsolete
 #pragma warning disable SYSLIB0012 // Type or member is obsolete
           if (references.TryGetValue(assemblyName.Name, out var assemblyReference) && assemblyReference.assemblyName.CodeBase == assembly.CodeBase)
           {
-            try
+            var architecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
+            var paths = new string[]
             {
-              var lib = System.Runtime.InteropServices.NativeLibrary.Load
-              (
-                $"{Path.Combine(SystemPath, dll)}.dll",
-                assembly,
-                System.Runtime.InteropServices.DllImportSearchPath.AssemblyDirectory |
-                System.Runtime.InteropServices.DllImportSearchPath.UseDllDirectoryForDependencies |
-                System.Runtime.InteropServices.DllImportSearchPath.System32 |
-                System.Runtime.InteropServices.DllImportSearchPath.SafeDirectories
-              );
-              return lib;
+              Path.Combine(SystemPath, "netcore", "runtimes", $"win-{architecture}", "native"),
+              Path.Combine(SystemPath, "netcore", "runtimes", "win", "native"),
+              Path.Combine(SystemPath),
+            };
+
+            foreach (var path in paths)
+            {
+              var libraryPath = Path.Combine(path, $"{libraryName}.dll");
+              if (Path.Exists(libraryPath))
+              {
+                try
+                {
+                  var lib = System.Runtime.InteropServices.NativeLibrary.Load
+                  (
+                    libraryPath,
+                    assembly,
+                    System.Runtime.InteropServices.DllImportSearchPath.AssemblyDirectory |
+                    System.Runtime.InteropServices.DllImportSearchPath.UseDllDirectoryForDependencies |
+                    System.Runtime.InteropServices.DllImportSearchPath.System32 |
+                    System.Runtime.InteropServices.DllImportSearchPath.SafeDirectories
+                  );
+                  return lib;
+                }
+                catch { }
+                break;
+              }
             }
-            catch { }
           }
 #pragma warning restore SYSLIB0012 // Type or member is obsolete
 #pragma warning restore SYSLIB0044 // Type or member is obsolete
@@ -332,6 +360,49 @@ namespace RhinoInside.Revit
     static void ActivationGate_Enter(object sender, EventArgs e) => ExternalAssembliesOnly = false;
     static void ActivationGate_Exit(object sender, EventArgs e) => ExternalAssembliesOnly = true;
 
+    static readonly MethodInfo AssemblyGetTypesMethod = typeof(Assembly).GetMethod("GetTypes", BindingFlags.Public | BindingFlags.Instance);
+    static readonly MethodInfo AssemblyGetExportedTypes = typeof(Assembly).GetMethod("GetExportedTypes", BindingFlags.Public | BindingFlags.Instance);
+    static readonly MethodInfo AssemblyGetForwardedTypes = typeof(Assembly).GetMethod("GetForwardedTypes", BindingFlags.Public | BindingFlags.Instance);
+
+    static bool IsReflectionOnly()
+    {
+      var trace = new StackTrace(1);
+      var frames = trace.GetFrames();
+
+      var callingAssembly = Assembly.GetCallingAssembly();
+
+      // Skip Calling Assembly
+      int f = 0;
+      for (; f < frames.Length; ++f)
+      {
+        var method = frames[f].GetMethod();
+        if (method is null) continue;
+        var frameAssembly = method.DeclaringType?.Assembly ?? method.Module?.Assembly;
+        if (frameAssembly != callingAssembly)
+          break;
+      }
+
+      // Look for Assembly.GetTypes
+      for (; f < frames.Length; ++f)
+      {
+        var method = frames[f].GetMethod();
+        if (method is null) continue;
+        if (method == AssemblyGetTypesMethod)
+          return true;
+
+        if (method.IsVirtual && method is MethodInfo methodInfo)
+        {
+          var baseDefinition = methodInfo.GetBaseDefinition();
+          if (baseDefinition == AssemblyGetExportedTypes)
+            return true;
+          if (baseDefinition == AssemblyGetForwardedTypes)
+            return true;
+        }
+      }
+
+      return false;
+    }
+
     static Assembly ExternalContextResolving(System.Runtime.Loader.AssemblyLoadContext loadContext, AssemblyName assemblyName)
     {
       // Resolve this Assembly
@@ -345,15 +416,18 @@ namespace RhinoInside.Revit
       if (ExternalAssembliesOnly && !IsExternalReference(assemblyName))
         return default;
 
-      var internalAssembliesOnly = ExternalAssembliesOnly;
+      if (ExternalAssembliesOnly && IsReflectionOnly())
+        return default;
+
+      var externalAssembliesOnly = ExternalAssembliesOnly;
       try
       {
-        internalAssembliesOnly = false;
+        ExternalAssembliesOnly = false;
         return InternalContext.ResolveAssembly(assemblyName);
       }
       finally
       {
-        ExternalAssembliesOnly = internalAssembliesOnly;
+        ExternalAssembliesOnly = externalAssembliesOnly;
       }
     }
     #endregion
@@ -414,8 +488,6 @@ namespace RhinoInside.Revit
             var paths = new (DirectoryInfo Directory, SearchOption Options)[]
             {
 #if NET
-              (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", $"win-{architecture}", "native")), SearchOption.TopDirectoryOnly),
-              (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", "win", "native")), SearchOption.TopDirectoryOnly),
               (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", $"win-{architecture}", "lib", "net8.0")), SearchOption.TopDirectoryOnly),
               (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", "win", "lib", "net8.0")), SearchOption.TopDirectoryOnly),
               (new DirectoryInfo(Path.Combine(SystemPath, "netcore", "runtimes", $"win-{architecture}", "lib", "net7.0")), SearchOption.TopDirectoryOnly),

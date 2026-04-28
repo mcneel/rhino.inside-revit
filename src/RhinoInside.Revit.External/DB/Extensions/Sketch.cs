@@ -138,9 +138,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 #endif
 
-    public static bool IsElementWithoutSketch(this SketchEditScope scope, Element element)
+    public static bool ElementNeedsNewSketch(this SketchEditScope scope, Element element)
     {
-      return element.GetSketch() is null;
+      return element is Wall || !element.GetSketchId().IsValid();
     }
 
     public static Sketch StartWithNewSketch(this SketchEditScope scope, Element element)
@@ -150,6 +150,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case Wall wall:
           using (var tx = element.Document.CommitScope())
           {
+            if (wall.SketchId.IsValid()) wall.RemoveProfileSketch();
             var sketch = wall.CreateProfileSketch();
             tx.Commit();
             scope.Start(sketch.Id);

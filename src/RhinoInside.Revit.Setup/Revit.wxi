@@ -1,110 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
   <Fragment>
-
-    <Property Id="REVIT2018_INSTALLLOCATION" Secure="yes">
-      <RegistrySearch Id="Revit2018InstallLocation" Type="raw"
-                      Root="HKLM"
-                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-1800-0510-0000-705C0D862004}"
-                      Name="InstallLocation"/>
-    </Property>
-
-    <Property Id="REVIT2019_INSTALLLOCATION" Secure="yes">
-      <RegistrySearch Id="Revit2019InstallLocation" Type="raw"
-                      Root="HKLM"
-                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-1900-0510-0000-705C0D862004}"
-                      Name="InstallLocation"/>
-    </Property>
-
-    <Property Id="REVIT2020_INSTALLLOCATION" Secure="yes">
-      <RegistrySearch Id="Revit2020InstallLocation" Type="raw"
-                      Root="HKLM"
-                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2000-0510-0000-705C0D862004}"
-                      Name="InstallLocation"/>
-    </Property>
-
-    <Property Id="REVIT2021_INSTALLLOCATION" Secure="yes">
-      <RegistrySearch Id="Revit2021InstallLocation" Type="raw"
-                      Root="HKLM"
-                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2100-0510-0000-705C0D862004}"
-                      Name="InstallLocation"/>
-    </Property>
-
-    <Property Id="REVIT2022_INSTALLLOCATION" Secure="yes">
-        <RegistrySearch Id="Revit2022InstallLocation" Type="raw"
-                        Root="HKLM"
-                        Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2200-0510-0000-705C0D862004}"
-                        Name="InstallLocation"/>
-      </Property>
-
-    <Property Id="REVIT2023_INSTALLLOCATION" Secure="yes">
-      <RegistrySearch Id="Revit2023InstallLocation" Type="raw"
-                      Root="HKLM"
-                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2300-0510-0000-705C0D862004}"
-                      Name="InstallLocation"/>
-    </Property>
-
-    <Property Id="REVIT2024_INSTALLLOCATION" Secure="yes">
-      <RegistrySearch Id="Revit2024InstallLocation" Type="raw"
-                      Root="HKLM"
-                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2400-0510-0000-705C0D862004}"
-                      Name="InstallLocation"/>
-    </Property>
-
-    <Property Id="REVIT2025_INSTALLLOCATION" Secure="yes">
-      <RegistrySearch Id="Revit2025InstallLocation" Type="raw"
-                      Root="HKLM"
-                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2500-0510-0000-705C0D862004}"
-                      Name="InstallLocation"/>
-    </Property>
-
-    <Property Id="REVIT2026_INSTALLLOCATION" Secure="yes">
-      <RegistrySearch Id="Revit2026InstallLocation" Type="raw"
-                      Root="HKLM"
-                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2600-0510-0000-705C0D862004}"
-                      Name="InstallLocation"/>
-    </Property>
-
     <InstallUISequence>
-      <Custom Action="ValidateRevitInstallLocation" After="AppSearch"/>
+      <Custom Action="ValidateRevitInstallLocations" After="AppSearch"/>
     </InstallUISequence>
 
     <InstallExecuteSequence>
-      <Custom Action="ValidateRevitInstallLocation" After="AppSearch"/>
+      <Custom Action="ValidateRevitInstallLocations" After="AppSearch"/>
     </InstallExecuteSequence>
 
-    <CustomAction Id="ValidateRevitInstallLocation" Script="vbscript" Execute="immediate" Return="check" >
-      <![CDATA[
-      Sub ValidateInstallLocation(LocationProperty)
-        InstallLocation = Session.Property(LocationProperty)
-
-        ' If InstallLocation is relative we assume is under "%PROGRAMFILES%\Autodesk"
-        If Mid(InstallLocation, 2, 2) <> ":\" Then
-          ProgramFilesFolder = Session.Property("ProgramFiles64Folder")
-          InstallLocation = ProgramFilesFolder & "Autodesk\" & InstallLocation
-        End If
-
-        ' If Revit.exe is not at InstallLocation we assume Revit is not installed
-        If Session.Installer.FileAttributes(InstallLocation & "Revit.exe") = -1 Then
-          Session.Property(LocationProperty) = ""
-        Else
-          Session.Property(LocationProperty) = InstallLocation
-        End If
-      End Sub
-
-      If Session.EvaluateCondition("Installed") = 0 Then
-        ValidateInstallLocation("REVIT2018_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2019_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2020_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2021_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2022_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2023_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2024_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2025_INSTALLLOCATION")
-        ValidateInstallLocation("REVIT2026_INSTALLLOCATION")
-      End If
-      ]]>
-    </CustomAction>
+    <CustomAction Id="ValidateRevitInstallLocations"
+                  BinaryKey="CustomActions" DllEntry="ValidateInstallLocations"
+                  Execute="immediate" Return="check" />
 
     <DirectoryRef Id="TARGETDIR">
       <Directory Id="ProgramFiles64Folder">
@@ -118,9 +26,131 @@
           <Directory Id="REVIT2024_INSTALLLOCATION" Name="Revit 2024"/>
           <Directory Id="REVIT2025_INSTALLLOCATION" Name="Revit 2025"/>
           <Directory Id="REVIT2026_INSTALLLOCATION" Name="Revit 2026"/>
+          <Directory Id="REVIT2027_INSTALLLOCATION" Name="Revit 2027"/>
+        </Directory>
+      </Directory>
+
+      <Directory Id="CommonFiles64Folder">
+        <Directory Id="AutodeskSharedFolder" Name="Autodesk Shared">
+          <Directory Id="ComponentsFolder" Name="Components">
+            <Directory Id="SHARED_COMPONENTS_2026_FOLDER" Name="2026" />
+            <Directory Id="SHARED_COMPONENTS_2027_FOLDER" Name="2027" />
+          </Directory>
         </Directory>
       </Directory>
     </DirectoryRef>
 
+    <!--2018-->
+    <Property Id="REVIT2018_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2018InstallLocation" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-1800-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <!--2019-->
+    <Property Id="REVIT2019_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2019InstallLocation" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-1900-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <!--2020-->
+    <Property Id="REVIT2020_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2020InstallLocation" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2000-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <!--2021-->
+    <Property Id="REVIT2021_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2021InstallLocation" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2100-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <!--2022-->
+    <Property Id="REVIT2022_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2022InstallLocation" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2200-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <!--2023-->
+    <Property Id="REVIT2023_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2023InstallLocation" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2300-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <!--2024-->
+    <Property Id="REVIT2024_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2024InstallLocation" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2400-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <!--2025-->
+    <Property Id="REVIT2025_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2025InstallLocation" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2500-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <!--2026-->
+    <Property Id="REVIT2026_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2026InstallLocation" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2600-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <Property Id="SHARED_COMPONENTS_2026_INSTALLPATH" Secure="yes" Value ="C:\Program Files\Common Files\Autodesk Shared\Components\2026">
+      <RegistrySearch Id="Components2026InstallPath" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Autodesk\SharedComponents\2026"
+                      Name="InstallPath"/>
+    </Property>
+
+    <Property Id="SHARED_COMPONENTS_2026_VERSION" Value=".">
+      <RegistrySearch Id="Components2026Version" Type="raw" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Autodesk\SharedComponents\2026"
+                      Name="Version"/>
+    </Property>
+
+    <SetDirectory Id="SHARED_COMPONENTS_2026_FOLDER" Value="[SHARED_COMPONENTS_2026_INSTALLPATH][SHARED_COMPONENTS_2026_VERSION]"/>
+
+    <!--2027-->
+    <Property Id="REVIT2027_INSTALLLOCATION" Secure="yes">
+      <RegistrySearch Id="Revit2027InstallLocation" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{7346B4A0-2700-0510-0000-705C0D862004}"
+                      Name="InstallLocation"/>
+    </Property>
+
+    <Property Id="SHARED_COMPONENTS_2027_INSTALLPATH" Secure="yes" Value ="C:\Program Files\Common Files\Autodesk Shared\Components\2027">
+      <RegistrySearch Id="Components2027InstallPath" Type="directory" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Autodesk\SharedComponents\2027"
+                      Name="InstallPath"/>
+    </Property>
+
+    <Property Id="SHARED_COMPONENTS_2027_VERSION" Value=".">
+      <RegistrySearch Id="Components2027Version" Type="raw" Win64="yes"
+                      Root="HKLM"
+                      Key="SOFTWARE\Autodesk\SharedComponents\2027"
+                      Name="Version"/>
+    </Property>
+    
+    <SetDirectory Id="SHARED_COMPONENTS_2027_FOLDER" Value="[SHARED_COMPONENTS_2027_INSTALLPATH][SHARED_COMPONENTS_2027_VERSION]"/>
   </Fragment>
+
 </Include>
