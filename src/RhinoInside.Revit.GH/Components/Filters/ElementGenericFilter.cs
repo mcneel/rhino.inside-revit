@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      DA.SetData("Filter", CompoundElementFilter.ElementIsElementTypeFilter(!inverted));
+      DA.SetData("Filter", ElementFilters.ElementIsElementTypeFilter(!inverted));
     }
   }
 
@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       try
       {
         var types = classNames.Select(x => typeof(ARDB.Element).Assembly.GetType(x, throwOnError: true)).ToArray();
-        DA.SetData("Filter", CompoundElementFilter.ElementClassFilter(types));
+        DA.SetData("Filter", ElementFilters.ElementClassFilter(types));
       }
       catch (System.TypeLoadException e)
       {
@@ -94,7 +94,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         return;
 
       var ids = categoryIds.Where(x => x is object).ToList();
-      DA.SetData("Filter", CompoundElementFilter.ElementCategoryFilter(ids, inverted));
+      DA.SetData("Filter", ElementFilters.ElementCategoryFilter(ids, inverted));
     }
   }
 
@@ -135,15 +135,15 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
       var filters = new List<ARDB.ElementFilter>(3);
       if (kind.HasValue)
-        filters.Add(CompoundElementFilter.ElementKindFilter(kind.Value, elementType: default, inverted.Value));
+        filters.Add(ElementFilters.ElementKindFilter(kind.Value, elementType: default, inverted.Value));
 
       if (familyName is object)
-        filters.Add(CompoundElementFilter.ElementFamilyNameFilter(familyName, inverted.Value));
+        filters.Add(ElementFilters.ElementFamilyNameFilter(familyName, inverted.Value));
 
       if (typeName is object)
-        filters.Add(CompoundElementFilter.ElementTypeNameFilter(typeName, inverted.Value));
+        filters.Add(ElementFilters.ElementTypeNameFilter(typeName, inverted.Value));
 
-      var filter = inverted.Value ? CompoundElementFilter.Union(filters) : CompoundElementFilter.Intersect(filters);
+      var filter = inverted.Value ? ElementFilters.Union(filters) : ElementFilters.Intersect(filters);
       DA.SetData("Filter", filter);
     }
   }
@@ -174,7 +174,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetData("Inverted", ref inverted))
         return;
 
-      var filter = CompoundElementFilter.ElementTypeFilter(types, inverted);
+      var filter = ElementFilters.ElementTypeFilter(types, inverted);
       DA.SetData("Filter", filter);
     }
   }

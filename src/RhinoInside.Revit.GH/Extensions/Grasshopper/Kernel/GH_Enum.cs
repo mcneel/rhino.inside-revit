@@ -777,7 +777,7 @@ namespace RhinoInside.Revit.GH.Parameters
         {
           case Enum e:    list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(value.Text, $"{System.Convert.ToInt32(e)}")); break;
           case int i:     list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(value.Text, $"{i}")); break;
-          case double d:  list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(value.Text, $"{d}")); break;
+          case double d:  list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(value.Text, d.ToString("R", CultureInfo.InvariantCulture))); break;
           case string s:  list.ListItems.Add(new Grasshopper.Kernel.Special.GH_ValueListItem(value.Text, $"\"{s}\"")); break;
         }
       }

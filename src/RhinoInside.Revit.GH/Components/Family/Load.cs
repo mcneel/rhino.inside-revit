@@ -83,24 +83,24 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
       if (!Params.GetData(DA, "Path", out string filePath)) return;
       if (!Params.TryGetData(DA, "Overwrite", out bool? overwrite)) return;
       if (!overwrite.HasValue) overwrite = false;
       if (!Params.TryGetData(DA, "Overwrite Parameters", out bool? overwriteParameters)) return;
       if (!overwriteParameters.HasValue) overwriteParameters = overwrite;
 
-      using (var transaction = NewTransaction(doc))
+      using (var transaction = NewTransaction(doc.Value))
       {
         transaction.Start(Name);
 
-        if (doc.LoadFamily(filePath, new FamilyLoadOptions(overwrite == true, overwriteParameters == true), out var family))
+        if (doc.Value.LoadFamily(filePath, new FamilyLoadOptions(overwrite == true, overwriteParameters == true), out var family))
         {
-          CommitTransaction(doc, transaction);
+          CommitTransaction(doc.Value, transaction);
         }
         else
         {
-          if (doc.TryGetFamily(Path.GetFileNameWithoutExtension(filePath), out family) && overwrite != true)
+          if (doc.Value.TryGetFamily(Path.GetFileNameWithoutExtension(filePath), out family) && overwrite != true)
             AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Family '{family.Name}' is already loaded.");
         }
 

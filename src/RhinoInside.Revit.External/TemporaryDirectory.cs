@@ -39,6 +39,14 @@ namespace RhinoInside.Revit
       Directory = System.IO.Directory.CreateDirectory(path);
     }
 
+    ~TemporaryDirectory()
+    {
+      if (Directory.Exists is true)
+      {
+        try { Directory.Delete(recursive: true); } catch { }
+      }
+    }
+
     public string PrefixOf(object key) => PrefixGenerator.PrefixOf(key);
 
     public void Delete(object key)

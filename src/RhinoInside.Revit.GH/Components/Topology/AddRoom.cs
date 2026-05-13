@@ -277,7 +277,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         // Place Room on `newCircuit`
         if (location is object && newCircuit is object)
         {
-          using (var tagsFilter = ERDB.CompoundElementFilter.ElementClassFilter(typeof(ARDB.Architecture.RoomTag)))
+          using (var tagsFilter = ERDB.ElementFilters.ElementClassFilter(typeof(ARDB.Architecture.RoomTag)))
           {
             var beforeTagIds = room.GetDependentElements(tagsFilter);
             if (room.Location is object) room.Unplace();

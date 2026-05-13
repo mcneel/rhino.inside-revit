@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       if (!Path.HasExtension(filePath))
         filePath += ".rfa";
 
-      if (!filePath.IsFullyQualifiedPath())
+      if (!PathExtension.TryGetFullyQualifiedPath(ref filePath))
       {
         filePath = Path.Combine(Types.Document.FromValue(family.Document).SwapFolder.Directory.FullName, "Families", filePath);
         Directory.CreateDirectory(Path.GetDirectoryName(filePath));
