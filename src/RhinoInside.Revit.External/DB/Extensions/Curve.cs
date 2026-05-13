@@ -304,6 +304,73 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return UnitXYZ.Orthonormalize(basisX, basisY, out basisX, out basisY, out var _);
     }
 
+    public static bool TryGetLocation(this HermiteSpline curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
+    {
+      if (!curve.IsBound)
+        throw new NotImplementedException();
+
+      var start = curve.GetEndPoint(CurveEnd.Start);
+      var end = curve.GetEndPoint(CurveEnd.End);
+      var curveDirection = end - start;
+
+      var ctrlPoints = curve.ControlPoints;
+      var cov = Transform.Identity;
+      int closed = curveDirection.IsZeroLength() ? 1 : 0;
+      cov.SetCovariance(ctrlPoints.Skip(closed));
+
+      if (closed == 0)
+      {
+        basisX = curveDirection.ToUnitXYZ();
+
+        if (cov.TryGetInverse(out var inverse))
+        {
+          var basisZ = inverse.GetPrincipalComponent(0D);
+          origin = new PlaneEquation(cov.Origin, basisZ).Project(start + (curveDirection * 0.5));
+          UnitXYZ.Orthonormal(basisZ, basisX, out basisY);
+        }
+        else
+        {
+          origin = start + (curveDirection * 0.5);
+
+          var principal = cov.GetPrincipalComponent(0D);
+          var plane = new PlaneEquation(principal, 0.0);
+          for (int p = 0; p < ctrlPoints.Count; ++p)
+            ctrlPoints[p] = plane.Project(ctrlPoints[p]);
+
+          cov.SetCovariance(ctrlPoints, plane.Project(cov.Origin));
+          basisY = cov.GetPrincipalComponent(0D);
+
+          if (basisY.IsNaN)
+            basisY = basisX.Right();
+        }
+      }
+      else
+      {
+        origin = cov.Origin;
+        basisX = cov.GetPrincipalComponent(0D);
+
+        if (cov.TryGetInverse(out var inverse))
+        {
+          var basisZ = inverse.GetPrincipalComponent(0D);
+          UnitXYZ.Orthonormal(basisZ, basisX, out basisY);
+        }
+        else
+        {
+          var plane = new PlaneEquation(basisX, 0.0);
+          for (int p = 0; p < ctrlPoints.Count; ++p)
+            ctrlPoints[p] = plane.Project(ctrlPoints[p]);
+
+          cov.SetCovariance(ctrlPoints.Skip(closed), plane.Project(cov.Origin));
+          basisY = cov.GetPrincipalComponent(0D);
+
+          if (basisY.IsNaN)
+            basisY = basisX.Right();
+        }
+      }
+
+      return UnitXYZ.Orthonormalize(basisX, basisY, out basisX, out basisY, out var _);
+    }
+
     public static bool TryGetLocation(this PolyLine curve, out XYZ origin, out UnitXYZ basisX, out UnitXYZ basisY)
     {
       switch (curve.NumberOfCoordinates)
@@ -348,6 +415,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case Ellipse ellipse:         return ellipse.TryGetLocation(out origin, out basisX, out basisY);
         case CylindricalHelix helix:  return helix.TryGetLocation(out origin, out basisX, out basisY);
         case NurbSpline spline:       return spline.TryGetLocation(out origin, out basisX, out basisY);
+        case HermiteSpline Hermite:   return Hermite.TryGetLocation(out origin, out basisX, out basisY);
         default: throw new NotImplementedException();
       }
     }
@@ -387,6 +455,47 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       centroid /= count;
       return count > 0;
+    }
+    #endregion
+
+    #region Project
+    /// <summary>
+    /// Projects the specified point on the curve even it is bounded.
+    /// </summary>
+    /// <param name="curve"></param>
+    /// <param name="point"></param>
+    /// <param name="closestEnd"></param>
+    /// <returns>Geometric information if projection is successful; if projection fails returns null</returns>
+    public static IntersectionResult Project(this Curve curve, XYZ point, out int closestEnd)
+    {
+      IntersectionResult closest = default;
+      if (curve.IsBound && !(curve is Line))
+      {
+        closest = curve.Project(point);
+      }
+      else
+      {
+        var count = 0;
+        var index = -1;
+        foreach (var bounded in curve.ToBoundedCurves())
+        {
+          if (bounded.Project(point) is IntersectionResult result)
+          {
+            if (closest is null) closest = result;
+            else if (result.XYZPoint.DistanceTo(point) < closest.XYZPoint.DistanceTo(point))
+            {
+              var start = (1.0 / count) * index;
+              result.SetParameter(start + bounded.GetNormalizedParameter(result.Parameter));
+              closest = result;
+              index = count;
+            }
+          }
+          count++;
+        }
+      }
+
+      closestEnd = closest is object ? curve.GetNormalizedParameter(closest.Parameter) > 0.5 ? 1 : 0 : -1;
+      return closest;
     }
     #endregion
   }

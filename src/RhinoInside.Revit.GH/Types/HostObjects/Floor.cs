@@ -42,5 +42,9 @@ namespace RhinoInside.Revit.GH.Types
     #region ISketchAccess
     public Sketch Sketch => GetElement<Sketch>(Value?.GetSketchId());
     #endregion
+
+    #region Structure
+    public override bool Structural => Value?.get_Parameter(ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).AsBoolean() is true;
+    #endregion
   }
 }

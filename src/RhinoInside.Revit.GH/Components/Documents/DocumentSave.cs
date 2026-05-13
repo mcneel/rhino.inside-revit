@@ -18,7 +18,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     public DocumentSave() : base
     (
       name: "Save Document",
-      nickname: "Save",
+      nickname: "D-Save",
       description: "Saves a document to a given file path",
       category: "Revit",
       subCategory: "Document"
@@ -55,21 +55,19 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
       if (!Params.TryGetData(DA, "Path", out string filePath)) return;
       if (!Params.TryGetData(DA, "Overwrite", out bool? overwrite)) return;
       if (!Params.TryGetData(DA, "Compact", out bool? compact)) return;
       if (!Params.TryGetData(DA, "Backups", out int? backups)) return;
-      if (Params.TryGetData(DA, "View", out Types.View view) && view?.Document.IsEquivalent(doc) is false)
+      if (Params.TryGetData(DA, "View", out Types.View view) && view?.Document.IsEquivalent(doc.Value) is false)
       {
         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"View '{view.Value.Title}' is not a valid view in document {doc.Title}");
         return;
       }
 
-      try
+      using (Guest.Instance.PauseTransactionGroups())
       {
-        Guest.Instance.CommitTransactionGroups();
-
         if (string.IsNullOrEmpty(filePath))
         {
           var wasSaved = !string.IsNullOrEmpty(doc.PathName);
@@ -80,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
               if (view is object)
                 saveOptions.PreviewViewId = view.Id;
 
-              doc.Save(saveOptions);
+              doc.Value.Save(saveOptions);
             }
 
             Params.TrySetData(DA, "Document", () => doc);
@@ -90,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
           else
           {
             if (!wasSaved && overwrite is true)
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Document '{doc.GetName()}' is never being saved before, please specify a valid Path.");
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Document '{doc.Name}' is never being saved before, please specify a valid Path.");
             else
             {
               Params.TrySetData(DA, "Document", () => doc);
@@ -104,12 +102,12 @@ namespace RhinoInside.Revit.GH.Components.Documents
           if (filePath.Last() == Path.DirectorySeparatorChar)
             filePath = Path.Combine(filePath, doc.Title);
 
-          if (filePath.IsFullyQualifiedPath())
+          if (PathExtension.TryGetFullyQualifiedPath(ref filePath))
           {
             if (!Path.HasExtension(filePath))
             {
-              if (doc.IsFamilyDocument) filePath += ".rfa";
-              else                      filePath += ".rvt";
+              if (doc is Types.FamilyDocument) filePath += ".rfa";
+              else                             filePath += ".rvt";
             }
 
             var exist = File.Exists(filePath);
@@ -123,7 +121,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
                 if (view is object)
                   saveAsOptions.PreviewViewId = view.Id;
 
-                doc.SaveAs(filePath, saveAsOptions);
+                doc.Value.SaveAs(filePath, saveAsOptions);
                 Params.TrySetData(DA, "Document", () => doc);
                 Params.TrySetData(DA, "Path", () => filePath);
                 Params.TrySetData(DA, "Written", () => true);
@@ -138,10 +136,6 @@ namespace RhinoInside.Revit.GH.Components.Documents
           }
           else AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Path should be absolute.");
         }
-      }
-      finally
-      {
-        Guest.Instance.StartTransactionGroups();
       }
     }
   }

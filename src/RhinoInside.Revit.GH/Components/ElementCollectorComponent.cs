@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
@@ -13,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components
     protected ElementCollectorComponent(string name, string nickname, string description, string category, string subCategory)
     : base(name, nickname, description, category, subCategory) { }
 
-    protected virtual ARDB.ElementFilter ElementFilter { get; } = default;
+    protected abstract ARDB.ElementFilter ElementFilter { get; }
     public override bool NeedsToBeExpired
     (
       ARDB.Document document,
@@ -36,8 +37,8 @@ namespace RhinoInside.Revit.GH.Components
 
     protected bool MayNeedToBeExpired(ARDB.Document document)
     {
-      if (Params.Input<Parameters.Document>("Document") is Parameters.Document Document)
-        return Document.VolatileData.AllData(true).Cast<Types.Document>().Select(x => x.Value).Contains(document);
+      if (Params.Input<Parameters.ElementSource>(Parameters.ElementSource.DefaultName) is Parameters.ElementSource source)
+        return source.VolatileData.AllData(true).OfType<Types.Document>().Select(x => x.Value).Where(x => !x.IsLinked).Contains(document);
 
       if (Parameters.Document.TryGetCurrentDocument(this, out var currentDocument))
         return document.Equals(currentDocument.Value);
@@ -53,33 +54,45 @@ namespace RhinoInside.Revit.GH.Components
       ISet<ARDB.ElementId> modified
     )
     {
-      var elementFilter = ElementFilter;
-      var _Filter_ = Params.IndexOfInputParam("Filter");
-      var filters = _Filter_ < 0 ?
-                    Enumerable.Empty<ARDB.ElementFilter>() :
-                    Params.Input[_Filter_].VolatileData.AllData(true).
-                    OfType<Types.ElementFilter>().
-                    Select(x => CompoundElementFilter.Intersect(elementFilter, x.Value));
-
-      foreach (var filter in filters.Any() ? filters : new ARDB.ElementFilter[] { elementFilter })
+      if (added.Count > 0)
       {
-        if (added.Any(x => filter.PassesFilter(document, x)))
-          return true;
+        var elementFilter = ElementFilter;
+        var _Filter_ = Params.IndexOfInputParam("Filter");
+        var filters = _Filter_ < 0 ?
+                      Array.Empty<ARDB.ElementFilter>() :
+                      Params.Input[_Filter_].VolatileData.AllData(true).
+                      OfType<Types.ElementFilter>().
+                      Select(x => ElementFilters.Intersect(elementFilter, x.Value));
 
-        if (modified.Any(x => filter.PassesFilter(document, x)))
-          return true;
-
-        if (deleted.Count > 0)
+        foreach (var filter in filters.Any() ? filters : new ARDB.ElementFilter[] { elementFilter })
         {
-          foreach (var param in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
-          {
-            if (param.NeedsToBeExpired(document, ElementIdExtension.EmptySet, deleted, ElementIdExtension.EmptySet))
-              return true;
-          }
+          if (added.Any(x => filter.PassesFilter(document, x)))
+            return true;
+        }
+      }
+
+      if (deleted.Count > 0 || modified.Count > 0)
+      {
+        foreach (var param in Params.Output.OfType<Kernel.IGH_ReferenceParam>())
+        {
+          if (param.NeedsToBeExpired(document, ElementIdExtension.EmptySet, deleted, modified))
+            return true;
         }
       }
 
       return false;
+    }
+
+    public override void AddedToDocument(GH_Document document)
+    {
+      if (Params.Input<Parameters.Document>("Document") is IGH_Param source)
+      {
+        source.Name = Parameters.ElementSource.DefaultName;
+        source.NickName = Parameters.ElementSource.DefaultNickName;
+        source.Description = Parameters.ElementSource.DefaultDescription;
+      }
+
+      base.AddedToDocument(document);
     }
 
     protected static bool TryGetFilterIntegerParam(ARDB.BuiltInParameter paramId, int pattern, out ARDB.ElementFilter filter)
@@ -140,7 +153,7 @@ namespace RhinoInside.Revit.GH.Components
             case Operator.CompareMethod.Contains: evaluator = new ARDB.FilterStringContains(); break;
           }
 
-          var rule = CompoundElementFilter.FilterStringRule
+          var rule = ElementFilters.FilterStringRule
           (
             new ARDB.ParameterValueProvider(new ARDB.ElementId(paramId)),
             evaluator,
@@ -167,6 +180,44 @@ namespace RhinoInside.Revit.GH.Components
 
       filter = new ARDB.ElementParameterFilter(rule, false);
       return true;
+    }
+  }
+
+  public static class ElementEnumeratorExtensions
+  {
+    public static IEnumerable<T> Cast<T>(this IEnumerable<ARDB.Element> elements) where T : Types.Element
+    {
+      foreach (var element in elements)
+        yield return (T) Types.Element.FromElement(element);
+    }
+
+    public static IEnumerable<T> OfType<T>(this IEnumerable<ARDB.Element> elements) where T : Types.Element
+    {
+      foreach (var element in elements)
+      {
+        if(Types.Element.FromElement(element) is T result)
+          yield return result;
+      }
+    }
+
+    public static IEnumerable<T> FromSource<T>(this IEnumerable<T> elements, Types.IGH_ElementSource source) where T : Types.Element
+    {
+      foreach (var element in elements)
+        yield return (T) element?.FromSource(source);
+    }
+
+    public static IEnumerable<T> Take<T>(this IEnumerable<T> source, int count) where T : Types.Element
+    {
+      if (count < 0) source = source.Reverse();
+
+      switch (count)
+      {
+        case int.MinValue: return source;
+        case -int.MaxValue: return source;
+        case 0: return Array.Empty<T>();
+        case int.MaxValue: return source;
+        default: return Enumerable.Take(source, Math.Abs(count));
+      }
     }
   }
 }

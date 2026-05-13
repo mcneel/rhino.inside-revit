@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
   {
     public override Guid ComponentGuid => new Guid("63C816D8-4A84-45B6-BCEC-C60E57FBC547");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
-    protected override ARDB.ElementFilter ElementFilter => CompoundElementFilter.ElementIsElementTypeFilter(inverted: true).
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.ElementIsElementTypeFilter(inverted: true).
       Intersect(new ARDB.ElementClassFilter(typeof(ARDB.Viewport)));
 
     public QueryViewports() : base

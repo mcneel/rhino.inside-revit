@@ -360,7 +360,7 @@ namespace RhinoInside.Revit.External.UI.Selection
 
     internal static IDisposable NoSelectionScope(this Document document)
     {
-      return UI.Selection.NoSelectionScope.Documents.Contains(document) ? default : new NoSelectionScope(document);
+      return document.IsLinked || UI.Selection.NoSelectionScope.Documents.Contains(document) ? default : new NoSelectionScope(document);
     }
   }
 
