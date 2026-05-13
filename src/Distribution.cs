@@ -38,15 +38,17 @@ namespace RhinoInside.Revit
     #endregion
 
     public readonly int MajorVersion;
+    public readonly int MinorVersion;
     public readonly bool Development;
 
-    public Distribution(int majorVersion, bool dev = false)
+    public Distribution(int majorVersion, int minorVersion = 0, bool dev = false)
     {
       MajorVersion = majorVersion;
+      MinorVersion = minorVersion;
       Development = dev;
     }
 
-    public bool IsAvailable => ExeVersion()?.Major == MajorVersion;
+    public bool IsAvailable => ExeVersion()?.Major == MajorVersion && ExeVersion()?.Minor >= MinorVersion;
 
     private static readonly string OptionsKey = $@"HKEY_CURRENT_USER\Software\McNeel\Rhino.Inside\Revit\{MinimumRevitVersion.Major}\";
     public static string DefaultKey
@@ -129,28 +131,33 @@ namespace RhinoInside.Revit
       return null;
     }
 
-    public static IEnumerable<Distribution> Available
+    private static IEnumerable<Distribution> Distributions(bool dev)
     {
-      get
-      {
-        var distributions = new Distribution[]
-        {
-          new Distribution(9),
-          new Distribution(8),
-#if NETFRAMEWORK
-          new Distribution(7),
+#if !DEBUG
+      if (dev)
+        yield break;
 #endif
-#if DEBUG
-          new Distribution(9, dev: true),
-          new Distribution(8, dev: true),
-#if NETFRAMEWORK
-          new Distribution(7, dev: true),
-#endif
-#endif
-        };
 
-        return distributions.Where(x => x.IsAvailable);
+#if NET
+      if (Environment.Version.Major >= 10)
+      {
+        yield return new Distribution(9, 0, dev);
+        yield return new Distribution(8, 32, dev);
       }
+      else if (Environment.Version.Major >= 8)
+      {
+        yield return new Distribution(8, 0, dev);
+      }
+#endif
+
+#if NETFRAMEWORK
+      {
+        yield return new Distribution(8, 0, dev);
+        yield return new Distribution(7, 0, dev);
+      }
+#endif
     }
+
+    public static IEnumerable<Distribution> Available => Distributions(false).Concat(Distributions(true)).Where(x => x.IsAvailable);
   }
 }
