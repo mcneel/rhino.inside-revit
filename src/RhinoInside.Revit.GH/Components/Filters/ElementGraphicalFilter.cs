@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
                     Select(x => new ARDB.ElementLevelFilter(x.Id, inverted)).
                     ToList<ARDB.ElementFilter>();
 
-      DA.SetData("Filter", inverted ? CompoundElementFilter.Intersect(filters) : CompoundElementFilter.Union(filters));
+      DA.SetData("Filter", inverted ? ElementFilters.Intersect(filters) : ElementFilters.Union(filters));
     }
   }
 

@@ -8,6 +8,7 @@ using OS = System.Environment;
 namespace RhinoInside.Revit.GH.Types
 {
   using External.DB.Extensions;
+  using External.DB.Schemas;
 
   public partial class Element
   {
@@ -20,14 +21,15 @@ namespace RhinoInside.Revit.GH.Types
 
       public override string FormatInstance()
       {
-        return owner.DisplayName;
+        External.DB.ReferenceId.TryParse(owner.ReferenceUniqueId, out var id, owner.ReferenceDocument);
+        return $"{id.ToStableRepresentation(null).PadLeft(8, (char)0x2002)} : {owner.Value?.Tooltip() ?? owner.DisplayName}";
       }
 
       protected virtual bool IsValidId(ARDB.Document doc, ARDB.ElementId id) =>
         owner.GetType() == Element.FromElementId(doc, id).GetType();
 
       [DisplayName("Document"), Description("The document that references this element."), Category("Reference")]
-      public string ReferenceDocument => owner.ReferenceDocument?.GetTitle();
+      public string ReferenceDocument => owner.ReferenceDocument?.GetName();
 
       [DisplayName("Built In"), Description("Element is built in Revit."), Category("Object")]
       public bool IsBuiltIn => owner.IsReferencedData && owner.Id.IsBuiltInId();
@@ -38,9 +40,6 @@ namespace RhinoInside.Revit.GH.Types
 
       [DisplayName("Unique ID"), Description("A stable unique identifier for an element within the model."), Category("Object")]
       public virtual string UniqueId => owner.UniqueId;
-
-      [Description("A human readable name for the Element."), Category("Object")]
-      public string Name => owner.Nomen;
 
       class ObjectConverter : ExpandableObjectConverter
       {
@@ -126,6 +125,12 @@ namespace RhinoInside.Revit.GH.Types
           {
             if (parameter.StorageType == ARDB.StorageType.String)
               return parameter.AsString();
+
+            if (parameter.StorageType == ARDB.StorageType.Integer)
+            {
+              if (parameter.Definition.GetDataType() == SpecType.Boolean.YesNo)
+                return parameter.AsBoolean().ToString();
+            }
 
             return parameter.Element.GetParameterFormatOptions(parameter.Id) is ARDB.FormatOptions options ?
               parameter.AsValueString(options) :

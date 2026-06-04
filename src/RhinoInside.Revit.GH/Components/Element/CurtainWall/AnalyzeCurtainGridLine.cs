@@ -95,7 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       var attachedMullions = new List<Types.Element>();
       
       // collect familyinstances and filter for DB.Mullion
-      var dependentMullionIds = gridLine.GetDependentElements(CompoundElementFilter.ElementClassFilter(typeof(ARDB.Mullion)));
+      var dependentMullionIds = gridLine.GetDependentElements(ElementFilters.ElementClassFilter(typeof(ARDB.Mullion)));
 
       // for each DB.Mullion that is dependent on this DB.CurtainGridLine
       foreach (var mullion in dependentMullionIds.Select(gridLine.Document.GetElement).OfType<ARDB.Mullion>())
@@ -119,7 +119,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       // but make sure to remove all the DB.FamilyInstance that are actually DB.Mullion
       var dependentPanels = gridLine.GetDependentElements
       (
-        CompoundElementFilter.ElementClassFilter(typeof(ARDB.FamilyInstance)).
+        ElementFilters.ElementClassFilter(typeof(ARDB.FamilyInstance)).
         ThatExcludes(dependentMullionIds.ToArray())
       ).
         Select(x => Types.Panel.FromElementId(gridLine.Document, x));
