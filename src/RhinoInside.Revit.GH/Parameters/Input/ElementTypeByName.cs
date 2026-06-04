@@ -98,7 +98,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
           foreach (var goo in goos)
           {
             var e = new Types.Element();
-            if (e.CastFrom(goo))
+            if (e.ConvertFrom(goo))
             {
               switch (e.Value)
               {
@@ -142,7 +142,7 @@ namespace RhinoInside.Revit.GH.Parameters.Input
             else
             {
               var c = new Types.Category();
-              if (c.CastFrom(goo))
+              if (c.ConvertFrom(goo))
               {
                 foreach (var elementType in elementTypeCollector.WhereCategoryIdEqualsTo(c.Id).Cast<ARDB.ElementType>())
                 {

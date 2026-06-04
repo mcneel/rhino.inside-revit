@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
       else Params.TrySetData(DA, "Document", () => doc);
 
       DA.SetData("Document ID", doc.DocumentId);
@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
       else Params.TrySetData(DA, "Document", () => doc);
 
       Params.TrySetData(DA, "Saved", () => doc.FilePath is object);
@@ -176,7 +176,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc))
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc))
         return;
 
       DA.SetData("Workshared", doc.IsWorkshared);
@@ -239,7 +239,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
 
       if (doc.IsWorkshared == true)
       {

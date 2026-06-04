@@ -25,6 +25,11 @@ The {{ site.terms.rir }} installer is also available on [Food4Rhino Website]({{ 
 
 Revit {{ site.terms.revit_versions }} is required to install  {{ site.terms.rir }}.
 
+<details>
+<summary>Autodesk Revit Product Updates</summary>
+
+- [Revit 2018](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2018-product-updates.html)
+- [Revit 2019](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2019-product-updates.html)
 - [Revit 2020](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2020-product-updates.html)
 - [Revit 2021](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2021-product-updates.html)
 - [Revit 2022](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2022-product-updates.html)
@@ -32,6 +37,9 @@ Revit {{ site.terms.revit_versions }} is required to install  {{ site.terms.rir 
 - [Revit 2024](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2024-product-updates.html)
 - [Revit 2025](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2025-product-updates.html)
 - [Revit 2026](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2026-product-updates.html)
+- [Revit 2027](https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/downloads/content/autodesk-revit-2027-product-updates.html)
+
+</details>
 
 Let's install {{ site.terms.rhino }} first
 

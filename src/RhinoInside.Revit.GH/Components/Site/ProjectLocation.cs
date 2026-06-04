@@ -6,6 +6,7 @@ using static RhinoInside.Revit.Diagnostics;
 
 namespace RhinoInside.Revit.GH.Components.Site
 {
+  [ComponentVersion(introduced:"1.0", updated: "1.36")]
   public class ActiveProjectLocation : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("B8677884-61E8-4D3F-8ACB-0873B2A40053");
@@ -85,8 +86,8 @@ namespace RhinoInside.Revit.GH.Components.Site
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      ParamDefinition.Create<Parameters.Document>("Project", "P", optional: true, relevance: ParamRelevance.Secondary),
-      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "New current Shared Site", optional: true, relevance: ParamRelevance.Tertiary),
+      ParamDefinition.Create<Parameters.ElementSource>("Project", "P", relevance: ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.ProjectLocation>("Shared Site", "SS", "New current Shared Site", optional: true, relevance: ParamRelevance.Secondary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -101,18 +102,14 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Project", out var doc)) return;
-      if (doc.IsFamilyDocument)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "'Project' is not a valid Project document");
-        return;
-      }
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
+      var doc = source.SourceDocument.Value;
 
       if (Params.GetData(DA, "Shared Site", out Types.ProjectLocation location, x => x.IsValid))
       {
-        if (!doc.Equals(location.Document))
+        if (!doc.IsEquivalent(location.Document))
         {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "'Shared Site' is not valid on 'Project' document");
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Site '{location}' is not valid on document '{source}'");
           return;
         }
 
@@ -120,11 +117,11 @@ namespace RhinoInside.Revit.GH.Components.Site
         doc.ActiveProjectLocation = location.Value;
       }
 
-      Params.TrySetData(DA, "Site Location", () => new Types.SiteLocation(doc.SiteLocation));
-      Params.TrySetData(DA, "Shared Site", () => new Types.ProjectLocation(doc.ActiveProjectLocation));
-      Params.TrySetData(DA, "Survey Point", () => new Types.BasePoint(BasePointExtension.GetSurveyPoint(doc)));
-      Params.TrySetData(DA, "Project Base Point", () => new Types.BasePoint(BasePointExtension.GetProjectBasePoint(doc)));
-      Params.TrySetData(DA, "Internal Origin", () => new Types.InternalOrigin(InternalOriginExtension.Get(doc)));
+      Params.TrySetData(DA, "Site Location", () => new Types.SiteLocation(doc.SiteLocation).FromSource(source));
+      Params.TrySetData(DA, "Shared Site", () => new Types.ProjectLocation(doc.ActiveProjectLocation).FromSource(source));
+      Params.TrySetData(DA, "Survey Point", () => new Types.BasePoint(BasePointExtension.GetSurveyPoint(doc)).FromSource(source));
+      Params.TrySetData(DA, "Project Base Point", () => new Types.BasePoint(BasePointExtension.GetProjectBasePoint(doc)).FromSource(source));
+      Params.TrySetData(DA, "Internal Origin", () => new Types.InternalOrigin(InternalOriginExtension.Get(doc)).FromSource(source));
     }
   }
 }

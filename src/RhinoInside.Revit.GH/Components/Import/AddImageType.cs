@@ -3,23 +3,23 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
-namespace RhinoInside.Revit.GH.Components.Import
+namespace RhinoInside.Revit.GH.Components.Insert
 {
   [ComponentVersion(introduced: "1.11")]
   public class AddImageType : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("09BD0AA8-52D7-4C2B-B7B1-C66304C939AF");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.senary;
 
     protected override string IconTag => string.Empty;
 
     public AddImageType() : base
     (
-      name: "Add Image Type",
-      nickname: "ImageType",
-      description: "Given the path, it adds an image type to the given View",
+      name: "Import Image",
+      nickname: "I-Image",
+      description: "Given the path, it adds an image type to the given document",
       category: "Revit",
-      subCategory: "View"
+      subCategory: "Insert"
     )
     { }
 
@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components.Import
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
 
       ReconstructElement<ARDB.ImageType>
       (

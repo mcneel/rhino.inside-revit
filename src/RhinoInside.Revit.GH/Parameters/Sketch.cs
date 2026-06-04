@@ -11,10 +11,5 @@ namespace RhinoInside.Revit.GH.Parameters
     public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.hidden;
 
     public Sketch() : base("Sketch", "Sketch", "Contains a collection of Revit sketch elements", "Params", "Revit") { }
-
-    protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
-    protected override void Menu_AppendPromptMore(ToolStripDropDown menu) { }
-    protected override GH_GetterResult Prompt_Plural(ref List<Types.Sketch> values) => GH_GetterResult.cancel;
-    protected override GH_GetterResult Prompt_Singular(ref Types.Sketch value) => GH_GetterResult.cancel;
   }
 }
