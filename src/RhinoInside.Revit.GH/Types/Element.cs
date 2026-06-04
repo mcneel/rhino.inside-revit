@@ -47,7 +47,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       get
       {
-        var displayName = Nomen ?? (IsReferencedData ? string.Empty : "<None>");
+        var displayName = CompleteNomen ?? (IsReferencedData ? string.Empty : "<None>");
+        if (!string.IsNullOrEmpty(displayName)) return displayName;
+        displayName = Value?.Name;
         if (!string.IsNullOrEmpty(displayName)) return displayName;
         if (Value?.Category is ARDB.Category category)
           return $"<{category.ToBuiltInCategory().Name(localized: false).TrimEnd('s')}>";
@@ -72,12 +74,6 @@ namespace RhinoInside.Revit.GH.Types
           default:    return null;
         }
       }
-    }
-
-    protected override void ResetValue()
-    {
-      SubInvalidateGraphics();
-      base.ResetValue();
     }
 
     protected override object FetchValue()
@@ -148,10 +144,6 @@ namespace RhinoInside.Revit.GH.Types
 
     ARDB.ElementId _ReferenceId = ARDB.ElementId.InvalidElementId;
     public override ARDB.ElementId ReferenceId => _ReferenceId;
-
-    public string UniqueId =>
-      Document is ARDB.Document document && ERDB.ReferenceId.TryParse(ReferenceUniqueId, out var referenceId, ReferenceDocument) ?
-      referenceId.Element.ToString(document) : default;
     #endregion
 
     #region IGH_ReferencedData
@@ -206,15 +198,6 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    protected internal void InvalidateGraphics()
-    {
-      Debug.Assert(Document.IsModifiable);
-
-      SubInvalidateGraphics();
-    }
-
-    protected virtual void SubInvalidateGraphics() { }
-
     protected T SetElement<T>(Element element) where T : ARDB.Element
     {
       if (element?.IsValid is true)
@@ -252,7 +235,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Casters
-    public override bool CastFrom(object source)
+    public override bool ConvertFrom(object source)
     {
       if (source is IGH_Goo goo)
         source = goo.ScriptVariable();
@@ -272,9 +255,9 @@ namespace RhinoInside.Revit.GH.Types
       return SetValue(source as ARDB.Element);
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target))
+      if (base.ConvertTo(out target))
         return true;
 
       var element = Value;
@@ -289,6 +272,12 @@ namespace RhinoInside.Revit.GH.Types
           return false;
 
         target = (Q) (object) element;
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(Category)))
+      {
+        target = (Q) (object) Category;
         return true;
       }
 
@@ -363,6 +352,8 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
+    public bool HasNomen() => Value.HasNomen();
+
     public virtual bool CanBeRenominated() => Value.CanBeRenominated();
 
     public virtual string NextIncrementalNomen(string prefix)
@@ -426,7 +417,7 @@ namespace RhinoInside.Revit.GH.Types
           }
         }
 
-        element.SetElementNomen
+        element.SetNomen
         (
           string.IsNullOrEmpty(name) ? $"({element.UniqueId})" : $"{name} ({element.UniqueId})"
         );
@@ -438,7 +429,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public virtual string Nomen
     {
-      get => Rhinoceros.InvokeInHostContext(() => Value?.GetElementNomen());
+      get => Rhinoceros.InvokeInHostContext(() => Value?.GetNomen());
       set
       {
         if (value is object && value != Nomen)
@@ -449,11 +440,13 @@ namespace RhinoInside.Revit.GH.Types
           }
           else if (Value is ARDB.Element element)
           {
-            element.SetElementNomen(value);
+            element.SetNomen(value);
           }
         }
       }
     }
+
+    public virtual string CompleteNomen => Nomen;
 
     internal ARDB.BuiltInCategory? BuiltInCategory => Value?.Category.ToBuiltInCategory();
 
@@ -489,7 +482,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public Workset Workset
     {
-      get => new Workset(Document, Document.IsWorkshared ? Document?.GetWorksetId(Id) ?? ARDB.WorksetId.InvalidWorksetId : ARDB.WorksetId.InvalidWorksetId);
+      get => new Workset(Document, (Document?.IsWorkshared is true) ? Document?.GetWorksetId(Id) ?? ARDB.WorksetId.InvalidWorksetId : ARDB.WorksetId.InvalidWorksetId);
       set
       {
         if (value is object && Value is ARDB.Element element)

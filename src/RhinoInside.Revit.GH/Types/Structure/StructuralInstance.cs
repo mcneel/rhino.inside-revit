@@ -22,9 +22,6 @@ namespace RhinoInside.Revit.GH.Types
     public StructuralInstance(ARDB.FamilyInstance value) : base(value) { }
 
     #region Joins
-    public static bool IsStructuralFraming(ARDB.FamilyInstance frame) =>
-      frame.Symbol.Family.FamilyPlacementType == ARDB.FamilyPlacementType.CurveDrivenStructural;
-
     public bool? IsJoinAllowedAtStart
     {
       get => Value is ARDB.FamilyInstance frame && IsStructuralFraming(frame) ?
@@ -108,6 +105,13 @@ namespace RhinoInside.Revit.GH.Types
     //    return base.Surface;
     //  }
     //}
+    #endregion
+
+    #region Structure
+    internal static bool IsStructuralFraming(ARDB.FamilyInstance frame) =>
+      frame.Symbol.Family.FamilyPlacementType == ARDB.FamilyPlacementType.CurveDrivenStructural;
+
+    public override bool Structural => Value is object;
     #endregion
   }
 

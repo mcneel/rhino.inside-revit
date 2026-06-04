@@ -6,7 +6,7 @@ using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using OS = System.Environment;
 
-namespace RhinoInside.Revit.GH.Components.Import
+namespace RhinoInside.Revit.GH.Components.Insert
 {
   using Numerical;
   using Convert.Geometry;
@@ -16,7 +16,7 @@ namespace RhinoInside.Revit.GH.Components.Import
   public class QueryCloudPoints : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("72B92E6A-2B21-4A4D-8AE4-39837F4C6C8B");
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override GH_Exposure Exposure => GH_Exposure.septenary;
 
     protected override string IconTag => string.Empty;
 
@@ -26,7 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Import
       nickname: "CloudPts",
       description: "Query Point Cloud points and colours.",
       category: "Revit",
-      subCategory: "Site"
+      subCategory: "Insert"
     )
     { }
 

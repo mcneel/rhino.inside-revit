@@ -7,7 +7,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Materials
 {
-  [ComponentVersion(introduced: "1.4")]
+  using External.DB;
+
+  [ComponentVersion(introduced: "1.4", updated:"1.36")]
   public class QueryAppearanceAssets : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("716903D0-867A-404A-8C23-878EFCF8115A");
@@ -37,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition (new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Asset name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Library", "L", "Library name", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Title", "T", "Asset title", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional),
@@ -52,18 +54,18 @@ namespace RhinoInside.Revit.GH.Components.Materials
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc)) return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       Params.TryGetData(DA, "Name", out string name);
       Params.TryGetData(DA, "Library", out string library);
       Params.TryGetData(DA, "Title", out string title);
       Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter);
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var materialsCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          materialsCollector = materialsCollector.WherePasses(filter);
+          materialsCollector = materialsCollector.WherePasses(filter, source.SourceInstance.Value);
 
         var assets = collector.Cast<ARDB.AppearanceAssetElement>();
 
@@ -93,6 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
           "Assets",
           assets.
           Select(x => new Types.AppearanceAssetElement(x)).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

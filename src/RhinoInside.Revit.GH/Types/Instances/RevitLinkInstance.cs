@@ -1,13 +1,19 @@
 using System;
+using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Linked Model")]
-  public sealed class RevitLinkInstance : Instance
+  public sealed class RevitLinkInstance : Instance, IGH_ElementSource
   {
     protected override Type ValueType => typeof(ARDB.RevitLinkInstance);
     public new ARDB.RevitLinkInstance Value => base.Value as ARDB.RevitLinkInstance;
+
+    #region IGH_ElementSource
+    RevitLinkInstance IGH_ElementSource.SourceInstance => this;
+    public Document SourceDocument => Types.Document.FromValue(Value.GetLinkDocument());
+    #endregion
 
     public RevitLinkInstance() { }
     public RevitLinkInstance(ARDB.RevitLinkInstance instance) : base(instance) { }

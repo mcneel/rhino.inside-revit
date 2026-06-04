@@ -114,7 +114,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
 
         if (Simulated)
         {
-          Status = ARDB.TransactionStatus.RolledBack;
+          TransactionStatus = ARDB.TransactionStatus.RolledBack;
         }
         else
         {
