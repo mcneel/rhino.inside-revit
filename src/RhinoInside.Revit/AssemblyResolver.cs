@@ -367,6 +367,15 @@ namespace RhinoInside.Revit
     static readonly MethodInfo AssemblyGetExportedTypes = typeof(Assembly).GetMethod("GetExportedTypes", BindingFlags.Public | BindingFlags.Instance);
     static readonly MethodInfo AssemblyGetForwardedTypes = typeof(Assembly).GetMethod("GetForwardedTypes", BindingFlags.Public | BindingFlags.Instance);
 
+    private static bool EqualsMethodInfo(MethodInfo x, MethodInfo y)
+    {
+      if (x == y) return true;
+      if (x.Name != y.Name) return false;
+      if (!x.DeclaringType.IsAssignableFrom(y.DeclaringType) && !y.DeclaringType.IsAssignableFrom(x.DeclaringType)) return false;
+
+      return true;
+    }
+
     static bool IsReflectionOnly()
     {
       var trace = new StackTrace(1);
@@ -385,20 +394,18 @@ namespace RhinoInside.Revit
           break;
       }
 
-      // Look for Assembly.GetTypes
+      // Look for Assembly.GetTypes or similar method.
       for (; f < frames.Length; ++f)
       {
         var method = frames[f].GetMethod();
-        if (method is null) continue;
-        if (method == AssemblyGetTypesMethod)
-          return true;
-
-        if (method.IsVirtual && method is MethodInfo methodInfo)
+        if (method is MethodInfo methodInfo)
         {
-          var baseDefinition = methodInfo.GetBaseDefinition();
-          if (baseDefinition == AssemblyGetExportedTypes)
+          var baseDefinition = methodInfo.GetRuntimeBaseDefinition();
+          if (EqualsMethodInfo(baseDefinition, AssemblyGetTypesMethod))
             return true;
-          if (baseDefinition == AssemblyGetForwardedTypes)
+          if (EqualsMethodInfo(baseDefinition, AssemblyGetExportedTypes))
+            return true;
+          if (EqualsMethodInfo(baseDefinition, AssemblyGetForwardedTypes))
             return true;
         }
       }
