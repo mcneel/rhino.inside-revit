@@ -6,7 +6,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Views
 {
-  [ComponentVersion(introduced: "1.0", updated: "1.7")]
+  using External.DB;
+
+  [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QueryViewTypes : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("51E306BD-4736-4B7D-B2FF-B23E0717EEBB");
@@ -28,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ViewFamily>>("View Family", "VF", optional: true),
       ParamDefinition.Create<Param_String>("Type Name", "TN", "View Type name", optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),
@@ -53,8 +55,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
-        return;
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
 
       var viewFamily = ARDB.ViewFamily.Invalid;
       DA.GetData("View Family", ref viewFamily);
@@ -65,12 +66,12 @@ namespace RhinoInside.Revit.GH.Components.Views
       var filter = default(ARDB.ElementFilter);
       DA.GetData("Filter", ref filter);
 
-      using (var collector = new ARDB.FilteredElementCollector(doc))
+      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
       {
         var elementCollector = collector.WherePasses(ElementFilter);
 
         if (filter is object)
-          elementCollector = elementCollector.WherePasses(filter);
+          elementCollector = elementCollector.WherePasses(filter, source.SourceInstance.Value);
 
         if (TryGetFilterStringParam(ARDB.BuiltInParameter.ALL_MODEL_TYPE_NAME, ref typeName, out var nameFilter))
           elementCollector = elementCollector.WherePasses(nameFilter);
@@ -88,6 +89,7 @@ namespace RhinoInside.Revit.GH.Components.Views
           "Types",
           types.
           Select(Types.ElementType.FromElement).
+          FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }

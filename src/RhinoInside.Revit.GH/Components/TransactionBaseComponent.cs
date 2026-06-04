@@ -675,7 +675,7 @@ namespace RhinoInside.Revit.GH.Components
     // Step 3.
     protected sealed override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var document))
+      if (Parameters.Document.GetDocumentOrCurrent(this, DA, out var document))
       {
         if (document.IsValid)
         {

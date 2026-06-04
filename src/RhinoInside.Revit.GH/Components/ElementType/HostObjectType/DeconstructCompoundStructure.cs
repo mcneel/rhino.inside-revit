@@ -136,7 +136,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       Params.TrySetData(DA, "Total Thickness", () => structure.GetWidth());
       Params.TrySetData(DA, "Wrapping At Inserts", () => structure.OpeningWrapping);
       Params.TrySetData(DA, "Wrapping At Ends", () => structure.EndCap);
-      if (structure.Value.IsVerticallyCompound)
+      if (structure.Value?.IsVerticallyCompound is true)
       {
         Params.TrySetData(DA, "Sample Height", () => structure.SampleHeight);
         Params.TrySetData(DA, "Cutoff Height", () => structure.CutoffHeight);

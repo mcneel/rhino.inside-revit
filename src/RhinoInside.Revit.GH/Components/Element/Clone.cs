@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc)) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc)) return;
 
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
       else Params.TrySetData(DA, "Element", () => element);
@@ -193,7 +193,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       // Duplicate any missing type, material on demand
       //x.DeepCopyParametersFrom(element.Value);
 
-      target.GetElementNomen(out var nomenParameter);
+      target.GetNomen(out var nomenParameter);
       if (nomenParameter.IsValid())
         target.CopyParametersFrom(source, new ARDB.BuiltInParameter[] { nomenParameter});
       else

@@ -139,7 +139,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.TryGetDocumentOrCurrent(this, DA, "Document", out var doc) || !doc.IsValid) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
 
       ReconstructElement<ARDB.View3D>
       (
@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     {
       if (view is null) return false;
       if (type.Id != view.GetTypeId()) view.ChangeTypeId(type.Id);
-      view.get_Parameter(ARDB.BuiltInParameter.VIEWER_PERSPECTIVE).Update(perspective);
+      view.get_Parameter(ARDB.BuiltInParameter.VIEWER_PERSPECTIVE).Update(perspective ? 1 : 0);
 
       return true;
     }

@@ -67,8 +67,8 @@ namespace RhinoInside.Revit.AddIn.Commands
         {
           cplane.Name = name;
           cplane.Plane = plane.ToPlane();
-          cplane.GridSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
-          cplane.SnapSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
+          if (!double.IsNaN(spacing)) cplane.GridSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
+          if (!double.IsNaN(spacing)) cplane.SnapSpacing = UnitScale.Convert(spacing, UnitScale.Internal, modelScale);
           var min = bboxUV.Min.ToPoint2d();
           min.X = Math.Round(min.X / cplane.GridSpacing) * cplane.GridSpacing;
           min.Y = Math.Round(min.Y / cplane.GridSpacing) * cplane.GridSpacing;
