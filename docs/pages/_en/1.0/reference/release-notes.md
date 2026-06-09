@@ -16,6 +16,14 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.36 RC6" version="v1.36.9651.16848" time="06/09/2026" %}
+
+- Revit 2027 Compatibility Fixes
+
+{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9651.15514" time="06/09/2026" %}
+
+- Revit 2027 Compatibility Fixes
+
 {% include ltr/release-header.html title="v1.36 RC5" version="v1.36.9629.19610" pre_release=true time="05/26/2026" %}
 
 - Rhino.Inside.Revit now requires Rhino 8 SR32 or newer for .NET 10
