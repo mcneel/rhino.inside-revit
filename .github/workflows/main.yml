@@ -6,6 +6,8 @@ jobs:
     name: test
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: microsoft/setup-msbuild@v1
+      - uses: actions/checkout@v7
+      - uses: microsoft/setup-msbuild@v3
+      - name: Install .NET Framework 4.6 Developer Pack
+        run: choco install netfx-4.6-devpack -y --no-progress
       - run: msbuild script\cibuild.msbuild -v:m
