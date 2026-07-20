@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
           filters.Add(filter);
       }
 
-      DA.SetData("Filter", CompoundElementFilter.Intersect(filters));
+      DA.SetData("Filter", ElementFilters.Intersect(filters));
     }
   }
 
@@ -132,7 +132,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
           filters.Add(filter);
       }
 
-      DA.SetData("Filter", CompoundElementFilter.Union(filters));
+      DA.SetData("Filter", ElementFilters.Union(filters));
     }
   }
 
@@ -157,7 +157,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetDataList("Filters", filters))
         return;
 
-      DA.SetData("Filter", CompoundElementFilter.Intersect(filters));
+      DA.SetData("Filter", ElementFilters.Intersect(filters));
     }
   }
 
@@ -182,7 +182,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       if (!DA.GetDataList("Filters", filters))
         return;
 
-      DA.SetData("Filter", CompoundElementFilter.Union(filters));
+      DA.SetData("Filter", ElementFilters.Union(filters));
     }
   }
 
@@ -213,7 +213,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
         return;
 
       var ids = elementIds.Where(x => x is object).ToList();
-      DA.SetData("Filter", CompoundElementFilter.ExclusionFilter(ids, inverted));
+      DA.SetData("Filter", ElementFilters.ExclusionFilter(ids, inverted));
     }
   }
 }

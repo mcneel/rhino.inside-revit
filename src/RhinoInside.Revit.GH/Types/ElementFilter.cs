@@ -21,16 +21,16 @@ namespace RhinoInside.Revit.GH.Types
     System.Drawing.Bitmap IGH_ItemDescription.GetTypeIcon(System.Drawing.Size size) => Properties.Resources.FilterElement;
     string IGH_ItemDescription.Name => DisplayName;
     string IGH_ItemDescription.Identity => IsLinked ? $"{{{ReferenceId?.ToString("D")}:{Id?.ToString("D")}}}" : $"{{{Id?.ToString("D")}}}";
-    string IGH_ItemDescription.Description => Document?.GetTitle();
+    string IGH_ItemDescription.Description => Document?.GetName();
     #endregion
 
     public FilterElement() { }
     protected FilterElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     protected FilterElement(ARDB.FilterElement value) : base(value) { }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
-      if (base.CastTo(out target))
+      if (base.ConvertTo(out target))
         return true;
 
       if (IsValid)

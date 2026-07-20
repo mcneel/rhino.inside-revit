@@ -6,6 +6,8 @@ using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
 {
+  using Numerical;
+
   public static class SolidExtension
   {
     /// <summary>
@@ -151,23 +153,22 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static IntersectionResult Project(this Solid solid, XYZ point, out Face face)
     {
       // Project on faces
-      var intersection = default(IntersectionResult);
-      (intersection, face) = solid.Faces.Cast<Face>().
+      var faceIntersection = default(IntersectionResult);
+      (faceIntersection, face) = solid.Faces.Cast<Face>().
         Select(x => (Intersection: x.Project(point), Face: x)).
         Where(x => x.Intersection is object).
         OrderBy(x => x.Intersection.Distance).
         FirstOrDefault();
 
-      if (face is object) return intersection;
-
       // Project on edges
-      (intersection, face) = solid.Edges.Cast<Edge>().
+      var edgeIntersection = default(IntersectionResult);
+      (edgeIntersection, face) = solid.Edges.Cast<Edge>().
         Select(x => (Intersection: x.Project(point, out var f), Face: f)).
         Where(x => x.Intersection is object).
         OrderBy(x => x.Intersection.Distance).
         FirstOrDefault();
 
-      return intersection;
+      return (faceIntersection?.Distance ?? double.PositiveInfinity) < (edgeIntersection?.Distance ?? double.PositiveInfinity) ? faceIntersection : edgeIntersection;
     }
 
     /// <summary>
@@ -179,23 +180,20 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static IntersectionResult Project(this Solid solid, XYZ point)
     {
       // Project on faces
-      var intersection = default(IntersectionResult);
-      intersection = solid.Faces.Cast<Face>().
+      var faceIntersection = solid.Faces.Cast<Face>().
         Select(x => x.Project(point)).
         Where(x => x is object).
         OrderBy(x => x.Distance).
         FirstOrDefault();
-
-      if (intersection is object) return intersection;
 
       // Project on edges
-      intersection = solid.Edges.Cast<Edge>().
+      var edgeIntersection = solid.Edges.Cast<Edge>().
         Select(x => x.Project(point)).
         Where(x => x is object).
         OrderBy(x => x.Distance).
         FirstOrDefault();
 
-      return intersection;
+      return (faceIntersection?.Distance ?? double.PositiveInfinity) < (edgeIntersection?.Distance ?? double.PositiveInfinity) ? faceIntersection : edgeIntersection;
     }
   }
 
@@ -209,81 +207,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return true;
 #endif
     }
-
-#if !REVIT_2018
-    public static Surface GetSurface(this Face face)
-    {
-      switch(face)
-      {
-        case PlanarFace planarFace:
-          return Plane.CreateByOriginAndBasis(planarFace.Origin, planarFace.XVector, planarFace.YVector);
-
-        case ConicalFace conicalFace:
-        {
-          var basisX = conicalFace.get_Radius(0).Normalize();
-          var basisY = conicalFace.get_Radius(1).Normalize();
-          var basisZ = conicalFace.Axis.Normalize();
-          return ConicalSurface.Create(new Frame(conicalFace.Origin, basisX, basisY, basisZ), conicalFace.HalfAngle);
-        }
-
-        case CylindricalFace cylindricalFace:
-        {
-          double radius = cylindricalFace.get_Radius(0).GetLength();
-          var basisX = cylindricalFace.get_Radius(0).Normalize();
-          var basisY = cylindricalFace.get_Radius(1).Normalize();
-          var basisZ = cylindricalFace.Axis.Normalize();
-          return CylindricalSurface.Create(new Frame(cylindricalFace.Origin, basisX, basisY, basisZ), radius);
-        }
-
-        case RevolvedFace revolvedFace:
-        {
-          var ECStoWCS = new Transform(Transform.Identity)
-          {
-            Origin = revolvedFace.Origin,
-            BasisX = revolvedFace.get_Radius(0).Normalize(),
-            BasisY = revolvedFace.get_Radius(1).Normalize(),
-            BasisZ = revolvedFace.Axis.Normalize()
-          };
-
-          var profileInWCS = revolvedFace.Curve.CreateTransformed(ECStoWCS);
-
-          return RevolvedSurface.Create(new Frame(ECStoWCS.Origin, ECStoWCS.BasisX, ECStoWCS.BasisY, ECStoWCS.BasisZ), profileInWCS);
-        }
-        case RuledFace ruledFace:
-        {
-          var profileCurve0 = ruledFace.get_Curve(0);
-          var profileCurve1 = ruledFace.get_Curve(1);
-          return RuledSurface.Create(profileCurve0, profileCurve1);
-        }
-      }
-
-      return null;
-    }
-
-    public static Curve GetProfileCurveInWorldCoordinates(this RevolvedSurface revolvedSurface)
-    {
-      var profileCurve = revolvedSurface.GetProfileCurve();
-      var ECStoWCS = new Transform(Transform.Identity)
-      {
-        Origin = revolvedSurface.Origin,
-        BasisX = revolvedSurface.XDir.Normalize(),
-        BasisY = revolvedSurface.YDir.Normalize(),
-        BasisZ = revolvedSurface.Axis.Normalize()
-      };
-
-      return profileCurve.CreateTransformed(ECStoWCS);
-    }
-
-    public static bool HasFirstProfilePoint(this RuledSurface ruledSurface)
-    {
-      return ruledSurface.GetFirstProfilePoint() is object;
-    }
-
-    public static bool HasSecondProfilePoint(this RuledSurface ruledSurface)
-    {
-      return ruledSurface.GetSecondProfilePoint() is object;
-    }
-#endif
 
     public static XYZ Evaluate(this Face face, UV param, bool normalized)
     {
@@ -313,6 +236,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         face.ComputeSecondDerivatives(uv);
     }
 
+    #region IsInside
     /// <summary>
     /// Indicates whether the specified point is within this face.
     /// </summary>
@@ -341,6 +265,25 @@ namespace RhinoInside.Revit.External.DB.Extensions
         face.IsInside(face.GetBoundingBox().Evaluate(uv), out result) :
         face.IsInside(uv, out result);
     }
+
+    /// <summary>
+    /// Indicates whether the specified other face is within this face.
+    /// </summary>
+    /// <param name="face"></param>
+    /// <param name="other"></param>
+    /// <returns>True if within this face or on its boundary, otherwise False.</returns>
+    internal static bool IsInside(this Face face, Face other)
+    {
+      foreach (var vertex in other.Triangulate().Vertices)
+      {
+        var projection = face.Project(vertex);
+        if (projection is null) return false;
+        if (Euclidean.IsZero1(projection.Distance, 1e-4)) return false;
+      }
+
+      return true;
+    }
+    #endregion
   }
 
   public static class EdgeExtension
@@ -355,12 +298,15 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       try
       {
-        var curve = edge.AsCurve();
-        var intersection = curve.Project(point);
-        intersection.SetEdgeObject(edge);
-        intersection.SetEdgeParameter(curve.GetNormalizedParameter(intersection.Parameter));
+        using (var curve = edge.AsCurve())
+        {
+          var intersection = curve.Project(point);
+          if (intersection is null) return null;
 
-        return intersection;
+          intersection.SetEdgeObject(edge);
+          intersection.SetEdgeParameter(curve.GetNormalizedParameter(intersection.Parameter));
+          return intersection;
+        }
       }
       catch { return default; }
     }
@@ -379,8 +325,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       try
       {
         var intersection = edge.Project(point);
-        var vector = (point - intersection.XYZPoint).ToUnitXYZ();
+        if (intersection is null) return null;
 
+        var vector = (point - intersection.XYZPoint).ToUnitXYZ();
         var faces = new Face[] { edge.GetFace(0), edge.GetFace(1) };
         if (!vector.IsNaN)
         {
@@ -400,7 +347,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
             dot1 = normal.DotProduct(vector);
           }
 
-          face = dot1 > dot0 ? faces[1] : faces[0];
+          face = dot1 < dot0 ? faces[1] : faces[0];
         }
         else
         {

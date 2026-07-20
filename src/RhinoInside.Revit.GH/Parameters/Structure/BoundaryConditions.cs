@@ -4,6 +4,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Parameters
 {
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.27")]
   public class BoundaryConditions : GraphicalElement<Types.BoundaryConditions, ARDB.Structure.BoundaryConditions>
   {
@@ -11,6 +13,22 @@ namespace RhinoInside.Revit.GH.Parameters
     public override Guid ComponentGuid => new Guid("DEE191F4-9D73-46C7-9BD0-EBBBD5B8D4A6");
 
     public BoundaryConditions() : base("Boundary Conditions", "Boundary Conditions", "Contains a collection of Revit Boundary Conditions", "Params", "Revit Elements") { }
+
+    internal static bool TryGetStructuralSettings(Types.Document document, out ARDB.Structure.StructuralSettings settings)
+    {
+      try
+      {
+        if (document?.Value is ARDB.Document doc)
+        {
+          settings = ARDB.Structure.StructuralSettings.GetStructuralSettings(doc);
+          return settings.BoundaryConditionFamilySymbolFixed.IsValid();
+        }
+      }
+      catch { }
+
+      settings = null;
+      return false;
+    }
   }
 
   //[ComponentVersion(introduced: "1.27")]

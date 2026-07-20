@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using Grasshopper.GUI;
 using Grasshopper.Kernel;
 using ARDB = Autodesk.Revit.DB;
 
@@ -10,7 +9,11 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   public class TopographySurface : GraphicalElement<Types.TopographySurface, ARDB.Architecture.TopographySurface>
   {
+#if REVIT_2024
+    public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.hidden;
+#else
     public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.obscure;
+#endif
     public override Guid ComponentGuid => new Guid("0700BE5F-9B9C-4235-ADD5-787E42898114");
 
     public TopographySurface() : base
@@ -31,9 +34,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
     protected override void Menu_AppendPromptNew(ToolStripDropDown menu)
     {
-      var create = Menu_AppendItem(menu, $"Set new {TypeName}");
-
 #if !REVIT_2024
+      var create = Menu_AppendItem(menu, $"Set new {TypeName}");
       Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.Toposurface, "Toposurface");
       Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.Subregion, "Region");
 #endif

@@ -83,7 +83,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.GetDataList(DA, "Element", out IList<Types.Element> elements)) return;
       if (Params.GetDataList(DA, "Type", out IList<Types.ElementType> types))
       {
-        var typesSets = new Dictionary<Types.ElementType, List<ARDB.ElementId>>();
+        var typesSets = new Dictionary<ARDB.ElementType, List<ARDB.ElementId>>(ElementEqualityComparer.InterDocument);
 
         foreach (var item in elements.ZipOrLast(types, (Element, Type) => (Element, Type)))
         {
@@ -95,10 +95,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
             if (element.Type.Equals(type))
               continue;
 
-            if (!element.Document.IsEquivalent(type.Document))
-              type = Types.ElementType.FromElementId(element.Document, element.Document.LookupElement(type.Document, type.Id)) as Types.ElementType;
-
-            if (type is object)
+            if (element.Document.TryGetNamesakeElement(type.Document, type.Id, out ARDB.ElementType elementType))
             {
               // Special case for ARDB.Panel
               if (element.Value is ARDB.Panel panel)
@@ -123,11 +120,12 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 }
               }
 
-              if (!typesSets.TryGetValue(type, out var entry))
-                typesSets.Add(type, new List<ARDB.ElementId> { element.Id });
+              if (!typesSets.TryGetValue(elementType, out var entry))
+                typesSets.Add(elementType, new List<ARDB.ElementId> { element.Id });
               else
                 entry.Add(element.Id);
             }
+            else throw new Exceptions.RuntimeArgumentException($"Failed to found type '{type.DisplayName}' on document '{element.Document.Tooltip()}'");
           }
         }
 
