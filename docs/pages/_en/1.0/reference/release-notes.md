@@ -12,13 +12,21 @@ group: Deployment & Configs
 
 ### RC
 
-- Fixed 'Host Boundary Profile' when used on walls that already have an Sketch.
-- Fixed inconsistency in 'Add Wall (Profile)' curve handling.
-  [#1355](https://github.com/mcneel/rhino.inside-revit/issues/1355)
-
 {% endcapture %}
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9651.15514" time="06/09/2026" %}
+
+- Revit 2027 Compatibility Fixes
+
+{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9629.5917" time="05/26/2026" %}
+
+- Rhino.Inside.Revit now requires Rhino 8 SR32 or newer for .NET 10
+
+{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9607.19178" time="04/21/2026" %}
+
+- Enabled .NET Framework assemblies in Revit 2027
 
 {% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9600.14957" time="04/14/2026" %}
 
