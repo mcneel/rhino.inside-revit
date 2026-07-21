@@ -118,16 +118,7 @@ namespace RhinoInside.Revit.Settings
 #endif
 
         bool shortcutUpdated = false;
-        try
-        {
-          var shortcutItem = shortcuts.First(x => x.CommandId == commandId);
-          if (shortcutItem.Shortcuts is null)
-          {
-            shortcutItem.Shortcuts = commandShortcuts;
-            shortcutUpdated = true;
-          }
-        }
-        catch (InvalidOperationException)
+        if (shortcuts.FirstOrDefault(x => x.CommandId == commandId) is null)
         {
           var shortcutItem = new ShortcutItem()
           {
