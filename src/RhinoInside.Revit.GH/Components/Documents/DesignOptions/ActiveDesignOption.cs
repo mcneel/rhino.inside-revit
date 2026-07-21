@@ -7,11 +7,12 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
 {
   using External.UI.Extensions;
 
-  public class ActiveDesignOption : ZuiComponent
+  public class ActiveDesignOption : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("B6349DDA-4486-44EB-9AF7-3D13404A3F3E");
     public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override string IconTag => "A";
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB.DesignOption));
 
     public ActiveDesignOption() : base
     (
@@ -26,22 +27,22 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.Element>("Active Design Option", "O", "Active design option", GH_ParamAccess.item)
+      ParamDefinition.Create<Parameters.Element>("Active Design Option", "O", "Active design option")
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDataOrDefault(this, DA, "Document", out var doc))
+      if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source))
         return;
 
-      var option = new Types.DesignOption(doc, ARDB.DesignOption.GetActiveDesignOptionId(doc));
-      DA.SetData("Active Design Option", option);
+      var option = new Types.DesignOption(source.SourceDocument.Value, ARDB.DesignOption.GetActiveDesignOptionId(source.SourceDocument.Value));
+      DA.SetData("Active Design Option", option.FromSource(source));
     }
 
     #region UI
@@ -59,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
 
       {
         var activeApp = Revit.ActiveUIApplication;
-        var postable = activeApp.ActiveUIDocument.TryGetRevitCommandId(Autodesk.Revit.UI.PostableCommand.DesignOptions, out var commandId);
+        var postable = activeApp.TryGetRevitCommandId(Autodesk.Revit.UI.PostableCommand.DesignOptions, out var commandId);
         Menu_AppendItem
         (
           menu, $"Open Design Options…",

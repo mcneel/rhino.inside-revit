@@ -31,11 +31,6 @@ namespace RhinoInside.Revit.GH.Components.Site
     )
     { }
 
-    //class FailuresPreprocessor : DB.IFailuresPreprocessor
-    //{
-    //  public DB.FailureProcessingResult PreprocessFailures(DB.FailuresAccessor failuresAccessor) => DB.FailureProcessingResult.Continue;
-    //}
-
     void ReconstructTopographyByPoints
     (
       [Optional, NickName("DOC")]

@@ -21,9 +21,8 @@ namespace RhinoInside.Revit.GH.Types
         return "<None>";
       }
     }
-    #endregion
-
     public new ARDB.CompoundStructure Value => base.Value as ARDB.CompoundStructure;
+    #endregion
 
     public CompoundStructure() : base() { }
     public CompoundStructure(ARDB.Document doc, ARDB.CompoundStructure value) : base(doc, value) { }
@@ -282,16 +281,18 @@ namespace RhinoInside.Revit.GH.Types
       get
       {
         if (Value is ARDB.CompoundStructureLayer layer)
-          return $"{layer.Function} : {layer.Width * Revit.ModelUnits} {Grasshopper.Kernel.GH_Format.RhinoUnitSymbol()}";
+          return $"{layer.Function} : {layer.Width * Revit.ModelUnits} {GH_Format.RhinoUnitSymbol()}";
 
         return "<None>";
       }
     }
-    #endregion
 
     public new ARDB.CompoundStructureLayer Value => base.Value as ARDB.CompoundStructureLayer;
+    #endregion
 
+    #region ICloneable
     object ICloneable.Clone() => new CompoundStructureLayer(this);
+    #endregion
 
     public CompoundStructureLayer() : base() { }
     public CompoundStructureLayer(CompoundStructureLayer value) : base(value?.Document, value is null ? null : new ARDB.CompoundStructureLayer(value.Value)) { }

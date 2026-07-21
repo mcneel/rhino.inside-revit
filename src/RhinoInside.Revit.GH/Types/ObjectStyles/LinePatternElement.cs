@@ -28,9 +28,9 @@ namespace RhinoInside.Revit.GH.Types
 
     internal static readonly ARDB.ElementId SolidId = ElementIdExtension.FromValue((int) External.DB.BuiltInLinePattern.Solid);
 
-    public sealed override bool CastFrom(object source)
+    public sealed override bool ConvertFrom(object source)
     {
-      if (base.CastFrom(source))
+      if (base.ConvertFrom(source))
         return true;
 
       var document = Revit.ActiveDBDocument;
@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    public override bool CastTo<Q>(out Q target)
+    public override bool ConvertTo<Q>(out Q target)
     {
 #if RHINO_8
       if (typeof(Q).IsAssignableFrom(typeof(ModelLinetype)))
@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Types
       }
 #endif
 
-      return base.CastTo(out target);
+      return base.ConvertTo(out target);
     }
     #endregion
 
@@ -110,40 +110,19 @@ namespace RhinoInside.Revit.GH.Types
 
       if (Id == ARDB.LinePatternElement.GetSolidPatternId())
       {
-        idMap.Add(Id, guid = new Guid("{3999bed5-78ee-4d73-a059-032224c6fd55}"));
+        idMap.Add(Id, guid = new Guid("{3999BED5-78EE-4D73-A059-032224C6FD55}"));
         return true;
       }
       else if (Value is ARDB.LinePatternElement linePattern)
       {
         // 2. Check if already exist
         var index = doc.Linetypes.Find(linePattern.Name);
-        var linetype = index < 0 ?
-          new Linetype() { Name = linePattern.Name } :
-          doc.Linetypes[index];
+        var linetype = index < 0 ? null : doc.Linetypes[index];
 
         // 3. Update if necessary
         if (index < 0 || overwrite)
         {
-          using (var pattern = linePattern.GetLinePattern())
-          {
-            linetype.SetSegments
-            (
-              pattern.GetSegments().Select
-              (
-                x =>
-                {
-                  switch (x.Type)
-                  {
-                    case ARDB.LinePatternSegmentType.Dash:  return UnitScale.Convert(+x.Length, UnitScale.Internal, UnitScale.Millimeters);
-                    case ARDB.LinePatternSegmentType.Space: return UnitScale.Convert(-x.Length, UnitScale.Internal, UnitScale.Millimeters);
-                    case ARDB.LinePatternSegmentType.Dot:   return 0.0;
-                    default: throw new ArgumentOutOfRangeException();
-                  }
-                }
-              )
-            );
-          }
-
+          linetype = ToLinetype(linetype);
           if (index < 0) { index = doc.Linetypes.Add(linetype); linetype = doc.Linetypes[index]; }
           else if (overwrite) doc.Linetypes.Modify(linetype, index, true);
         }
@@ -195,6 +174,38 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 #endif
+
+    internal Linetype ToLinetype(Linetype linetype = null)
+    {
+      if (Value is ARDB.LinePatternElement linePattern)
+      {
+        linetype ??= new Linetype() { Name = linePattern.Name };
+
+        using (var pattern = linePattern.GetLinePattern())
+        {
+          linetype.SetSegments
+          (
+            pattern.GetSegments().Select
+            (
+              x =>
+              {
+                switch (x.Type)
+                {
+                  case ARDB.LinePatternSegmentType.Dash: return UnitScale.Convert(+x.Length, UnitScale.Internal, UnitScale.Millimeters);
+                  case ARDB.LinePatternSegmentType.Space: return UnitScale.Convert(-x.Length, UnitScale.Internal, UnitScale.Millimeters);
+                  case ARDB.LinePatternSegmentType.Dot: return 0.0;
+                  default: throw new ArgumentOutOfRangeException();
+                }
+              }
+            )
+          );
+        }
+
+        return linetype;
+      }
+
+      return null;
+    }
     #endregion
 
     #region Properties

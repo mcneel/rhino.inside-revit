@@ -178,7 +178,7 @@ namespace Microsoft.Win32.SafeHandles
     }
     public bool Hide() => User32.ShowWindow(this, 0 /*SW_HIDE*/);
     public bool Show() => User32.ShowWindow(this, 8 /*SW_SHOWNA*/);
-    public bool Minimize(bool minimize) => minimize ? User32.CloseWindow(this) : User32.OpenIcon(this);
+    public bool Minimize(bool minimize) => User32.ShowWindow(this, minimize ? 6 /*SW_MINIMIZE*/: 9 /*SW_RESTORE*/);
     public bool Enabled
     {
       get => User32.IsWindowEnabled(this);

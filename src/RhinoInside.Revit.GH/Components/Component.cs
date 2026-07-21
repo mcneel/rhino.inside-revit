@@ -98,12 +98,15 @@ namespace RhinoInside.Revit.GH.Components
     {
       get
       {
-        ComponentVersionAttribute.GetVersionHistory(GetType(), out var introduced, out var _, out var deprecated);
+        ComponentVersionAttribute.GetVersionHistory(GetType(), out var introduced, out var updated, out var deprecated);
 
         var versionDescription = string.Empty;
 
         if (introduced is object)
           versionDescription += $"Introduced in v{introduced}" + OS.NewLine;
+
+        if (introduced is object)
+          versionDescription += $"Updated in v{updated}" + OS.NewLine;
 
         if (Obsolete)
         {
@@ -400,6 +403,7 @@ namespace RhinoInside.Revit.GH.Components
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, argument.Message, argument.Value as Rhino.Geometry.GeometryBase);
           break;
 
+        case System.ComponentModel.WarningException _:
         case Exceptions.RuntimeException _:
           if (!AbortOnContinuableException)
           {
