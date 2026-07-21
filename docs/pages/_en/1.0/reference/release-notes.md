@@ -16,6 +16,10 @@ group: Deployment & Configs
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
 
+{% include ltr/release-header.html title="v1.36 RC7" version="v1.36.9698.18734" time="06/21/2026" %}
+
+- Miscellaneous improvements and bug fixes
+
 {% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9698.15636" time="06/21/2026" %}
 
 - Miscellaneous improvements and bug fixes
