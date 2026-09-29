@@ -653,6 +653,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddSlopedFloor {
+            get {
+                object obj = ResourceManager.GetObject("AddSlopedFloor", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddSpace {
             get {
                 object obj = ResourceManager.GetObject("AddSpace", resourceCulture);
