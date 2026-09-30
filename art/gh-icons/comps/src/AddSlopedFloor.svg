@@ -1,22 +1,26 @@
-<?xml version="1.0"?>
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full" width="24" height="24">
+<svg version="1.1" baseProfile="full" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="radial716583fc4e70" gradientUnits="userSpaceOnUse" cx="11.5" cy="8.15" r="14.85">
-      <stop offset="0%" style="stop-color:#30E2ED;"/>
-      <stop offset="100%" style="stop-color:#187C8B;"/>
+    <radialGradient id="radial46c378a2c380" gradientUnits="userSpaceOnUse" cx="16" cy="16.5" r="14">
+      <stop offset="0%" style="stop-color:#C4C4C4;" />
+      <stop offset="100%" style="stop-color:#8A8A8A;" />
     </radialGradient>
-    <linearGradient id="linear061683a29bd0" gradientUnits="userSpaceOnUse" x1="3.5" y1="12" x2="19.5" y2="14">
-      <stop offset="0%" style="stop-color:#FFFFFF;"/>
-      <stop offset="100%" style="stop-color:#D8D8D8;"/>
+    <linearGradient id="linear0289bd157968" gradientUnits="userSpaceOnUse" x1="3" y1="8" x2="21.03" y2="10">
+      <stop offset="0%" style="stop-color:#DCDCDC;" />
+      <stop offset="100%" style="stop-color:#7E7E7E;" />
+    </linearGradient>
+    <linearGradient id="linear77bdf3e108ed" gradientUnits="userSpaceOnUse" x1="3.5" y1="12" x2="19.5" y2="14">
+      <stop offset="0%" style="stop-color:#34EFF9;" />
+      <stop offset="100%" style="stop-color:#22AEBB;" />
     </linearGradient>
   </defs>
   <g fill="none" stroke="none">
-    <path d="M 11.5 1 L 21.03 6.5 L 21.03 17.5 L 11.5 23 L 1.97 17.5 L 1.97 6.5 L 11.5 1" fill="url(#radial716583fc4e70)" stroke="#104B6A" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M 11.5 18 L 19.5 14 L 19.5 16 L 11.5 20 L 11.5 18" fill="#8C8C8C"/>
-    <path d="M 3.5 12 L 11.5 18 L 11.5 20 L 3.5 14 L 3.5 12" fill="#B4B4B4"/>
-    <path d="M 3.5 12 L 11.5 8 L 19.5 14 L 11.5 18 L 3.5 12" fill="url(#linear061683a29bd0)" stroke="#104B6A" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M 3.5 12 L 11.5 18 L 19.5 14 L 19.5 16 L 11.5 20 L 3.5 14 L 3.5 12" stroke="#104B6A" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M 7.9 10.3 L 10.94 10.58 L 9.02 13.14 L 7.9 10.3" fill="#104B6A"/>
-    <path d="M 15.1 15.7 L 9.98 11.86" stroke="#104B6A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 1.97 15.5 L 11.5 10 L 21.03 15.5 L 21.03 17.5 L 11.5 23 L 1.97 17.5 L 1.97 15.5" fill="url(#radial46c378a2c380)" />
+    <path d="M 1.97 6.5 L 11.5 1 L 21.03 6.5 L 21.03 15.5 L 11.5 10 L 1.97 15.5 L 1.97 6.5" fill="url(#linear0289bd157968)" />
+    <path d="M 11.5 18 L 19.5 14 L 19.5 16 L 11.5 20 L 11.5 18" fill="#156A7C" />
+    <path d="M 3.5 12 L 11.5 18 L 11.5 20 L 3.5 14 L 3.5 12" fill="#1E8E9C" />
+    <path d="M 3.5 12 L 11.5 8 L 19.5 14 L 11.5 18 L 3.5 12" fill="url(#linear77bdf3e108ed)" stroke="#104B6A" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 3.5 12 L 11.5 18 L 19.5 14 L 19.5 16 L 11.5 20 L 3.5 14 L 3.5 12" stroke="#104B6A" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 7.9 10.3 L 10.94 10.58 L 9.02 13.14 L 7.9 10.3" fill="#104B6A" />
+    <path d="M 15.1 15.7 L 9.98 11.86" stroke="#104B6A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
   </g>
 </svg>
