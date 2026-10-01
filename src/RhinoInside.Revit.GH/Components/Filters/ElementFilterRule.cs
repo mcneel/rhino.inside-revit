@@ -530,4 +530,192 @@ namespace RhinoInside.Revit.GH.Components.Filters
       DA.SetData("Rule", rule);
     }
   }
+
+  public abstract class ElementFilterValuePresenceRule : Component
+  {
+#if REVIT_2020
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
+#else
+    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.hidden;
+#endif
+    public override bool IsPreviewCapable => false;
+
+    protected enum ConditionType
+    {
+      HasValue,
+      HasNoValue,
+    }
+
+    protected abstract ConditionType Condition { get; }
+
+    protected ElementFilterValuePresenceRule(string name, string nickname, string description, string category, string subCategory)
+    : base(name, nickname, description, category, subCategory) { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.ParameterKey(), "Parameter", "P", "Parameter to check", GH_ParamAccess.item);
+    }
+
+    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.FilterRule(), "Rule", "R", string.Empty, GH_ParamAccess.item);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      var parameterKey = default(Types.ParameterKey);
+      if (!DA.GetData("Parameter", ref parameterKey))
+        return;
+
+      if (!parameterKey.IsReferencedData)
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Conversion from '{parameterKey.Nomen}' to Parameter may be ambiguous. Please use 'BuiltInParameter Picker' or a 'Parameter' Param");
+
+      if (!ElementFilterRule.TryGetParameterDefinition(parameterKey.Document, parameterKey.Id, out var _, out var _))
+      {
+        if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
+        else
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Nomen}' in Revit document.");
+
+        return;
+      }
+
+#if REVIT_2020
+      switch (Condition)
+      {
+        case ConditionType.HasValue:   DA.SetData("Rule", new ARDB.HasValueFilterRule(parameterKey.Id));   break;
+        case ConditionType.HasNoValue: DA.SetData("Rule", new ARDB.HasNoValueFilterRule(parameterKey.Id)); break;
+      }
+#else
+      throw new Exceptions.RuntimeErrorException($"'{Name}' is only supported on Revit 2020 or above.");
+#endif
+    }
+  }
+
+  [ComponentVersion(introduced: "1.37")]
+  public class ElementFilterRuleHasValue : ElementFilterValuePresenceRule
+  {
+    public override Guid ComponentGuid => new Guid("01D1280A-3C4E-4A8C-B4F3-10E52BAA59E4");
+    protected override string IconTag => "∃";
+    protected override ConditionType Condition => ConditionType.HasValue;
+
+    public ElementFilterRuleHasValue()
+    : base("Has Value Rule", "HasValue", "Filter used to match elements if a parameter has a value", "Revit", "Filter")
+    { }
+  }
+
+  [ComponentVersion(introduced: "1.37")]
+  public class ElementFilterRuleHasNoValue : ElementFilterValuePresenceRule
+  {
+    public override Guid ComponentGuid => new Guid("A37B1886-66B2-4D8D-B56C-4FE96FF58E14");
+    protected override string IconTag => "∅";
+    protected override ConditionType Condition => ConditionType.HasNoValue;
+
+    public ElementFilterRuleHasNoValue()
+    : base("Has No Value Rule", "HasNoValue", "Filter used to match elements if a parameter has no value", "Revit", "Filter")
+    { }
+  }
+
+  [ComponentVersion(introduced: "1.37")]
+  public class ElementFilterRuleSharedParameter : Component
+  {
+    public override Guid ComponentGuid => new Guid("3C917300-2DD3-4821-B486-D2F4E0766197");
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override bool IsPreviewCapable => false;
+    protected override string IconTag => "S";
+
+    public ElementFilterRuleSharedParameter()
+    : base("Shared Parameter Rule", "Shared", "Filter used to match elements if a shared parameter is applicable to them", "Revit", "Filter")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.ParameterKey(), "Parameter", "P", "Shared parameter to check", GH_ParamAccess.item);
+    }
+
+    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.FilterRule(), "Rule", "R", string.Empty, GH_ParamAccess.item);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      var parameterKey = default(Types.ParameterKey);
+      if (!DA.GetData("Parameter", ref parameterKey))
+        return;
+
+      if (parameterKey.Class != ParameterClass.Shared)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{parameterKey.Nomen}' is not a shared parameter.");
+        return;
+      }
+
+      DA.SetData("Rule", ARDB.ParameterFilterRuleFactory.CreateSharedParameterApplicableRule(parameterKey.Nomen));
+    }
+  }
+
+  [ComponentVersion(introduced: "1.37")]
+  public class ElementFilterRuleGlobalParameter : Component
+  {
+    public override Guid ComponentGuid => new Guid("09C76B00-5D50-4A55-A8E6-C7F3AD299351");
+    public override GH_Exposure Exposure => GH_Exposure.quinary;
+    public override bool IsPreviewCapable => false;
+    protected override string IconTag => "G";
+
+    public ElementFilterRuleGlobalParameter()
+    : base("Global Parameter Rule", "Global", "Filter used to match elements if a parameter is associated with a global parameter", "Revit", "Filter")
+    { }
+
+    protected override void RegisterInputParams(GH_InputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.ParameterKey(), "Parameter", "P", "Parameter to check", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.ParameterKey(), "Global", "G", "Global parameter the Parameter should be associated with", GH_ParamAccess.item);
+      manager.AddBooleanParameter("Inverted", "I", "True if the results of the rule should be inverted", GH_ParamAccess.item, false);
+    }
+
+    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    {
+      manager.AddParameter(new Parameters.FilterRule(), "Rule", "R", string.Empty, GH_ParamAccess.item);
+    }
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      var parameterKey = default(Types.ParameterKey);
+      if (!DA.GetData("Parameter", ref parameterKey))
+        return;
+
+      if (!parameterKey.IsReferencedData)
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Conversion from '{parameterKey.Nomen}' to Parameter may be ambiguous. Please use 'BuiltInParameter Picker' or a 'Parameter' Param");
+
+      if (!ElementFilterRule.TryGetParameterDefinition(parameterKey.Document, parameterKey.Id, out var _, out var _))
+      {
+        if (parameterKey.Id.TryGetBuiltInParameter(out var builtInParameter))
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{ARDB.LabelUtils.GetLabelFor(builtInParameter)}' in Revit document.");
+        else
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Failed to found parameter '{parameterKey.Nomen}' in Revit document.");
+
+        return;
+      }
+
+      var globalKey = default(Types.ParameterKey);
+      if (!DA.GetData("Global", ref globalKey))
+        return;
+
+      if (globalKey.Class != ParameterClass.Global)
+      {
+        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Parameter '{globalKey.Nomen}' is not a global parameter.");
+        return;
+      }
+
+      var inverted = false;
+      if (!DA.GetData("Inverted", ref inverted))
+        return;
+
+      var rule = inverted ?
+        ARDB.ParameterFilterRuleFactory.CreateIsNotAssociatedWithGlobalParameterRule(parameterKey.Id, globalKey.Id) :
+        ARDB.ParameterFilterRuleFactory.CreateIsAssociatedWithGlobalParameterRule(parameterKey.Id, globalKey.Id);
+
+      DA.SetData("Rule", rule);
+    }
+  }
 }

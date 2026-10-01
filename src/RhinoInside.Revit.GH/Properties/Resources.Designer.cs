@@ -2333,6 +2333,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementFilterRuleGlobalParameter {
+            get {
+                object obj = ResourceManager.GetObject("ElementFilterRuleGlobalParameter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementFilterRuleGreater {
             get {
                 object obj = ResourceManager.GetObject("ElementFilterRuleGreater", resourceCulture);
@@ -2346,6 +2356,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ElementFilterRuleGreaterOrEqual {
             get {
                 object obj = ResourceManager.GetObject("ElementFilterRuleGreaterOrEqual", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementFilterRuleHasNoValue {
+            get {
+                object obj = ResourceManager.GetObject("ElementFilterRuleHasNoValue", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementFilterRuleHasValue {
+            get {
+                object obj = ResourceManager.GetObject("ElementFilterRuleHasValue", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2376,6 +2406,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ElementFilterRuleNotEquals {
             get {
                 object obj = ResourceManager.GetObject("ElementFilterRuleNotEquals", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementFilterRuleSharedParameter {
+            get {
+                object obj = ResourceManager.GetObject("ElementFilterRuleSharedParameter", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
