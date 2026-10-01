@@ -1691,6 +1691,18 @@
     "until": null, 
     "uuid": "dc8daf4f-cc93-43e2-a871-3a01a920a722"
   }, 
+    {
+    "desc": "Given its outline curve and a slope arrow, it adds a sloped Floor element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddSlopedFloor.png", 
+    "icontag": null, 
+    "panel": "Architecture", 
+    "since": "1.37", 
+    "tab": "Revit", 
+    "title": "Add Sloped Floor", 
+    "typename": "AddSlopedFloor", 
+    "until": null, 
+    "uuid": "fd260bdc-9f29-4410-8783-ec68a0500495"
+  }, 
   {
     "desc": "Given a curve, it adds a Railing element to the active Revit document", 
     "iconsrc": "/static/images/GH/RailingByCurve.png", 
