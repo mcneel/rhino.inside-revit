@@ -79,7 +79,8 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Structural",
           NickName = "S",
           Description = "Whether floor is structural or not",
-        }.SetDefaultVale(true), ParamRelevance.Primary
+          Optional = true
+        }, ParamRelevance.Primary
       )
     };
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -11,9 +12,7 @@ namespace RhinoInside.Revit.GH.Components
   using Convert.Geometry;
   using Convert.System.Collections.Generic;
   using External.DB.Extensions;
-  using Kernel.Attributes;
   using RhinoInside.Revit.GH.Exceptions;
-
 
   [ComponentVersion(introduced: "1.37"), ComponentRevitAPIVersion(min: "2022.0")]
   public class AddSlopedFloor : ElementTrackerComponent
@@ -23,8 +22,8 @@ namespace RhinoInside.Revit.GH.Components
 
     public AddSlopedFloor() : base
     (
-      name: "Add Sloped Floor",
-      nickname: "SlopedFloor",
+      name: "Add Floor (Sloped)",
+      nickname: "S-Floor",
       description: "Given its outline curve and a slope arrow, it adds a sloped Floor element to the active Revit document",
       category: "Revit",
       subCategory: "Architecture"
@@ -82,7 +81,8 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Structural",
           NickName = "S",
           Description = "Whether floor is structural or not",
-        }.SetDefaultVale(true), ParamRelevance.Primary
+          Optional = true
+        }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
@@ -144,6 +144,7 @@ namespace RhinoInside.Revit.GH.Components
           if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary)) return null;
 
           var tol = GeometryTolerance.Model;
+          var normal = Vector3d.Zero;
           for (int index = 0; index < boundary.Count; ++index)
           {
             var loop = boundary[index];
@@ -152,10 +153,12 @@ namespace RhinoInside.Revit.GH.Components
             (
               loop.IsShort(tol.ShortCurveTolerance) ||
               !loop.IsClosed ||
-              !loop.TryGetPlane(out var plane, tol.VertexTolerance) ||
-              plane.ZAxis.IsParallelTo(Vector3d.ZAxis, tol.AngleTolerance) == 0
+              !loop.TryGetPlane(out var plane, tol.VertexTolerance)||
+              (!normal.IsZero && plane.Normal.IsParallelTo(normal, tol.AngleTolerance) == 0)
             )
-              throw new RuntimeArgumentException(nameof(boundary), "Boundary loop curves should be a set of valid horizontal, coplanar and closed curves.", boundary);
+              throw new RuntimeArgumentException(nameof(boundary), "Boundary loop curves should be a set of valid coplanar and closed curves.", boundary);
+
+            if (normal.IsZero) normal = plane.Normal;
 
             boundary[index] = loop.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
           }
@@ -181,34 +184,36 @@ namespace RhinoInside.Revit.GH.Components
           if (angle.HasValue && Params.Input<Param_Number>("Slope")?.UseDegrees == true)
             angle = Rhino.RhinoMath.ToRadians(angle.Value);
 
-          if (angle.HasValue && Math.Abs(angle.Value) >= Rhino.RhinoMath.ToRadians(89.0))
-            throw new RuntimeArgumentException("Slope", "Slope should be less than 89°.", angle.Value);
+          if (arrow.HasValue && (arrow.Value.Length < tol.ShortCurveTolerance || !arrow.Value.IsValid))
+            arrow = null;
+          else
+            arrow = arrow ?? Across(boundary[0]);
 
-          if (arrow.HasValue && arrow.Value.Length < tol.ShortCurveTolerance)
-            arrow = default;
-
-          if (arrow.HasValue && !angle.HasValue)
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "'Slope Arrow' has no 'Slope', so the floor is flat.");
-          else if (!arrow.HasValue && angle.HasValue && angle.Value != 0.0)
+          if (!arrow.HasValue && angle.HasValue && angle.Value != 0.0)
             AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "'Slope' needs a 'Slope Arrow' to know which way is up, so the floor is flat.");
 
-          // The arrow lies on the boundary plane. Revit keeps the slope as rise over run.
-          var sloped = arrow.HasValue && angle.HasValue;
-          var slopeArrow = sloped ?
+          // The arrow lies on the boundary plane.
+          var slopeArrow = arrow.HasValue ?
             new Line
             (
               new Point3d(arrow.Value.From.X, arrow.Value.From.Y, bbox.Min.Z),
               new Point3d(arrow.Value.To.X, arrow.Value.To.Y, bbox.Min.Z)
             ) :
             default(Line?);
-          var slope = sloped ? Math.Tan(angle.Value) : 0.0;
+
+          // Revit keeps the slope as rise over run.
+          var slope = angle.HasValue ? Math.Tan(angle.Value):
+                      arrow.HasValue ? (arrow.Value.ToZ - arrow.Value.FromZ) / new Vector2d(arrow.Value.Direction.X, arrow.Value.Direction.Y).Length:
+                      double.NaN;
+
+          boundary = boundary.Select(x => x.ProjectToPlane(new Plane(boundary[0].PointAtStart, Vector3d.XAxis, Vector3d.YAxis))).ToArray();
 
           // Compute
           floor = Reconstruct(floor, doc.Value, boundary, bbox, floorType, level.Value, structural ?? true, slopeArrow, slope);
 
           if (floor is object)
           {
-            var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation();
+            var heightAboveLevel = (arrow?.FromZ ?? bbox.Min.Z) / Revit.ModelUnits - level.Value.GetElevation();
             floor.get_Parameter(ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
           }
 
@@ -221,7 +226,7 @@ namespace RhinoInside.Revit.GH.Components
 
 #if REVIT_2022
     static ARDB.CurveElement GetSlopeArrow(ARDB.Sketch sketch) =>
-      new Types.Sketch(sketch).SlopeArrow?.Value as ARDB.CurveElement;
+      new Types.Sketch(sketch).SlopeArrow?.Value;
 
     bool Reuse
     (
@@ -250,7 +255,7 @@ namespace RhinoInside.Revit.GH.Components
       }
 
       bool succeed = true;
-      succeed &= floor.get_Parameter(ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).Update(structural ? 1 : 0);
+      succeed &= floor.get_Parameter(ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).Update(structural);
       succeed &= floor.get_Parameter(ARDB.BuiltInParameter.LEVEL_PARAM).Update(level.Id);
 
       // A new arrow moves the current one, at the height the sketch keeps it.
@@ -268,8 +273,8 @@ namespace RhinoInside.Revit.GH.Components
           arrow.SetGeometryCurve(ARDB.Line.CreateBound(start, end), overrideJoins: true);
       }
 
+      arrow.get_Parameter(ARDB.BuiltInParameter.SPECIFY_SLOPE_OR_OFFSET).Update(1);
       succeed &= arrow.get_Parameter(ARDB.BuiltInParameter.ROOF_SLOPE)?.Update(slope) == true;
-      arrow.get_Parameter(ARDB.BuiltInParameter.SLOPE_START_HEIGHT)?.Update(0.0);
 
       return succeed;
     }
@@ -282,21 +287,8 @@ namespace RhinoInside.Revit.GH.Components
     )
     {
       var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
-
-      // A flat floor gets an arrow of slope 0 across its middle, so a slope can be added later.
-      var line = slopeArrow ?? Across(bbox);
-      var arrow = ARDB.Line.CreateBound(line.From.ToXYZ(), line.To.ToXYZ());
-
-      var floor = default(ARDB.Floor);
-      try
-      {
-        floor = ARDB.Floor.Create(document, curveLoops, type.Id, level.Id, structural, arrow, slope);
-      }
-      catch (Autodesk.Revit.Exceptions.ArgumentException) when (!slopeArrow.HasValue)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Floor was created without a slope arrow, so adding a slope later will replace it.");
-        floor = ARDB.Floor.Create(document, curveLoops, type.Id, level.Id, structural, default, 0.0);
-      }
+      var line = slopeArrow ?? Across(boundary[0]);
+      var floor = ARDB.Floor.Create(document, curveLoops, type.Id, level.Id, structural, line.ToLine(), slope);
 
       // We turn off analytical model off by default
       floor.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
@@ -304,15 +296,32 @@ namespace RhinoInside.Revit.GH.Components
       return floor;
     }
 
-    /// <summary>A line through the middle of the outline, half as long as it is wide.</summary>
-    static Line Across(BoundingBox bbox)
+    static Line Across(Curve curve)
     {
-      var center = bbox.Center;
-      var size = bbox.Diagonal;
+      if (curve.TryGetPlane(out var plane))
+      {
+        if (plane.Normal.IsParallelTo(Vector3d.ZAxis, GeometryTolerance.Model.AngleTolerance) != 0)
+        {
+          plane = new Plane(curve.PointAtStart, curve.TangentAtStart, Vector3d.CrossProduct(plane.ZAxis, curve.TangentAtStart));
+          var box = new Box(plane, curve.GetBoundingBox(plane));
+          return new Line(box.Plane.Origin, box.Plane.Origin + plane.YAxis * box.Y.T1);
+        }
+        else
+        {
+          var points = curve.ExtremeParameters(Vector3d.ZAxis).
+                       Select(x => curve.PointAt(x)).
+                       OrderBy(x => x.Z);
 
-      return size.X >= size.Y ?
-        new Line(new Point3d(center.X - size.X / 4.0, center.Y, bbox.Min.Z), new Point3d(center.X + size.X / 4.0, center.Y, bbox.Min.Z)) :
-        new Line(new Point3d(center.X, center.Y - size.Y / 4.0, bbox.Min.Z), new Point3d(center.X, center.Y + size.Y / 4.0, bbox.Min.Z));
+          var xdir = Vector3d.CrossProduct(plane.ZAxis, new Vector3d(plane.ZAxis.X, plane.ZAxis.Y, 0.0));
+          var ydir = Vector3d.CrossProduct(plane.ZAxis, xdir);
+
+          plane = new Plane(points.First(), xdir, plane.Normal.Z < 0.0 ? -ydir : ydir);
+          var box = new Box(plane, curve.GetBoundingBox(plane));
+          return new Line(box.Plane.Origin, box.Plane.Origin + plane.YAxis * box.Y.T1);
+        }
+      }
+
+      return default;
     }
 
     ARDB.Floor Reconstruct
@@ -329,6 +338,14 @@ namespace RhinoInside.Revit.GH.Components
           Create(doc, boundary, bbox, type, level, structural, slopeArrow, slope),
           ExcludeUniqueProperties
         );
+
+        // Necessary to set SpanDirectionAngle right after creation.
+        floor.Document.Regenerate();
+      }
+
+      if (floor is object && slopeArrow.HasValue)
+      {
+        floor.SpanDirectionAngle = Math.Atan2(slopeArrow.Value.Direction.Y, slopeArrow.Value.Direction.X);
       }
 
       return floor;
