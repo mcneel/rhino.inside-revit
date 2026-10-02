@@ -153,10 +153,11 @@ namespace RhinoInside.Revit.GH.Components
             (
               loop.IsShort(tol.ShortCurveTolerance) ||
               !loop.IsClosed ||
-              !loop.TryGetPlane(out var plane, tol.VertexTolerance)||
+              !loop.TryGetPlane(out var plane, tol.VertexTolerance) ||
+              plane.Normal.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance) ||
               (!normal.IsZero && plane.Normal.IsParallelTo(normal, tol.AngleTolerance) == 0)
             )
-              throw new RuntimeArgumentException(nameof(boundary), "Boundary loop curves should be a set of valid coplanar and closed curves.", boundary);
+              throw new RuntimeArgumentException(nameof(boundary), "Boundary loop curves should be a set of valid non-vertical coplanar and closed curves.", boundary);
 
             if (normal.IsZero) normal = plane.Normal;
 
