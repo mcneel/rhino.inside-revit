@@ -533,11 +533,8 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
   public abstract class ElementFilterValuePresenceRule : Component
   {
-#if REVIT_2020
-    public override GH_Exposure Exposure => GH_Exposure.quinary;
-#else
-    public override GH_Exposure Exposure => GH_Exposure.quinary | GH_Exposure.hidden;
-#endif
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.quinary);
+
     public override bool IsPreviewCapable => false;
 
     protected enum ConditionType
@@ -563,6 +560,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+#if REVIT_2020
       var parameterKey = default(Types.ParameterKey);
       if (!DA.GetData("Parameter", ref parameterKey))
         return;
@@ -580,19 +578,16 @@ namespace RhinoInside.Revit.GH.Components.Filters
         return;
       }
 
-#if REVIT_2020
       switch (Condition)
       {
         case ConditionType.HasValue:   DA.SetData("Rule", new ARDB.HasValueFilterRule(parameterKey.Id));   break;
         case ConditionType.HasNoValue: DA.SetData("Rule", new ARDB.HasNoValueFilterRule(parameterKey.Id)); break;
       }
-#else
-      throw new Exceptions.RuntimeErrorException($"'{Name}' is only supported on Revit 2020 or above.");
 #endif
     }
   }
 
-  [ComponentVersion(introduced: "1.37")]
+  [ComponentVersion(introduced: "1.37"), ComponentRevitAPIVersion(min: "2020.0")]
   public class ElementFilterRuleHasValue : ElementFilterValuePresenceRule
   {
     public override Guid ComponentGuid => new Guid("01D1280A-3C4E-4A8C-B4F3-10E52BAA59E4");
@@ -604,7 +599,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     { }
   }
 
-  [ComponentVersion(introduced: "1.37")]
+  [ComponentVersion(introduced: "1.37"), ComponentRevitAPIVersion(min: "2020.0")]
   public class ElementFilterRuleHasNoValue : ElementFilterValuePresenceRule
   {
     public override Guid ComponentGuid => new Guid("A37B1886-66B2-4D8D-B56C-4FE96FF58E14");

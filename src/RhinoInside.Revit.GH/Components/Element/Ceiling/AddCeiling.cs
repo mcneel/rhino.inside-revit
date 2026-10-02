@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components
   public class AddCeiling : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("A39BBDF2-78F2-4501-BB6E-F9CC3E83516E");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary);
 
     public AddCeiling() : base
     (
