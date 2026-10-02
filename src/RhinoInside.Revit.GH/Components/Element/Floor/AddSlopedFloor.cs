@@ -14,11 +14,11 @@ namespace RhinoInside.Revit.GH.Components
   using External.DB.Extensions;
   using RhinoInside.Revit.GH.Exceptions;
 
-  [ComponentVersion(introduced: "1.37"), ComponentRevitAPIVersion(min: "2022.0")]
+  [ComponentVersion(introduced: "1.37")]
   public class AddSlopedFloor : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("FD260BDC-9F29-4410-8783-EC68A0500495");
-    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary);
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary | GH_Exposure.obscure);
 
     public AddSlopedFloor() : base
     (
@@ -133,7 +133,6 @@ namespace RhinoInside.Revit.GH.Components
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-#if REVIT_2022
       if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
 
       ReconstructElement<ARDB.Floor>
@@ -163,6 +162,14 @@ namespace RhinoInside.Revit.GH.Components
 
             boundary[index] = loop.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
           }
+
+#if !REVIT_2022
+          if (boundary.Count > 1)
+          {
+            boundary = new Curve[] { boundary[0] };
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Multiple boundary curves are only supported on Revit 2022 or above.");
+          }
+#endif
 
           var bbox = Rhino.Geometry.BoundingBox.Empty;
           foreach (var geometry in boundary)
@@ -222,10 +229,8 @@ namespace RhinoInside.Revit.GH.Components
           return floor;
         }
       );
-#endif
     }
 
-#if REVIT_2022
     static ARDB.CurveElement GetSlopeArrow(ARDB.Sketch sketch) =>
       new Types.Sketch(sketch).SlopeArrow?.Value;
 
@@ -287,9 +292,17 @@ namespace RhinoInside.Revit.GH.Components
       Line? slopeArrow, double slope
     )
     {
-      var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
       var line = slopeArrow ?? Across(boundary[0]);
+#if REVIT_2022
+      var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
       var floor = ARDB.Floor.Create(document, curveLoops, type.Id, level.Id, structural, line.ToLine(), slope);
+#else
+      var curveArray = boundary[0].ToBoundedCurveArray();
+      var floor = document.Create.NewSlab(curveArray, level, line.ToLine(), slope, structural);
+
+      if (floor.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
+        floor = floor.Document.GetElement(id) as ARDB.Floor;
+#endif
 
       // We turn off analytical model off by default
       floor.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
@@ -351,6 +364,5 @@ namespace RhinoInside.Revit.GH.Components
 
       return floor;
     }
-#endif
   }
 }
