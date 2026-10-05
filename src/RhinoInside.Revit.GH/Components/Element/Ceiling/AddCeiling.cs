@@ -13,16 +13,17 @@ namespace RhinoInside.Revit.GH.Components
   using External.DB.Extensions;
   using RhinoInside.Revit.GH.Exceptions;
 
-  public class AddFloor : ElementTrackerComponent
+  [ComponentVersion(introduced: "1.3"), ComponentRevitAPIVersion(min: "2022.0")]
+  public class AddCeiling : ElementTrackerComponent
   {
-    public override Guid ComponentGuid => new Guid("DC8DAF4F-CC93-43E2-A871-3A01A920A722");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override Guid ComponentGuid => new Guid("A39BBDF2-78F2-4501-BB6E-F9CC3E83516E");
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary);
 
-    public AddFloor() : base
+    public AddCeiling() : base
     (
-      name: "Add Floor",
-      nickname: "Floor",
-      description: "Given its outline curve, it adds a Floor element to the active Revit document",
+      name: "Add Ceiling",
+      nickname: "Ceiling",
+      description: "Given its outline curve, it adds a Ceiling element to the active Revit document",
       category: "Revit",
       subCategory: "Architecture"
     )
@@ -47,7 +48,7 @@ namespace RhinoInside.Revit.GH.Components
         {
           Name = "Boundary",
           NickName = "B",
-          Description = "Floor boundary profile",
+          Description = "Ceiling boundary profile",
           Access = GH_ParamAccess.list
         }
       ),
@@ -57,9 +58,9 @@ namespace RhinoInside.Revit.GH.Components
         {
           Name = "Type",
           NickName = "T",
-          Description = "Floor type",
+          Description = "Ceiling type",
           Optional = true,
-          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Floors
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Ceilings
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
@@ -68,20 +69,10 @@ namespace RhinoInside.Revit.GH.Components
         {
           Name = "Level",
           NickName = "L",
-          Description = "Floor base level",
+          Description = "Ceiling base level",
           Optional = true
         }, ParamRelevance.Primary
       ),
-      new ParamDefinition
-       (
-        new Param_Boolean
-        {
-          Name = "Structural",
-          NickName = "S",
-          Description = "Whether floor is structural or not",
-          Optional = true
-        }, ParamRelevance.Primary
-      )
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -89,33 +80,33 @@ namespace RhinoInside.Revit.GH.Components
     {
       new ParamDefinition
       (
-        new Parameters.Floor()
+        new Parameters.Ceiling()
         {
-          Name = _Floor_,
-          NickName = _Floor_.Substring(0, 1),
-          Description = $"Output {_Floor_}",
+          Name = _Ceiling_,
+          NickName = _Ceiling_.Substring(0, 1),
+          Description = $"Output {_Ceiling_}",
         }
       )
     };
 
-    const string _Floor_ = "Floor";
+    const string _Ceiling_ = "Ceiling";
     static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
       ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
       ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
       ARDB.BuiltInParameter.ELEM_TYPE_PARAM,
       ARDB.BuiltInParameter.LEVEL_PARAM,
-      ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM,
-      ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL
+      ARDB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM,
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
+#if REVIT_2022
       if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
 
-      ReconstructElement<ARDB.Floor>
+      ReconstructElement<ARDB.Ceiling>
       (
-        doc.Value, _Floor_, floor =>
+        doc.Value, _Ceiling_, ceiling =>
         {
           // Input
           if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary)) return null;
@@ -155,95 +146,76 @@ namespace RhinoInside.Revit.GH.Components
             }
           }
 
-#if !REVIT_2022
-          if (boundary.Count > 1)
-          {
-            boundary = new Curve[] { boundary[maxIndex] };
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Multiple boundary curves are only supported on Revit 2022 or above.");
-          }
-#endif
-
           var bbox = Rhino.Geometry.BoundingBox.Empty;
           foreach (var geometry in boundary)
             bbox.Union(geometry.GetBoundingBox(true));
 
-          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.HostObjectType type, doc, ARDB.ElementTypeGroup.FloorType)) return null;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.HostObjectType type, doc, ARDB.ElementTypeGroup.CeilingType)) return null;
 
-          if (!(type.Value is ARDB.FloorType floorType))
-            throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid floor type.");
-          else if (floorType.IsFoundationSlab)
-            throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid floor type.{OS.NewLine}Consider use 'Add Foundation (Slab)' component.");
+          if (!(type.Value is ARDB.CeilingType ceilingType))
+            throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid ceiling type.");
 
           if (!Parameters.Level.GetDataOrDefault(this, DA, "Level", out Types.Level level, doc, bbox.IsValid ? bbox.Min.Z : double.NaN)) return null;
-          if (!Params.TryGetData(DA, "Structural", out bool? structural)) return null;
 
           // Compute
-          floor = Reconstruct(floor, doc.Value, boundary, floorType, level.Value, structural ?? true);
+          ceiling = Reconstruct(ceiling, doc.Value, boundary, ceilingType, level.Value);
 
-          if (floor is object)
+          if (ceiling is object)
           {
             var heightAboveLevel = bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation();
-            floor.get_Parameter(ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
+            ceiling.get_Parameter(ARDB.BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM)?.Update(heightAboveLevel);
           }
 
-          DA.SetData(_Floor_, floor);
-          return floor;
+          DA.SetData(_Ceiling_, ceiling);
+          return ceiling;
         }
       );
+#endif
     }
 
-    bool Reuse(ref ARDB.Floor floor, IList<Curve> boundaries, ARDB.FloorType type, ARDB.Level level, bool structural)
+#if REVIT_2022
+    bool Reuse(ref ARDB.Ceiling ceiling, IList<Curve> boundaries, ARDB.CeilingType type, ARDB.Level level)
     {
-      if (floor is null) return false;
+      if (ceiling is null) return false;
 
-      if (!(floor.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundaries, Vector3d.ZAxis)))
+      if (!(ceiling.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundaries, Vector3d.ZAxis)))
         return false;
 
-      if (floor.GetTypeId() != type.Id)
+      if (ceiling.GetTypeId() != type.Id)
       {
-        if (ARDB.Element.IsValidType(floor.Document, new ARDB.ElementId[] { floor.Id }, type.Id))
+        if (ARDB.Element.IsValidType(ceiling.Document, new ARDB.ElementId[] { ceiling.Id }, type.Id))
         {
-          if (floor.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
-            floor = floor.Document.GetElement(id) as ARDB.Floor;
+          if (ceiling.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
+            ceiling = ceiling.Document.GetElement(id) as ARDB.Ceiling;
         }
         else return false;
       }
 
       bool succeed = true;
-      succeed &= floor.get_Parameter(ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).Update(structural ? 1 : 0);
-      succeed &= floor.get_Parameter(ARDB.BuiltInParameter.LEVEL_PARAM).Update(level.Id);
+      succeed &= ceiling.get_Parameter(ARDB.BuiltInParameter.LEVEL_PARAM).Update(level.Id);
 
       return succeed;
     }
 
-    ARDB.Floor Create(ARDB.Document document, IList<Curve> boundary, ARDB.FloorType type, ARDB.Level level, bool structural)
+    ARDB.Ceiling Create(ARDB.Document document, IList<Curve> boundary, ARDB.CeilingType type, ARDB.Level level)
     {
-#if REVIT_2022
       var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
-      var floor = ARDB.Floor.Create(document, curveLoops, type.Id, level.Id, structural, default, 0.0);
-#else
-      var curveArray = boundary[0].ToBoundedCurveArray();
-      var floor = document.Create.NewFloor(curveArray, type, level, structural, ARDB.XYZ.BasisZ);
-#endif
-
-      // We turn off analytical model off by default
-      floor.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
-      floor.get_Parameter(ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL)?.Update(structural);
-      return floor;
+      return ARDB.Ceiling.Create(document, curveLoops, type.Id, level.Id);
     }
 
-    ARDB.Floor Reconstruct(ARDB.Floor floor, ARDB.Document doc, IList<Curve> boundary, ARDB.FloorType type, ARDB.Level level, bool structural)
+    ARDB.Ceiling Reconstruct(ARDB.Ceiling ceiling, ARDB.Document doc, IList<Curve> boundary, ARDB.CeilingType type, ARDB.Level level)
     {
-      if (!Reuse(ref floor, boundary, type, level, structural))
+      if (!Reuse(ref ceiling, boundary, type, level))
       {
-        floor = floor.ReplaceElement
+        ceiling = ceiling.ReplaceElement
         (
-          Create(doc, boundary, type, level, structural),
+          Create(doc, boundary, type, level),
           ExcludeUniqueProperties
         );
       }
 
-      return floor;
+      return ceiling;
     }
+#endif
   }
 }

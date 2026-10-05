@@ -10,7 +10,12 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added 'Add Floor (Sloped)' component. [#1129](https://github.com/mcneel/rhino.inside-revit/issues/1129)
+- Added 'Add Ceiling (Sloped)' component. [#1129](https://github.com/mcneel/rhino.inside-revit/issues/1129)
+
 ### RC
+
+- Now default keyboard shortcuts are only assigned when missing.
 
 {% endcapture %}
 
