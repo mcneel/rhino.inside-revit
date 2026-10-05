@@ -85,18 +85,20 @@ namespace RhinoInside.Revit.GH.Components.Insert
                     (source is Types.RevitLinkInstance link ? view.Value.CollectElements(link.Id) : view.Value.CollectElements()) :
                     Array.Empty<ARDB.Element>();
 
+      var imports = elements.OfClass<ARDB.ImportInstance>();
+
       if (filter is object)
-        elements = elements.WherePasses(filter, source.SourceInstance.Value);
+        imports = imports.WherePasses(filter, source.SourceInstance.Value);
 
       if (TryGetFilterStringParam(ARDB.BuiltInParameter.IMPORT_SYMBOL_NAME, ref name, out var nameFilter))
-        elements = elements.WherePasses(nameFilter);
+        imports = imports.WherePasses(nameFilter);
 
       if (!string.IsNullOrEmpty(name))
         elements = elements.Where(x => x.GetNomen(ARDB.BuiltInParameter.IMPORT_SYMBOL_NAME).IsSymbolNameLike(name));
 
       if (Params.Output.Count > 0)
       {
-        var imports = elements.Cast<ARDB.ImportInstance>().ToArray();
+        imports = imports.TakeWhileIsNotEscapeKeyDown(this).ToArray();
 
         Params.TrySetDataList
         (
@@ -105,8 +107,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
           () => imports.
           Where(x => !x.IsLinked).
           OfType<Types.ImportInstance>().
-          FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          FromSource(source)
         );
         Params.TrySetDataList
         (
@@ -115,8 +116,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
           () => imports.
           Where(x => x.IsLinked).
           OfType<Types.ImportInstance>().
-          FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          FromSource(source)
         );
       }
     }
