@@ -10,65 +10,51 @@ namespace RhinoInside.Revit.External.DB
 {
   using Extensions;
 
-  class FilteredElementEnumerator : IEnumerator<Element>
+  abstract class ElementCollector
   {
-    public FilteredElementEnumerator(ElementCollector source, Predicate<Element> predicate)
-    {
-      Source = source;
-      Predicate = predicate;
-    }
+    internal virtual IEnumerable<Element> GetSource() => Array.Empty<Element>();
+    internal virtual ElementFilter[] GetFilters() => Array.Empty<ElementFilter>();
+    internal virtual Func<Element, bool> GetPredicate() => default;
 
-    readonly ElementCollector Source;
-    readonly Predicate<Element> Predicate;
-
-    FilteredElementCollector Collector;
-    FilteredElementIterator Iterator;
-
-    object IEnumerator.Current => Current;
-    public Element Current => Iterator?.Current;
-
-    public bool MoveNext()
-    {
-      Collector ??= Source.GetCollector();
-      Iterator ??= Collector.GetElementIterator();
-
-      while (Iterator.MoveNext())
-      {
-        if (Predicate(Iterator.Current))
-          return true;
-      }
-
-      Dispose();
-      return false;
-    }
-
-    public void Reset() => Iterator.Reset();
-
-    public void Dispose()
-    {
-      using (Iterator) Iterator = null;
-      using (Collector) Collector = null;
-    }
+    internal abstract int Count { get; }
   }
 
-  abstract class ElementCollector : IEnumerable<Element>
+  abstract class ElementCollector<T> : ElementCollector, IEnumerable<T> where T : Element
   {
-    internal abstract FilteredElementCollector GetCollector();
-    internal virtual Predicate<Element> GetPredicate() => x => true;
-    internal virtual int Count
-    {
-      get
-      {
-        using (var collector = GetCollector())
-          return collector.GetElementCount();
-      }
-    }
-
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    public IEnumerator<Element> GetEnumerator() => new FilteredElementEnumerator(this, GetPredicate());
+    public IEnumerator<T> GetEnumerator()
+    {
+      var source = GetSource();
+      var filters = GetFilters();
+      var filter = filters.Length > 0 ? ElementFilters.Intersect(filters) : null;
+
+      if (source is FilteredElementCollector collector)
+      {
+        collector = collector.WherePasses(ElementFilters.ElementClassFilter(typeof(T)));
+        if (filter?.IsUniverse() is false)
+          collector = collector.WherePasses(ElementFilters.Intersect(filters));
+
+        if (GetPredicate() is Func<Element, bool> predicate)
+          source = collector.Where(predicate);
+        else
+          source = collector;
+      }
+      else
+      {
+        if (GetPredicate() is Func<Element, bool> predicate)
+          source = source.Where(predicate);
+
+        if (filter?.IsUniverse() is false)
+          source = source.Where(x => filter.PassesFilter(x));
+      }
+
+      return source.OfType<T>().GetEnumerator();
+    }
+
+    internal override int Count => Enumerable.Count(this);
   }
 
-  class DocumentCollector : ElementCollector
+  class DocumentCollector<T> : ElementCollector<T> where T : Element
   {
     private readonly Document Document;
     private readonly ElementId ViewId;
@@ -83,7 +69,7 @@ namespace RhinoInside.Revit.External.DB
       LinkId = linkId;
     }
 
-    internal override FilteredElementCollector GetCollector()
+    internal override IEnumerable<Element> GetSource()
     {
       if (ViewId is null)
       {
@@ -107,7 +93,7 @@ namespace RhinoInside.Revit.External.DB
       return FilteredElementCollectorExtension.Invalid(Document);
     }
 
-    internal override Predicate<Element> GetPredicate()
+    internal override Func<Element, bool> GetPredicate()
     {
       if (ViewId is object)
       {
@@ -160,76 +146,57 @@ namespace RhinoInside.Revit.External.DB
         else return x => false;
       }
 
-      return x => true;
+      return default;
     }
 
     internal override int Count
     {
       get
       {
-        if (ViewId is null) return base.Count;
+        if (ViewId is null)
+        {
+          var source = GetSource() as FilteredElementCollector;
+          using (source) return source.GetElementCount();
+        }
         if (Document.GetElement(ViewId) is View view)
         {
           if (LinkId is object && view.GetVisibleLink<RevitLinkInstance>(LinkId, out var _) is null) return 0;
         }
         else return 0;
 
-        return Enumerable.Count(this);
+        return base.Count;
       }
     }
   }
 
-  class FilteredCollector : ElementCollector
-  {
-    readonly FilteredElementCollector Source;
-    public FilteredCollector(FilteredElementCollector source) => Source = source;
-    internal override FilteredElementCollector GetCollector() => Source;
-  }
-
-  class WherePassesCollector : ElementCollector
-  {
-    readonly ElementCollector Source;
-    readonly ElementFilter[] Filters;
-    public WherePassesCollector(ElementCollector source)
-    {
-      Source = source;
-      Filters = Array.Empty<ElementFilter>();
-    }
-
-    public WherePassesCollector(ElementCollector source, ElementFilter filter)
-    {
-      Source = source;
-      Filters = new ElementFilter[] { filter };
-    }
-
-    public WherePassesCollector(WherePassesCollector source, ElementFilter filter)
-    {
-      Source = source.Source;
-      Filters = source.Filters.Append(filter).ToArray();
-    }
-
-    internal override FilteredElementCollector GetCollector() => Source.GetCollector().WherePasses(ElementFilters.Intersect(Filters));
-  }
-
-  class WherePassesEnumerable : IEnumerable<Element>
+  class EnumerableCollector<T> : ElementCollector<T> where T : Element
   {
     readonly IEnumerable<Element> Source;
-    readonly ElementFilter Filter;
-    public WherePassesEnumerable(IEnumerable<Element> source, ElementFilter filter)
+    public EnumerableCollector(IEnumerable<Element> source) => Source = source;
+
+    internal override IEnumerable<Element> GetSource() => Source;
+  }
+
+  class FilteredCollector<T> : ElementCollector<T> where T : Element
+  {
+    protected readonly ElementCollector Collector;
+    protected readonly ElementFilter[] Filters;
+
+    public FilteredCollector(ElementCollector collector)
     {
-      Source = source;
-      Filter = filter;
+      Collector = collector;
+      Filters = default;
     }
 
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    public IEnumerator<Element> GetEnumerator()
+    public FilteredCollector(ElementCollector collector, ElementFilter filter)
     {
-      foreach (var element in Source)
-      {
-        if (!Filter.PassesFilter(element)) continue;
-        yield return element;
-      }
+      Collector = collector;
+      Filters = collector.GetFilters().Append(filter).ToArray();
     }
+
+    internal override IEnumerable<Element> GetSource() => Collector.GetSource();
+    internal override ElementFilter[] GetFilters() => Filters ?? Collector.GetFilters();
+    internal override Func<Element, bool> GetPredicate() => Collector.GetPredicate();
   }
 
   public static class ElementEnumerable
@@ -286,22 +253,22 @@ namespace RhinoInside.Revit.External.DB
       return source.WherePasses(filter);
     }
 
-    internal static IEnumerable<Element> WherePasses(this IEnumerable<Element> source, ElementFilter filter, RevitLinkInstance instance)
+    internal static IEnumerable<T> WherePasses<T>(this IEnumerable<T> source, ElementFilter filter, RevitLinkInstance instance) where T : Element
     {
       AssertIsValidFiler(filter, instance);
       return source.WherePasses(filter);
     }
 
-    public static IEnumerable<Element> CollectElements(this Document document) => new DocumentCollector(document);
-    public static IEnumerable<Element> CollectElements(this View view) => new DocumentCollector(view.Document, view.Id);
-    public static IEnumerable<Element> CollectElements(this View view, ElementId linkId) => new DocumentCollector(view.Document, view.Id, linkId);
+    public static IEnumerable<Element> CollectElements(this Document document) => new DocumentCollector<Element>(document);
+    public static IEnumerable<Element> CollectElements(this View view) => new DocumentCollector<Element>(view.Document, view.Id);
+    public static IEnumerable<Element> CollectElements(this View view, ElementId linkId) => new DocumentCollector<Element>(view.Document, view.Id, linkId);
 
     public static int Count<T>(this IEnumerable<T> source) where T : Element
     {
       switch (source)
       {
         case FilteredElementCollector collector: return collector.GetElementCount();
-        case ElementCollector collector: return collector.Count;
+        case ElementCollector<T> collector: return collector.Count;
         default: return Enumerable.Count(source);
       }
     }
@@ -320,14 +287,22 @@ namespace RhinoInside.Revit.External.DB
       }
     }
 
-    public static IEnumerable<Element> WherePasses(this IEnumerable<Element> source, ElementFilter filter)
+    public static IEnumerable<T> OfClass<T>(this IEnumerable<Element> source) where T : Element
     {
       switch (source)
       {
-        case FilteredElementCollector collector: return new WherePassesCollector(new FilteredCollector(collector), filter);
-        case WherePassesCollector collector: return new WherePassesCollector(collector, filter);
-        case ElementCollector collector: return new WherePassesCollector(collector, filter);
-        default: return new WherePassesEnumerable(source, filter);
+        case IEnumerable<T> enumerable:          return enumerable;
+        case ElementCollector elementCollector:  return new FilteredCollector<T>(elementCollector);
+        default: return new EnumerableCollector<T>(source);
+      }
+    }
+
+    public static IEnumerable<T> WherePasses<T>(this IEnumerable<T> source, ElementFilter filter) where T : Element
+    {
+      switch (source)
+      {
+        case ElementCollector<T> collector: return new FilteredCollector<T>(collector, filter);
+        default: return new FilteredCollector<T>(new EnumerableCollector<T>(source), filter);
       }
     }
   }
