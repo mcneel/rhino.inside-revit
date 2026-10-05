@@ -136,9 +136,9 @@ namespace RhinoInside.Revit.GH.Components.Insert
       if (!SupportedExtensions.Contains(Path.GetExtension(path)))
         throw new Exceptions.RuntimeException($"Unsupported file extension: {Path.GetExtension(path)}");
 
-      using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.View)))
+      using (var collector = new ARDB.FilteredElementCollector(doc))
       {
-        if (collector.OfType<ARDB.View>().FirstOrDefault(x => x.IsModelView()) is ARDB.View view)
+        if (collector.OfClass<ARDB.View>().FirstOrDefault(ViewExtension.IsModelView) is ARDB.View view)
         {
           var instanceId = ARDB.ElementId.InvalidElementId;
 
