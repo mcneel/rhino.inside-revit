@@ -463,6 +463,24 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
+    ComponentVersion(introduced: "1.37"),
+    ComponentGuid("51F33640-0D8E-4A75-AE7B-E58BA4870464"),
+    Name("Wall Sweep Type"),
+    Description("Contains a collection of Revit wall sweep type values"),
+  ]
+  public class WallSweepType : GH_Enum<ARDB.WallSweepType>
+  {
+    public WallSweepType() : base() { }
+    public WallSweepType(ARDB.WallSweepType value) : base(value) { }
+
+    public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
+    {
+      { (int) ARDB.WallSweepType.Sweep,   "Sweep"  },
+      { (int) ARDB.WallSweepType.Reveal,  "Reveal" },
+    };
+  }
+
+  [
     ComponentGuid("A8122936-6A69-4D78-B1F5-13FD8F2144A5"),
     Name("End Cap Condition"),
     Description("Represents end cap condition of a compound structure"),
