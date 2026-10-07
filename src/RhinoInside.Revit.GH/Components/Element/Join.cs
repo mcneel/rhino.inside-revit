@@ -142,7 +142,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
               else if (!ARDB.JoinGeometryUtils.IsCuttingElementInJoin(element.Document, cutter.Value, element.Value))
               {
                 if (FailureProcessingMode != ARDB.FailureProcessingResult.ProceedWithCommit)
-                  message = $"The target element is not joined the joining element but the other way around. {{{cutter.Id}}}";
+                  message = $"The joining element is not joined the target element but the other way around. {{{cutter.Id}}}";
               }
 
               if (!ReportFailure(message))
@@ -164,7 +164,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
                     AddContinueFailure($"Join order switched. {{{cutter.Id}}}");
                   }
                   else
-                    message = $"The target element is already joined the other way around to the joining element. {{{cutter.Id}}}";
+                    message = $"The joining element is already joined the other way around to the target element. {{{cutter.Id}}}";
                 }
               }
               else
