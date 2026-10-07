@@ -85,7 +85,6 @@ namespace RhinoInside.Revit.GH.Components.Walls
       {
         if (info.WallSweepType != kind) return false;
         if (info.IsVertical != vertical) return false;
-        info.WallOffset = 100.0;
       }
 
       if (!wallSweep.GetHostIds().Contains(wall.Id)) return false;
