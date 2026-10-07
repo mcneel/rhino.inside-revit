@@ -10,120 +10,14 @@ namespace RhinoInside.Revit.GH.Components.Walls
   using RhinoInside.Revit.GH.Exceptions;
 
   [ComponentVersion(introduced: "1.37")]
-  public class AddWallSweep : ElementTrackerComponent
+  public abstract class AddWallModifier : ElementTrackerComponent
   {
-    public override Guid ComponentGuid => new Guid("CD4BECC6-751A-40B3-8115-315F7E2045C4");
-    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary);
+    protected AddWallModifier(string name, string nickname, string description, string category, string subCategory)
+    : base(name, nickname, description, category, subCategory) { }
 
-    public AddWallSweep() : base
-    (
-      name: "Add Wall (Sweep)",
-      nickname: "S-Wall",
-      description: "Given a Wall, it adds a Wall Sweep or Reveal element to the active Revit document",
-      category: "Revit",
-      subCategory: "Architecture"
-    )
-    { }
+    protected abstract string WallModifier { get; }
+    protected abstract ARDB.WallSweepType WallModifierType { get; }
 
-    protected override ParamDefinition[] Inputs => inputs;
-    static readonly ParamDefinition[] inputs =
-    {
-      new ParamDefinition
-      (
-        new Parameters.Document()
-        {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document",
-          Optional = true
-        }, ParamRelevance.Occasional
-      ),
-      new ParamDefinition
-      (
-        new Parameters.Wall
-        {
-          Name = "Wall",
-          NickName = "W",
-          Description = "Wall to host the sweep or reveal"
-        }
-      ),
-      new ParamDefinition
-      (
-        new Parameters.Param_Enum<Types.WallSweepType>
-        {
-          Name = "Kind",
-          NickName = "K",
-          Description = "Whether it is a sweep or a reveal",
-          Optional = true
-        }, ParamRelevance.Primary
-      ),
-      new ParamDefinition
-      (
-        new Param_Boolean
-        {
-          Name = "Vertical",
-          NickName = "V",
-          Description = "Whether the sweep runs vertically along the wall",
-          Optional = true
-        }, ParamRelevance.Primary
-      ),
-      new ParamDefinition
-      (
-        new Parameters.ElementType
-        {
-          Name = "Type",
-          NickName = "T",
-          Description = "Wall sweep or reveal type",
-          Optional = true
-        }, ParamRelevance.Primary
-      ),
-      new ParamDefinition
-      (
-        new Param_Number
-        {
-          Name = "Distance",
-          NickName = "D",
-          Description = "Distance from the level, or from the wall start when vertical",
-          Optional = true
-        }, ParamRelevance.Primary
-      ),
-      new ParamDefinition
-      (
-        new Param_Number
-        {
-          Name = "Offset",
-          NickName = "O",
-          Description = "Offset from the wall face",
-          Optional = true
-        }, ParamRelevance.Occasional
-      ),
-      new ParamDefinition
-      (
-        new Parameters.Level
-        {
-          Name = "Level",
-          NickName = "L",
-          Description = "Level the distance is measured from. Wall base level is used when empty",
-          Optional = true
-        }, ParamRelevance.Occasional
-      ),
-    };
-
-    protected override ParamDefinition[] Outputs => outputs;
-    static readonly ParamDefinition[] outputs =
-    {
-      new ParamDefinition
-      (
-        new Parameters.GraphicalElement()
-        {
-          Name = _WallSweep_,
-          NickName = "S",
-          Description = $"Output {_WallSweep_}",
-        }
-      )
-    };
-
-    const string _WallSweep_ = "Wall Sweep";
     static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
     {
       ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
@@ -136,50 +30,42 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
+      if (!Params.GetData(DA, "Wall", out Types.Wall wall, x => x.IsValid)) return;
 
       ReconstructElement<ARDB.WallSweep>
       (
-        doc.Value, _WallSweep_, wallSweep =>
+        wall.Document, WallModifier, wallSweep =>
         {
           // Input
-          if (!Params.GetData(DA, "Wall", out Types.Wall wall, x => x.IsValid)) return null;
-
-          if (!doc.Value.IsEquivalent(wall.Document))
-            throw new RuntimeArgumentException(nameof(wall), $"Wall '{wall.Nomen}' belongs to a different document.", wall);
-
           if (!ARDB.WallSweep.WallAllowsWallSweep(wall.Value))
             throw new RuntimeArgumentException(nameof(wall), $"Wall '{wall.Nomen}' does not allow wall sweeps.", wall);
 
-          if (!Params.TryGetData(DA, "Kind", out Types.WallSweepType kind)) return null;
-          var sweepKind = kind?.Value ?? ARDB.WallSweepType.Sweep;
-
           if (!Params.TryGetData(DA, "Vertical", out bool? vertical)) return null;
 
-          var typeGroup = sweepKind == ARDB.WallSweepType.Reveal ? ARDB.ElementTypeGroup.RevealType : ARDB.ElementTypeGroup.CorniceType;
-          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.ElementType type, doc, typeGroup)) return null;
+          var typeGroup = WallModifierType == ARDB.WallSweepType.Reveal ? ARDB.ElementTypeGroup.RevealType : ARDB.ElementTypeGroup.CorniceType;
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.ElementType type, Types.Document.FromValue(wall.Document), typeGroup)) return null;
 
-          var typeCategory = sweepKind == ARDB.WallSweepType.Reveal ? ARDB.BuiltInCategory.OST_Reveals : ARDB.BuiltInCategory.OST_Cornices;
+          var typeCategory = WallModifierType == ARDB.WallSweepType.Reveal ? ARDB.BuiltInCategory.OST_Reveals : ARDB.BuiltInCategory.OST_Cornices;
           if (type.Value.Category?.ToBuiltInCategory() != typeCategory)
-            throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid wall {(sweepKind == ARDB.WallSweepType.Reveal ? "reveal" : "sweep")} type.", type);
+            throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid wall {(WallModifierType == ARDB.WallSweepType.Reveal ? "reveal" : "sweep")} type.", type);
 
           if (!Params.TryGetData(DA, "Distance", out double? distance)) return null;
           if (!Params.TryGetData(DA, "Offset", out double? offset)) return null;
           if (!Params.TryGetData(DA, "Level", out Types.Level level)) return null;
 
-          if (level is object && !doc.Value.IsEquivalent(level.Document))
+          if (level is object && !wall.Document.IsEquivalent(level.Document))
             throw new RuntimeArgumentException(nameof(level), $"Level '{level.Nomen}' belongs to a different document.", level);
 
           // Compute
           wallSweep = Reconstruct
           (
-            wallSweep, wall.Value, sweepKind, vertical ?? false, type.Value,
+            wallSweep, wall.Value, WallModifierType, vertical ?? false, type.Value,
             (distance ?? 0.0) / Revit.ModelUnits,
             (offset ?? 0.0) / Revit.ModelUnits,
             level?.Value
           );
 
-          DA.SetData(_WallSweep_, wallSweep);
+          DA.SetData(WallModifier, wallSweep);
           return wallSweep;
         }
       );
@@ -199,6 +85,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
       {
         if (info.WallSweepType != kind) return false;
         if (info.IsVertical != vertical) return false;
+        info.WallOffset = 100.0;
       }
 
       if (!wallSweep.GetHostIds().Contains(wall.Id)) return false;
@@ -272,5 +159,203 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
       return wallSweep;
     }
+  }
+
+  public class AddWallSweep : AddWallModifier
+  {
+    public override Guid ComponentGuid => new Guid("A65BEAB5-8BDD-4729-8772-FCEAD75E45F3");
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary);
+    public AddWallSweep() : base
+    (
+      name: "Add Wall (Sweep)",
+      nickname: "S-Wall",
+      description: "Given a Wall, it adds a Wall Sweep element to the active Revit document",
+      category: "Revit",
+      subCategory: "Architecture"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.Wall
+        {
+          Name = "Wall",
+          NickName = "W",
+          Description = "Wall to host the sweep"
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean
+        {
+          Name = "Vertical",
+          NickName = "V",
+          Description = "Whether the sweep runs vertically along the wall",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.ElementType
+        {
+          Name = "Type",
+          NickName = "T",
+          Description = "Wall sweep type",
+          Optional = true,
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Cornices
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Number
+        {
+          Name = "Distance",
+          NickName = "D",
+          Description = "Distance from the level, or from the wall start when vertical",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Number
+        {
+          Name = "Offset",
+          NickName = "O",
+          Description = "Offset from the wall face",
+          Optional = true
+        }, ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Level
+        {
+          Name = "Level",
+          NickName = "L",
+          Description = "Level the distance is measured from. Wall base level is used when empty",
+          Optional = true
+        }, ParamRelevance.Occasional
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = _WallSweep_,
+          NickName = "S",
+          Description = $"Output {_WallSweep_}",
+        }
+      )
+    };
+
+    const string _WallSweep_ = "Wall Sweep";
+
+    protected override string WallModifier => _WallSweep_;
+    protected override ARDB.WallSweepType WallModifierType => ARDB.WallSweepType.Sweep;
+  }
+
+  public class AddWallReveal : AddWallModifier
+  {
+    public override Guid ComponentGuid => new Guid("7B406612-D46B-46EB-BF00-75CA1313EF36");
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary);
+    public AddWallReveal() : base
+    (
+      name: "Add Wall (Reveal)",
+      nickname: "R-Wall",
+      description: "Given a Wall, it adds a Wall Reveal element to the active Revit document",
+      category: "Revit",
+      subCategory: "Architecture"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.Wall
+        {
+          Name = "Wall",
+          NickName = "W",
+          Description = "Wall to host the reveal"
+        }
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean
+        {
+          Name = "Vertical",
+          NickName = "V",
+          Description = "Whether the reveal runs vertically along the wall",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.ElementType
+        {
+          Name = "Type",
+          NickName = "T",
+          Description = "Wall reveal type",
+          Optional = true,
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Reveals
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Number
+        {
+          Name = "Distance",
+          NickName = "D",
+          Description = "Distance from the level, or from the wall start when vertical",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Number
+        {
+          Name = "Offset",
+          NickName = "O",
+          Description = "Offset from the wall face",
+          Optional = true
+        }, ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Level
+        {
+          Name = "Level",
+          NickName = "L",
+          Description = "Level the distance is measured from. Wall base level is used when empty",
+          Optional = true
+        }, ParamRelevance.Occasional
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = _WallReveal_,
+          NickName = "S",
+          Description = $"Output {_WallReveal_}",
+        }
+      )
+    };
+
+    const string _WallReveal_ = "Wall Reveal";
+
+    protected override string WallModifier => _WallReveal_;
+    protected override ARDB.WallSweepType WallModifierType => ARDB.WallSweepType.Reveal;
   }
 }
