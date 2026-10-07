@@ -1,16 +1,21 @@
 <svg version="1.1" baseProfile="full" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="radial3c2fc5858821" gradientUnits="userSpaceOnUse" cx="11.5" cy="8.15" r="14.85">
+    <radialGradient id="radial7862e6639824" gradientUnits="userSpaceOnUse" cx="11.5" cy="8.15" r="14.85">
       <stop offset="0%" style="stop-color:#CFE900;" />
       <stop offset="100%" style="stop-color:#597E01;" />
     </radialGradient>
   </defs>
   <g fill="none" stroke="none">
-    <path d="M 11.5 1 L 21.03 6.5 L 21.03 17.5 L 11.5 23 L 1.97 17.5 L 1.97 6.5 L 11.5 1" fill="url(#radial3c2fc5858821)" stroke="#4A6800" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 11.5 1 L 21.03 6.5 L 21.03 17.5 L 11.5 23 L 1.97 17.5 L 1.97 6.5 L 11.5 1" fill="url(#radial7862e6639824)" stroke="#4A6800" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
     <path d="M 6.5 8.5 L 16.5 8.5 L 16.5 17.5 L 6.5 17.5 L 6.5 8.5" fill="#FFFFFF" stroke="#4A6800" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
     <path d="M 10 14.5 L 12 14.5 L 10 12.8 L 10 14.5" stroke="#4A6800" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
     <path d="M 8.5 15.5 L 14.5 15.5 L 8.5 10.5 L 8.5 15.5" stroke="#4A6800" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M 16.5 1.4999999 A 1 1 0 0 1 17.5 0.5 L 22.5 0.5 A 1 1 0 0 1 23.5 1.5000001 L 23.5 6.5 A 1 1 0 0 1 22.5 7.5 L 17.5 7.5 A 1 1 0 0 1 16.5 6.5 L 16.5 1.5" fill="#000000" stroke="#FFFFFF" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-    <!--Icon element '(Grasshopper2.UI.Icon.Vector.Ink,Grasshopper2.UI.Icon.Vector.VectorStyle)' failed to create valid SVG.-->
+    <path d="M 15 0 L 24 0 L 24 9 L 15 9 L 15 0" fill="#FFFFFF" />
+    <path d="M 16 1 L 23 1 L 23 8 L 16 8 L 16 1" fill="#000000" />
+    <path d="M 17 6 L 22 6 L 22 7 L 17 7 L 17 6" fill="#FFFFFF" />
+    <path d="M 17 5 L 18 5 L 18 6 L 17 6 L 17 5" fill="#FFFFFF" />
+    <path d="M 17 4 L 18 4 L 18 5 L 17 5 L 17 4" fill="#FFFFFF" />
+    <path d="M 17 3 L 18 3 L 18 4 L 17 4 L 17 3" fill="#FFFFFF" />
+    <path d="M 17 2 L 22 2 L 22 3 L 17 3 L 17 2" fill="#FFFFFF" />
   </g>
 </svg>
