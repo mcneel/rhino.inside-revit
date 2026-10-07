@@ -163,11 +163,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
   public class AddWallSweep : AddWallModifier
   {
     public override Guid ComponentGuid => new Guid("A65BEAB5-8BDD-4729-8772-FCEAD75E45F3");
-    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary);
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary | GH_Exposure.obscure);
     public AddWallSweep() : base
     (
-      name: "Add Wall (Sweep)",
-      nickname: "S-Wall",
+      name: "Add Wall Sweep",
+      nickname: "Sweep",
       description: "Given a Wall, it adds a Wall Sweep element to the active Revit document",
       category: "Revit",
       subCategory: "Architecture"
@@ -262,11 +262,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
   public class AddWallReveal : AddWallModifier
   {
     public override Guid ComponentGuid => new Guid("7B406612-D46B-46EB-BF00-75CA1313EF36");
-    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary);
+    public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.primary | GH_Exposure.obscure);
     public AddWallReveal() : base
     (
-      name: "Add Wall (Reveal)",
-      nickname: "R-Wall",
+      name: "Add Wall Reveal",
+      nickname: "Reveal",
       description: "Given a Wall, it adds a Wall Reveal element to the active Revit document",
       category: "Revit",
       subCategory: "Architecture"
