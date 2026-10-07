@@ -34,7 +34,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to access other joined elements",
+          Description = "Target element",
         }
       ),
       new ParamDefinition
@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to access other joined elements",
+          Description = "Target element",
         }
       ),
       new ParamDefinition

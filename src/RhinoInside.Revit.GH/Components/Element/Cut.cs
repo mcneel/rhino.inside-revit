@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to access cutters",
+          Description = "Target element",
         }
       ),
       new ParamDefinition
@@ -71,7 +71,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Element",
           NickName = "E",
-          Description = "Element to access cutters",
+          Description = "Target element",
         }
       ),
       new ParamDefinition
@@ -134,7 +134,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       return ARDB.SolidSolidCutUtils.CutExistsBetweenElements(first, second, out firstCutsSecond);
     }
 
-    static void AddCutBetweenSolids(ARDB.Document document, ARDB.Element solidToBeCut, ARDB.Element cuttingSolid)
+    static void AddCutBetweenElements(ARDB.Document document, ARDB.Element solidToBeCut, ARDB.Element cuttingSolid)
     {
       if (ARDB.InstanceVoidCutUtils.IsVoidInstanceCuttingElement(cuttingSolid))
         ARDB.InstanceVoidCutUtils.AddInstanceVoidCut(document, solidToBeCut, cuttingSolid);
@@ -142,7 +142,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         ARDB.SolidSolidCutUtils.AddCutBetweenSolids(document, solidToBeCut, cuttingSolid, false);
     }
 
-    static void RemoveCutBetweenSolids(ARDB.Document document, ARDB.Element solidToBeCut, ARDB.Element cuttingSolid)
+    static void RemoveCutBetweenElements(ARDB.Document document, ARDB.Element solidToBeCut, ARDB.Element cuttingSolid)
     {
       if (ARDB.InstanceVoidCutUtils.IsVoidInstanceCuttingElement(cuttingSolid))
         ARDB.InstanceVoidCutUtils.RemoveInstanceVoidCut(document, solidToBeCut, cuttingSolid);
@@ -150,13 +150,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
         ARDB.SolidSolidCutUtils.RemoveCutBetweenSolids(document, solidToBeCut, cuttingSolid);
     }
 
-    static IEnumerable<ARDB.ElementId> GetCuttingSolids(ARDB.Element element)
+    static IEnumerable<ARDB.ElementId> GetCuttingElements(ARDB.Element element)
     {
       return ARDB.SolidSolidCutUtils.GetCuttingSolids(element).Concat(ARDB.InstanceVoidCutUtils.GetCuttingVoidInstances(element)).
              OrderBy(x => x.ToValue());
     }
 
-    static IEnumerable<ARDB.ElementId> GetSolidsBeingCut(ARDB.Element element)
+    static IEnumerable<ARDB.ElementId> GetElementsBeingCut(ARDB.Element element)
     {
       return ARDB.SolidSolidCutUtils.GetSolidsBeingCut(element).Concat(ARDB.InstanceVoidCutUtils.GetElementsBeingCut(element)).
              OrderBy(x => x.ToValue());
@@ -184,7 +184,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 throw new RuntimeErrorException($"The cutter element is not valid for solid-solid cut {{{cutter.Id}}}");
 
               if (CutExistsBetweenElements(cutter.Value, element.Value, out var canRemove) && canRemove)
-                RemoveCutBetweenSolids(element.Document, element.Value, cutter.Value);
+                RemoveCutBetweenElements(element.Document, element.Value, cutter.Value);
             }
 
             foreach (var cutter in add ?? Array.Empty<Types.GraphicalElement>())
@@ -196,7 +196,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
               if (CanElementCutElement(cutter.Value, element.Value, out var reasson))
               {
-                AddCutBetweenSolids(element.Document, element.Value, cutter.Value);
+                AddCutBetweenElements(element.Document, element.Value, cutter.Value);
               }
               else
               {
@@ -229,8 +229,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
         );
       }
 
-      Params.TrySetDataList(DA, "Cutters", () => GetCuttingSolids(element.Value).Select(x => element.GetElement<Types.GraphicalElement>(x)));
-      Params.TrySetDataList(DA, "Cutting", () => GetSolidsBeingCut(element.Value).Select(x => element.GetElement<Types.GraphicalElement>(x)));
+      Params.TrySetDataList(DA, "Cutters", () => GetCuttingElements(element.Value).Select(x => element.GetElement<Types.GraphicalElement>(x)));
+      Params.TrySetDataList(DA, "Cutting", () => GetElementsBeingCut(element.Value).Select(x => element.GetElement<Types.GraphicalElement>(x)));
     }
   }
 }
