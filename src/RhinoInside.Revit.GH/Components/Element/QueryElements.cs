@@ -260,7 +260,12 @@ namespace RhinoInside.Revit.GH.Components.Elements
   {
     public override Guid ComponentGuid => new Guid("6ADE8C09-F553-4031-BA96-32D7595489BD");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
-    protected override ARDB.ElementFilter ElementFilter => ElementFilters.GraphicalElementFilter.Intersect(ElementFilters.ElementHasPhase);
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.Intersect
+    (
+      ElementFilters.ElementIsViewSpecificFilter(inverted: true),
+      ElementFilters.GraphicalElementFilter,
+      ElementFilters.ElementHasPhase
+    );
 
     public QueryInterferenceElements() : base
     (
@@ -293,7 +298,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           DataMapping = GH_DataMapping.Graft
         },ParamRelevance.Primary
       ),
-      ParamDefinition.Create<Parameters.GraphicalElement>("Interferences", "I", "Elements interferences list", GH_ParamAccess.list)
+      ParamDefinition.Create<Parameters.GraphicalElement>("Interferences", "I", "Element interferences list", GH_ParamAccess.list)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -320,13 +325,13 @@ namespace RhinoInside.Revit.GH.Components.Elements
         var bbox = element.GetBoundingBox(xform);
         if (!bbox.IsValid) return;
 
-        var elements = source.SourceDocument.Value.CollectElements();
-        elements = elements.WherePasses(ElementFilters.ElementIsElementTypeFilter(inverted: true));
-        elements = elements.WherePasses(ElementFilters.ElementHasCategoryFilter);
-        elements = elements.WherePasses(ElementFilters.ElementIsViewSpecificFilter(inverted: true));
-        elements = elements.WherePasses(ElementFilters.BoundingBoxIntersectsFilter(bbox.ToOutline(), GeometryTolerance.Internal.DefaultTolerance, inverted:false));
+        var interferences = source.SourceDocument.Value.CollectElements();
+        interferences = interferences.WherePasses(ElementFilters.ElementIsElementTypeFilter(inverted: true));
+        interferences = interferences.WherePasses(ElementFilters.ElementHasCategoryFilter);
+        interferences = interferences.WherePasses(ElementFilters.ElementIsViewSpecificFilter(inverted: true));
+        interferences = interferences.WherePasses(ElementFilters.BoundingBoxIntersectsFilter(bbox.ToOutline(), GeometryTolerance.Internal.DefaultTolerance, inverted:false));
         if (element.Source.SourceDocument.Value.IsEquivalent(source.SourceDocument.Value))
-          elements = elements.WherePasses(ElementFilters.ExclusionFilter(element.Id));
+          interferences = interferences.WherePasses(ElementFilters.ExclusionFilter(element.Id));
 
         {
           var createdPhaseId = element.Value.CreatedPhaseId;
@@ -358,26 +363,26 @@ namespace RhinoInside.Revit.GH.Components.Elements
             }
           }
 
-          elements = elements.WherePasses(ElementFilters.ElementIntersectsPhase(createdPhaseId, demolishedPhaseId));
+          interferences = interferences.WherePasses(ElementFilters.ElementIntersectsPhase(createdPhaseId, demolishedPhaseId));
         }
 
         if (filter is object)
         {
           filter.AssertIsValidFiler(source.SourceInstance.Value);
-          elements = elements.WherePasses(filter);
+          interferences = interferences.WherePasses(filter);
         }
 
         if (element.Value.HasGeometry())
         {
           using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Medium })
-            elements = elements.WherePasses(ElementFilters.ElementIntersectsElementSolidsFilter(element.Value, options, xform.ToTransform()));
+            interferences = interferences.WherePasses(ElementFilters.ElementIntersectsElementSolidsFilter(element.Value, options, xform.ToTransform()));
         }
         else AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Element has no geometry. {{{element.Id}}}");
 
         DA.SetDataList
         (
           "Interferences",
-          elements.
+          interferences.
           OfType<Types.GraphicalElement>().
           FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)
