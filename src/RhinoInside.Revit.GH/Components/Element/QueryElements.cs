@@ -277,7 +277,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target Element"),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewDetailLevel>>("Detail Level", "LOD", "Geometry level of detail [1, 3]", optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),
     };
 
