@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if
       (
         Params.GetData(DA, "Location", out Plane? location, x => x.IsValid) &&
-        !element.Location.EpsilonEquals(location.Value, tol.VertexTolerance)
+        !element.Location.EpsilonEquals(location.Value, tol.DefaultTolerance)
       )
       {
         UpdateElement(element.Value, () => element.SetLocation(location.Value, KeepJoins));
