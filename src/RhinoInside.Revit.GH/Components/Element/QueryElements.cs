@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   using Convert.Geometry;
   using External.DB;
   using External.DB.Extensions;
-  using RhinoInside.Revit.GH.Exceptions;
+  using GH.Exceptions;
 
   public class QueryElement : ZuiComponent
   {
@@ -276,20 +276,31 @@ namespace RhinoInside.Revit.GH.Components.Elements
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target Element"),
+      ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target element"),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      ParamDefinition.Create<Parameters.GraphicalElement>("Elements", "E", "Elements list", GH_ParamAccess.list)
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Target element",
+          DataMapping = GH_DataMapping.Graft
+        },ParamRelevance.Primary
+      ),
+      ParamDefinition.Create<Parameters.GraphicalElement>("Interferences", "I", "Elements interferences list", GH_ParamAccess.list)
     };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.ElementSource.TryGetElementSource(this, DA, out var source)) return;
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
+      Params.TrySetData(DA, "Element", () => element);
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
       source ??= element?.Source;
@@ -365,7 +376,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
         DA.SetDataList
         (
-          "Elements",
+          "Interferences",
           elements.
           OfType<Types.GraphicalElement>().
           FromSource(source).
