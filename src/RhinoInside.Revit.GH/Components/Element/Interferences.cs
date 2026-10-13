@@ -40,7 +40,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target element"),
       ParamDefinition.Create<Parameters.GraphicalElement>("Candidates", "C", "Candidate elements for interference checking", access: GH_ParamAccess.list),
     };
