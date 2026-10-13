@@ -13,6 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   using Convert.Geometry;
   using External.DB;
   using External.DB.Extensions;
+  using RhinoInside.Revit.GH.Exceptions;
 
   public class QueryElement : ZuiComponent
   {
@@ -324,18 +325,26 @@ namespace RhinoInside.Revit.GH.Components.Elements
           {
             if (element.Source is Types.RevitLinkInstance elementSource)
             {
+#if !REVIT_2019
+              throw new RuntimeErrorException("Linked element intersection is only supported on Revit 2019 or above.");
+#else
               var map = InverseMap(elementSource.Document, elementSource.SourceDocument.Value,
                                   (elementSource.Type.Value as ARDB.RevitLinkType).GetPhaseMap());
 
               createdPhaseId = GetPhaseIdAtHost(map, elementSource.SourceDocument.Value, createdPhaseId);
               demolishedPhaseId = GetPhaseIdAtHost(map, elementSource.SourceDocument.Value, demolishedPhaseId);
+#endif
             }
 
             if (source is Types.RevitLinkInstance instanceSource)
             {
+#if !REVIT_2019
+              throw new RuntimeErrorException("Linked element intersection is only supported on Revit 2019 or above.");
+#else
               var map = (instanceSource.Type.Value as ARDB.RevitLinkType).GetPhaseMap();
               if (!map.TryGetValue(createdPhaseId, out createdPhaseId)) createdPhaseId = ElementIdExtension.Invalid;
               if (!map.TryGetValue(demolishedPhaseId, out demolishedPhaseId)) demolishedPhaseId = ElementIdExtension.Invalid;
+#endif
             }
           }
 
@@ -353,7 +362,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Medium })
             elements = elements.WherePasses(ElementFilters.ElementIntersectsElementSolidsFilter(element.Value, options, xform.ToTransform()));
         }
-        else AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Element has no geometry. {{{element.Id.Value}}}");
+        else AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Element has no geometry. {{{element.Id}}}");
 
         DA.SetDataList
         (
