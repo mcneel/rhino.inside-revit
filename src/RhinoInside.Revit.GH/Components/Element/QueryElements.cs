@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
+  using Convert.Geometry;
   using External.DB;
   using External.DB.Extensions;
 
@@ -187,6 +189,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ParamDefinition.Create<Parameters.GraphicalElement>("Elements", "E", "Elements list", GH_ParamAccess.list)
     };
 
+    static bool AssertValidViewSource(Types.View view, Types.IGH_ElementSource source)
+    {
+      if (source is Types.RevitLinkInstance instance && instance.ReferenceDocument.Equals(view.ReferenceDocument))
+        return true;
+
+      return view.AssertValidElementSource(source, acceptLinked: false);
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
@@ -194,7 +204,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      if (view.AssertValidElementSource(source, acceptLinked: true))
+      if (AssertValidViewSource(view, source))
       {
         if (filter?.IsEmpty() is true) return;
         var elements = source is Types.RevitLinkInstance link ?
@@ -242,5 +252,175 @@ namespace RhinoInside.Revit.GH.Components.Elements
         );
       }
     }
+  }
+
+  [ComponentVersion(introduced: "1.37")]
+  public class QueryInterferenceElements : ElementCollectorComponent
+  {
+    public override Guid ComponentGuid => new Guid("6ADE8C09-F553-4031-BA96-32D7595489BD");
+    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.GraphicalElementFilter.Intersect(ElementFilters.ElementHasPhase);
+
+    public QueryInterferenceElements() : base
+    (
+      name: "Query Interference Elements",
+      nickname: "Interferences",
+      description: "Get solid elements that interfere in space and time with the provided element.",
+      category: "Revit",
+      subCategory: "Element"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target Element"),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewDetailLevel>>("Detail Level", "LOD", "Geometry level of detail [1, 3]", optional: true),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      ParamDefinition.Create<Parameters.GraphicalElement>("Elements", "E", "Elements list", GH_ParamAccess.list)
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Parameters.ElementSource.TryGetElementSource(this, DA, out var source)) return;
+      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
+      if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
+
+      source ??= element?.Source;
+      if (element.AssertValidElementSource(source, acceptLinked: true))
+      {
+        if (filter?.IsEmpty() is true) return;
+
+        var elementToWorld = element.Source is Types.RevitLinkInstance elementInstance ?
+          Transform.ChangeBasis(Plane.WorldXY, elementInstance.Location) : Transform.Identity;
+        elementToWorld.TryGetInverse(out var worldToElement);
+
+        var worldToSource = source is Types.RevitLinkInstance sourceInstance ?
+          Transform.ChangeBasis(Plane.WorldXY, sourceInstance.Location) : Transform.Identity;
+        worldToSource.TryGetInverse(out var sourceToWorld);
+
+        var xform = worldToElement * worldToSource;
+        var bbox = element.GetBoundingBox(xform);
+        if (!bbox.IsValid) return;
+
+        var elements = source.SourceDocument.Value.CollectElements();
+        elements = elements.WherePasses(ElementFilters.ElementIsElementTypeFilter(inverted: true));
+        elements = elements.WherePasses(ElementFilters.ElementHasCategoryFilter);
+        elements = elements.WherePasses(ElementFilters.ElementIsViewSpecificFilter(inverted: true));
+        elements = elements.WherePasses(ElementFilters.BoundingBoxIntersectsFilter(bbox.ToOutline(), GeometryTolerance.Internal.DefaultTolerance, inverted:false));
+        if (element.Source.SourceDocument.Value.IsEquivalent(source.SourceDocument.Value))
+          elements = elements.WherePasses(ElementFilters.ExclusionFilter(element.Id));
+
+        {
+          var createdPhaseId = element.Value.CreatedPhaseId;
+          var demolishedPhaseId = element.Value.DemolishedPhaseId;
+
+          {
+            if (element.Source is Types.RevitLinkInstance elementSource)
+            {
+              var map = InverseMap(elementSource.Document, elementSource.SourceDocument.Value,
+                                  (elementSource.Type.Value as ARDB.RevitLinkType).GetPhaseMap());
+
+              createdPhaseId = GetPhaseIdAtHost(map, elementSource.SourceDocument.Value, createdPhaseId);
+              demolishedPhaseId = GetPhaseIdAtHost(map, elementSource.SourceDocument.Value, demolishedPhaseId);
+            }
+
+            if (source is Types.RevitLinkInstance instanceSource)
+            {
+              var map = (instanceSource.Type.Value as ARDB.RevitLinkType).GetPhaseMap();
+              if (!map.TryGetValue(createdPhaseId, out createdPhaseId)) createdPhaseId = ElementIdExtension.Invalid;
+              if (!map.TryGetValue(demolishedPhaseId, out demolishedPhaseId)) demolishedPhaseId = ElementIdExtension.Invalid;
+            }
+          }
+
+          elements = elements.WherePasses(ElementFilters.ElementIntersectsPhase(createdPhaseId, demolishedPhaseId));
+        }
+
+        if (filter is object)
+        {
+          filter.AssertIsValidFiler(source.SourceInstance.Value);
+          elements = elements.WherePasses(filter);
+        }
+
+        if (element.Value.HasGeometry())
+        {
+          using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Medium })
+            elements = elements.WherePasses(ElementFilters.ElementIntersectsElementSolidsFilter(element.Value, options, xform.ToTransform()));
+        }
+        else AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Element has no geometry. {{{element.Id.Value}}}");
+
+        DA.SetDataList
+        (
+          "Elements",
+          elements.
+          OfType<Types.GraphicalElement>().
+          FromSource(source).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
+      }
+    }
+
+    static KeyValuePair<ARDB.Phase, ARDB.Phase>[] InverseMap
+    (
+      ARDB.Document host, ARDB.Document link,
+      IDictionary<ARDB.ElementId, ARDB.ElementId> map
+    )
+    {
+      return map.
+        Select(x => new KeyValuePair<ARDB.Phase, ARDB.Phase>(link.GetElement(x.Value) as ARDB.Phase, host.GetElement(x.Key) as ARDB.Phase)).
+        OrderBy(x => GetPhaseIndex(x.Value)).
+        ThenBy(x => GetPhaseIndex(x.Key)).
+        ToArray();
+    }
+
+    static ARDB.ElementId GetPhaseIdAtHost
+    (
+      KeyValuePair<ARDB.Phase, ARDB.Phase>[] map,
+      ARDB.Document link, ARDB.ElementId phaseId
+    )
+    {
+      using (var phases = link.Phases)
+      {
+        do
+        {
+          if (TryGetPhaseAtHost(map, phaseId, out var hostId))
+            return hostId;
+
+          var phase = link.GetElement<ARDB.Phase>(phaseId);
+          var next = phase is object ? GetPhase(phases, GetPhaseIndex(phase) + 1) : null;
+          phaseId = next?.Id;
+
+        } while (phaseId is object);
+      }
+
+      return phaseId ?? ElementIdExtension.Invalid;
+    }
+
+    static bool TryGetPhaseAtHost(KeyValuePair<ARDB.Phase, ARDB.Phase>[] phases, ARDB.ElementId key, out ARDB.ElementId value)
+    {
+      foreach (var item in phases)
+      {
+        if (item.Key.Id == key)
+        {
+          value = item.Value.Id;
+          return true;
+        }
+      }
+
+      value = default;
+      return false;
+    }
+
+    static int GetPhaseIndex(ARDB.Phase phase) =>
+      phase.get_Parameter(ARDB.BuiltInParameter.PHASE_SEQUENCE_NUMBER).AsInteger() - 1;
+
+    static ARDB.Phase GetPhase(ARDB.PhaseArray phases, int index) =>
+      index >= 0 && index < phases.Size ? phases.get_Item(index) : null;
   }
 }
