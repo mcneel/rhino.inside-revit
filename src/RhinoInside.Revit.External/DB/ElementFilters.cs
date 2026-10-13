@@ -506,6 +506,55 @@ namespace RhinoInside.Revit.External.DB
 
       return new BoundingBoxIsInsideFilter(outline, tolerance, inverted);
     }
+
+    public static ElementFilter ElementIntersectsElementSolidsFilter(Element element, Options options, Transform transform)
+    {
+      using (var geometry = element.GetGeometry(options))
+      {
+        return LogicalOrFilter
+        (
+          geometry.OfType<Solid>(transform).
+          Where(x => !x.Item.Faces.IsEmpty).
+          OrderByDescending(x => x.Item.GetBoundingBox().GetVolume()).
+          Select(x => new ElementIntersectsSolidFilter(SolidUtils.CreateTransformed(x.Item, x.Transform)))
+        );
+      }
+    }
+    #endregion
+
+    #region Phase
+    internal static ElementFilter ElementHasPhase { get; } = new ElementParameterFilter
+    (
+      new FilterElementIdRule
+      (
+        new ParameterValueProvider(new ElementId(BuiltInParameter.PHASE_CREATED)),
+        new FilterNumericEquals(),
+        ElementId.InvalidElementId
+      ), inverted: true
+    );
+
+    internal static ElementFilter ElementHasNoPhase { get; } = new ElementParameterFilter
+    (
+      new FilterElementIdRule
+      (
+        new ParameterValueProvider(new ElementId(BuiltInParameter.PHASE_CREATED)),
+        new FilterNumericEquals(),
+        ElementId.InvalidElementId
+      )
+    );
+
+    public static ElementFilter ElementIntersectsPhase(ElementId createdPhaseId, ElementId demolishedPhaseId)
+    {
+      if (createdPhaseId.IsValid())
+      {
+        var creationFilter = new ElementPhaseStatusFilter(createdPhaseId, ElementOnPhaseStatus.Past, inverted: true);
+        var demolishedFilter = new ElementPhaseStatusFilter(demolishedPhaseId, ElementOnPhaseStatus.Future, inverted: true);
+
+        return Intersect(ElementHasPhase, creationFilter, demolishedFilter);
+      }
+
+      return Empty;
+    }
     #endregion
   }
 }

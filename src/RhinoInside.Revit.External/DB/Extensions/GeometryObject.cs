@@ -1042,6 +1042,31 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
     #endregion
+
+    #region OfType
+    internal static IEnumerable<(Transform Transform, T Item)> OfType<T>
+    (
+      this GeometryObject geometry, Transform transform
+    )
+    {
+      switch (geometry)
+      {
+        case GeometryElement element:
+          foreach (var item in element.SelectMany(x => OfType<T>(x, transform)))
+            yield return item;
+          yield break;
+
+        case GeometryInstance instance:
+          foreach (var item in OfType<T>(instance.GetSymbolGeometry(), transform * instance.Transform))
+            yield return item;
+          yield break;
+
+        case T geometryObject:
+          yield return (transform, geometryObject);
+          yield break;
+      }
+    }
+    #endregion
   }
 
   public static class GeometryElementExtension

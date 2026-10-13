@@ -9,7 +9,6 @@ namespace RhinoInside.Revit.GH.Components.Walls
   using External.DB.Extensions;
   using RhinoInside.Revit.GH.Exceptions;
 
-  [ComponentVersion(introduced: "1.37")]
   public abstract class AddWallModifier : ElementTrackerComponent
   {
     protected AddWallModifier(string name, string nickname, string description, string category, string subCategory)
@@ -160,6 +159,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     }
   }
 
+  [ComponentVersion(introduced: "1.37")]
   public class AddWallSweep : AddWallModifier
   {
     public override Guid ComponentGuid => new Guid("A65BEAB5-8BDD-4729-8772-FCEAD75E45F3");
@@ -259,6 +259,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     protected override ARDB.WallSweepType WallModifierType => ARDB.WallSweepType.Sweep;
   }
 
+  [ComponentVersion(introduced: "1.37")]
   public class AddWallReveal : AddWallModifier
   {
     public override Guid ComponentGuid => new Guid("7B406612-D46B-46EB-BF00-75CA1313EF36");
