@@ -256,7 +256,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   }
 
   [ComponentVersion(introduced: "1.37")]
-  public class QueryInterferenceElements : ElementCollectorComponent
+  public class QueryInterferingElements : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("6ADE8C09-F553-4031-BA96-32D7595489BD");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -267,10 +267,10 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ElementFilters.ElementHasPhase
     );
 
-    public QueryInterferenceElements() : base
+    public QueryInterferingElements() : base
     (
-      name: "Query Interference Elements",
-      nickname: "Interferences",
+      name: "Query Interfering Elements",
+      nickname: "Interfering",
       description: "Get solid elements that interfere in space and time with the provided element.",
       category: "Revit",
       subCategory: "Element"

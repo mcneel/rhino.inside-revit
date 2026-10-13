@@ -17,7 +17,7 @@ group: Deployment & Configs
 - Added 'Add Wall (Reveal)' component.
 - Added 'Add Wall (Sweep)' component.
 - Added 'Element Interferences' component.
-- Added 'Query Interference Elements' component.
+- Added 'Query Interfering Elements' component.
 
 ### RC
 
