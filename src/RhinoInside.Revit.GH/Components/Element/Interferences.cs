@@ -11,6 +11,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   using Convert.Geometry;
   using External.DB;
   using External.DB.Extensions;
+  using Grasshopper.Kernel.Parameters;
 
   [ComponentVersion(introduced: "1.37")]
   public class ElementInterferences : ZuiComponent
@@ -39,6 +40,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target element"),
       ParamDefinition.Create<Parameters.GraphicalElement>("Candidates", "C", "Candidate elements for interference checking", access: GH_ParamAccess.list),
+      ParamDefinition.Create<Param_Boolean>("Phasing", "P", "Check that elements also coincide on time", defaultValue: true, relevance: ParamRelevance.Primary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -62,6 +64,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
       Params.TrySetData(DA, "Element", () => element);
       if (!Params.TryGetDataList(DA, "Candidates", out IList<Types.GraphicalElement> candidates)) return;
+      if (!Params.TryGetData(DA, "Phasing", out bool? phasing)) return;
 
       var interferences = new List<Types.GraphicalElement>();
 
@@ -88,7 +91,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
           if (element.Source.SourceDocument.Value.IsEquivalent(source.SourceDocument.Value))
             elements = elements.WherePasses(ElementFilters.ExclusionFilter(element.Id));
 
-          elements = elements.WherePasses(ElementFilters.ElementIntersectsPhase(element.Value, (element.Source as Types.RevitLinkInstance)?.Value, (source as Types.RevitLinkInstance)?.Value));
+          if (phasing is true)
+            elements = elements.WherePasses(ElementFilters.ElementIntersectsPhase(element.Value, (element.Source as Types.RevitLinkInstance)?.Value, (source as Types.RevitLinkInstance)?.Value));
 
           if (element.Value.HasGeometry())
           {

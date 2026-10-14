@@ -281,6 +281,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target element"),
+      ParamDefinition.Create<Param_Boolean>("Phasing", "P", "Check that elements also coincide on time", defaultValue: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),
     };
 
@@ -305,6 +306,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Parameters.ElementSource.TryGetElementSource(this, DA, out var source)) return;
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
       Params.TrySetData(DA, "Element", () => element);
+      if (!Params.TryGetData(DA, "Phasing", out bool? phasing)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
       source ??= element?.Source;
@@ -332,7 +334,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
         if (element.Source.SourceDocument.Value.IsEquivalent(source.SourceDocument.Value))
           interferences = interferences.WherePasses(ElementFilters.ExclusionFilter(element.Id));
 
-        interferences = interferences.WherePasses(ElementFilters.ElementIntersectsPhase(element.Value, (element.Source as Types.RevitLinkInstance)?.Value, (source as Types.RevitLinkInstance)?.Value));
+        if (phasing is true)
+          interferences = interferences.WherePasses(ElementFilters.ElementIntersectsPhase(element.Value, (element.Source as Types.RevitLinkInstance)?.Value, (source as Types.RevitLinkInstance)?.Value));
 
         if (filter is object)
         {

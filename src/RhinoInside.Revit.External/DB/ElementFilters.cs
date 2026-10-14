@@ -523,7 +523,7 @@ namespace RhinoInside.Revit.External.DB
     #endregion
 
     #region Phase
-    internal static ElementFilter ElementHasPhase { get; } = new ElementParameterFilter
+    public static ElementFilter ElementHasPhase { get; } = new ElementParameterFilter
     (
       new FilterElementIdRule
       (
@@ -533,7 +533,7 @@ namespace RhinoInside.Revit.External.DB
       ), inverted: true
     );
 
-    internal static ElementFilter ElementHasNoPhase { get; } = new ElementParameterFilter
+    public static ElementFilter ElementHasNoPhase { get; } = new ElementParameterFilter
     (
       new FilterElementIdRule
       (
@@ -557,11 +557,11 @@ namespace RhinoInside.Revit.External.DB
         throw new NotImplementedException("Linked element intersection is only supported on Revit 2019 or above.");
 #else
         var linkedDocument = elementSource.GetLinkDocument();
-        var map = ElementFilters.InverseMap(elementSource.Document, linkedDocument,
+        var map = InverseMap(elementSource.Document, linkedDocument,
                                             elementSource.Document.GetElement<RevitLinkType>(elementSource.GetTypeId()).GetPhaseMap());
 
-        createdPhaseId = ElementFilters.GetPhaseIdAtHost(map, linkedDocument, createdPhaseId);
-        demolishedPhaseId = ElementFilters.GetPhaseIdAtHost(map, linkedDocument, demolishedPhaseId);
+        createdPhaseId = GetPhaseIdAtHost(map, linkedDocument, createdPhaseId);
+        demolishedPhaseId = GetPhaseIdAtHost(map, linkedDocument, demolishedPhaseId);
 #endif
       }
 
@@ -587,7 +587,7 @@ namespace RhinoInside.Revit.External.DB
       return Intersect(ElementHasPhase, creationFilter, demolishedFilter);
     }
 
-    internal static KeyValuePair<Phase, Phase>[] InverseMap
+    static KeyValuePair<Phase, Phase>[] InverseMap
     (
       Document host, Document link,
       IDictionary<ElementId, ElementId> map
@@ -600,7 +600,7 @@ namespace RhinoInside.Revit.External.DB
         ToArray();
     }
 
-    internal static ElementId GetPhaseIdAtHost
+    static ElementId GetPhaseIdAtHost
     (
       KeyValuePair<Phase, Phase>[] map,
       Document link, ElementId phaseId
