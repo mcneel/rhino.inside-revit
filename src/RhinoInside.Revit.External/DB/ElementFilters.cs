@@ -543,17 +543,99 @@ namespace RhinoInside.Revit.External.DB
       )
     );
 
-    public static ElementFilter ElementIntersectsPhase(ElementId createdPhaseId, ElementId demolishedPhaseId)
+    public static ElementFilter ElementIntersectsPhase(Element element, RevitLinkInstance target, RevitLinkInstance source)
     {
-      if (createdPhaseId.IsValid())
-      {
-        var creationFilter = new ElementPhaseStatusFilter(createdPhaseId, ElementOnPhaseStatus.Past, inverted: true);
-        var demolishedFilter = new ElementPhaseStatusFilter(demolishedPhaseId, ElementOnPhaseStatus.Future, inverted: true);
+      if (!element.HasPhases())
+        return Empty;
 
-        return Intersect(ElementHasPhase, creationFilter, demolishedFilter);
+      var createdPhaseId = element.CreatedPhaseId;
+      var demolishedPhaseId = element.DemolishedPhaseId;
+
+      if (target is RevitLinkInstance elementSource)
+      {
+#if !REVIT_2019
+        throw new NotImplementedException("Linked element intersection is only supported on Revit 2019 or above.");
+#else
+        var linkedDocument = elementSource.GetLinkDocument();
+        var map = ElementFilters.InverseMap(elementSource.Document, linkedDocument,
+                                            elementSource.Document.GetElement<RevitLinkType>(elementSource.GetTypeId()).GetPhaseMap());
+
+        createdPhaseId = ElementFilters.GetPhaseIdAtHost(map, linkedDocument, createdPhaseId);
+        demolishedPhaseId = ElementFilters.GetPhaseIdAtHost(map, linkedDocument, demolishedPhaseId);
+#endif
       }
 
-      return Empty;
+      if (source is RevitLinkInstance instanceSource)
+      {
+#if !REVIT_2019
+        throw new NotImplementedException("Linked element intersection is only supported on Revit 2019 or above.");
+#else
+        var map = instanceSource.Document.GetElement<RevitLinkType>(instanceSource.GetTypeId()).GetPhaseMap();
+        if (!map.TryGetValue(createdPhaseId, out createdPhaseId)) createdPhaseId = ElementIdExtension.Invalid;
+        if (!map.TryGetValue(demolishedPhaseId, out demolishedPhaseId)) demolishedPhaseId = ElementIdExtension.Invalid;
+#endif
+      }
+
+      return ElementIntersectsPhase(createdPhaseId, demolishedPhaseId);
+    }
+
+    static ElementFilter ElementIntersectsPhase(ElementId createdPhaseId, ElementId demolishedPhaseId)
+    {
+      var creationFilter = new ElementPhaseStatusFilter(createdPhaseId, ElementOnPhaseStatus.Past, inverted: true);
+      var demolishedFilter = new ElementPhaseStatusFilter(demolishedPhaseId, ElementOnPhaseStatus.Future, inverted: true);
+
+      return Intersect(ElementHasPhase, creationFilter, demolishedFilter);
+    }
+
+    internal static KeyValuePair<Phase, Phase>[] InverseMap
+    (
+      Document host, Document link,
+      IDictionary<ElementId, ElementId> map
+    )
+    {
+      return map.
+        Select(x => new KeyValuePair<Phase, Phase>(link.GetElement(x.Value) as Phase, host.GetElement(x.Key) as Phase)).
+        OrderBy(x => x.Value.SequenceIndex()).
+        ThenBy(x => x.Key.SequenceIndex()).
+        ToArray();
+    }
+
+    internal static ElementId GetPhaseIdAtHost
+    (
+      KeyValuePair<Phase, Phase>[] map,
+      Document link, ElementId phaseId
+    )
+    {
+      using (var phases = link.Phases)
+      {
+        do
+        {
+          if (TryGetPhaseAtHost(map, phaseId, out var hostId))
+            return hostId;
+
+          var phase = link.GetElement<Phase>(phaseId);
+          var next = phase is object ? phases.GetPhase(phase.SequenceIndex() + 1) : null;
+          phaseId = next?.Id;
+
+        } while (phaseId is object);
+      }
+
+      return phaseId ?? ElementIdExtension.Invalid;
+    }
+
+    static bool TryGetPhaseAtHost(KeyValuePair<Phase, Phase>[] phases, ElementId key, out ElementId value)
+    {
+      foreach (var item in phases)
+      {
+        if (item.Key.Id == key)
+        {
+          value = item.Value.Id;
+          return true;
+        }
+      }
+
+      value = default;
+      return false;
     }
     #endregion
   }
