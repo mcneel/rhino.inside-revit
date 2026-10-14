@@ -8,6 +8,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: microsoft/setup-msbuild@v3
-      - name: Install .NET Framework 4.6 Developer Pack
-        run: choco install netfx-4.6-devpack -y --no-progress
+      - name: Install .NET Framework 4.6 reference assemblies
+        shell: pwsh
+        run: |
+          $pkg = Join-Path $env:RUNNER_TEMP 'net46'
+          Invoke-WebRequest https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.net46/1.0.3 -OutFile "$pkg.zip" -MaximumRetryCount 5 -RetryIntervalSec 10
+          Expand-Archive "$pkg.zip" -DestinationPath $pkg -Force
+          $dst = Join-Path ${env:ProgramFiles(x86)} 'Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6'
+          New-Item -ItemType Directory -Force -Path $dst | Out-Null
+          Copy-Item "$pkg\build\.NETFramework\v4.6\*" -Destination $dst -Recurse -Force
+          if (-not (Test-Path "$dst\mscorlib.dll")) { throw "v4.6 reference assemblies not installed" }
       - run: msbuild script\cibuild.msbuild -v:m
