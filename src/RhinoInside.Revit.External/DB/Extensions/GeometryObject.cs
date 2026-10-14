@@ -1047,7 +1047,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     internal static IEnumerable<(Transform Transform, T Item)> OfType<T>
     (
       this GeometryObject geometry, Transform transform
-    )
+    ) where T : GeometryObject
     {
       switch (geometry)
       {
@@ -1062,7 +1062,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
           yield break;
 
         case T geometryObject:
-          yield return (transform, geometryObject);
+          if (!geometryObject.IsEmpty())
+            yield return (transform, geometryObject);
+
           yield break;
       }
     }
@@ -1197,6 +1199,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       FirstOrDefault();
 
       return intersection;
+    }
+    #endregion
+
+    #region Solids
+    public static IEnumerable<Solid> GetTransformedSolids(this GeometryElement geometry, Transform transform)
+    {
+      return geometry.OfType<Solid>(transform).Select(x => SolidUtils.CreateTransformed(x.Item, x.Transform));
     }
     #endregion
   }

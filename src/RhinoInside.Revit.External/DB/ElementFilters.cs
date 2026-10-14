@@ -507,18 +507,21 @@ namespace RhinoInside.Revit.External.DB
       return new BoundingBoxIsInsideFilter(outline, tolerance, inverted);
     }
 
-    public static ElementFilter ElementIntersectsElementSolidsFilter(Element element, Options options, Transform transform)
+    public static ElementFilter IntersectsAnySolidFilter(IEnumerable<Solid> solids, bool inverted = false)
     {
-      using (var geometry = element.GetGeometry(options))
-      {
-        return LogicalOrFilter
+      return inverted ?
+        LogicalAndFilter
         (
-          geometry.OfType<Solid>(transform).
-          Where(x => !x.Item.Faces.IsEmpty).
-          OrderByDescending(x => x.Item.GetBoundingBox().GetVolume()).
-          Select(x => new ElementIntersectsSolidFilter(SolidUtils.CreateTransformed(x.Item, x.Transform)))
+          solids.
+          OrderByDescending(x => x.GetBoundingBox().GetVolume()).
+          Select(x => new ElementIntersectsSolidFilter(x, inverted: true))
+        ) :
+        LogicalOrFilter
+        (
+          solids.
+          OrderByDescending(x => x.GetBoundingBox().GetVolume()).
+          Select(x => new ElementIntersectsSolidFilter(x))
         );
-      }
     }
     #endregion
 
