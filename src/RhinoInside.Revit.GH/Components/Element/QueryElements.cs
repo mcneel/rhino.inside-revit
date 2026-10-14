@@ -282,6 +282,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target element"),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ViewDetailLevel>>("Detail Level", "LOD", "Geometry level of detail", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Voids", "V", "Check also family voids", defaultValue: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Phasing", "P", "Check that elements also coincide on time", defaultValue: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),
     };
@@ -308,6 +309,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
       Params.TrySetData(DA, "Element", () => element);
       if (!Params.TryGetData(DA, "Detail Level", out ARDB.ViewDetailLevel? vdl)) return;
+      if (!Params.TryGetData(DA, "Voids", out bool? voids)) return;
       if (!Params.TryGetData(DA, "Phasing", out bool? phasing)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
@@ -345,18 +347,15 @@ namespace RhinoInside.Revit.GH.Components.Elements
           interferences = interferences.WherePasses(filter);
         }
 
-        using (var options = new ARDB.Options() { DetailLevel = vdl ?? ARDB.ViewDetailLevel.Undefined })
-        {
-          DA.SetDataList
-          (
-            "Interferences",
-            interferences.
-            WhereIntersectsSolids(element.Value, options, xform.ToTransform()).
-            OfType<Types.GraphicalElement>().
-            FromSource(source).
-            TakeWhileIsNotEscapeKeyDown(this)
-          );
-        }
+        DA.SetDataList
+        (
+          "Interferences",
+          interferences.
+          WhereIntersectsSolids(element.Value, xform.ToTransform(), voids ?? false, vdl ?? ARDB.ViewDetailLevel.Undefined).
+          OfType<Types.GraphicalElement>().
+          FromSource(source).
+          TakeWhileIsNotEscapeKeyDown(this)
+        );
       }
     }
   }

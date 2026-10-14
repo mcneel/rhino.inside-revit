@@ -306,31 +306,54 @@ namespace RhinoInside.Revit.External.DB
       }
     }
 
-    public static IEnumerable<Element> WhereIntersectsSolids(this IEnumerable<Element> elements, Element target, Options options, Transform transform)
+    public static IEnumerable<Element> WhereIntersectsSolids
+    (
+      this IEnumerable<Element> elements,
+      Element target,
+      Transform transform,
+      bool voids = false,
+      ViewDetailLevel detailLevel = ViewDetailLevel.Undefined
+    )
     {
-      if (options.DetailLevel != ViewDetailLevel.Undefined || options.IncludeNonVisibleObjects)
-        return WhereIntersectsSolidsCustom(elements, target, options, transform);
+      if (detailLevel != ViewDetailLevel.Undefined || voids)
+        return WhereIntersectsSolidsCustom(elements, target, transform, voids, detailLevel);
 
-      var solidsFilter = ElementFilters.IntersectsAnySolidFilter(target.get_Geometry(options).GetTransformedSolids(transform));
-      if (solidsFilter.IsEmpty())
-        return Array.Empty<Element>();
+      using (var options = new Options() { DetailLevel = ViewDetailLevel.Undefined })
+      {
+        var solidsFilter = ElementFilters.IntersectsAnySolidFilter(target.get_Geometry(options).GetTransformedSolids(transform));
+        if (solidsFilter.IsEmpty())
+          return Array.Empty<Element>();
 
-      return elements.WherePasses(solidsFilter);
+        return elements.WherePasses(solidsFilter);
+      }
     }
 
-    static IEnumerable<Element> WhereIntersectsSolidsCustom(IEnumerable<Element> elements, Element target, Options options, Transform transform)
+    static IEnumerable<Element> WhereIntersectsSolidsCustom
+    (
+      IEnumerable<Element> elements,
+      Element target,
+      Transform transform,
+      bool voids,
+      ViewDetailLevel detailLevel
+    )
     {
-      var targetSolids = target.get_Geometry(options).GetTransformedSolids(transform).ToArray();
-      if (targetSolids.Length > 0)
+      using (var optionsA = new Options() { DetailLevel = detailLevel, IncludeNonVisibleObjects = voids && InstanceVoidCutUtils.IsVoidInstanceCuttingElement(target) })
       {
-        foreach (var element in elements)
+        var targetSolids = target.get_Geometry(optionsA).GetTransformedSolids(transform).ToArray();
+        if (targetSolids.Length > 0)
         {
-          var elementSolids = element.get_Geometry(options).GetTransformedSolids(transform).ToArray();
-          if (Intersect(targetSolids, elementSolids))
-            yield return element;
+          foreach (var element in elements)
+          {
+            using (var optionsB = new Options() { DetailLevel = detailLevel, IncludeNonVisibleObjects = voids && InstanceVoidCutUtils.IsVoidInstanceCuttingElement(element) })
+            {
+              var elementSolids = element.get_Geometry(optionsB).GetTransformedSolids(transform).ToArray();
+              if (Intersect(targetSolids, elementSolids))
+                yield return element;
 
-          foreach (var solid in elementSolids)
-            solid.Dispose();
+              foreach (var solid in elementSolids)
+                solid.Dispose();
+            }
+          }
         }
       }
     }
@@ -353,6 +376,10 @@ namespace RhinoInside.Revit.External.DB
               BooleanOperationsUtils.ExecuteBooleanOperationModifyingOriginalSolid(b, a, BooleanOperationsType.Intersect);
               if (!b.IsEmpty()) return true;
             }
+          }
+          catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+          {
+            return true;
           }
           catch { }
         }
