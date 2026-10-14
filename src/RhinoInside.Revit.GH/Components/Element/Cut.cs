@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (ARDB.InstanceVoidCutUtils.IsVoidInstanceCuttingElement(cuttingElement))
       {
         reason = ARDB.CutFailureReason.CutAllowed;
-        if (!ARDB.InstanceVoidCutUtils.CanBeCutWithVoid(cutElement) || cuttingElement.Id == cuttingElement.Id)
+        if (!ARDB.InstanceVoidCutUtils.CanBeCutWithVoid(cutElement) || cutElement.Id == cuttingElement.Id)
           reason = ARDB.CutFailureReason.CutNotAppropriateForElements;
         else if (ARDB.InstanceVoidCutUtils.InstanceVoidCutExists(cutElement, cuttingElement))
           reason = ARDB.CutFailureReason.CutAlreadyExists;
