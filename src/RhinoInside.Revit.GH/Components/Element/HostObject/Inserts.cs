@@ -133,10 +133,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
           var openings = new HashSet<ARDB.ElementId>(host.Value.FindInserts(true, false, false, false));
           openings.ExceptWith(inserts);
 
-          foreach (var opening in host.Value.GetDependentElements(new ARDB.ElementClassFilter(typeof(ARDB.Opening))))
-            openings.Add(opening);
-
-          return openings.Select(x => host.GetElement<Types.GraphicalElement>(x));
+          return openings.Select(x => host.GetElement<Types.GraphicalElement>(x)).OfType<Types.Opening>();
         }
       );
 
@@ -157,10 +154,10 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
         DA, "Walls",
         () =>
         {
-          var walls = new HashSet<ARDB.ElementId>(host.Value.FindInserts(false, false, true, false));
+          var walls = new HashSet<ARDB.ElementId>(host.Value.FindInserts(true, false, true, false));
           walls.ExceptWith(inserts);
 
-          return walls.Select(x => host.GetElement<Types.GraphicalElement>(x));
+          return walls.Select(x => host.GetElement<Types.GraphicalElement>(x)).OfType<Types.Wall>();
         }
       );
     }

@@ -1042,6 +1042,33 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
     }
     #endregion
+
+    #region OfType
+    internal static IEnumerable<(Transform Transform, T Item)> OfType<T>
+    (
+      this GeometryObject geometry, Transform transform
+    ) where T : GeometryObject
+    {
+      switch (geometry)
+      {
+        case GeometryElement element:
+          foreach (var item in element.SelectMany(x => OfType<T>(x, transform)))
+            yield return item;
+          yield break;
+
+        case GeometryInstance instance:
+          foreach (var item in OfType<T>(instance.GetSymbolGeometry(), transform * instance.Transform))
+            yield return item;
+          yield break;
+
+        case T geometryObject:
+          if (!geometryObject.IsEmpty())
+            yield return (transform, geometryObject);
+
+          yield break;
+      }
+    }
+    #endregion
   }
 
   public static class GeometryElementExtension
@@ -1172,6 +1199,16 @@ namespace RhinoInside.Revit.External.DB.Extensions
       FirstOrDefault();
 
       return intersection;
+    }
+    #endregion
+
+    #region Solids
+    public static IEnumerable<Solid> GetTransformedSolids(this GeometryElement geometry, Transform transform)
+    {
+      return geometry.OfType<Solid>(transform).Select
+      (
+        x => x.Transform.IsIdentity ? x.Item : SolidUtils.CreateTransformed(x.Item, x.Transform)
+      );
     }
     #endregion
   }
