@@ -305,5 +305,60 @@ namespace RhinoInside.Revit.External.DB
         default: return new FilteredCollector<T>(new EnumerableCollector<T>(source), filter);
       }
     }
+
+    public static IEnumerable<Element> WhereIntersectsSolids(this IEnumerable<Element> elements, Element target, Options options, Transform transform)
+    {
+      if (options.DetailLevel != ViewDetailLevel.Undefined || options.IncludeNonVisibleObjects)
+        return WhereIntersectsSolidsCustom(elements, target, options, transform);
+
+      var solidsFilter = ElementFilters.IntersectsAnySolidFilter(target.get_Geometry(options).GetTransformedSolids(transform));
+      if (solidsFilter.IsEmpty())
+        return Array.Empty<Element>();
+
+      return elements.WherePasses(solidsFilter);
+    }
+
+    static IEnumerable<Element> WhereIntersectsSolidsCustom(IEnumerable<Element> elements, Element target, Options options, Transform transform)
+    {
+      var targetSolids = target.get_Geometry(options).GetTransformedSolids(transform).ToArray();
+      if (targetSolids.Length > 0)
+      {
+        foreach (var element in elements)
+        {
+          var elementSolids = element.get_Geometry(options).GetTransformedSolids(transform).ToArray();
+          if (Intersect(targetSolids, elementSolids))
+            yield return element;
+
+          foreach (var solid in elementSolids)
+            solid.Dispose();
+        }
+      }
+    }
+
+    static bool Intersect(IEnumerable<Solid> A, IEnumerable<Solid> B)
+    {
+      foreach (var a in A)
+      {
+        foreach (var b in B)
+        {
+          try
+          {
+            if (b.IsElementGeometry)
+            {
+              using (var result = BooleanOperationsUtils.ExecuteBooleanOperation(b, a, BooleanOperationsType.Intersect))
+                if (!result.IsEmpty()) return true;
+            }
+            else
+            {
+              BooleanOperationsUtils.ExecuteBooleanOperationModifyingOriginalSolid(b, a, BooleanOperationsType.Intersect);
+              if (!b.IsEmpty()) return true;
+            }
+          }
+          catch { }
+        }
+      }
+
+      return false;
+    }
   }
 }

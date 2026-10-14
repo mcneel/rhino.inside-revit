@@ -281,6 +281,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target element"),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewDetailLevel>>("Detail Level", "LOD", "Geometry level of detail", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Phasing", "P", "Check that elements also coincide on time", defaultValue: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),
     };
@@ -306,6 +307,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Parameters.ElementSource.TryGetElementSource(this, DA, out var source)) return;
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
       Params.TrySetData(DA, "Element", () => element);
+      if (!Params.TryGetData(DA, "Detail Level", out ARDB.ViewDetailLevel? vdl)) return;
       if (!Params.TryGetData(DA, "Phasing", out bool? phasing)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
@@ -343,23 +345,18 @@ namespace RhinoInside.Revit.GH.Components.Elements
           interferences = interferences.WherePasses(filter);
         }
 
-        using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Medium })
+        using (var options = new ARDB.Options() { DetailLevel = vdl ?? ARDB.ViewDetailLevel.Undefined })
         {
-          var solidsFilter = ElementFilters.IntersectsAnySolidFilter(element.Value.get_Geometry(options).GetTransformedSolids(xform.ToTransform()));
-          if (solidsFilter.IsEmpty())
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Element has no geometry. {{{element.Id}}}");
-
-          interferences = interferences.WherePasses(solidsFilter);
+          DA.SetDataList
+          (
+            "Interferences",
+            interferences.
+            WhereIntersectsSolids(element.Value, options, xform.ToTransform()).
+            OfType<Types.GraphicalElement>().
+            FromSource(source).
+            TakeWhileIsNotEscapeKeyDown(this)
+          );
         }
-
-        DA.SetDataList
-        (
-          "Interferences",
-          interferences.
-          OfType<Types.GraphicalElement>().
-          FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
-        );
       }
     }
   }

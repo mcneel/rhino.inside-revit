@@ -39,8 +39,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
     static readonly ParamDefinition[] inputs =
     {
       ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target element"),
-      ParamDefinition.Create<Parameters.GraphicalElement>("Candidates", "C", "Candidate elements for interference checking", access: GH_ParamAccess.list),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewDetailLevel>>("Detail Level", "LOD", "Geometry level of detail", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Phasing", "P", "Check that elements also coincide on time", defaultValue: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.GraphicalElement>("Candidates", "C", "Candidate elements for interference checking", access: GH_ParamAccess.list),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -63,8 +64,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
       Params.TrySetData(DA, "Element", () => element);
-      if (!Params.TryGetDataList(DA, "Candidates", out IList<Types.GraphicalElement> candidates)) return;
+      if (!Params.TryGetData(DA, "Detail Level", out ARDB.ViewDetailLevel? vdl)) return;
       if (!Params.TryGetData(DA, "Phasing", out bool? phasing)) return;
+      if (!Params.TryGetDataList(DA, "Candidates", out IList<Types.GraphicalElement> candidates)) return;
 
       var interferences = new List<Types.GraphicalElement>();
 
@@ -94,16 +96,16 @@ namespace RhinoInside.Revit.GH.Components.Elements
           if (phasing is true)
             elements = elements.WherePasses(ElementFilters.ElementIntersectsPhase(element.Value, (element.Source as Types.RevitLinkInstance)?.Value, (source as Types.RevitLinkInstance)?.Value));
 
-          using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Medium })
+          using (var options = new ARDB.Options() { DetailLevel = vdl ?? ARDB.ViewDetailLevel.Medium })
           {
-            var solidsFilter = ElementFilters.IntersectsAnySolidFilter(element.Value.get_Geometry(options).GetTransformedSolids(xform.ToTransform()));
-            if (solidsFilter.IsEmpty())
-              AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Element has no geometry. {{{element.Id}}}");
-
-            elements = elements.WherePasses(solidsFilter);
+            interferences.AddRange
+            (
+              elements.
+              WhereIntersectsSolids(element.Value, options, xform.ToTransform()).
+              OfType<Types.GraphicalElement>().FromSource(source).
+              TakeWhileIsNotEscapeKeyDown(this)
+            );
           }
-
-          interferences.AddRange(elements.OfType<Types.GraphicalElement>().FromSource(source).TakeWhileIsNotEscapeKeyDown(this));
         }
       }
 
