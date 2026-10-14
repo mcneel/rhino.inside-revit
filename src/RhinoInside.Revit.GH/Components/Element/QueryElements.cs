@@ -351,7 +351,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         (
           "Interferences",
           interferences.
-          WhereIntersectsSolids(element.Value, xform.ToTransform(), voids ?? false, vdl ?? ARDB.ViewDetailLevel.Undefined).
+          WhereIntersectsElement(element.Value, xform.ToTransform(), voids ?? false, vdl ?? ARDB.ViewDetailLevel.Undefined).
           OfType<Types.GraphicalElement>().
           FromSource(source).
           TakeWhileIsNotEscapeKeyDown(this)

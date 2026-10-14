@@ -306,21 +306,21 @@ namespace RhinoInside.Revit.External.DB
       }
     }
 
-    public static IEnumerable<Element> WhereIntersectsSolids
+    public static IEnumerable<Element> WhereIntersectsElement
     (
       this IEnumerable<Element> elements,
       Element target,
-      Transform transform,
+      Transform transform = null,
       bool voids = false,
       ViewDetailLevel detailLevel = ViewDetailLevel.Undefined
     )
     {
       if (detailLevel != ViewDetailLevel.Undefined || voids)
-        return WhereIntersectsSolidsCustom(elements, target, transform, voids, detailLevel);
+        return WhereIntersectsSolids(elements, target, transform ?? Transform.Identity, voids, detailLevel);
 
       using (var options = new Options() { DetailLevel = ViewDetailLevel.Undefined })
       {
-        var solidsFilter = ElementFilters.IntersectsAnySolidFilter(target.get_Geometry(options).GetTransformedSolids(transform));
+        var solidsFilter = ElementFilters.IntersectsAnySolidFilter(target.get_Geometry(options).GetTransformedSolids(transform ?? Transform.Identity));
         if (solidsFilter.IsEmpty())
           return Array.Empty<Element>();
 
@@ -328,7 +328,7 @@ namespace RhinoInside.Revit.External.DB
       }
     }
 
-    static IEnumerable<Element> WhereIntersectsSolidsCustom
+    static IEnumerable<Element> WhereIntersectsSolids
     (
       IEnumerable<Element> elements,
       Element target,
