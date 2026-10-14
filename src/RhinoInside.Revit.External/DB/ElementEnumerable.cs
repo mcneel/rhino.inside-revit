@@ -305,5 +305,87 @@ namespace RhinoInside.Revit.External.DB
         default: return new FilteredCollector<T>(new EnumerableCollector<T>(source), filter);
       }
     }
+
+    public static IEnumerable<Element> WhereIntersectsSolids
+    (
+      this IEnumerable<Element> elements,
+      Element target,
+      Transform transform,
+      bool voids = false,
+      ViewDetailLevel detailLevel = ViewDetailLevel.Undefined
+    )
+    {
+      if (detailLevel != ViewDetailLevel.Undefined || voids)
+        return WhereIntersectsSolidsCustom(elements, target, transform, voids, detailLevel);
+
+      using (var options = new Options() { DetailLevel = ViewDetailLevel.Undefined })
+      {
+        var solidsFilter = ElementFilters.IntersectsAnySolidFilter(target.get_Geometry(options).GetTransformedSolids(transform));
+        if (solidsFilter.IsEmpty())
+          return Array.Empty<Element>();
+
+        return elements.WherePasses(solidsFilter);
+      }
+    }
+
+    static IEnumerable<Element> WhereIntersectsSolidsCustom
+    (
+      IEnumerable<Element> elements,
+      Element target,
+      Transform transform,
+      bool voids,
+      ViewDetailLevel detailLevel
+    )
+    {
+      using (var optionsA = new Options() { DetailLevel = detailLevel, IncludeNonVisibleObjects = voids && InstanceVoidCutUtils.IsVoidInstanceCuttingElement(target) })
+      {
+        var targetSolids = target.get_Geometry(optionsA).GetTransformedSolids(transform).ToArray();
+        if (targetSolids.Length > 0)
+        {
+          foreach (var element in elements)
+          {
+            using (var optionsB = new Options() { DetailLevel = detailLevel, IncludeNonVisibleObjects = voids && InstanceVoidCutUtils.IsVoidInstanceCuttingElement(element) })
+            {
+              var elementSolids = element.get_Geometry(optionsB).GetTransformedSolids(transform).ToArray();
+              if (Intersect(targetSolids, elementSolids))
+                yield return element;
+
+              foreach (var solid in elementSolids)
+                solid.Dispose();
+            }
+          }
+        }
+      }
+    }
+
+    static bool Intersect(IEnumerable<Solid> A, IEnumerable<Solid> B)
+    {
+      foreach (var a in A)
+      {
+        foreach (var b in B)
+        {
+          try
+          {
+            if (b.IsElementGeometry)
+            {
+              using (var result = BooleanOperationsUtils.ExecuteBooleanOperation(b, a, BooleanOperationsType.Intersect))
+                if (!result.IsEmpty()) return true;
+            }
+            else
+            {
+              BooleanOperationsUtils.ExecuteBooleanOperationModifyingOriginalSolid(b, a, BooleanOperationsType.Intersect);
+              if (!b.IsEmpty()) return true;
+            }
+          }
+          catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+          {
+            return true;
+          }
+          catch { }
+        }
+      }
+
+      return false;
+    }
   }
 }

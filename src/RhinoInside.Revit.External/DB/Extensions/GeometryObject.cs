@@ -1205,7 +1205,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Solids
     public static IEnumerable<Solid> GetTransformedSolids(this GeometryElement geometry, Transform transform)
     {
-      return geometry.OfType<Solid>(transform).Select(x => SolidUtils.CreateTransformed(x.Item, x.Transform));
+      return geometry.OfType<Solid>(transform).Select
+      (
+        x => x.Transform.IsIdentity ? x.Item : SolidUtils.CreateTransformed(x.Item, x.Transform)
+      );
     }
     #endregion
   }
