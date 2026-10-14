@@ -512,7 +512,6 @@ namespace RhinoInside.Revit.External.DB
       return LogicalOrFilter
       (
         geometry.OfType<Solid>(transform).
-        Where(x => !x.Item.Faces.IsEmpty).
         OrderByDescending(x => x.Item.GetBoundingBox().GetVolume()).
         Select(x => new ElementIntersectsSolidFilter(SolidUtils.CreateTransformed(x.Item, x.Transform)))
       );

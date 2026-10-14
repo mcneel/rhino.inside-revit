@@ -1047,7 +1047,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     internal static IEnumerable<(Transform Transform, T Item)> OfType<T>
     (
       this GeometryObject geometry, Transform transform
-    )
+    ) where T : GeometryObject
     {
       switch (geometry)
       {
@@ -1062,7 +1062,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
           yield break;
 
         case T geometryObject:
-          yield return (transform, geometryObject);
+          if (!geometryObject.IsEmpty())
+            yield return (transform, geometryObject);
+
           yield break;
       }
     }
