@@ -345,7 +345,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
         using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Medium })
         {
-          var solidsFilter = ElementFilters.ElementIntersectsSolidsFilter(element.Value.get_Geometry(options), xform.ToTransform());
+          var solidsFilter = ElementFilters.IntersectsAnySolidFilter(element.Value.get_Geometry(options).GetTransformedSolids(xform.ToTransform()));
           if (solidsFilter.IsEmpty())
             AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Element has no geometry. {{{element.Id}}}");
 

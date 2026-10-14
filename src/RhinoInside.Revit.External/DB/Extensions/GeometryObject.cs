@@ -1201,6 +1201,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return intersection;
     }
     #endregion
+
+    #region Solids
+    public static IEnumerable<Solid> GetTransformedSolids(this GeometryElement geometry, Transform transform)
+    {
+      return geometry.OfType<Solid>(transform).Select(x => SolidUtils.CreateTransformed(x.Item, x.Transform));
+    }
+    #endregion
   }
 
   public static class GeometryInstanceExtension
