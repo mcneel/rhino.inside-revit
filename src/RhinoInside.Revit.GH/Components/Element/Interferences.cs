@@ -101,7 +101,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           interferences.AddRange
           (
             elements.
-            WhereIntersectsElement(element.Value, xform.ToTransform(), voids ?? false, vdl ?? ARDB.ViewDetailLevel.Medium).
+            WhereIntersectsElement(element.Value, xform.ToTransform(), voids ?? false, vdl ?? ARDB.ViewDetailLevel.Undefined).
             OfType<Types.GraphicalElement>().FromSource(source).
             TakeWhileIsNotEscapeKeyDown(this)
           );
