@@ -343,12 +343,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
           interferences = interferences.WherePasses(filter);
         }
 
-        if (element.Value.HasGeometry())
+        using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Medium })
         {
-          using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Medium })
-            interferences = interferences.WherePasses(ElementFilters.ElementIntersectsElementSolidsFilter(element.Value, options, xform.ToTransform()));
+          var solidsFilter = ElementFilters.ElementIntersectsSolidsFilter(element.Value.get_Geometry(options), xform.ToTransform());
+          if (solidsFilter.IsEmpty())
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Element has no geometry. {{{element.Id}}}");
+
+          interferences = interferences.WherePasses(solidsFilter);
         }
-        else AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Element has no geometry. {{{element.Id}}}");
 
         DA.SetDataList
         (

@@ -94,12 +94,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
           if (phasing is true)
             elements = elements.WherePasses(ElementFilters.ElementIntersectsPhase(element.Value, (element.Source as Types.RevitLinkInstance)?.Value, (source as Types.RevitLinkInstance)?.Value));
 
-          if (element.Value.HasGeometry())
+          using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Medium })
           {
-            using (var options = new ARDB.Options() { DetailLevel = ARDB.ViewDetailLevel.Medium })
-              elements = elements.WherePasses(ElementFilters.ElementIntersectsElementSolidsFilter(element.Value, options, xform.ToTransform()));
+            var solidsFilter = ElementFilters.ElementIntersectsSolidsFilter(element.Value.get_Geometry(options), xform.ToTransform());
+            if (solidsFilter.IsEmpty())
+              AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Element has no geometry. {{{element.Id}}}");
+
+            elements = elements.WherePasses(solidsFilter);
           }
-          else AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"Element has no geometry. {{{element.Id}}}");
 
           interferences.AddRange(elements.OfType<Types.GraphicalElement>().FromSource(source).TakeWhileIsNotEscapeKeyDown(this));
         }
