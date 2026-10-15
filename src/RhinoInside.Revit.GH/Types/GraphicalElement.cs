@@ -836,9 +836,9 @@ namespace RhinoInside.Revit.GH.Types
       if (!ARDB.ElementIntersectsFilter.IsElementSupported(Value))
         return Array.Empty<GraphicalElement>();
 
-      var solidInterferences = !source.Equals(Source);
+      var sameSource = source.Equals(Source);
       var xform = Transform.Identity;
-      if (solidInterferences)
+      if (!sameSource)
       {
         var elementToWorld = Source is RevitLinkInstance elementInstance ?
           Transform.ChangeBasis(Plane.WorldXY, elementInstance.Location) : Transform.Identity;
@@ -855,15 +855,15 @@ namespace RhinoInside.Revit.GH.Types
 
       candidates = candidates.WherePasses(ElementFilters.ElementIsViewSpecificFilter(inverted: true));
       candidates = candidates.WherePasses(ElementFilters.BoundingBoxIntersectsFilter(bbox.ToOutline(), GeometryTolerance.Internal.DefaultTolerance, inverted: false));
-      if (Source.SourceDocument.Value.IsEquivalent(source.SourceDocument.Value))
+      if (sameSource)
         candidates = candidates.WherePasses(ElementFilters.ExclusionFilter(Id));
 
       if (phasing is true)
         candidates = candidates.WherePasses(ElementFilters.ElementIntersectsPhase(Value, (Source as RevitLinkInstance)?.Value, (source as RevitLinkInstance)?.Value));
 
-      candidates = solidInterferences ?
-        candidates.WhereIntersectsSolids(Value, xform.ToTransform(), voids):
-        candidates.WhereIntersectsElements(Value, voids);
+      candidates = sameSource ?
+        candidates.WhereIntersectsElements(Value, voids) :
+        candidates.WhereIntersectsSolids(Value, xform.ToTransform(), voids);
 
       return candidates.OfType<GraphicalElement>().FromSource(source);
     }
