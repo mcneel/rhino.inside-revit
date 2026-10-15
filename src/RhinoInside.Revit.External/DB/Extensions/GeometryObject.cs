@@ -1057,7 +1057,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
           yield break;
 
         case GeometryInstance instance:
-          foreach (var item in OfType<T>(instance.GetSymbolGeometry(), transform * instance.Transform))
+          foreach (var item in OfType<T>(instance.GetInstanceGeometry(), transform))
             yield return item;
           yield break;
 
