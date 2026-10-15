@@ -318,7 +318,7 @@ namespace RhinoInside.Revit.External.DB
       if (detailLevel != ViewDetailLevel.Undefined || voids)
         return WhereIntersectsSolids(elements, target, transform ?? Transform.Identity, voids, detailLevel);
 
-      using (var options = new Options() { DetailLevel = ViewDetailLevel.Undefined })
+      using (var options = new Options() { DetailLevel = ViewDetailLevel.Medium })
       {
         var solidsFilter = ElementFilters.IntersectsAnySolidFilter(target.get_Geometry(options).GetTransformedSolids(transform ?? Transform.Identity));
         if (solidsFilter.IsEmpty())
@@ -337,6 +337,7 @@ namespace RhinoInside.Revit.External.DB
       ViewDetailLevel detailLevel
     )
     {
+      if (detailLevel == ViewDetailLevel.Undefined) detailLevel = ViewDetailLevel.Medium;
       using (var optionsA = new Options() { DetailLevel = detailLevel, IncludeNonVisibleObjects = voids && InstanceVoidCutUtils.IsVoidInstanceCuttingElement(target) })
       {
         var targetSolids = target.get_Geometry(optionsA).GetTransformedSolids(transform).ToArray();
@@ -346,12 +347,8 @@ namespace RhinoInside.Revit.External.DB
           {
             using (var optionsB = new Options() { DetailLevel = detailLevel, IncludeNonVisibleObjects = voids && InstanceVoidCutUtils.IsVoidInstanceCuttingElement(element) })
             {
-              var elementSolids = element.get_Geometry(optionsB).GetTransformedSolids(transform).ToArray();
-              if (Intersect(targetSolids, elementSolids))
+              if (Intersect(targetSolids, element.get_Geometry(optionsB).GetTransformedSolids(Transform.Identity)))
                 yield return element;
-
-              foreach (var solid in elementSolids)
-                solid.Dispose();
             }
           }
         }
@@ -360,28 +357,31 @@ namespace RhinoInside.Revit.External.DB
 
     static bool Intersect(IEnumerable<Solid> A, IEnumerable<Solid> B)
     {
-      foreach (var a in A)
+      foreach (var b in B)
       {
-        foreach (var b in B)
+        using (b)
         {
-          try
+          foreach (var a in A)
           {
-            if (b.IsElementGeometry)
+            try
             {
-              using (var result = BooleanOperationsUtils.ExecuteBooleanOperation(b, a, BooleanOperationsType.Intersect))
-                if (!result.IsEmpty()) return true;
+              if (b.IsElementGeometry)
+              {
+                using (var result = BooleanOperationsUtils.ExecuteBooleanOperation(b, a, BooleanOperationsType.Intersect))
+                  if (!result.IsEmpty()) return true;
+              }
+              else
+              {
+                BooleanOperationsUtils.ExecuteBooleanOperationModifyingOriginalSolid(b, a, BooleanOperationsType.Intersect);
+                if (!b.IsEmpty()) return true;
+              }
             }
-            else
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException)
             {
-              BooleanOperationsUtils.ExecuteBooleanOperationModifyingOriginalSolid(b, a, BooleanOperationsType.Intersect);
-              if (!b.IsEmpty()) return true;
+              return true;
             }
+            catch { }
           }
-          catch (Autodesk.Revit.Exceptions.InvalidOperationException)
-          {
-            return true;
-          }
-          catch { }
         }
       }
 
