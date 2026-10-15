@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
           Name = "Path",
           NickName = "P",
           Description = "Absolute path to the file",
-          FileFilter = "Files (*.rte, *.rvt, *.rfa, *.rvf, *.ifc, *.ifczip)|*.rte;*.rvt;*.rfa;*.rvf;*.ifc;*.ifczip"
+          FileFilter = "Files (*.rte, *.rvt, *.rfa, *.ifc, *.ifczip)|*.rte;*.rvt;*.rfa;*.ifc;*.ifczip"
         }
       ),
       new ParamDefinition
@@ -154,13 +154,11 @@ namespace RhinoInside.Revit.GH.Components.Documents
       {
         _cachedDocs.Remove(uri);
 
-#if DEBUG
         if (File.GetLastWriteTimeUtc(uri) == document.File.LastWriteTimeUtc)
         {
           _currentDocs[uri] = document;
           return true;
         }
-#endif
 
         if (load != true)
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"File '{uri}' has changed since last time it was loaded.");
