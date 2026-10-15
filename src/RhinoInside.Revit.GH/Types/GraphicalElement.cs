@@ -17,6 +17,8 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using Convert.Units;
   using External.DB.Extensions;
+  using External.DB;
+  using Components;
 
   /// <summary>
   /// Interface that represents any <see cref="ARDB.Element"/> that has a Graphical representation in Revit
@@ -801,6 +803,69 @@ namespace RhinoInside.Revit.GH.Types
 
         return Array.Empty<AnalyticalElement>();
       }
+    }
+    #endregion
+
+    #region Interferences
+    public IEnumerable<GraphicalElement> GetSolidInterferences
+    (
+      IEnumerable<GraphicalElement> candidates,
+      bool voids = true,
+      bool phasing = true
+    )
+    {
+      foreach (var set in candidates.GroupBy(x => x.Source))
+      {
+        var source = set.Key;
+        if (AssertValidElementSource(source, acceptLinked: true))
+        {
+          foreach (var interference in GetSolidInterferencesFrom(source, set.Select(x => x.Value).Distinct(ElementEqualityComparer.SameDocument), voids, phasing))
+            yield return interference;
+        }
+      }
+    }
+
+    internal IEnumerable<GraphicalElement> GetSolidInterferencesFrom
+    (
+      IGH_ElementSource source,
+      IEnumerable<ARDB.Element> candidates,
+      bool voids = true,
+      bool phasing = true
+    )
+    {
+      if (!ARDB.ElementIntersectsFilter.IsElementSupported(Value))
+        return Array.Empty<GraphicalElement>();
+
+      var sameSource = source.Equals(Source);
+      var xform = Transform.Identity;
+      if (!sameSource)
+      {
+        var elementToWorld = Source is RevitLinkInstance elementInstance ?
+          Transform.ChangeBasis(Plane.WorldXY, elementInstance.Location) : Transform.Identity;
+        if (!elementToWorld.TryGetInverse(out var worldToElement)) return Array.Empty<GraphicalElement>();
+
+        var worldToSource = source is RevitLinkInstance sourceInstance ?
+          Transform.ChangeBasis(Plane.WorldXY, sourceInstance.Location) : Transform.Identity;
+
+        xform = worldToElement * worldToSource;
+      }
+
+      var bbox = GetBoundingBox(xform);
+      if (!bbox.IsValid) return Array.Empty<GraphicalElement>();
+
+      candidates = candidates.WherePasses(ElementFilters.ElementIsViewSpecificFilter(inverted: true));
+      candidates = candidates.WherePasses(ElementFilters.BoundingBoxIntersectsFilter(bbox.ToOutline(), GeometryTolerance.Internal.DefaultTolerance, inverted: false));
+      if (sameSource)
+        candidates = candidates.WherePasses(ElementFilters.ExclusionFilter(Id));
+
+      if (phasing is true)
+        candidates = candidates.WherePasses(ElementFilters.ElementIntersectsPhase(Value, (Source as RevitLinkInstance)?.Value, (source as RevitLinkInstance)?.Value));
+
+      candidates = sameSource ?
+        candidates.WhereIntersectsElement(Value, voids) :
+        candidates.WhereIntersectsSolids(Value, xform.ToTransform(), voids);
+
+      return candidates.OfType<GraphicalElement>().FromSource(source);
     }
     #endregion
   }

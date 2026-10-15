@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
-using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Elements
 {
-  using Convert.Geometry;
   using External.DB;
   using External.DB.Extensions;
 
@@ -262,8 +260,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ARDB.ElementFilter ElementFilter => ElementFilters.Intersect
     (
       ElementFilters.ElementIsViewSpecificFilter(inverted: true),
-      ElementFilters.GraphicalElementFilter,
-      ElementFilters.ElementHasPhase
+      ElementFilters.GraphicalElementFilter
     );
 
     public QueryInterferingElements() : base
@@ -281,7 +278,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target element"),
-      ParamDefinition.Create<Parameters.Param_Enum<Types.ViewDetailLevel>>("Detail Level", "LOD", "Geometry level of detail", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Voids", "V", "Check also family voids", defaultValue: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Phasing", "P", "Check that elements also coincide on time", defaultValue: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),
@@ -308,55 +304,22 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Parameters.ElementSource.TryGetElementSource(this, DA, out var source)) return;
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
       Params.TrySetData(DA, "Element", () => element);
-      if (!Params.TryGetData(DA, "Detail Level", out ARDB.ViewDetailLevel? vdl)) return;
       if (!Params.TryGetData(DA, "Voids", out bool? voids)) return;
       if (!Params.TryGetData(DA, "Phasing", out bool? phasing)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
       source ??= element?.Source;
-      if (element.AssertValidElementSource(source, acceptLinked: true))
-      {
-        if (filter?.IsEmpty() is true) return;
-
-        var elementToWorld = element.Source is Types.RevitLinkInstance elementInstance ?
-          Transform.ChangeBasis(Plane.WorldXY, elementInstance.Location) : Transform.Identity;
-        elementToWorld.TryGetInverse(out var worldToElement);
-
-        var worldToSource = source is Types.RevitLinkInstance sourceInstance ?
-          Transform.ChangeBasis(Plane.WorldXY, sourceInstance.Location) : Transform.Identity;
-        worldToSource.TryGetInverse(out var sourceToWorld);
-
-        var xform = worldToElement * worldToSource;
-        var bbox = element.GetBoundingBox(xform);
-        if (!bbox.IsValid) return;
-
-        var interferences = source.SourceDocument.Value.CollectElements();
-        interferences = interferences.WherePasses(ElementFilters.ElementIsElementTypeFilter(inverted: true));
-        interferences = interferences.WherePasses(ElementFilters.ElementHasCategoryFilter);
-        interferences = interferences.WherePasses(ElementFilters.ElementIsViewSpecificFilter(inverted: true));
-        interferences = interferences.WherePasses(ElementFilters.BoundingBoxIntersectsFilter(bbox.ToOutline(), GeometryTolerance.Internal.DefaultTolerance, inverted:false));
-        if (element.Source.SourceDocument.Value.IsEquivalent(source.SourceDocument.Value))
-          interferences = interferences.WherePasses(ElementFilters.ExclusionFilter(element.Id));
-
-        if (phasing is true)
-          interferences = interferences.WherePasses(ElementFilters.ElementIntersectsPhase(element.Value, (element.Source as Types.RevitLinkInstance)?.Value, (source as Types.RevitLinkInstance)?.Value));
-
-        if (filter is object)
-        {
-          filter.AssertIsValidFiler(source.SourceInstance.Value);
-          interferences = interferences.WherePasses(filter);
-        }
-
-        DA.SetDataList
+      DA.SetDataList
+      (
+        "Interferences",
+        element.GetSolidInterferencesFrom
         (
-          "Interferences",
-          interferences.
-          WhereIntersectsElement(element.Value, xform.ToTransform(), voids ?? false, vdl ?? ARDB.ViewDetailLevel.Undefined).
-          OfType<Types.GraphicalElement>().
-          FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
-        );
-      }
+          source,
+          source.SourceDocument.Value.CollectElements(),
+          voids ?? false,
+          phasing ?? false
+        ).TakeWhileIsNotEscapeKeyDown(this)
+      );
     }
   }
 }

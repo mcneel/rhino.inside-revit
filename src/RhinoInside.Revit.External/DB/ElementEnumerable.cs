@@ -310,45 +310,79 @@ namespace RhinoInside.Revit.External.DB
     (
       this IEnumerable<Element> elements,
       Element target,
-      Transform transform = null,
-      bool voids = false,
-      ViewDetailLevel detailLevel = ViewDetailLevel.Undefined
+      bool voids = false
     )
     {
-      if (detailLevel != ViewDetailLevel.Undefined || voids)
-        return WhereIntersectsSolids(elements, target, transform ?? Transform.Identity, voids, detailLevel);
-
-      using (var options = new Options() { DetailLevel = ViewDetailLevel.Medium })
+      using (var options = new Options() { IncludeNonVisibleObjects = voids && InstanceVoidCutUtils.IsVoidInstanceCuttingElement(target) })
       {
-        var solidsFilter = ElementFilters.IntersectsAnySolidFilter(target.get_Geometry(options).GetTransformedSolids(transform ?? Transform.Identity));
-        if (solidsFilter.IsEmpty())
-          return Array.Empty<Element>();
+        using (var filter = new ElementIntersectsElementFilter(target))
+        {
+          using (var cuttingOptions = voids ? new Options() { IncludeNonVisibleObjects = true } : default)
+          {
+            var targetSolids = default(Solid[]);
+            foreach (var element in elements)
+            {
+              if (filter.PassesFilter(element))
+              {
+                yield return element;
+              }
+              else if (voids && InstanceVoidCutUtils.IsVoidInstanceCuttingElement(element))
+              {
+                var cuttingGeometry = element.
+                  get_Geometry(cuttingOptions).
+                  OfType<Solid>().
+                  Where(x => element.Document.GetElement<GraphicsStyle>(x.GraphicsStyleId)?.GraphicsStyleCategory?.ToBuiltInCategory() == BuiltInCategory.OST_IOSCuttingGeometry);
 
-        return elements.WherePasses(solidsFilter);
+                targetSolids ??= target.get_Geometry(options).GetTransformedSolids(Transform.Identity).ToArray();
+                if (Intersect(targetSolids, cuttingGeometry))
+                  yield return element;
+              }
+            }
+          }
+        }
       }
     }
 
-    static IEnumerable<Element> WhereIntersectsSolids
+    public static IEnumerable<Element> WhereIntersectsSolids
     (
-      IEnumerable<Element> elements,
+      this IEnumerable<Element> elements,
       Element target,
-      Transform transform,
-      bool voids,
-      ViewDetailLevel detailLevel
+      Transform transform = null,
+      bool voids = false
     )
     {
-      if (detailLevel == ViewDetailLevel.Undefined) detailLevel = ViewDetailLevel.Medium;
-      using (var optionsA = new Options() { DetailLevel = detailLevel, IncludeNonVisibleObjects = voids && InstanceVoidCutUtils.IsVoidInstanceCuttingElement(target) })
+      using (var options = new Options() { IncludeNonVisibleObjects = voids && InstanceVoidCutUtils.IsVoidInstanceCuttingElement(target) })
       {
-        var targetSolids = target.get_Geometry(optionsA).GetTransformedSolids(transform).ToArray();
-        if (targetSolids.Length > 0)
+        var targetSolids = target.get_Geometry(options).GetTransformedSolids(transform).ToArray();
+        var inverse = transform.Inverse;
+        using (var filter = ElementFilters.IntersectsAnySolidFilter(targetSolids))
         {
-          foreach (var element in elements)
+          using (var cuttingOptions = voids ? new Options() { IncludeNonVisibleObjects = true } : default)
           {
-            using (var optionsB = new Options() { DetailLevel = detailLevel, IncludeNonVisibleObjects = voids && InstanceVoidCutUtils.IsVoidInstanceCuttingElement(element) })
+            foreach (var element in elements)
             {
-              if (Intersect(targetSolids, element.get_Geometry(optionsB).GetTransformedSolids(Transform.Identity)))
-                yield return element;
+              if (filter.IsEmpty())
+              {
+                if (ElementFilters.IntersectsAnySolidFilter(element.get_Geometry(new Options()).GetTransformedSolids(inverse)).PassesFilter(target))
+                  yield return element;
+              }
+              else
+              {
+                if (filter.PassesFilter(element))
+                {
+                  yield return element;
+                }
+                else if (voids && InstanceVoidCutUtils.IsVoidInstanceCuttingElement(element))
+                {
+                  var cuttingGeometry = element.
+                    get_Geometry(cuttingOptions).
+                    OfType<Solid>().
+                    Where(x => element.Document.GetElement<GraphicsStyle>(x.GraphicsStyleId)?.GraphicsStyleCategory?.ToBuiltInCategory() == BuiltInCategory.OST_IOSCuttingGeometry);
+
+                  if (Intersect(targetSolids, cuttingGeometry))
+                    yield return element;
+                }
+              }
             }
           }
         }
