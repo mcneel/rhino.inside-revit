@@ -862,7 +862,7 @@ namespace RhinoInside.Revit.GH.Types
         candidates = candidates.WherePasses(ElementFilters.ElementIntersectsPhase(Value, (Source as RevitLinkInstance)?.Value, (source as RevitLinkInstance)?.Value));
 
       candidates = sameSource ?
-        candidates.WhereIntersectsElements(Value, voids) :
+        candidates.WhereIntersectsElement(Value, voids) :
         candidates.WhereIntersectsSolids(Value, xform.ToTransform(), voids);
 
       return candidates.OfType<GraphicalElement>().FromSource(source);

@@ -306,7 +306,7 @@ namespace RhinoInside.Revit.External.DB
       }
     }
 
-    public static IEnumerable<Element> WhereIntersectsElements
+    public static IEnumerable<Element> WhereIntersectsElement
     (
       this IEnumerable<Element> elements,
       Element target,
