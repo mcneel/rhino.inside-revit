@@ -315,7 +315,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         element.GetSolidInterferencesFrom
         (
           source,
-          source.SourceDocument.Value.CollectElements(),
+          source?.SourceDocument.Value.CollectElements(),
           voids ?? false,
           phasing ?? false
         ).TakeWhileIsNotEscapeKeyDown(this)

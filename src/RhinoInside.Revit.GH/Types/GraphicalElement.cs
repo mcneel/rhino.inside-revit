@@ -833,7 +833,7 @@ namespace RhinoInside.Revit.GH.Types
       bool phasing = true
     )
     {
-      if (!ARDB.ElementIntersectsFilter.IsElementSupported(Value))
+      if (Value is null || !ARDB.ElementIntersectsFilter.IsElementSupported(Value))
         return Array.Empty<GraphicalElement>();
 
       var sameSource = source.Equals(Source);
