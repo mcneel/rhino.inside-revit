@@ -1,11 +1,14 @@
 using System;
-using Rhino.Geometry;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Families
 {
-  public class FamilyGeometryByBrep : Component
+  using ERDB = External.DB;
+
+  public class FamilyGeometryByBrep : ZuiComponent
   {
     public override Guid ComponentGuid => new Guid("8A51D5A1-F463-492B-AE5B-B4F7870D106B");
     public override GH_Exposure Exposure => GH_Exposure.quinary;
@@ -16,19 +19,21 @@ namespace RhinoInside.Revit.GH.Components.Families
     : base("Component Family Form", "FamForm", string.Empty, "Revit", "Component")
     { }
 
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddBrepParameter("Brep", "B", string.Empty, GH_ParamAccess.item);
-      manager[manager.AddBooleanParameter("Visible", "V", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddIntegerParameter("Visibility", "Vs", "Visibility/Graphics Overrides", GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.Category(), "Subcategory", "Sc", string.Empty, GH_ParamAccess.item)].Optional = true;
-      manager[manager.AddParameter(new Parameters.Material(), "Material", "M", string.Empty, GH_ParamAccess.item)].Optional = true;
-    }
+      ParamDefinition.Create<Param_Brep>("Brep", "B"),
+      ParamDefinition.Create<Param_Boolean>("Visible", "V", string.Empty, defaultValue:true, optional:true),
+      ParamDefinition.Create<Parameters.Param_Enum<Types.FamilyElementVisibility>>("Visibility", "Vs", "Visibility/Graphics Overrides", defaultValue:ERDB.FamilyElementVisibilityDefaults.Model, optional:true),
+      ParamDefinition.Create<Parameters.Category>("Subcategory", "Sc", optional:true),
+      ParamDefinition.Create<Parameters.Material>("Material", "M", optional:true),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddBrepParameter("Brep", "B", string.Empty, GH_ParamAccess.item);
-    }
+      ParamDefinition.Create<Param_Brep>("Brep", "B"),
+    };
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
