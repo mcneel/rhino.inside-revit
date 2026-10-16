@@ -1453,19 +1453,21 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     internal static FamilySymbol CreateWorkPlaneBasedSymbol(this Document document, string familyName, string symbolName = default)
     {
-      if (GetWorkPlaneBasedSymbol(document.Application.ResourceDocument("RiR-Template.rte")) is var symbol)
+      if (GetWorkPlaneBasedSymbol(document.Application.ResourceDocument("RiR-Template.rte")) is var template)
       {
-        using (symbol.Document.RollBackScope())
+        using (template.Document.RollBackScope())
         {
           // Change the name to avoid any possible name collision
           var uniqueName = Guid.NewGuid().ToString();
-          symbol.Family.Name = uniqueName;
-          symbol.Name = uniqueName;
+          template.Family.Name = uniqueName;
+          template.Name = uniqueName;
 
-          symbol = symbol.CloneElement(document);
-          symbol.Family.Name = familyName;
-          symbol.Name = symbolName ?? familyName;
-          return symbol;
+          if (template.CloneElement(document) is FamilySymbol symbol)
+          {
+            symbol.Family.Name = familyName;
+            symbol.Name = symbolName ?? familyName;
+            return symbol;
+          }
         }
       }
 
