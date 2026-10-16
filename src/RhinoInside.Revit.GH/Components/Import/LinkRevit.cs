@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
@@ -139,18 +140,54 @@ namespace RhinoInside.Revit.GH.Components.Insert
     {
       var modelPath = ARDB.ModelPathUtils.ConvertUserVisiblePathToModelPath(path);
 
-      var linkOptions = new ARDB.RevitLinkOptions(!absolute);
-      var linkLoadResult = ARDB.RevitLinkType.Create(doc, modelPath, linkOptions);
+      var linkTypeId = default(ARDB.ElementId);
+      if (GetExistingLinkType(doc, modelPath) is ARDB.RevitLinkType linkType)
+      {
+        linkTypeId = linkType.Id;
+      }
+      else
+      {
+        var linkOptions = new ARDB.RevitLinkOptions(!absolute);
+        var linkLoadResult = ARDB.RevitLinkType.Create(doc, modelPath, linkOptions);
 
-      if (linkLoadResult.ElementId == ARDB.ElementId.InvalidElementId)
-        throw new Exceptions.RuntimeException($"Failed to create Revit link from file: {path}");
+        if (linkLoadResult.ElementId == ARDB.ElementId.InvalidElementId)
+          throw new Exceptions.RuntimeException($"Failed to create Revit link from file: {path}");
 
-      var linkInstance = ARDB.RevitLinkInstance.Create(doc, linkLoadResult.ElementId);
+        linkTypeId = linkLoadResult.ElementId;
+      }
+
+      var linkInstance = ARDB.RevitLinkInstance.Create(doc, linkTypeId);
 
       if (linkInstance == null)
         throw new Exceptions.RuntimeException($"Failed to create link instance for Revit link");
 
       return linkInstance;
+    }
+
+    public ARDB.RevitLinkType GetExistingLinkType(ARDB.Document doc, ARDB.ModelPath targetFilePath)
+    {
+      var targetLinkPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(targetFilePath);
+      using (var linkTypes = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.RevitLinkType)))
+      {
+        foreach (var linkType in linkTypes.Cast<ARDB.RevitLinkType>())
+        {
+          if (linkType.IsNestedLink)
+            continue;
+
+          if (!linkType.IsFromLocalPath())
+            continue;
+
+          var extRef = linkType.GetExternalFileReference();
+          if (extRef == null)
+            continue;
+
+          var currentLinkPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(extRef.GetAbsolutePath());
+          if (string.Equals(currentLinkPath, targetLinkPath, StringComparison.OrdinalIgnoreCase))
+            return linkType;
+        }
+      }
+
+      return null;
     }
 
     ARDB.RevitLinkInstance Reconstruct
