@@ -819,11 +819,13 @@ namespace RhinoInside.Revit.GH.Components.Families
           {
             transaction.Start(Name);
 
-            family = doc.Value.CreateWorkPlaneBasedSymbol(name).Family;
+            family = doc.Value.CreateWorkPlaneBasedSymbol(name)?.Family;
             overwrite = true;
             updateGeometry = true;
 
             CommitTransaction(doc.Value, transaction);
+
+            if (family is null) return;
           }
         }
       }
