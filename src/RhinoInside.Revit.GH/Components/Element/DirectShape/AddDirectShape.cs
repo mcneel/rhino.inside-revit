@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 #if RHINO_8
 using Grasshopper.Rhinoceros.Model;
@@ -288,7 +289,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     }
   }
 
-  public class AddDirectShapeInstance : ReconstructElementComponent
+  public class AddDirectShapeInstance : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("A811EFA4-8DE2-46F3-9F88-3D4F13FE40BE");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -303,42 +304,100 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     )
     { }
 
-    void ReconstructAddDirectShapeInstance
-    (
-      [Optional, NickName("DOC")]
-      ARDB.Document document,
-
-      [ParamType(typeof(Parameters.GraphicalElement)), NickName("DS"), Description("New DirectShape")]
-      ref ARDB.DirectShape directShape,
-
-      [Description("Location where to place the element. Point or plane is accepted.")]
-      Plane location,
-      ARDB.DirectShapeType type
-    )
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      var parametersMask = new ARDB.BuiltInParameter[]
-      {
+      new ParamDefinition
+      (
+        new Parameters.Document()
+        {
+          Name = "Document",
+          NickName = "DOC",
+          Description = "Document",
+          Optional = true
+        }, ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+       (
+        new Param_Plane
+        {
+          Name = "Location",
+          NickName = "L",
+          Description = "Location where to place the element. Point or plane is accepted.",
+        }
+      ),
+      new ParamDefinition
+       (
+        new Parameters.ElementType
+        {
+          Name = "Type",
+          NickName = "T",
+          Description = "DirectShape type"
+        }
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = _DirectShape_,
+          NickName = "DS",
+          Description = $"Output {_DirectShape_}",
+        }
+      )
+    };
+
+    const string _DirectShape_ = "DirectShape";
+
+    static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
+    {
         ARDB.BuiltInParameter.ELEM_FAMILY_AND_TYPE_PARAM,
         ARDB.BuiltInParameter.ELEM_FAMILY_PARAM,
         ARDB.BuiltInParameter.ELEM_TYPE_PARAM
-      };
+    };
 
-      if (directShape is object && directShape.Category.Id == type.Category.Id) { }
-      else ReplaceElement(ref directShape, ARDB.DirectShape.CreateElement(document, type.Category.Id), parametersMask);
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
 
-      if (directShape.TypeId != type.Id)
-        directShape.SetTypeId(type.Id);
+      ReconstructElement<ARDB.DirectShape>
+      (
+        doc.Value, _DirectShape_, directShape =>
+        {
+          // Input
+          if (!Params.GetData(DA, "Location", out Plane? location, x => x.IsValid)) return null;
+          if (!Params.GetData(DA, "Type", out ARDB.DirectShapeType type)) return null;
 
-      using (var library = ARDB.DirectShapeLibrary.GetDirectShapeLibrary(document))
-      {
-        if (!library.ContainsType(type.UniqueId))
-          library.AddDefinitionType(type.UniqueId, type.Id);
-      }
+          if (directShape is object && directShape.Category.Id == type.Category.Id)
+          {
+            if (directShape.TypeId != type.Id)
+              directShape.SetTypeId(type.Id);
+          }
+          else directShape = directShape.ReplaceElement
+          (
+            ARDB.DirectShape.CreateElement(doc.Value, type.Category.Id),
+            ExcludeUniqueProperties
+          );
 
-      using (var transform = Transform.PlaneToPlane(Plane.WorldXY, location).ToTransform())
-      {
-        directShape.SetShape(ARDB.DirectShape.CreateGeometryInstance(document, type.UniqueId, transform));
-      }
+          using (var library = ARDB.DirectShapeLibrary.GetDirectShapeLibrary(doc.Value))
+          {
+            if (!library.ContainsType(type.UniqueId))
+              library.AddDefinitionType(type.UniqueId, type.Id);
+          }
+
+          using (var transform = Transform.PlaneToPlane(Plane.WorldXY, location.Value).ToTransform())
+          {
+            directShape.SetShape(ARDB.DirectShape.CreateGeometryInstance(doc.Value, type.UniqueId, transform));
+          }
+
+          DA.SetData(_DirectShape_, directShape);
+          return directShape;
+        }
+      );
     }
   }
 }
