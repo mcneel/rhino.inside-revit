@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       [Optional, NickName("DOC")]
       ARDB.Document document,
 
-      [ParamType(typeof(Parameters.GraphicalElement)), Name("Brep"), NickName("B"), Description("New Brep Shape")]
+      [Name("Brep"), NickName("B"), Description("New Brep Shape")]
       ref ARDB.DirectShape element,
 
       Brep brep

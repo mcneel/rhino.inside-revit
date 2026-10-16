@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       [Optional, NickName("DOC")]
       ARDB.Document document,
 
-      [ParamType(typeof(Parameters.GraphicalElement)), Name("Point"), NickName("P"), Description("New Point Shape")]
+      [Name("Point"), NickName("P"), Description("New Point Shape")]
       ref ARDB.DirectShape element,
 
       Point3d point

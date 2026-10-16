@@ -352,6 +352,9 @@ namespace RhinoInside.Revit.GH.Components
       { typeof(ARDB.FamilySymbol),                    (typeof(Parameters.FamilySymbol),     typeof(Types.FamilySymbol))     },
       { typeof(ARDB.FamilyInstance),                  (typeof(Parameters.FamilyInstance),   typeof(Types.FamilyInstance))   },
 
+      { typeof(ARDB.DirectShapeType),                 (typeof(Parameters.DirectShapeType),  typeof(Types.DirectShapeType))  },
+      { typeof(ARDB.DirectShape),                     (typeof(Parameters.DirectShape),      typeof(Types.DirectShape))      },
+
       { typeof(ARDB.SpatialElement),                  (typeof(Parameters.SpatialElement),   typeof(Types.SpatialElement))   },
     };
 
