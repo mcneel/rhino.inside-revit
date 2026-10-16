@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
+using OS = System.Environment;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
@@ -115,23 +117,23 @@ namespace RhinoInside.Revit.GH.Components.Walls
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
-       (
-        new Parameters.Level
+      (
+        new Parameters.LevelConstraint
         {
-          Name = "Level",
-          NickName = "L",
-          Description = "Wall base level",
-          Optional = true
+          Name = "Base",
+          NickName = "BA",
+          Description = $"Base of the {_Wall_.ToLowerInvariant()}.{OS.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Curve'.",
+          Optional = true,
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
       (
-        new Param_Number
+        new Parameters.LevelConstraint
         {
-          Name = "Height",
-          NickName = "H",
-          Description = "Unconnected Height",
-          Optional = true
+          Name = "Top",
+          NickName = "TO",
+          Description = $"Top of the {_Wall_.ToLowerInvariant()}.{OS.NewLine}This input accepts a 'Level Constraint', an 'Elevation' or a 'Number' as an offset from the 'Base'.",
+          Optional = true,
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
@@ -250,25 +252,42 @@ namespace RhinoInside.Revit.GH.Components.Walls
             throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid floor type.");
 
           var bbox = curve.GetBoundingBox(true);
-          if (!Parameters.Level.GetDataOrDefault(this, DA, "Level", out Types.Level level, doc, bbox.IsValid ? bbox.Min.Z : double.NaN)) return null;
-          if (!Params.TryGetData(DA, "Height", out double? height)) return null;
+          if (!Params.TryGetData(DA, "Base", out ERDB.ElevationElementReference? baseElevation)) return null;
+          if (!Params.TryGetData(DA, "Top", out ERDB.ElevationElementReference? topElevation)) return null;
           if (!Params.TryGetData(DA, "Location Line", out ARDB.WallLocationLine? locationLine)) return null;
           if (!Params.TryGetData(DA, "Flipped", out bool? flipped)) return null;
           if (!Params.TryGetData(DA, "Allow Joins", out bool? allowJoins)) return null;
           if (!Params.TryGetData(DA, "Structural Usage", out ARDB.Structure.StructuralWallUsage? structuralUsage)) return null;
 
+          // Solve missing Base & Top
+          ERDB.ElevationElementReference.SolveBase
+          (
+            doc.Value, bbox.Min.Z / Revit.ModelUnits,
+            0.0, 
+            ref baseElevation
+          );
+          //ERDB.ElevationElementReference.SolveBaseAndTop
+          //(
+          //  doc.Value, bbox.Min.Z / Revit.ModelUnits,
+          //  0.0, type?.Value.GetCompoundStructure()?.SampleHeight * Revit.ModelUnits ?? 20.0 * Revit.ModelUnits,
+          //  ref baseElevation, ref topElevation
+          //);
+
+          if (!baseElevation.Value.IsLevelConstraint(out var baseLevel, out var baseOffset))
+            throw new RuntimeArgumentException(nameof(curve), "No suitable level has been found.", curve);
+
           // Curve
-          var levelPlane = new Plane(new Point3d(0.0, 0.0, level.Elevation), Vector3d.ZAxis);
+          var levelPlane = new Plane(new Point3d(0.0, 0.0, baseLevel.Elevation), Vector3d.ZAxis);
           if (!TryGetCurveAtPlane(curve, levelPlane, out var centerLine))
             throw new RuntimeArgumentException(nameof(curve), "Failed to project curve in the level plane.", curve);
 
-          if (!height.HasValue)
-            height ??= type?.Value.GetCompoundStructure()?.SampleHeight * Revit.ModelUnits ?? 20.0 * Revit.ModelUnits;
+          //if (!height.HasValue)
+          //  height ??= type?.Value.GetCompoundStructure()?.SampleHeight * Revit.ModelUnits ?? 20.0 * Revit.ModelUnits;
 
-          if (height.Value < 0.1 * Revit.ModelUnits)
-            throw new RuntimeArgumentException(nameof(height), $"Height minimum value is {0.1 * Revit.ModelUnits} {Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem}");
-          else if (height.Value > 3000 * Revit.ModelUnits)
-            throw new RuntimeArgumentException(nameof(height), $"Height maximum value is {3000 * Revit.ModelUnits} {Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem}");
+          //if (height.Value < 0.1 * Revit.ModelUnits)
+          //  throw new RuntimeArgumentException(nameof(height), $"Height minimum value is {0.1 * Revit.ModelUnits} {Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem}");
+          //else if (height.Value > 3000 * Revit.ModelUnits)
+          //  throw new RuntimeArgumentException(nameof(height), $"Height maximum value is {3000 * Revit.ModelUnits} {Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem}");
 
           // LocationLine
           if (locationLine.HasValue && locationLine != ARDB.WallLocationLine.WallCenterline)
@@ -311,9 +330,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
             centerLine,
             locationLine ?? ARDB.WallLocationLine.FinishFaceInterior,
             wallType,
-            level.Value,
-            bbox.Min.Z - level.Elevation,
-            height ?? 6.0,
+            baseElevation.Value,
+            topElevation ?? new ERDB.ElevationElementReference(type?.Value.GetCompoundStructure()?.SampleHeight ?? 20.0, null),
             flipped ?? false,
             allowJoins ?? false,
             structuralUsage ?? ARDB.Structure.StructuralWallUsage.NonBearing
@@ -329,12 +347,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     (
       ref ARDB.Wall wall,
       ARDB.Curve centerLine,
-      ARDB.WallType type,
-      ARDB.Level level,
-      double height,
-      double offset,
-      bool flipped,
-      ARDB.Structure.StructuralWallUsage structuralUsage
+      ARDB.WallType type
     )
     {
       if (wall is null) return false;
@@ -403,28 +416,43 @@ namespace RhinoInside.Revit.GH.Components.Walls
       ARDB.Curve centerLine,
       ARDB.WallLocationLine locationLine,
       ARDB.WallType type,
-      ARDB.Level level, double baseHeight,
-      double unconnectedHeight,
+      ERDB.ElevationElementReference baseElevation,
+      ERDB.ElevationElementReference topElevation,
       bool flipped,
       bool allowJoins,
       ARDB.Structure.StructuralWallUsage structuralUsage
     )
     {
-      if (!Reuse(ref wall, centerLine, type, level, baseHeight, unconnectedHeight, flipped, structuralUsage))
+      if (!baseElevation.IsLevelConstraint(out var baseLevel, out var baseOffset))
+        return null;
+
+      var unconnectedHeight = topElevation.Elevation - baseElevation.Elevation;
+
+      if (!Reuse(ref wall, centerLine, type))
       {
         wall = wall.ReplaceElement
         (
-          Create(doc, centerLine, type, level, baseHeight, unconnectedHeight, flipped, structuralUsage),
+          Create(doc, centerLine, type, baseLevel, baseOffset ?? 0.0, unconnectedHeight, flipped, structuralUsage),
           ExcludeUniqueProperties
         );
       }
 
       if (wall is object)
       {
-        wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Id);
-        wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(baseHeight / Revit.ModelUnits);
         wall.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(ARDB.ElementId.InvalidElementId);
-        wall.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update(unconnectedHeight / Revit.ModelUnits);
+
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(baseLevel.Id);
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update((baseOffset ?? 0.0));
+
+        if (topElevation.IsLevelConstraint(out var topLevel, out var topOffset))
+        {
+          wall.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(topLevel.Id);
+          wall.get_Parameter(ARDB.BuiltInParameter.WALL_TOP_OFFSET).Update(topOffset ?? 0.0);
+        }
+        else if (topElevation.IsOffset(out var offset))
+        {
+          wall.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update(offset);
+        }
 
         wall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(locationLine);
         if (structuralUsage == ARDB.Structure.StructuralWallUsage.NonBearing)
