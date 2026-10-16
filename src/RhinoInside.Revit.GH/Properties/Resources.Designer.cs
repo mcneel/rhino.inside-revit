@@ -653,6 +653,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddSlopedFloor {
+            get {
+                object obj = ResourceManager.GetObject("AddSlopedFloor", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap AddSpace {
             get {
                 object obj = ResourceManager.GetObject("AddSpace", resourceCulture);
@@ -2333,6 +2343,16 @@ namespace RhinoInside.Revit.GH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ElementFilterRuleGlobalParameter {
+            get {
+                object obj = ResourceManager.GetObject("ElementFilterRuleGlobalParameter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ElementFilterRuleGreater {
             get {
                 object obj = ResourceManager.GetObject("ElementFilterRuleGreater", resourceCulture);
@@ -2346,6 +2366,26 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ElementFilterRuleGreaterOrEqual {
             get {
                 object obj = ResourceManager.GetObject("ElementFilterRuleGreaterOrEqual", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementFilterRuleHasNoValue {
+            get {
+                object obj = ResourceManager.GetObject("ElementFilterRuleHasNoValue", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementFilterRuleHasValue {
+            get {
+                object obj = ResourceManager.GetObject("ElementFilterRuleHasValue", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -2376,6 +2416,16 @@ namespace RhinoInside.Revit.GH.Properties {
         internal static System.Drawing.Bitmap ElementFilterRuleNotEquals {
             get {
                 object obj = ResourceManager.GetObject("ElementFilterRuleNotEquals", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementFilterRuleSharedParameter {
+            get {
+                object obj = ResourceManager.GetObject("ElementFilterRuleSharedParameter", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -5089,5 +5139,105 @@ namespace RhinoInside.Revit.GH.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DocumentLoad {
+            get {
+                object obj = ResourceManager.GetObject("DocumentLoad", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LinkCAD {
+            get {
+                object obj = ResourceManager.GetObject("LinkCAD", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LinkIFC {
+            get {
+                object obj = ResourceManager.GetObject("LinkIFC", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LinkRevit {
+            get {
+                object obj = ResourceManager.GetObject("LinkRevit", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap IFCReadOptions {
+            get {
+                object obj = ResourceManager.GetObject("IFCReadOptions", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap QueryCADModels {
+            get {
+                object obj = ResourceManager.GetObject("QueryCADModels", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AnalyticalAssociations {
+            get {
+                object obj = ResourceManager.GetObject("AnalyticalAssociations", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementAnalyticalAssociations {
+            get {
+                object obj = ResourceManager.GetObject("ElementAnalyticalAssociations", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementCut {
+            get {
+                object obj = ResourceManager.GetObject("ElementCut", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ElementJoin {
+            get {
+                object obj = ResourceManager.GetObject("ElementJoin", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
     }
 }
