@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
           if (options is ARDB.DWGImportOptions optionsDwg)      doc.Link(path, optionsDwg, view, out instanceId);
           else if (options is ARDB.DGNImportOptions optionsDGN) doc.Link(path, optionsDGN, view, out instanceId);
           else if (options is ARDB.SATImportOptions optionsSAT) instanceId = doc.Link(path, optionsSAT, view);
-          else if (options is ARDB.SATImportOptions optionsSKP) instanceId = doc.Link(path, optionsSKP, view);
+          else if (options is ARDB.SKPImportOptions optionsSKP) instanceId = doc.Link(path, optionsSKP, view);
 #if REVIT_2022
           else if (options is ARDB.ImportOptions3DM options3DM) instanceId = doc.Link(path, options3DM, view);
 #endif
