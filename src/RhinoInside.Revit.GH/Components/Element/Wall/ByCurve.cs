@@ -266,12 +266,6 @@ namespace RhinoInside.Revit.GH.Components.Walls
             0.0, 
             ref baseElevation
           );
-          //ERDB.ElevationElementReference.SolveBaseAndTop
-          //(
-          //  doc.Value, bbox.Min.Z / Revit.ModelUnits,
-          //  0.0, type?.Value.GetCompoundStructure()?.SampleHeight * Revit.ModelUnits ?? 20.0 * Revit.ModelUnits,
-          //  ref baseElevation, ref topElevation
-          //);
 
           if (!baseElevation.Value.IsLevelConstraint(out var baseLevel, out var baseOffset))
             throw new RuntimeArgumentException(nameof(curve), "No suitable level has been found.", curve);
@@ -280,14 +274,6 @@ namespace RhinoInside.Revit.GH.Components.Walls
           var levelPlane = new Plane(new Point3d(0.0, 0.0, baseLevel.Elevation), Vector3d.ZAxis);
           if (!TryGetCurveAtPlane(curve, levelPlane, out var centerLine))
             throw new RuntimeArgumentException(nameof(curve), "Failed to project curve in the level plane.", curve);
-
-          //if (!height.HasValue)
-          //  height ??= type?.Value.GetCompoundStructure()?.SampleHeight * Revit.ModelUnits ?? 20.0 * Revit.ModelUnits;
-
-          //if (height.Value < 0.1 * Revit.ModelUnits)
-          //  throw new RuntimeArgumentException(nameof(height), $"Height minimum value is {0.1 * Revit.ModelUnits} {Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem}");
-          //else if (height.Value > 3000 * Revit.ModelUnits)
-          //  throw new RuntimeArgumentException(nameof(height), $"Height maximum value is {3000 * Revit.ModelUnits} {Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem}");
 
           // LocationLine
           if (locationLine.HasValue && locationLine != ARDB.WallLocationLine.WallCenterline)
