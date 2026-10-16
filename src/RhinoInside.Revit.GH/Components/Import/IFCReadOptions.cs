@@ -47,16 +47,6 @@ namespace RhinoInside.Revit.GH.Components.Insert
       ),
       new ParamDefinition
       (
-        new Param_Integer
-        {
-          Name = "Action",
-          NickName = "A",
-          Description = "Import action:\n  0 = Open (open IFC as new document)\n  1 = Link (link IFC to current document)",
-          Optional = true
-        }, ParamRelevance.Primary
-      ),
-      new ParamDefinition
-      (
         new Param_Boolean
         {
           Name = "Auto Join",
@@ -102,16 +92,6 @@ namespace RhinoInside.Revit.GH.Components.Insert
       ),
       new ParamDefinition
       (
-        new Param_Integer
-        {
-          Name = "Action",
-          NickName = "A",
-          Description = "Import action value",
-          Access = GH_ParamAccess.item
-        }, ParamRelevance.Secondary
-      ),
-      new ParamDefinition
-      (
         new Param_Boolean
         {
           Name = "Auto Join",
@@ -144,12 +124,6 @@ namespace RhinoInside.Revit.GH.Components.Insert
       {
         if (Enum.IsDefined(typeof(ARDB.IFC.IFCImportIntent), intent.Value))
           options.Intent = (ARDB.IFC.IFCImportIntent)intent.Value;
-      }
-
-      if (Params.TryGetData(DA, "Action", out int? action) && action.HasValue)
-      {
-        if (Enum.IsDefined(typeof(ARDB.IFC.IFCImportAction), action.Value))
-          options.Action = (ARDB.IFC.IFCImportAction)action.Value;
       }
 
       if (Params.TryGetData(DA, "Auto Join", out bool? autoJoin) && autoJoin.HasValue)

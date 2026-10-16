@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
@@ -153,57 +154,107 @@ namespace RhinoInside.Revit.GH.Components.Insert
 
     ARDB.RevitLinkInstance Create(ARDB.Document doc, string path, ARDB.IFC.IFCImportOptions options)
     {
-      var app = Revit.ActiveUIApplication.Application;
+      var tempPath = path + ".rvt";
+      var modelPath = ARDB.ModelPathUtils.ConvertUserVisiblePathToModelPath(tempPath);
 
-      // Generate a unique temporary path for the RVT file
-      var tempFileName = $"{Path.GetFileNameWithoutExtension(path)}_IFC_{Guid.NewGuid():N}.rvt";
-      var tempPath = Path.Combine(Path.GetTempPath(), tempFileName);
-
-      ARDB.Document tempDoc = null;
-
-      try
+      var linkTypeId = default(ARDB.ElementId);
+      if (GetExistingLinkType(doc, modelPath) is ARDB.RevitLinkType linkType)
+      {
+        linkTypeId = linkType.Id;
+      }
+      else
       {
         if (File.Exists(tempPath))
-          File.Delete(tempPath);
+        {
+          var ifcModifiedTime = File.GetLastWriteTimeUtc(path);
 
-        // Create default options if not provided
-        if (options == null)
-          options = new ARDB.IFC.IFCImportOptions();
+          // Get the creation time of the linked RVT file (when we converted it)
+          var rvtCreationTime = File.GetCreationTimeUtc(tempPath);
 
-        // Convert IFC to RVT using OpenIFCDocument
-        tempDoc = app.OpenIFCDocument(path, options);
+          // If the IFC file was modified after we created the RVT link, we need to recreate
+          if (ifcModifiedTime > rvtCreationTime)
+            File.Delete(tempPath);
+        }
 
-        if (tempDoc == null || !tempDoc.IsValidObject)
-          throw new Exceptions.RuntimeException($"Failed to open IFC file: {path}");
+        if (!File.Exists(tempPath))
+        {
+          // Create default options if not provided
+          if (options == null)
+            options = new ARDB.IFC.IFCImportOptions();
 
-        tempDoc.SaveAs(tempPath);
-        tempDoc.Close(false);
+          // Convert IFC to RVT using OpenIFCDocument
+          try
+          {
+            using (var ifcDocument = doc.Application.OpenIFCDocument(path, options))
+            {
+              try { ifcDocument.SaveAs(tempPath); }
+              catch (Exception ex)
+              {
+                if (File.Exists(tempPath))
+                  File.Delete(tempPath);
+
+                throw new Exceptions.RuntimeException($"Error creating IFC link: {ex.Message}", ex);
+              }
+              finally { ifcDocument.Close(false); }
+            }
+          }
+          catch
+          {
+            throw new Exceptions.RuntimeException($"Failed to open IFC file: {path}");
+          }
+        }
 
         // Create RevitLinkType
         var linkOptions = new ARDB.RevitLinkOptions(false);
-        var linkLoadResult = ARDB.RevitLinkType.CreateFromIFC(doc, path, tempPath, false, linkOptions);
+        var linkLoadResult = default(ARDB.LinkLoadResult);
+        try
+        {
+          linkLoadResult = ARDB.RevitLinkType.CreateFromIFC(doc, path, tempPath, true, linkOptions);
+        }
+        catch (Exception e)
+        {
+          linkLoadResult = ARDB.RevitLinkType.Create(doc, ARDB.ModelPathUtils.ConvertUserVisiblePathToModelPath(tempPath), linkOptions);
+        }
 
         if (linkLoadResult.ElementId == ARDB.ElementId.InvalidElementId)
           throw new Exceptions.RuntimeException($"Failed to create link from IFC file: {path}");
 
-        // Create link instance
-        var linkInstance = ARDB.RevitLinkInstance.Create(doc, linkLoadResult.ElementId);
-
-        if (linkInstance == null)
-          throw new Exceptions.RuntimeException($"Failed to create link instance from link type");
-
-        return linkInstance;
+        linkTypeId = linkLoadResult.ElementId;
       }
-      catch (Exception ex)
+
+      // Create link instance
+      var linkInstance = ARDB.RevitLinkInstance.Create(doc, linkTypeId);
+
+      if (linkInstance == null)
+        throw new Exceptions.RuntimeException($"Failed to create link instance from link type");
+
+      return linkInstance;
+    }
+
+    public ARDB.RevitLinkType GetExistingLinkType(ARDB.Document doc, ARDB.ModelPath targetFilePath)
+    {
+      var targetLinkPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(targetFilePath);
+      using (var linkTypes = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.RevitLinkType)))
       {
-        if (tempDoc != null && tempDoc.IsValidObject)
-          tempDoc.Close(false);
+        foreach (var linkType in linkTypes.Cast<ARDB.RevitLinkType>())
+        {
+          if (linkType.IsNestedLink)
+            continue;
 
-        if (File.Exists(tempPath))
-          File.Delete(tempPath);
+          if (!linkType.IsFromLocalPath())
+            continue;
 
-        throw new Exceptions.RuntimeException($"Error creating IFC link: {ex.Message}");
+          var extRef = linkType.GetExternalFileReference();
+          if (extRef == null)
+            continue;
+
+          var currentLinkPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(extRef.GetAbsolutePath());
+          if (string.Equals(currentLinkPath, targetLinkPath, StringComparison.OrdinalIgnoreCase))
+            return linkType;
+        }
       }
+
+      return null;
     }
 
     ARDB.RevitLinkInstance Reconstruct
@@ -219,6 +270,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
         if (linkInstance != null && linkInstance.IsValidObject)
         {
           var linkTypeId = linkInstance.GetTypeId();
+          linkInstance.Pinned = false;
           doc.Delete(linkInstance.Id);
 
           if (linkTypeId != ARDB.ElementId.InvalidElementId)
