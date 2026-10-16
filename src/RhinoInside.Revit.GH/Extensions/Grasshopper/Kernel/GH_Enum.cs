@@ -336,8 +336,16 @@ namespace RhinoInside.Revit.GH.Types
           {
             if (UnderlyingEnumType.GetCustomAttribute<FlagsAttribute>() is object)
             {
-              // TODO: Translate result using GetNammedValues.
-              return ScriptVariable().ToString();
+              var texts = new List<string>();
+              for (int i = 0; i < 32; ++i)
+              {
+                var value = Value & 1 << i;
+                if (0 == (value)) continue;
+                try { texts.Add(GetNamedValues(GetType())[value]); }
+                catch (KeyNotFoundException) { return $"#{Value:D}"; }
+              }
+
+              return string.Join(" | ", texts);
             }
             else
             {
@@ -703,7 +711,8 @@ namespace RhinoInside.Revit.GH.Parameters
       if(Exposure != GH_Exposure.hidden)
         Menu_AppendExtractParameter(menu);
 
-      Menu_AppendItem(menu, "Expose picker", Menu_ExposePicker, SourceCount == 0);
+      if (!typeof(Types.IGH_Flags).IsAssignableFrom(typeof(T)))
+        Menu_AppendItem(menu, "Expose picker", Menu_ExposePicker, SourceCount == 0);
     }
 
     private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
