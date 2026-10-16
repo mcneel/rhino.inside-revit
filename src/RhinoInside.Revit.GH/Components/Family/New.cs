@@ -374,7 +374,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           brep.TryGetUserString(ARDB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
           freeForm.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
 
-          brep.TryGetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, ERDB.FamilyElementVisibility.DefaultModel);
+          brep.TryGetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, ERDB.FamilyElementVisibilityDefaults.Model);
           freeForm.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility);
 
           brep.TryGetUserString(ARDB.BuiltInParameter.MATERIAL_ID_PARAM.ToString(), out ARDB.ElementId materialId);
@@ -434,9 +434,8 @@ namespace RhinoInside.Revit.GH.Components.Families
           familyGraphicsStyle = familySubCategory?.GetGraphicsStyle(graphicsStyleType);
         }
 
-        curve.TryGetUserString(ARDB.BuiltInParameter.MODEL_OR_SYMBOLIC.ToString(), out bool symbolic, true);
         curve.TryGetUserString(ARDB.BuiltInParameter.IS_VISIBLE_PARAM.ToString(), out var visible, true);
-        curve.TryGetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, ERDB.FamilyElementVisibility.DefaultModel);
+        curve.TryGetUserString(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM.ToString(), out var visibility, ERDB.FamilyElementVisibilityDefaults.Model);
 
         if (familyDoc.OwnerFamily.FamilyCategory.ToBuiltInCategory() == ARDB.BuiltInCategory.OST_DetailComponents)
         {
@@ -455,13 +454,10 @@ namespace RhinoInside.Revit.GH.Components.Families
               else detailCurve = familyDoc.FamilyCreate.NewDetailCurve(view, c);
 
               detailCurve.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
-              detailCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility & ERDB.FamilyElementVisibility.DefaultDetail);
+              detailCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility & ERDB.FamilyElementVisibilityDefaults.Detail);
 
               if (familyGraphicsStyle is object)
                 detailCurve.LineStyle = familyGraphicsStyle;
-
-              if (!symbolic)
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Curves on a Detail will not display in 3D views");
             }
           }
         }
@@ -481,7 +477,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           {
             curves.MoveNext();
 
-            if (symbolic)
+            if (!visibility.HasFlag(ERDB.FamilyElementVisibility.Model))
             {
               if (curves.Current is ARDB.SymbolicCurve symbolicCurve && symbolicCurve.GeometryCurve.IsSameKindAs(c))
               {
@@ -491,7 +487,7 @@ namespace RhinoInside.Revit.GH.Components.Families
               else symbolicCurve = familyDoc.FamilyCreate.NewSymbolicCurve(c, sketchPlane);
 
               symbolicCurve.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
-              symbolicCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility & ERDB.FamilyElementVisibility.DefaultSymbolic);
+              symbolicCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility & ERDB.FamilyElementVisibilityDefaults.Symbolic);
 
               if (familyGraphicsStyle is object)
                 symbolicCurve.Subcategory = familyGraphicsStyle;
@@ -506,7 +502,7 @@ namespace RhinoInside.Revit.GH.Components.Families
               else modelCurve = familyDoc.FamilyCreate.NewModelCurve(c, sketchPlane);
 
               modelCurve.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM).Update(visible ? 1 : 0);
-              modelCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility & ERDB.FamilyElementVisibility.DefaultModel);
+              modelCurve.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(visibility & ERDB.FamilyElementVisibilityDefaults.Model);
 
               if (familyGraphicsStyle is object)
                 modelCurve.Subcategory = familyGraphicsStyle;

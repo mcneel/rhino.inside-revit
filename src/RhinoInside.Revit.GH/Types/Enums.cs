@@ -1,4 +1,5 @@
 using ARDB = Autodesk.Revit.DB;
+using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
@@ -28,9 +29,9 @@ namespace RhinoInside.Revit.GH.Types
     Name("Element Kind"),
     Description("Contains a collection of Revit element kind values"),
   ]
-  public class ElementKind : GH_Flags<External.DB.ElementKind>
+  public class ElementKind : GH_Flags<ERDB.ElementKind>
   {
-    public override bool IsEmpty => Value == External.DB.ElementKind.None;
+    public override bool IsEmpty => Value == ERDB.ElementKind.None;
   }
 
   [
@@ -38,9 +39,9 @@ namespace RhinoInside.Revit.GH.Types
     Name("Parameter Class"),
     Description("Contains a collection of Revit Parameter class values"),
   ]
-  public class ParameterClass : GH_Enum<External.DB.ParameterClass>
+  public class ParameterClass : GH_Enum<ERDB.ParameterClass>
   {
-    public override bool IsEmpty => Value == External.DB.ParameterClass.Any;
+    public override bool IsEmpty => Value == ERDB.ParameterClass.Any;
   }
 
   [
@@ -48,9 +49,9 @@ namespace RhinoInside.Revit.GH.Types
     Name("Parameter Scope"),
     Description("Contains a collection of Revit parameter scope type values"),
   ]
-  public class ParameterScope : GH_Enum<External.DB.ParameterScope>
+  public class ParameterScope : GH_Enum<ERDB.ParameterScope>
   {
-    public override bool IsEmpty => Value == External.DB.ParameterScope.Unknown;
+    public override bool IsEmpty => Value == ERDB.ParameterScope.Unknown;
   }
 
   [
@@ -95,12 +96,12 @@ namespace RhinoInside.Revit.GH.Types
     Name("Category Discipline"),
     Description("Contains a collection of Revit parameter category discipline values"),
   ]
-  public class CategoryDiscipline : GH_Enum<External.DB.CategoryDiscipline>
+  public class CategoryDiscipline : GH_Enum<ERDB.CategoryDiscipline>
   {
-    public CategoryDiscipline() : base(External.DB.CategoryDiscipline.None) { }
-    public CategoryDiscipline(External.DB.CategoryDiscipline value) : base(value) { }
+    public CategoryDiscipline() : base(ERDB.CategoryDiscipline.None) { }
+    public CategoryDiscipline(ERDB.CategoryDiscipline value) : base(value) { }
 
-    public override bool IsEmpty => Value == External.DB.CategoryDiscipline.None;
+    public override bool IsEmpty => Value == ERDB.CategoryDiscipline.None;
   }
 
   [
@@ -134,6 +135,30 @@ namespace RhinoInside.Revit.GH.Types
   {
     public GraphicsStyleType() : base(ARDB.GraphicsStyleType.Projection) { }
     public GraphicsStyleType(ARDB.GraphicsStyleType value) : base(value) { }
+  }
+
+  [
+    ComponentGuid("D328BF75-14C8-48FE-A4C4-5CA149F3CB2C"),
+    Name("Family Element Visibility"),
+    Description("Represents the value of 'Visibility/Graphics Overrides' property on a family element."),
+  ]
+  public class FamilyElementVisibility : GH_Flags<ERDB.FamilyElementVisibility>
+  {
+    public FamilyElementVisibility() : base() { }
+    public FamilyElementVisibility(ERDB.FamilyElementVisibility value) : base(value) { }
+
+    public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
+    {
+      { (int) ERDB.FamilyElementVisibility.Model,      "Model"           },
+      { (int) ERDB.FamilyElementVisibility.TopBottom,  "Plan/RCP"        },
+      { (int) ERDB.FamilyElementVisibility.FrontBack,  "Front/Back"      },
+      { (int) ERDB.FamilyElementVisibility.LeftRight,  "Left/Right"      },
+      { (int) ERDB.FamilyElementVisibility.PlanRCPCut, "Cut in Plan/RCP" },
+      { (int) ERDB.FamilyElementVisibility.OnlyWhenCut,"Instance is cut" },
+      { (int) ERDB.FamilyElementVisibility.Coarse,     "Coarse"          },
+      { (int) ERDB.FamilyElementVisibility.Medium,     "Medium"          },
+      { (int) ERDB.FamilyElementVisibility.Fine,       "Fine"            },
+    };
   }
 
   [
@@ -350,17 +375,17 @@ namespace RhinoInside.Revit.GH.Types
   Name("Slab Curved Edge Condition"),
   Description("Contains a collection of slab curves edge condition values"),
 ]
-  public class SlabShapeEditCurvedEdgeCondition : GH_Enum<External.DB.SlabShapeEditCurvedEdgeCondition>
+  public class SlabShapeEditCurvedEdgeCondition : GH_Enum<ERDB.SlabShapeEditCurvedEdgeCondition>
   {
     public SlabShapeEditCurvedEdgeCondition() : base() { }
-    public SlabShapeEditCurvedEdgeCondition(External.DB.SlabShapeEditCurvedEdgeCondition value) : base(value) { }
-    public override bool IsEmpty => Value == External.DB.SlabShapeEditCurvedEdgeCondition.None;
+    public SlabShapeEditCurvedEdgeCondition(ERDB.SlabShapeEditCurvedEdgeCondition value) : base(value) { }
+    public override bool IsEmpty => Value == ERDB.SlabShapeEditCurvedEdgeCondition.None;
 
     public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
     {
-      { (int) External.DB.SlabShapeEditCurvedEdgeCondition.None,           "None" },
-      { (int) External.DB.SlabShapeEditCurvedEdgeCondition.ConformToCurve, "Conform To Curve" },
-      { (int) External.DB.SlabShapeEditCurvedEdgeCondition.ProjectToSide,  "Project To Side" },
+      { (int) ERDB.SlabShapeEditCurvedEdgeCondition.None,           "None" },
+      { (int) ERDB.SlabShapeEditCurvedEdgeCondition.ConformToCurve, "Conform To Curve" },
+      { (int) ERDB.SlabShapeEditCurvedEdgeCondition.ProjectToSide,  "Project To Side" },
     };
   }
 
@@ -438,10 +463,10 @@ namespace RhinoInside.Revit.GH.Types
     Name("Wall Wrapping"),
     Description("Contains a collection of Revit wall wrapping option"),
   ]
-  public class WallWrapping : GH_Enum<External.DB.WallWrapping>
+  public class WallWrapping : GH_Enum<ERDB.WallWrapping>
   {
     public WallWrapping() : base() { }
-    public WallWrapping(External.DB.WallWrapping value) : base(value) { }
+    public WallWrapping(ERDB.WallWrapping value) : base(value) { }
   }
 
   [
@@ -573,18 +598,18 @@ namespace RhinoInside.Revit.GH.Types
     Name("Curtain Grid Layout"),
     Description("Represents layout for curtain grids at either direction"),
   ]
-  public class CurtainGridLayout : GH_Enum<External.DB.CurtainGridLayout>
+  public class CurtainGridLayout : GH_Enum<ERDB.CurtainGridLayout>
   {
     public CurtainGridLayout() : base() { }
-    public CurtainGridLayout(External.DB.CurtainGridLayout value) : base(value) { }
+    public CurtainGridLayout(ERDB.CurtainGridLayout value) : base(value) { }
 
     public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
     {
-      { (int) External.DB.CurtainGridLayout.None,            "None"             },
-      { (int) External.DB.CurtainGridLayout.FixedDistance,   "Fixed Distance"   },
-      { (int) External.DB.CurtainGridLayout.FixedNumber,     "Fixed Number"     },
-      { (int) External.DB.CurtainGridLayout.MaximumSpacing,  "Maximum Spacing"  },
-      { (int) External.DB.CurtainGridLayout.MinimumSpacing,  "Minimum Spacing"  },
+      { (int) ERDB.CurtainGridLayout.None,            "None"             },
+      { (int) ERDB.CurtainGridLayout.FixedDistance,   "Fixed Distance"   },
+      { (int) ERDB.CurtainGridLayout.FixedNumber,     "Fixed Number"     },
+      { (int) ERDB.CurtainGridLayout.MaximumSpacing,  "Maximum Spacing"  },
+      { (int) ERDB.CurtainGridLayout.MinimumSpacing,  "Minimum Spacing"  },
     };
   }
 
@@ -593,19 +618,19 @@ namespace RhinoInside.Revit.GH.Types
     Name("Curtain Grid Join Condition"),
     Description("Represents join condition for curtain grids at either direction"),
   ]
-  public class CurtainGridJoinCondition : GH_Enum<External.DB.CurtainGridJoinCondition>
+  public class CurtainGridJoinCondition : GH_Enum<ERDB.CurtainGridJoinCondition>
   {
     public CurtainGridJoinCondition() : base() { }
-    public CurtainGridJoinCondition(External.DB.CurtainGridJoinCondition value) : base(value) { }
-    public override bool IsEmpty => Value == External.DB.CurtainGridJoinCondition.NotDefined;
+    public CurtainGridJoinCondition(ERDB.CurtainGridJoinCondition value) : base(value) { }
+    public override bool IsEmpty => Value == ERDB.CurtainGridJoinCondition.NotDefined;
 
     public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
     {
-      { (int) External.DB.CurtainGridJoinCondition.NotDefined,                        "Not Defined" },
-      { (int) External.DB.CurtainGridJoinCondition.VerticalGridContinuous,            "Vertical Grid Continuous" },
-      { (int) External.DB.CurtainGridJoinCondition.HorizontalGridContinuous,          "Horizontal Grid Continuous" },
-      { (int) External.DB.CurtainGridJoinCondition.BorderAndVerticalGridContinuous,   "Border & Vertical Grid Continuous" },
-      { (int) External.DB.CurtainGridJoinCondition.BorderAndHorizontalGridContinuous, "Border & Horizontal Grid Continuous" },
+      { (int) ERDB.CurtainGridJoinCondition.NotDefined,                        "Not Defined" },
+      { (int) ERDB.CurtainGridJoinCondition.VerticalGridContinuous,            "Vertical Grid Continuous" },
+      { (int) ERDB.CurtainGridJoinCondition.HorizontalGridContinuous,          "Horizontal Grid Continuous" },
+      { (int) ERDB.CurtainGridJoinCondition.BorderAndVerticalGridContinuous,   "Border & Vertical Grid Continuous" },
+      { (int) ERDB.CurtainGridJoinCondition.BorderAndHorizontalGridContinuous, "Border & Horizontal Grid Continuous" },
     };
   }
 
@@ -614,21 +639,21 @@ namespace RhinoInside.Revit.GH.Types
     Name("Curtain Mullion System Family"),
     Description("Represents builtin curtain mullion system families"),
   ]
-  public class CurtainMullionSystemFamily : GH_Enum<External.DB.CurtainMullionSystemFamily>
+  public class CurtainMullionSystemFamily : GH_Enum<ERDB.CurtainMullionSystemFamily>
   {
-    public CurtainMullionSystemFamily() : base(External.DB.CurtainMullionSystemFamily.Unknown) { }
-    public CurtainMullionSystemFamily(External.DB.CurtainMullionSystemFamily value) : base(value) { }
-    public override bool IsEmpty => Value == External.DB.CurtainMullionSystemFamily.Unknown;
+    public CurtainMullionSystemFamily() : base(ERDB.CurtainMullionSystemFamily.Unknown) { }
+    public CurtainMullionSystemFamily(ERDB.CurtainMullionSystemFamily value) : base(value) { }
+    public override bool IsEmpty => Value == ERDB.CurtainMullionSystemFamily.Unknown;
 
     public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
     {
-      { (int) External.DB.CurtainMullionSystemFamily.Unknown,         "Unknown"         },
-      { (int) External.DB.CurtainMullionSystemFamily.Rectangular,     "Rectangular"     },
-      { (int) External.DB.CurtainMullionSystemFamily.Circular,        "Circular"        },
-      { (int) External.DB.CurtainMullionSystemFamily.LCorner,         "L Corner"        },
-      { (int) External.DB.CurtainMullionSystemFamily.TrapezoidCorner, "Trapezoid Corner"},
-      { (int) External.DB.CurtainMullionSystemFamily.QuadCorner,      "Quad Corner"     },
-      { (int) External.DB.CurtainMullionSystemFamily.VCorner,         "V Corner"        },
+      { (int) ERDB.CurtainMullionSystemFamily.Unknown,         "Unknown"         },
+      { (int) ERDB.CurtainMullionSystemFamily.Rectangular,     "Rectangular"     },
+      { (int) ERDB.CurtainMullionSystemFamily.Circular,        "Circular"        },
+      { (int) ERDB.CurtainMullionSystemFamily.LCorner,         "L Corner"        },
+      { (int) ERDB.CurtainMullionSystemFamily.TrapezoidCorner, "Trapezoid Corner"},
+      { (int) ERDB.CurtainMullionSystemFamily.QuadCorner,      "Quad Corner"     },
+      { (int) ERDB.CurtainMullionSystemFamily.VCorner,         "V Corner"        },
     };
   }
 
@@ -637,11 +662,11 @@ namespace RhinoInside.Revit.GH.Types
     Name("Curtain Panel System Family"),
     Description("Represents builtin curtain panel system families"),
   ]
-  public class CurtainPanelSystemFamily : GH_Enum<External.DB.CurtainPanelSystemFamily>
+  public class CurtainPanelSystemFamily : GH_Enum<ERDB.CurtainPanelSystemFamily>
   {
     public CurtainPanelSystemFamily() : base() { }
-    public CurtainPanelSystemFamily(External.DB.CurtainPanelSystemFamily value) : base(value) { }
-    public override bool IsEmpty => Value == External.DB.CurtainPanelSystemFamily.Unknown;
+    public CurtainPanelSystemFamily(ERDB.CurtainPanelSystemFamily value) : base(value) { }
+    public override bool IsEmpty => Value == ERDB.CurtainPanelSystemFamily.Unknown;
   }
 
   [
@@ -649,7 +674,7 @@ namespace RhinoInside.Revit.GH.Types
     Name("Floor Function"),
     Description("Represents builtin floor function"),
   ]
-  public class FloorFunction : GH_Enum<External.DB.FloorFunction>
+  public class FloorFunction : GH_Enum<ERDB.FloorFunction>
   {
   }
 

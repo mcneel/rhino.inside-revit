@@ -97,7 +97,7 @@ namespace RhinoInside.Revit.GH.Components.Families
       }
 
       form.get_Parameter(ARDB.BuiltInParameter.IS_VISIBLE_PARAM)?.Update(true);
-      form.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(ERDB.FamilyElementVisibility.DefaultModel);
+      form.get_Parameter(ARDB.BuiltInParameter.GEOM_VISIBILITY_PARAM).Update(ERDB.FamilyElementVisibilityDefaults.Model);
       form.get_Parameter(ARDB.BuiltInParameter.MATERIAL_ID_PARAM)?.Update(ElementIdExtension.Invalid);
       form.get_Parameter(ARDB.BuiltInParameter.FAMILY_ELEM_SUBCATEGORY)?.Update(ElementIdExtension.Invalid);
       form.get_Parameter(ARDB.BuiltInParameter.ELEMENT_IS_CUTTING)?.Update(0);

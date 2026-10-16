@@ -24,34 +24,34 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     protected override void RegisterInputParams(GH_InputParamManager manager)
     {
-      manager.AddBooleanParameter("Model", "M", string.Empty, GH_ParamAccess.item, false);
-      manager.AddBooleanParameter("PlanRCPCut", "RCP", string.Empty, GH_ParamAccess.item, true);
-      manager.AddBooleanParameter("TopBottom", "XY", string.Empty, GH_ParamAccess.item, true);
-      manager.AddBooleanParameter("FrontBack", "YZ", string.Empty, GH_ParamAccess.item, true);
-      manager.AddBooleanParameter("LeftRight", "XZ", string.Empty, GH_ParamAccess.item, true);
-      manager.AddBooleanParameter("OnlyWhenCut", "CUT", string.Empty, GH_ParamAccess.item, false);
+      manager.AddBooleanParameter("Model", "M", "Model or Symbolic", GH_ParamAccess.item, true);
+      manager.AddBooleanParameter("When Cut : Model", "Mc", string.Empty, GH_ParamAccess.item, true);
+      manager.AddBooleanParameter("Plan/RCP : Model", "XY", string.Empty, GH_ParamAccess.item, true);
+      manager.AddBooleanParameter("Front/Back : Model", "YZ", string.Empty, GH_ParamAccess.item, true);
+      manager.AddBooleanParameter("Left/Right : Model", "XZ", string.Empty, GH_ParamAccess.item, true);
+      manager.AddBooleanParameter("When Cut : Symbolic", "Sc", string.Empty, GH_ParamAccess.item, true);
 
-      manager.AddBooleanParameter("Coarse", "C", string.Empty, GH_ParamAccess.item, true);
-      manager.AddBooleanParameter("Medium", "M", string.Empty, GH_ParamAccess.item, true);
-      manager.AddBooleanParameter("Fine", "F", string.Empty, GH_ParamAccess.item, true);
+      manager.AddBooleanParameter("Coarse : Detail Level", "C", string.Empty, GH_ParamAccess.item, true);
+      manager.AddBooleanParameter("Medium : Detail Level", "M", string.Empty, GH_ParamAccess.item, true);
+      manager.AddBooleanParameter("Fine : Detail Level", "F", string.Empty, GH_ParamAccess.item, true);
     }
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddIntegerParameter("Visibility", "Vs", "Visibility/Graphics Overrides", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.Param_Enum<Types.FamilyElementVisibility>(), "Visibility", "Vs", "Visibility/Graphics Overrides", GH_ParamAccess.item);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       var model = false; if (!DA.GetData(0, ref model)) return;
-      var planRCPCut = false; if (!DA.GetData("PlanRCPCut", ref planRCPCut)) return;
-      var topBottom = false; if (!DA.GetData("TopBottom", ref topBottom)) return;
-      var frontBack = false; if (!DA.GetData("FrontBack", ref frontBack)) return;
-      var leftRight = false; if (!DA.GetData("LeftRight", ref leftRight)) return;
-      var onlyWhenCut = false; if (!DA.GetData("OnlyWhenCut", ref onlyWhenCut)) return;
-      var coarse = false; if (!DA.GetData("Coarse", ref coarse)) return;
-      var medium = false; if (!DA.GetData("Medium", ref medium)) return;
-      var fine = false; if (!DA.GetData("Fine", ref fine)) return;
+      var planRCPCut = false; if (!DA.GetData(1, ref planRCPCut)) return;
+      var topBottom = false; if (!DA.GetData(2, ref topBottom)) return;
+      var frontBack = false; if (!DA.GetData(3, ref frontBack)) return;
+      var leftRight = false; if (!DA.GetData(4, ref leftRight)) return;
+      var onlyWhenCut = false; if (!DA.GetData(5, ref onlyWhenCut)) return;
+      var coarse = false; if (!DA.GetData(6, ref coarse)) return;
+      var medium = false; if (!DA.GetData(7, ref medium)) return;
+      var fine = false; if (!DA.GetData(8, ref fine)) return;
 
       var value = default(ERDB.FamilyElementVisibility);
       if (model) value |= ERDB.FamilyElementVisibility.Model;

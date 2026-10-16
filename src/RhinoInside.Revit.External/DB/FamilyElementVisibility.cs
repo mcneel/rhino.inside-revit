@@ -23,9 +23,31 @@ namespace RhinoInside.Revit.External.DB
     Coarse =        1 << 13,
     Medium =        1 << 14,
     Fine =          1 << 15,
+  }
 
-    DefaultModel = Model | PlanRCPCut | TopBottom | FrontBack | LeftRight | Coarse | Medium | Fine,
-    DefaultDetail = Model | Coarse | Medium | Fine,
-    DefaultSymbolic = Coarse | Medium | Fine,
+  internal static class FamilyElementVisibilityDefaults
+  {
+    public static readonly FamilyElementVisibility Model = FamilyElementVisibility.Model |
+      FamilyElementVisibility.PlanRCPCut |
+      FamilyElementVisibility.TopBottom |
+      FamilyElementVisibility.FrontBack |
+      FamilyElementVisibility.LeftRight |
+      FamilyElementVisibility.Coarse |
+      FamilyElementVisibility.Medium |
+      FamilyElementVisibility.Fine;
+
+    public static readonly FamilyElementVisibility Detail = FamilyElementVisibility.Model |
+      FamilyElementVisibility.PlanRCPCut |
+      FamilyElementVisibility.TopBottom |
+      FamilyElementVisibility.FrontBack |
+      FamilyElementVisibility.LeftRight |
+      FamilyElementVisibility.Coarse |
+      FamilyElementVisibility.Medium |
+      FamilyElementVisibility.Fine;
+
+    public static readonly FamilyElementVisibility Symbolic = FamilyElementVisibility.OnlyWhenCut |
+      FamilyElementVisibility.Coarse |
+      FamilyElementVisibility.Medium |
+      FamilyElementVisibility.Fine;
   }
 }
