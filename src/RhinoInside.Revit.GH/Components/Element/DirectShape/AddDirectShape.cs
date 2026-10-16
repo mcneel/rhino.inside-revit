@@ -188,7 +188,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       [Optional, NickName("DOC")]
       ARDB.Document document,
 
-      [ParamType(typeof(Parameters.GraphicalElement)), Name("DirectShape"), NickName("DS"), Description("New DirectShape")]
+      [Name("DirectShape"), NickName("DS"), Description("New DirectShape")]
       ref ARDB.DirectShape element,
 
       [Optional] string name,
@@ -251,7 +251,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       ARDB.Document document,
 
       [Description("New DirectShape Type")]
-      ref ARDB.ElementType type,
+      ref ARDB.DirectShapeType type,
 
       [Optional, Name("Family Name"), NickName("FN")]
       string familyName,
@@ -328,7 +328,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       ),
       new ParamDefinition
        (
-        new Parameters.ElementType
+        new Parameters.DirectShapeType
         {
           Name = "Type",
           NickName = "T",
@@ -342,7 +342,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     {
       new ParamDefinition
       (
-        new Parameters.GraphicalElement()
+        new Parameters.DirectShape()
         {
           Name = _DirectShape_,
           NickName = "DS",

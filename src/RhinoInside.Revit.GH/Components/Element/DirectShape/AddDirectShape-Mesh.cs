@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       [Optional, NickName("DOC")]
       ARDB.Document document,
 
-      [ParamType(typeof(Parameters.GraphicalElement)), Name("Mesh"), NickName("M"), Description("New Mesh Shape")]
+      [Name("Mesh"), NickName("M"), Description("New Mesh Shape")]
       ref ARDB.DirectShape element,
 
       Mesh mesh

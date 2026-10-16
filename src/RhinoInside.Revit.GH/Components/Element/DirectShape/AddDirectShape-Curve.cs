@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       [Optional, NickName("DOC")]
       ARDB.Document document,
 
-      [ParamType(typeof(Parameters.GraphicalElement)), Name("Curve"), NickName("C"), Description("New Curve Shape")]
+      [Name("Curve"), NickName("C"), Description("New Curve Shape")]
       ref ARDB.DirectShape element,
 
       Curve curve
