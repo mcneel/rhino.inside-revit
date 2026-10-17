@@ -233,12 +233,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
         options = new ARDB.IFC.IFCImportOptions();
 
       if (options.Action != ARDB.IFC.IFCImportAction.Open)
-      {
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,
-          $"IFC Import Action is set to '{options.Action}'. OpenIFCDocument only supports 'Open' action. " +
-          "Setting Action to Open.");
         options.Action = ARDB.IFC.IFCImportAction.Open;
-      }
 
       if (options.Intent != ARDB.IFC.IFCImportIntent.Parametric)
       {
