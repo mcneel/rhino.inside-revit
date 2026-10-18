@@ -61,8 +61,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
         {
           Name = _Output_,
           NickName = _Output_.Substring(0, 1),
-          Description = $"Output {_Output_}",
-          Access = GH_ParamAccess.item
+          Description = $"Output {_Output_}"
         }
       )
     };

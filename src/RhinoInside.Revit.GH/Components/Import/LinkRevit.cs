@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Insert
@@ -44,18 +45,8 @@ namespace RhinoInside.Revit.GH.Components.Insert
           Name = "Path",
           NickName = "P",
           Description = "Absolute path to the Revit file",
-          FileFilter = "Revit Files (*.rvt, *.rfa)|*.rvt;*.rfa"
+          FileFilter = "Revit Files (*.rvt)|*.rvt"
         }
-      ),
-      new ParamDefinition
-      (
-        new Param_Boolean
-        {
-          Name = "Absolute",
-          NickName = "A",
-          Description = "Use absolute path (true) or relative path (false)",
-          Optional = true
-        }, ParamRelevance.Secondary
       )
     };
 
@@ -68,8 +59,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
         {
           Name = _Output_,
           NickName = _Output_.Substring(0, 1),
-          Description = $"Output {_Output_}",
-          Access = GH_ParamAccess.item
+          Description = $"Output {_Output_}"
         }
       )
     };
@@ -86,18 +76,17 @@ namespace RhinoInside.Revit.GH.Components.Insert
         {
           // Input
           if (!Params.GetData(DA, "Path", out string path)) return null;
-          Params.TryGetData(DA, "Absolute", out bool? absolute);
 
           // Validations
           if (!File.Exists(path))
             throw new Exceptions.RuntimeArgumentException("Path", $"Revit file does not exist: {path}");
 
           var extension = Path.GetExtension(path).ToLowerInvariant();
-          if (extension != ".rvt" && extension != ".rfa")
-            throw new Exceptions.RuntimeArgumentException("Path", $"File must be a Revit file (.rvt or .rfa): {path}");
+          if (extension != ".rvt")
+            throw new Exceptions.RuntimeArgumentException("Path", $"File must be a Revit file (*.rvt): {path}");
           
           // Compute
-          linkInstance = Reconstruct(linkInstance, doc.Value, path, absolute ?? false);
+          linkInstance = Reconstruct(linkInstance, doc.Value, path);
 
           DA.SetData(_Output_, linkInstance);
           return linkInstance;
@@ -105,12 +94,11 @@ namespace RhinoInside.Revit.GH.Components.Insert
       );
     }
 
-    bool Reuse(ARDB.RevitLinkInstance linkInstance, ARDB.Document doc, string rvtPath)
+    bool Reuse(ref ARDB.RevitLinkInstance linkInstance, string rvtPath)
     {
       if (linkInstance is null) return false;
-      if (!linkInstance.IsValidObject) return false;
 
-      if (!(doc.GetElement(linkInstance.GetTypeId()) is ARDB.RevitLinkType linkType)) return false;
+      if (!(linkInstance.Document.GetElement(linkInstance.GetTypeId()) is ARDB.RevitLinkType linkType)) return false;
 
       var externalFileRef = linkType.GetExternalFileReference();
       if (externalFileRef == null) return false;
@@ -122,51 +110,39 @@ namespace RhinoInside.Revit.GH.Components.Insert
       var normalizedInputPath = Path.GetFullPath(rvtPath);
 
       if (!string.Equals(normalizedLinkedPath, normalizedInputPath, StringComparison.OrdinalIgnoreCase))
-        return false;
+      {
+        var typeId = GetLinkTypeId(linkInstance.Document, rvtPath);
+        if (!typeId.IsValid())
+          return false;
 
-      if (!File.Exists(linkedPath))
-        return false;
-
-      var rvtModifiedTime = File.GetLastWriteTimeUtc(rvtPath);
-      var linkStatus = linkType.GetLinkedFileStatus();
-
-      if (linkStatus != ARDB.LinkedFileStatus.Loaded)
-        return false;
+        if (ARDB.Element.IsValidType(linkInstance.Document, new ARDB.ElementId[] { linkInstance.Id }, typeId))
+        {
+          if (linkInstance.ChangeTypeId(typeId) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
+            linkInstance = linkInstance.Document.GetElement(id) as ARDB.RevitLinkInstance;
+        }
+        else return false;
+      }
 
       return true;
     }
 
-    ARDB.RevitLinkInstance Create(ARDB.Document doc, string path, bool absolute)
+    ARDB.ElementId CreateLinkType(ARDB.Document doc, string path)
     {
+      var typeId = GetLinkTypeId(doc, path);
+      if (typeId.IsValid()) return typeId;
+
+      var linkOptions = new ARDB.RevitLinkOptions(relative:false);
       var modelPath = ARDB.ModelPathUtils.ConvertUserVisiblePathToModelPath(path);
+      var linkLoadResult = ARDB.RevitLinkType.Create(doc, modelPath, linkOptions);
 
-      var linkTypeId = default(ARDB.ElementId);
-      if (GetExistingLinkType(doc, modelPath) is ARDB.RevitLinkType linkType)
-      {
-        linkTypeId = linkType.Id;
-      }
-      else
-      {
-        var linkOptions = new ARDB.RevitLinkOptions(!absolute);
-        var linkLoadResult = ARDB.RevitLinkType.Create(doc, modelPath, linkOptions);
+      if (linkLoadResult.ElementId == ARDB.ElementId.InvalidElementId)
+        throw new Exceptions.RuntimeException($"Failed to create Revit link from file: {path}");
 
-        if (linkLoadResult.ElementId == ARDB.ElementId.InvalidElementId)
-          throw new Exceptions.RuntimeException($"Failed to create Revit link from file: {path}");
-
-        linkTypeId = linkLoadResult.ElementId;
-      }
-
-      var linkInstance = ARDB.RevitLinkInstance.Create(doc, linkTypeId);
-
-      if (linkInstance == null)
-        throw new Exceptions.RuntimeException($"Failed to create link instance for Revit link");
-
-      return linkInstance;
+      return linkLoadResult.ElementId;
     }
 
-    public ARDB.RevitLinkType GetExistingLinkType(ARDB.Document doc, ARDB.ModelPath targetFilePath)
+    public ARDB.ElementId GetLinkTypeId(ARDB.Document doc, string rvtPath)
     {
-      var targetLinkPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(targetFilePath);
       using (var linkTypes = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.RevitLinkType)))
       {
         foreach (var linkType in linkTypes.Cast<ARDB.RevitLinkType>())
@@ -182,40 +158,23 @@ namespace RhinoInside.Revit.GH.Components.Insert
             continue;
 
           var currentLinkPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(extRef.GetAbsolutePath());
-          if (string.Equals(currentLinkPath, targetLinkPath, StringComparison.OrdinalIgnoreCase))
-            return linkType;
+          if (string.Equals(currentLinkPath, rvtPath, StringComparison.OrdinalIgnoreCase))
+            return linkType.Id;
         }
       }
 
-      return null;
+      return ElementIdExtension.Invalid;
     }
 
     ARDB.RevitLinkInstance Reconstruct
     (
       ARDB.RevitLinkInstance linkInstance,
       ARDB.Document doc,
-      string path,
-      bool absolute
+      string path
     )
     {
-      if (!Reuse(linkInstance, doc, path))
-      {
-        if (linkInstance != null && linkInstance.IsValidObject)
-        {
-          var linkTypeId = linkInstance.GetTypeId();
-          doc.Delete(linkInstance.Id);
-
-          if (linkTypeId != ARDB.ElementId.InvalidElementId)
-          {
-            if (doc.GetElement(linkTypeId) is ARDB.RevitLinkType linkType && linkType.IsValidObject)
-            {
-              doc.Delete(linkTypeId);
-            }
-          }
-        }
-
-        linkInstance = Create(doc, path, absolute);
-      }
+      if (!Reuse(ref linkInstance, path))
+        linkInstance = ARDB.RevitLinkInstance.Create(doc, CreateLinkType(doc, path));
 
       return linkInstance;
     }

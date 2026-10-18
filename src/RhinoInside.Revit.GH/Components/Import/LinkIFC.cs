@@ -7,6 +7,8 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Insert
 {
+  using External.DB.Extensions;
+
   [ComponentVersion(introduced: "1.36")]
   public class LinkIFC : ElementTrackerComponent
   {
@@ -68,8 +70,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
         {
           Name = _Output_,
           NickName = _Output_.Substring(0, 1),
-          Description = $"Output {_Output_}",
-          Access = GH_ParamAccess.item
+          Description = $"Output {_Output_}"
         }
       )
     };
@@ -105,84 +106,89 @@ namespace RhinoInside.Revit.GH.Components.Insert
       );
     }
 
-    bool Reuse(ARDB.RevitLinkInstance linkInstance, ARDB.Document doc, string ifcPath)
+    bool Reuse(ref ARDB.RevitLinkInstance linkInstance, string ifcPath)
     {
+      var rvtPath = ifcPath + ".RVT";
       if (linkInstance is null) return false;
 
-      if (!(doc.GetElement(linkInstance.GetTypeId()) is ARDB.RevitLinkType linkType)) return false;
-      if (linkType.IsNestedLink) return false;
-      if (!linkType.IsFromLocalPath()) return false;
+      if (!(linkInstance.Document.GetElement(linkInstance.GetTypeId()) is ARDB.RevitLinkType linkType)) return false;
 
       var externalFileRef = linkType.GetExternalFileReference();
       if (externalFileRef == null) return false;
 
-      var rvtPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(externalFileRef.GetPath());
-      if (string.IsNullOrEmpty(rvtPath)) return false;
-      if (!File.Exists(rvtPath)) return false;
+      var linkedPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(externalFileRef.GetPath());
+      if (string.IsNullOrEmpty(linkedPath)) return false;
 
-      var ifcModifiedTime = File.GetLastWriteTimeUtc(ifcPath);
-      var rvtModifiedTime = File.GetLastWriteTimeUtc(rvtPath);
+      var normalizedLinkedPath = Path.GetFullPath(linkedPath);
+      var normalizedInputPath = Path.GetFullPath(rvtPath);
 
-      if (ifcModifiedTime > rvtModifiedTime)
+      if (!string.Equals(normalizedLinkedPath, normalizedInputPath, StringComparison.OrdinalIgnoreCase))
+      {
+        var typeId = GetLinkTypeId(linkInstance.Document, rvtPath);
+        if (!typeId.IsValid())
+          return false;
+
+        if (ARDB.Element.IsValidType(linkInstance.Document, new ARDB.ElementId[] { linkInstance.Id }, typeId))
+        {
+          if (linkInstance.ChangeTypeId(typeId) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
+            linkInstance = linkInstance.Document.GetElement(id) as ARDB.RevitLinkInstance;
+        }
+        else return false;
+      }
+
+      if (File.GetLastWriteTimeUtc(ifcPath) > File.GetLastWriteTimeUtc(rvtPath))
         return false;
 
       return true;
     }
 
-    ARDB.RevitLinkInstance Create(ARDB.Document doc, string ifcPath, ARDB.IFC.IFCImportOptions options)
+    ARDB.ElementId CreateLinkType(ARDB.Document doc, string ifcPath, ARDB.IFC.IFCImportOptions options)
     {
       var rvtPath = ifcPath + ".RVT";
-      var linkTypeId = default(ARDB.ElementId);
-      if (GetExistingLinkType(doc, rvtPath) is ARDB.RevitLinkType linkType)
+      var typeId = GetLinkTypeId(doc, rvtPath);
+      if (typeId.IsValid()) return typeId;
+
+      if (File.Exists(rvtPath))
       {
-        linkTypeId = linkType.Id;
+        var ifcModifiedTime = File.GetLastWriteTimeUtc(ifcPath);
+        var rvtModifiedTime = File.GetLastWriteTimeUtc(rvtPath);
+
+        if (ifcModifiedTime > rvtModifiedTime)
+          File.Delete(rvtPath);
       }
-      else
+
+      if (!File.Exists(rvtPath))
       {
-        if (File.Exists(rvtPath))
+        try
         {
-          var ifcModifiedTime = File.GetLastWriteTimeUtc(ifcPath);
-          var rvtModifiedTime = File.GetLastWriteTimeUtc(rvtPath);
-
-          if (ifcModifiedTime > rvtModifiedTime)
-            File.Delete(rvtPath);
-        }
-
-        if (!File.Exists(rvtPath))
-        {
-          try
+          using (var ifcDocument = doc.Application.OpenIFCDocument(ifcPath, options ?? new ARDB.IFC.IFCImportOptions()))
           {
-            using (var ifcDocument = doc.Application.OpenIFCDocument(ifcPath, options ?? new ARDB.IFC.IFCImportOptions()))
+            try { ifcDocument.SaveAs(rvtPath); }
+            catch (Exception ex)
             {
-              try { ifcDocument.SaveAs(rvtPath); }
-              catch (Exception ex)
-              {
-                if (File.Exists(rvtPath))
-                  File.Delete(rvtPath);
+              if (File.Exists(rvtPath))
+                File.Delete(rvtPath);
 
-                throw new Exceptions.RuntimeException($"Error creating IFC link: {ex.Message}", ex);
-              }
-              finally { ifcDocument.Close(false); }
+              throw new Exceptions.RuntimeException($"Error creating IFC link: {ex.Message}", ex);
             }
-          }
-          catch
-          {
-            throw new Exceptions.RuntimeException($"Failed to open IFC file: {ifcPath}");
+            finally { ifcDocument.Close(false); }
           }
         }
-
-        var linkOptions = new ARDB.RevitLinkOptions(false);
-        var linkLoadResult = ARDB.RevitLinkType.CreateFromIFC(doc, ifcPath, rvtPath, true, linkOptions);
-        if (linkLoadResult.ElementId == ARDB.ElementId.InvalidElementId)
-          throw new Exceptions.RuntimeException($"Failed to create link from IFC file: {ifcPath}");
-
-        linkTypeId = linkLoadResult.ElementId;
+        catch
+        {
+          throw new Exceptions.RuntimeException($"Failed to open IFC file: {ifcPath}");
+        }
       }
 
-      return ARDB.RevitLinkInstance.Create(doc, linkTypeId);
+      var linkOptions = new ARDB.RevitLinkOptions(false);
+      var linkLoadResult = ARDB.RevitLinkType.CreateFromIFC(doc, ifcPath, rvtPath, false, linkOptions);
+      if (linkLoadResult.ElementId == ARDB.ElementId.InvalidElementId)
+        throw new Exceptions.RuntimeException($"Failed to create link from IFC file: {ifcPath}");
+
+      return linkLoadResult.ElementId;
     }
 
-    public ARDB.RevitLinkType GetExistingLinkType(ARDB.Document doc, string rvtPath)
+    public ARDB.ElementId GetLinkTypeId(ARDB.Document doc, string rvtPath)
     {
       using (var linkTypes = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.RevitLinkType)))
       {
@@ -200,11 +206,11 @@ namespace RhinoInside.Revit.GH.Components.Insert
 
           var currentLinkPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(extRef.GetAbsolutePath());
           if (string.Equals(currentLinkPath, rvtPath, StringComparison.OrdinalIgnoreCase))
-            return linkType;
+            return linkType.Id;
         }
       }
 
-      return null;
+      return ElementIdExtension.Invalid;
     }
 
     ARDB.RevitLinkInstance Reconstruct
@@ -215,20 +221,8 @@ namespace RhinoInside.Revit.GH.Components.Insert
       ARDB.IFC.IFCImportOptions options
     )
     {
-      if (!Reuse(linkInstance, doc, path))
-      {
-        if (linkInstance != null && linkInstance.IsValidObject)
-        {
-          var linkTypeId = linkInstance.GetTypeId();
-          linkInstance.Pinned = false;
-          doc.Delete(linkInstance.Id);
-
-          if (doc.GetElement(linkTypeId) is ARDB.RevitLinkType linkType)
-            doc.Delete(linkTypeId);
-        }
-
-        linkInstance = Create(doc, path, options);
-      }
+      if (!Reuse(ref linkInstance, path))
+        linkInstance = ARDB.RevitLinkInstance.Create(doc, CreateLinkType(doc, path, options));
 
       return linkInstance;
     }
