@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Filter name", GH_ParamAccess.item, optional: true),
     };
 
