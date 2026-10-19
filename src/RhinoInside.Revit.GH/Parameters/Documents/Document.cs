@@ -203,7 +203,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var documents = Revit.ActiveUIApplication.
         Application.Documents.
         Cast<ARDB.Document>().
-        Where(x => !x.IsLinked && (docType == ARDB.DocumentType.Other || x.GetDocumentType() == docType)).
+        Where(x => !x.IsLinked && (docType == ARDB.DocumentType.Other || x.GetDocumentType() == docType) && x.GetActiveView() is object).
         Select(Types.Document.FromValue);
 
       listBox.DisplayMember = nameof(Types.Document.DisplayName);
