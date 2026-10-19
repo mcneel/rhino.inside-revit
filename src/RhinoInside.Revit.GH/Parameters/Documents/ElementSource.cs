@@ -9,26 +9,29 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Parameters
 {
   using External.DB.Extensions;
+  using RhinoInside.Revit.GH.Components;
 
   public class ElementSource : PersistentParam<Types.IGH_ElementSource>, Kernel.IGH_ReferenceParam
   {
-    public override GH_Exposure Exposure => GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.primary;
     public override Guid ComponentGuid => new Guid("EF2EFE84-8B2E-4613-A352-B1CE95671238");
     protected override string IconTag => DefaultNickName;
 
     internal static readonly string DefaultName = "Source";
-    internal static readonly string DefaultNickName = "S";
+    internal static readonly string DefaultNickName = "Src";
     internal static readonly string DefaultDescription = "Contains a collection of Revit element sources";
 
     public ElementSource() : base
     (
-      name: DefaultName,
-      nickname: DefaultName,
+      name: "Element Source",
+      nickname: DefaultNickName,
       description: DefaultDescription,
-      category: "Params",
-      subcategory: "Revit"
+      category: "Revit",
+      subcategory: "Filter"
     )
     { }
+
+    public static ElementSource QuerySource() => new ElementSource() { Name = DefaultName };
 
     protected override Types.IGH_ElementSource PreferredCast(object data)
     {

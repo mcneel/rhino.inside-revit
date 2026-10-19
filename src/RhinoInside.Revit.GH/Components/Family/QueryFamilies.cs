@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Families
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ElementKind>>("Kind", "K", "Kind to match", defaultValue: ElementKind.System | ElementKind.Component, optional: true),
       ParamDefinition.Create<Parameters.Category>                     ("Category", "C",  optional: true),
       ParamDefinition.Create<Param_String>                            ("Family Name", "FN", optional: true),

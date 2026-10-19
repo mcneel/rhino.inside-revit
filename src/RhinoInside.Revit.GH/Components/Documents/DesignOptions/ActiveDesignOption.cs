@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;

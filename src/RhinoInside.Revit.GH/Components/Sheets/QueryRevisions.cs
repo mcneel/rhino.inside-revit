@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Revision Number", "RN", "Revision number", optional: true, relevance : ParamRelevance.Primary),
       ParamDefinition.Create<Param_Integer>("Revision Sequence", "RS", "Revision number", optional: true, relevance : ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Revision Date", "RD", "Revision date", optional: true, relevance : ParamRelevance.Primary),

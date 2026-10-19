@@ -40,7 +40,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Design Option name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional),
     };
@@ -115,7 +115,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Element>("Design Option Set", "DOS", string.Empty, GH_ParamAccess.item, optional:true),
       ParamDefinition.Create<Param_String>("Name", "N", "Design Option name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_Boolean>("Primary", "P", "Design Option is primary", GH_ParamAccess.item, optional: true),
