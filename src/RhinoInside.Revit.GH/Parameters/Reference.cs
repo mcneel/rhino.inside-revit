@@ -224,19 +224,25 @@ namespace RhinoInside.Revit.GH.Parameters
 
     private bool ReloadReferencedData(bool reload)
     {
-      if (OnPingDocument() is GH_Document document)
+      if (typeof(Types.IGH_GeometryObject).IsAssignableFrom(typeof(T)))
       {
-        GH_Document.SolutionEndEventHandler SolutionEndEventHandler = default;
-        document.SolutionEnd += SolutionEndEventHandler = (s, a) =>
+        if (OnPingDocument() is GH_Document document)
         {
-          document.SolutionEnd -= SolutionEndEventHandler;
-
-          foreach (var data in VolatileData.AllData(true).OfType<IGH_ReferencedData>())
+          GH_Document.SolutionEndEventHandler SolutionEndEventHandler = default;
+          document.SolutionEnd += SolutionEndEventHandler = (s, a) =>
           {
-            data.UnloadReferencedData();
-            if (reload) data.LoadReferencedData();
-          }
-        };
+            document.SolutionEnd -= SolutionEndEventHandler;
+
+            foreach (var data in VolatileData.AllData(true).OfType<IGH_ReferencedData>())
+            {
+              if (data is Types.IGH_GeometryObject)
+              {
+                data.UnloadReferencedData();
+                if (reload) data.LoadReferencedData();
+              }
+            }
+          };
+        }
       }
 
       return true;
