@@ -41,6 +41,26 @@ namespace RhinoInside.Revit.GH.Parameters
       return null;
     }
 
+    public static bool TryGetElementSource(IGH_Component component, IGH_DataAccess DA, out Types.IGH_ElementSource source)
+    {
+      source = default;
+
+      var _Model_ = component.Params.IndexOfInputParam(DefaultName);
+      if
+      (
+        _Model_ < 0 || // Not present
+        (
+          component.Params.Input[_Model_].SourceCount == 0 &&  // Not connected
+          component.Params.Input[_Model_].VolatileData.IsEmpty // Not persistent data
+        )
+      )
+      {
+        return true;
+      }
+
+      return DA.GetData(_Model_, ref source);
+    }
+
     public static bool GetElementSourceOrCurrent(IGH_Component component, IGH_DataAccess DA, out Types.IGH_ElementSource source)
     {
       source = default;
