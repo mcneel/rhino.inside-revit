@@ -256,7 +256,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
   public class QueryInterferingElements : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("6ADE8C09-F553-4031-BA96-32D7595489BD");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
     protected override ARDB.ElementFilter ElementFilter => ElementFilters.Intersect
     (
       ElementFilters.ElementIsViewSpecificFilter(inverted: true),
@@ -269,14 +269,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
       nickname: "Interfering",
       description: "Get solid elements that interfere in space and time with the provided element.",
       category: "Revit",
-      subCategory: "Element"
+      subCategory: "Filter"
     )
     { }
 
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target element"),
       ParamDefinition.Create<Param_Boolean>("Voids", "V", "Check also family voids", defaultValue: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Phasing", "P", "Check that elements also coincide on time", defaultValue: true, relevance: ParamRelevance.Primary),
