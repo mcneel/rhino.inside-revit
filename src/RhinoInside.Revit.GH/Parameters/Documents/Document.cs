@@ -82,14 +82,6 @@ namespace RhinoInside.Revit.GH.Parameters
     }
 
     #region UI
-    static ARDB.DocumentType GetDocumentType(ARDB.Document doc)
-    {
-      if (doc.IsFamilyDocument)
-        return ARDB.DocumentType.Family;
-      else
-        return ARDB.DocumentType.Project;
-    }
-
     protected EventHandler Menu_PromptFile(Autodesk.Revit.UI.RevitCommandId commandId) => async (sender, args) =>
     {
       var activeApp = Revit.ActiveUIApplication;
@@ -138,7 +130,7 @@ namespace RhinoInside.Revit.GH.Parameters
       docTypeBox.Items.Add(ARDB.DocumentType.Family);
 
       if (PersistentValue?.Value is ARDB.Document current)
-        RefreshDocumentsList(listBox, GetDocumentType(current));
+        RefreshDocumentsList(listBox, current.GetDocumentType());
       else
         RefreshDocumentsList(listBox, ARDB.DocumentType.Other);
 
@@ -211,7 +203,7 @@ namespace RhinoInside.Revit.GH.Parameters
       var documents = Revit.ActiveUIApplication.
         Application.Documents.
         Cast<ARDB.Document>().
-        Where(x => !x.IsLinked && (docType == ARDB.DocumentType.Other || GetDocumentType(x) == docType)).
+        Where(x => !x.IsLinked && (docType == ARDB.DocumentType.Other || x.GetDocumentType() == docType)).
         Select(Types.Document.FromValue);
 
       listBox.DisplayMember = nameof(Types.Document.DisplayName);

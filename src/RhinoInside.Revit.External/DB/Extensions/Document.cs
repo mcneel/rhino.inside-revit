@@ -96,6 +96,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
     }
 
     #region Identity
+    public static DocumentType GetDocumentType(this Document doc)
+    {
+      if (doc.IsFamilyDocument)
+        return DocumentType.Family;
+      else
+        return DocumentType.Project;
+    }
+
     /// <summary>
     /// The document's name.
     /// </summary>
