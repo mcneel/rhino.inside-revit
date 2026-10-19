@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ParameterScope>>("Scope", "S", "Parameter scope", optional: true),
       ParamDefinition.Create<Param_String>("Name", "N", "Parameter name", optional: true),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ParameterType>>("Type", "T", "Parameter type", optional: true),

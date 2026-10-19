@@ -30,7 +30,7 @@ namespace RhinoInside.Revit.GH.Components.Views
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Parameters.Param_Enum<Types.ViewFamily>>("View Family", "VF", optional: true),
       ParamDefinition.Create<Param_String>("Type Name", "TN", "View Type name", optional: true),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),

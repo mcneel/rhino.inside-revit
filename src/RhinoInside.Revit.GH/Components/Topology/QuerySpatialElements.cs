@@ -19,7 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Param_Point()
@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Param_Point()
@@ -323,7 +323,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Param_String()

@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.ElementSource(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Asset name", GH_ParamAccess.item, optional: true),
       ParamDefinition.Create<Param_String>("Library", "L", "Library name", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Title", "T", "Asset title", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Occasional),

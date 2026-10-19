@@ -189,7 +189,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
   public class ElementExclusionFilter : ElementFilterComponent
   {
     public override Guid ComponentGuid => new Guid("396F7E91-7F08-4A3D-9B9B-B6AA91AC0A2B");
-    public override GH_Exposure Exposure => GH_Exposure.primary;
+    public override GH_Exposure Exposure => GH_Exposure.primary | GH_Exposure.obscure;
     protected override string IconTag => "⊄";
 
     public ElementExclusionFilter()
