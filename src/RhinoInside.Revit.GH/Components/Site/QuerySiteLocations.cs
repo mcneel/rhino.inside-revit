@@ -56,6 +56,7 @@ namespace RhinoInside.Revit.GH.Components.Site
       if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
+      if (source.SourceDocument.Value.IsFamilyDocument) return;
 
       var locations = source.SourceDocument.Value.ProjectLocations.Cast<ARDB.ProjectLocation>().
         Select(x => x.Document.GetElement(x.GetTypeId()) as ARDB.SiteLocation).
