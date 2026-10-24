@@ -8,6 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Site
 {
   using External.DB;
+  using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.0", updated: "1.36")]
   public class QuerySiteLocations : ElementCollectorComponent
@@ -41,7 +42,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     {
       new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Site location name", optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", GH_ParamAccess.item, optional: true, relevance: ParamRelevance.Secondary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -55,28 +56,27 @@ namespace RhinoInside.Revit.GH.Components.Site
       if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
+      if (source.SourceDocument.Value.IsFamilyDocument) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
-      {
-        var locationsCollector = collector.WherePasses(ElementFilter);
+      var locations = source.SourceDocument.Value.ProjectLocations.Cast<ARDB.ProjectLocation>().
+        Select(x => x.Document.GetElement(x.GetTypeId()) as ARDB.SiteLocation).
+        Distinct();
 
-        if (filter is object)
-          locationsCollector = locationsCollector.WherePasses(filter, source.SourceInstance.Value);
+      if (filter is object)
+        locations = locations.WherePasses(filter, source.SourceInstance.Value);
 
-        var locations = collector.Cast<ARDB.SiteLocation>();
+      if (name is object)
+        locations = locations.Where(x => x.Name.IsSymbolNameLike(name));
 
-        if (name is object)
-          locations = locations.Where(x => x.Name.IsSymbolNameLike(name));
-
-        DA.SetDataList
-        (
-          "Site Locations",
-          locations.
-          Select(x => new Types.SiteLocation(x)).
-          FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
-        );
-      }
+      DA.SetDataList
+      (
+        "Site Locations",
+        locations.
+        OrderBy(x => x.Id.ToValue()).
+        Cast<Types.SiteLocation>().
+        FromSource(source).
+        TakeWhileIsNotEscapeKeyDown(this)
+      );
     }
   }
 }

@@ -8,6 +8,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Site
 {
   using External.DB;
+  using External.DB.Extensions;
 
   [ComponentVersion(introduced: "1.0", updated:"1.36")]
   public class QueryProjectLocations : ElementCollectorComponent
@@ -32,7 +33,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     {
       new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_String>("Name", "N", "Shared site name", optional: true),
-      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true, relevance: ParamRelevance.Secondary),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -46,28 +47,25 @@ namespace RhinoInside.Revit.GH.Components.Site
       if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
+      if (source.SourceDocument.Value.IsFamilyDocument) return;
 
-      using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
-      {
-        var sitesCollector = collector.WherePasses(ElementFilter);
+      var sites = source.SourceDocument.Value.ProjectLocations.Cast<ARDB.ProjectLocation>();
 
-        if (filter is object)
-          sitesCollector = sitesCollector.WherePasses(filter, source.SourceInstance.Value);
+      if (filter is object)
+        sites = sites.WherePasses(filter, source.SourceInstance.Value);
 
-        var sites = collector.Cast<ARDB.ProjectLocation>();
+      if (name is object)
+        sites = sites.Where(x => x.Name.IsSymbolNameLike(name));
 
-        if (name is object)
-          sites = sites.Where(x => x.Name.IsSymbolNameLike(name));
-
-        DA.SetDataList
-        (
-          "Shared Sites",
-          sites.
-          Select(x => new Types.ProjectLocation(x)).
-          FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
-        );
-      }
+      DA.SetDataList
+      (
+        "Shared Sites",
+        sites.
+        OrderBy(x => x.Id.ToValue()).
+        Cast<Types.ProjectLocation>().
+        FromSource(source).
+        TakeWhileIsNotEscapeKeyDown(this)
+      );
     }
 
     #region UI
