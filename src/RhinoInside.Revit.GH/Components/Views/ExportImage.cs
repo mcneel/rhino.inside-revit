@@ -268,7 +268,7 @@ namespace RhinoInside.Revit.GH.Components.Views
       if (!Params.GetData(DA, "View", out Types.View view)) return;
       else Params.TrySetData(DA, "View", () => view);
       {
-        if (!(view.Value.IsModelView() || (view.Value is ARDB.ViewSchedule schedule && !schedule.IsInternalKeynoteSchedule && !schedule.IsTitleblockRevisionSchedule)))
+        if (!view.Value.CanBePrinted)
           throw new Exceptions.RuntimeArgumentException("View", $"'{view.FullName}' is not a graphical view", view);
       }
 
