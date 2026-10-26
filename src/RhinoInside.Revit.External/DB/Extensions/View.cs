@@ -127,9 +127,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       switch (viewType)
       {
-        // ViewSheet
-        case ViewType.DrawingSheet:
-
         // View3D
         case ViewType.ThreeD:
         case ViewType.Walkthrough:
@@ -147,12 +144,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
         case ViewType.Elevation:
         case ViewType.Section:
         case ViewType.Detail:
-
-        // ViewDrafting
-        case ViewType.DraftingView:
-
-        // View
-        case ViewType.Legend:
 
           return true;
       }
@@ -805,7 +796,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       var filter = default(ElementFilter);
 
-      if (view.IsModelView())
+      if (view.CanBePrinted)
       {
         filter = GetModelFilter(view, clipped);
       }

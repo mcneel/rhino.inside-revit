@@ -266,12 +266,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public DisplayMaterial ToDisplayMaterial() => Rhinoceros.InvokeInHostContext(() =>
     {
-      if
-      (
-        Value is ARDB.View view &&
-        view.CanBePrinted &&
-        (view.IsModelView() /*|| (view is ARDB.ViewSchedule schedule && !schedule.IsInternalKeynoteSchedule && !schedule.IsTitleblockRevisionSchedule)*/)
-      )
+      if (Value is ARDB.View view && view.CanBePrinted)
       {
         var viewId = view.Id;
         using (var viewDocument = view.Document)
