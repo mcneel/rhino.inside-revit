@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
       {
         case ARDB.ImportPlacement.Site:
           if (instance.GetSharedSite() is object) return false;
-          if (move) instance.SetLocation(BasePointExtension.GetProjectBasePoint(view.Document).Position, ERDB.UnitXYZ.BasisX, ERDB.UnitXYZ.BasisY);
+          if (move) instance.SetLocation(BasePointExtension.GetProjectBasePoint(view.Document).GetPosition(), ERDB.UnitXYZ.BasisX, ERDB.UnitXYZ.BasisY);
           break;
         case ARDB.ImportPlacement.Origin:
           if (instance.GetSharedSite() is object) return false;
@@ -105,7 +105,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
 
       ARDB.XYZ origin = default;
       if (options.Placement == ARDB.ImportPlacement.Site)
-        origin = BasePointExtension.GetProjectBasePoint(view.Document).Position;
+        origin = BasePointExtension.GetProjectBasePoint(view.Document).GetPosition();
       else if (options.Placement == ARDB.ImportPlacement.Origin)
         origin = XYZExtension.Zero;
 
