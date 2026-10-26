@@ -108,7 +108,7 @@ namespace RhinoInside.Revit.Convert.DocObjects
     {
       vport = default;
 
-      if (!view.IsModelView())
+      if (!view.CanBePrinted)
         return false;
 
       if (useUIView)
