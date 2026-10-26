@@ -392,7 +392,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
       if (view is null || view.IsTemplate)
         return BoundingBoxXYZExtension.Empty;
 
-      if (!view.ViewType.IsModelViewType())
+      if (!view.CanBePrinted)
         return BoundingBoxXYZExtension.Universe;
 
       switch (view.CropBox)
