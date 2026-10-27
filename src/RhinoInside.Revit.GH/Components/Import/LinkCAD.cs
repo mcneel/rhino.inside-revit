@@ -167,7 +167,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
         {
           Name = "View",
           NickName = "V",
-          Description = "Target view.\r\nImported drawing will be visible only into the provided View.",
+          Description = "Reference view.",
         }
       ),
       new ParamDefinition
