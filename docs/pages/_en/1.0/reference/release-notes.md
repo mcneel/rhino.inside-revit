@@ -17,6 +17,7 @@ group: Deployment & Configs
 - Added 'Link Model CAD File' component.
 - Added 'Import Drafting CAD File' component.
 - Added 'Import Model CAD File' component.
+- Added 'Link Image File' component.
 
 {% endcapture %}
 
