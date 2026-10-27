@@ -220,7 +220,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
       Params.TrySetData(DA, "Correct Off Axis Lines", () => options.AutocorrectOffAxisLines);
       Params.TrySetData(DA, "Color Mode", () => options.ColorMode);
       Params.TrySetData(DA, "Visible Layers Only", () => options.VisibleLayersOnly);
-      Params.TrySetDataList(DA, "Layers", () => options.LayerSelection.OrderBy(x => x));
+      Params.TrySetDataList(DA, "Layers", () => options.LayerSelection?.OrderBy(x => x));
     }
   }
 }
