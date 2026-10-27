@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Grasshopper.Special;
+using System.Linq;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -82,11 +82,31 @@ namespace RhinoInside.Revit.GH.Types
       if (path.EndsWith(".obj", StringComparison.InvariantCultureIgnoreCase)) { ConvertTo(out ARDB.OBJImportOptions options); return options; }
       if (path.EndsWith(".stl", StringComparison.InvariantCultureIgnoreCase)) { ConvertTo(out ARDB.STLImportOptions options); return options; }
 #endif
+#if REVIT_2024
+      if (path.EndsWith(".stp", StringComparison.InvariantCultureIgnoreCase)) { ConvertTo(out ARDB.STEPImportOptions options); return options; }
+      if (path.EndsWith(".step", StringComparison.InvariantCultureIgnoreCase)) { ConvertTo(out ARDB.STEPImportOptions options); return options; }
+      if (path.EndsWith(".stpz", StringComparison.InvariantCultureIgnoreCase)) { ConvertTo(out ARDB.STEPImportOptions options); return options; }
+#endif
 
       return null;
     }
 
     #region Extensions
+    public static string FileFilter => $"All Supported Files ({string.Join(", ", SupportedExtensions.Select(x => $"*{x}"))})|{string.Join(";", SupportedExtensions)}";
+    public static ISet<string> SupportedExtensions { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+      ".dwg", ".dxf", ".dgn", ".sat", ".skp",
+#if REVIT_2022
+      ".3dm",
+#endif
+#if REVIT_2023
+      ".obj", ".stl",
+#endif
+#if REVIT_2024
+      ".stp", ".step", ".stpz",
+#endif
+    };
+
     static void AssertValidPath(string path)
     {
       if (!System.IO.File.Exists(path))
@@ -99,25 +119,6 @@ namespace RhinoInside.Revit.GH.Types
         throw new Exceptions.RuntimeArgumentException(nameof(path), $"File must have one of these extensions: {supportedList}.");
       }
     }
-    public static ISet<string> SupportedExtensions { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-    {
-      ".dwg", ".dxf", ".dgn", ".sat", ".skp",
-#if REVIT_2022
-      ".3dm",
-#endif
-#if REVIT_2023
-      ".obj", ".stl",
-#endif
-    };
-
-    public static string FileFilter =>
-#if REVIT_2023
-      "All Supported Files (*3dm, *sat, *obj, *.stl, *skp, *.dwg, *.dxf, *.dgn)|*3dm;*sat;*obj;*.stl;*skp;*.dwg;*.dxf;*.dgn";
-#elif REVIT_2022
-      "All Supported Files (*3dm, *sat, *skp, *.dwg, *.dxf, *.dgn)|*3dm;*sat;*skp;*.dwg;*.dxf;*.dgn";
-#else
-      "All Supported Files (*sat, *skp, *.dwg, *.dxf, *.dgn)|*sat;*skp;*.dwg;*.dxf;*.dgn";
-#endif
     #endregion
   }
 }
