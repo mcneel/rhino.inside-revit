@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Windows.Forms
 {
+#pragma warning disable CA1060 // Move pinvokes to native methods class
   static class Extension
   {
     [DllImport("USER32", CharSet = CharSet.Unicode, SetLastError = false)]
@@ -17,4 +18,5 @@ namespace System.Windows.Forms
       cb.Invalidate();
     }
   }
+#pragma warning restore CA1060 // Move pinvokes to native methods class
 }

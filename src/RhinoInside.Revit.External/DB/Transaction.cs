@@ -19,7 +19,6 @@ namespace RhinoInside.Revit.External.DB
       internal TransactionAwaitable(Transaction transaction) => awaiter = new TransactionAwaiter(transaction);
       public TransactionAwaiter GetAwaiter() => awaiter;
 
-      [HostProtection(Synchronization = true)]
       public class TransactionAwaiter : UI.ExternalEventHandler, ICriticalNotifyCompletion, ITransactionFinalizer
       {
         public readonly string Name;
