@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #endregion
 
     #region Link
-    public static ImportInstance Link(View view, string path, BaseImportOptions options, out LinkLoadResult result)
+    public static ImportInstance Link(View view, string path, BaseImportOptions options)
     {
       var doc = view.Document;
       if (options.ThisViewOnly)
@@ -53,31 +53,29 @@ namespace RhinoInside.Revit.External.DB.Extensions
         else if (options is STEPImportOptions optionsSTP) instanceId = doc.Link(path, optionsSTP, view);
 #endif
 
-        result = new LinkLoadResult();
         return doc.GetElement(instanceId) as ImportInstance;
       }
       else
       {
         if (CreateCADLinkResourceReference(doc, path) is ExternalResourceReference externalResource)
         {
-          if (options is DWGImportOptions optionsDwg) return ImportInstance.Create(doc, view, externalResource, optionsDwg, out result);
-          if (options is DGNImportOptions optionsDGN) return ImportInstance.Create(doc, view, externalResource, optionsDGN, out result);
-          if (options is SATImportOptions optionsSAT) return ImportInstance.Create(doc, view, externalResource, optionsSAT, out result);
-          if (options is SKPImportOptions optionsSKP) return ImportInstance.Create(doc, view, externalResource, optionsSKP, out result);
+          if (options is DWGImportOptions optionsDwg) return ImportInstance.Create(doc, view, externalResource, optionsDwg, out var result);
+          if (options is DGNImportOptions optionsDGN) return ImportInstance.Create(doc, view, externalResource, optionsDGN, out var result);
+          if (options is SATImportOptions optionsSAT) return ImportInstance.Create(doc, view, externalResource, optionsSAT, out var result);
+          if (options is SKPImportOptions optionsSKP) return ImportInstance.Create(doc, view, externalResource, optionsSKP, out var result);
 #if REVIT_2022
-          if (options is ImportOptions3DM options3DM) return ImportInstance.Create(doc, view, externalResource, options3DM, out result);
+          if (options is ImportOptions3DM options3DM) return ImportInstance.Create(doc, view, externalResource, options3DM, out var result);
 #endif
 #if REVIT_2023
-          if (options is OBJImportOptions optionsOBJ) return ImportInstance.Create(doc, view, externalResource, optionsOBJ, out result);
-          if (options is STLImportOptions optionsSTL) return ImportInstance.Create(doc, view, externalResource, optionsSTL, out result); ;
+          if (options is OBJImportOptions optionsOBJ) return ImportInstance.Create(doc, view, externalResource, optionsOBJ, out var result);
+          if (options is STLImportOptions optionsSTL) return ImportInstance.Create(doc, view, externalResource, optionsSTL, out var result); ;
 #endif
 #if REVIT_2025
-          if (options is STEPImportOptions optionsSTP) return ImportInstance.Create(doc, view, externalResource, optionsSTP, out result);
+          if (options is STEPImportOptions optionsSTP) return ImportInstance.Create(doc, view, externalResource, optionsSTP, out var result);
 #endif
         }
       }
 
-      result = default;
       return null;
     }
 

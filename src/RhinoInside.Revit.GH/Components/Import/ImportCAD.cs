@@ -59,8 +59,8 @@ namespace RhinoInside.Revit.GH.Components.Insert
       var ownerViewId = options.ThisViewOnly ? view.Id : ElementIdExtension.Invalid;
       if (instance.OwnerViewId != ownerViewId) return false;
 
-      var type = view.Document.GetCADLinkType(Path.GetFileNameWithoutExtension(path), linked: false);
-      if (type is null) return false;
+      var type = view.Document.GetCADLinkType(Path.GetFileName(path));
+      if (type is null || type.IsLinked()) return false;
       if (instance.GetTypeId() != type.Id) return false;
 
       switch (options.Placement)
@@ -99,13 +99,22 @@ namespace RhinoInside.Revit.GH.Components.Insert
       if (!Types.CADReadOptions.ImportExtensions.Contains(Path.GetExtension(path)))
         throw new Exceptions.RuntimeException($"Unsupported file extension: {Path.GetExtension(path)}");
 
-      var type = view.Document.GetCADLinkType(Path.GetFileNameWithoutExtension(path), linked: false);
+      var type = view.Document.GetCADLinkType(Path.GetFileName(path));
+      if (type?.IsLinked() is true)
+        throw new Exceptions.RuntimeException($"Revit already has a link with the input location name, so no new import with same name can be created.");
+
       var instance = type is object ?
         ARDB.ImportInstance.Create(view.Document, type.Id, view):
         ImportInstanceExtension.Import(view, path, options);
 
       if (instance is null)
         throw new Exceptions.RuntimeException($"Failed to import file '{path}'");
+
+      if (type is null)
+      {
+        type = instance.Document.GetElement(instance.GetTypeId()) as ARDB.CADLinkType;
+        type.Name = Path.GetFileName(path);
+      }
 
       ARDB.XYZ origin = default;
       if (options.Placement == ARDB.ImportPlacement.Site)

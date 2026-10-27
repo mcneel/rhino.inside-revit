@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
       if (instance.OwnerViewId != ownerViewId) return false;
 
       var type = view.Document.GetCADLinkedType(path);
-      if (type is null) return false;
+      if (type is null || !type.IsLinked()) return false;
       if (instance.GetTypeId() != type.Id) return false;
 
       switch (options.Placement)
@@ -99,9 +99,22 @@ namespace RhinoInside.Revit.GH.Components.Insert
       if (!Types.CADReadOptions.LinkExtensions.Contains(Path.GetExtension(path)))
         throw new Exceptions.RuntimeException($"Unsupported file extension: {Path.GetExtension(path)}");
 
-      var instance = ImportInstanceExtension.Link(view, path, options, out var result);
+      var type = view.Document.GetCADLinkType(Path.GetFileName(path));
+      if (type?.IsLinked() is false)
+        throw new Exceptions.RuntimeException($"Revit already has an import with the input location name, so no new link with same name can be created.");
+
+      var instance = type is object ?
+        ARDB.ImportInstance.Create(view.Document, type.Id, view) :
+        ImportInstanceExtension.Link(view, path, options);
+
       if (instance is null)
-        throw new Exceptions.RuntimeException($"Failed to link file '{path}'" + OS.NewLine + $"{result?.LoadResult ?? ARDB.LinkLoadResultType.LinkNotOpenable}");
+        throw new Exceptions.RuntimeException($"Failed to link file '{path}'");
+
+      if (type is null)
+      {
+        type = instance.Document.GetElement(instance.GetTypeId()) as ARDB.CADLinkType;
+        type.Name = Path.GetFileName(path);
+      }
 
       ARDB.XYZ origin = default;
       if (options.Placement == ARDB.ImportPlacement.Site)
