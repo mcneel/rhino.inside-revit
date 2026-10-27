@@ -6,12 +6,29 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class CADLinkTypeExtension
   {
-    public static CADLinkType GetCADLinkType(this Document doc, string path)
+    public static CADLinkType GetCADLinkType(this Document doc, string name)
     {
       using (var linkTypes = new FilteredElementCollector(doc).OfClass(typeof(CADLinkType)))
       {
         foreach (var linkType in linkTypes.Cast<CADLinkType>())
         {
+          if (ElementNaming.NameEqualityComparer.Equals(linkType.Name, name))
+            return linkType;
+        }
+      }
+
+      return null;
+    }
+
+    public static CADLinkType GetCADLinkedType(this Document doc, string path)
+    {
+      using (var linkTypes = new FilteredElementCollector(doc).OfClass(typeof(CADLinkType)))
+      {
+        foreach (var linkType in linkTypes.Cast<CADLinkType>())
+        {
+          if (!linkType.IsExternalFileReference())
+            continue;
+
           var extRef = linkType.GetExternalFileReference();
           if (extRef == null)
             continue;
@@ -25,10 +42,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
       return null;
     }
 
-    public static ProjectLocation[] GetSharedSites(this CADLinkType type)
-    {
-      return type.GetDependents<ProjectLocation>();
-    }
+    public static bool IsLinked(this CADLinkType type) => type.IsExternalFileReference();
+
+    public static ProjectLocation[] GetSharedSites(this CADLinkType type) => type.GetDependents<ProjectLocation>();
 
     public static void SetImportUnits(this CADLinkType type, ImportUnit unit, double customScale)
     {

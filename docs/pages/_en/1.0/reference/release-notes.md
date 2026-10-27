@@ -22,6 +22,11 @@ group: Deployment & Configs
 ### RC
 
 - Now default keyboard shortcuts are only assigned when missing.
+- Added 'CAD Read Options' component
+- Added 'Link Drafting CAD File' component.
+- Added 'Link Model CAD File' component.
+- Added 'Import Drafting CAD File' component.
+- Added 'Import Model CAD File' component.
 
 {% endcapture %}
 
