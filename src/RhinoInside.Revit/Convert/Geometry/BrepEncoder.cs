@@ -407,11 +407,7 @@ namespace RhinoInside.Revit.Convert.Geometry
                     edgeIds.AddRange(ToBRepBuilderEdgeGeometry(edge).Select(e => builder.AddEdge(e)));
                   }
 
-                  bool trimReversed = face.OrientationIsReversed ?
-                                      !trim.IsReversed() :
-                                       trim.IsReversed();
-
-                  if (trimReversed)
+                  if (face.OrientationIsReversed != trim.IsReversed())
                   {
                     for (int e = edgeIds.Count - 1; e >= 0; --e)
                       builder.AddCoEdge(loopId, edgeIds[e], true);
