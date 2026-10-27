@@ -776,6 +776,73 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [
+    ComponentVersion(introduced: "1.36"),
+    ComponentGuid("CBAC399C-FB4F-46B4-9FC6-F1C84E03AF91"),
+    Name("Import Placement"),
+    Description("Represents model import placement"),
+  ]
+  public class ImportPlacement : GH_Enum<ARDB.ImportPlacement>
+  {
+    public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
+    {
+      { (int) ARDB.ImportPlacement.Site,     "Project Base Point" },
+      { (int) ARDB.ImportPlacement.Origin,   "Origin" },
+      { (int) ARDB.ImportPlacement.Centered, "Centered" },
+      { (int) ARDB.ImportPlacement.Shared,   "Shared Coordinates" },
+    };
+  }
+
+  [
+    ComponentVersion(introduced: "1.36"),
+    ComponentGuid("10334A4A-402B-4F9F-B04D-5837FEE4BAA4"),
+    Name("Draw Layer"),
+    Description("Represents model import draw layer"),
+  ]
+  public class DrawLayer : GH_Enum<ARDB.DrawLayer>
+  {
+  }
+
+  [
+    ComponentVersion(introduced: "1.36"),
+    ComponentGuid("8EA68C6D-B7C1-429A-AD08-8BA5FD42266D"),
+    Name("Import Color Mode"),
+    Description("Represents model import color mode"),
+  ]
+  public class ImportColorMode : GH_Enum<ARDB.ImportColorMode>
+  {
+    public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
+    {
+      { (int) ARDB.ImportColorMode.Preserved,     "Preserve" },
+      { (int) ARDB.ImportColorMode.Inverted,      "Invert" },
+      { (int) ARDB.ImportColorMode.BlackAndWhite, "Black and White" },
+    };
+  }
+
+  [
+    ComponentVersion(introduced: "1.36"),
+    ComponentGuid("895ED72A-6D74-4725-925D-4D9D2115AE78"),
+    Name("Import Unit"),
+    Description("Represents model import unit system"),
+  ]
+  public class ImportUnit : GH_Enum<ARDB.ImportUnit>
+  {
+    public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
+    {
+      { (int) ARDB.ImportUnit.Default,       "Default" },
+      { (int) ARDB.ImportUnit.Inch,          "Inch" },
+      { (int) ARDB.ImportUnit.Foot,          "Feet" },
+#if REVIT_2024
+      { (int) ARDB.ImportUnit.USSurveyFoot,  "US Survey Feet" },
+#endif
+      { (int) ARDB.ImportUnit.Millimeter,    "Millimeter" },
+      { (int) ARDB.ImportUnit.Centimeter,    "Centimeter" },
+      { (int) ARDB.ImportUnit.Decimeter,     "Decimeter" },
+      { (int) ARDB.ImportUnit.Meter,         "Meter" },
+      { (int) ARDB.ImportUnit.Custom,        "Custom" },
+    };
+  }
+
+  [
     ComponentVersion(introduced: "1.27"),
     ComponentGuid("84CCF256-95C2-4D9B-BFCD-303567FDF89B"),
     Name("Analytical Structural Role"),

@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
       (
         new Param_GenericObject
         {
-          Name = "IFC Import Options",
+          Name = "Options",
           NickName = "O",
           Description = "IFC import options object (optional, will create new if not provided)",
           Optional = true
@@ -74,7 +74,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
       (
         new Param_GenericObject
         {
-          Name = "IFC Import Options",
+          Name = "Options",
           NickName = "O",
           Description = "IFC import options object",
           Access = GH_ParamAccess.item
@@ -115,7 +115,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       ARDB.IFC.IFCImportOptions options = null;
-      if (Params.TryGetData(DA, "IFC Import Options", out ARDB.IFC.IFCImportOptions inputOptions) && inputOptions != null)
+      if (Params.TryGetData(DA, "Options", out ARDB.IFC.IFCImportOptions inputOptions) && inputOptions != null)
         options = inputOptions;
       else
         options = new ARDB.IFC.IFCImportOptions();
@@ -132,7 +132,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
       if (Params.TryGetData(DA, "Autocorrect Off Axis Lines", out bool? autocorrect) && autocorrect.HasValue)
         options.AutocorrectOffAxisLines = autocorrect.Value;
 
-      DA.SetData("IFC Import Options", options);
+      DA.SetData("Options", options);
 
       if (options != null)
       {
