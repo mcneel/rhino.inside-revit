@@ -412,7 +412,9 @@ namespace RhinoInside.Revit.GH.Types
       { typeof(ARDB.ProjectLocation),                 (element)=> new ProjectLocation       (element as ARDB.ProjectLocation)   },
       { typeof(ARDB.SiteLocation),                    (element)=> new SiteLocation          (element as ARDB.SiteLocation)      },
       { typeof(ARDB.RevitLinkInstance),               (element)=> new RevitLinkInstance     (element as ARDB.RevitLinkInstance) },
+      { typeof(ARDB.RevitLinkType),                   (element)=> new RevitLinkType         (element as ARDB.RevitLinkType)     },
       { typeof(ARDB.ImportInstance),                  (element)=> new ImportInstance        (element as ARDB.ImportInstance)    },
+      { typeof(ARDB.CADLinkType),                     (element)=> new CADLinkType           (element as ARDB.CADLinkType)       },
       { typeof(ARDB.PointCloudInstance),              (element)=> new PointCloudInstance    (element as ARDB.PointCloudInstance)},
 
       { typeof(ARDB.DirectShape),                     (element)=> new DirectShape           (element as ARDB.DirectShape)       },
