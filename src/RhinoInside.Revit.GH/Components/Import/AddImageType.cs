@@ -15,9 +15,9 @@ namespace RhinoInside.Revit.GH.Components.Insert
 
     public AddImageType() : base
     (
-      name: "Import Image",
-      nickname: "I-Image",
-      description: "Given the path, it adds an image type to the given document",
+      name: "Link Image File",
+      nickname: "L-Image",
+      description: "Given the path, it adds a linked image type to the given document",
       category: "Revit",
       subCategory: "Insert"
     )
