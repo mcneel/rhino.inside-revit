@@ -59,7 +59,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
       var ownerViewId = options.ThisViewOnly ? view.Id : ElementIdExtension.Invalid;
       if (instance.OwnerViewId != ownerViewId) return false;
 
-      var type = view.Document.GetCADLinkType(path);
+      var type = view.Document.GetCADLinkedType(path);
       if (type is null) return false;
       if (instance.GetTypeId() != type.Id) return false;
 
@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
       ARDB.BaseImportOptions options
     )
     {
-      if (!Types.CADReadOptions.SupportedExtensions.Contains(Path.GetExtension(path)))
+      if (!Types.CADReadOptions.LinkExtensions.Contains(Path.GetExtension(path)))
         throw new Exceptions.RuntimeException($"Unsupported file extension: {Path.GetExtension(path)}");
 
       var instance = ImportInstanceExtension.Link(view, path, options, out var result);
@@ -177,7 +177,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
           Name = "Path",
           NickName = "P",
           Description = "Absolute path to the CAD file",
-          FileFilter = Types.CADReadOptions.FileFilter
+          FileFilter = Types.CADReadOptions.LinkFileFilter
         }
       ),
       new ParamDefinition
@@ -304,7 +304,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
           Name = "Path",
           NickName = "P",
           Description = "Absolute path to the CAD file",
-          FileFilter = Types.CADReadOptions.FileFilter
+          FileFilter = Types.CADReadOptions.LinkFileFilter
         }
       ),
       new ParamDefinition

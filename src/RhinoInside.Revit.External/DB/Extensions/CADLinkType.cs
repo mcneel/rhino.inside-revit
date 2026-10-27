@@ -6,12 +6,32 @@ namespace RhinoInside.Revit.External.DB.Extensions
 {
   public static class CADLinkTypeExtension
   {
-    public static CADLinkType GetCADLinkType(this Document doc, string path)
+    public static CADLinkType GetCADLinkType(this Document doc, string name, bool linked)
     {
       using (var linkTypes = new FilteredElementCollector(doc).OfClass(typeof(CADLinkType)))
       {
         foreach (var linkType in linkTypes.Cast<CADLinkType>())
         {
+          if (linkType.IsExternalFileReference() != linked)
+            continue;
+
+          if (ElementNaming.NameEqualityComparer.Equals(linkType.Name, name))
+            return linkType;
+        }
+      }
+
+      return null;
+    }
+
+    public static CADLinkType GetCADLinkedType(this Document doc, string path)
+    {
+      using (var linkTypes = new FilteredElementCollector(doc).OfClass(typeof(CADLinkType)))
+      {
+        foreach (var linkType in linkTypes.Cast<CADLinkType>())
+        {
+          if (!linkType.IsExternalFileReference())
+            continue;
+
           var extRef = linkType.GetExternalFileReference();
           if (extRef == null)
             continue;

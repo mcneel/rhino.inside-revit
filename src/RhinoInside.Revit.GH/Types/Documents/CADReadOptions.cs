@@ -92,8 +92,8 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     #region Extensions
-    public static string FileFilter => $"All Supported Files ({string.Join(", ", SupportedExtensions.Select(x => $"*{x}"))})|{string.Join(";", SupportedExtensions)}";
-    public static ISet<string> SupportedExtensions { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    public static string ImportFileFilter => $"All Supported Files ({string.Join(", ", ImportExtensions.Select(x => $"*{x}"))})|{string.Join(";", ImportExtensions)}";
+    public static ISet<string> ImportExtensions { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
       ".dwg", ".dxf", ".dgn", ".sat", ".skp",
 #if REVIT_2022
@@ -107,15 +107,30 @@ namespace RhinoInside.Revit.GH.Types
 #endif
     };
 
+    public static string LinkFileFilter => $"All Supported Files ({string.Join(", ", LinkExtensions.Select(x => $"*{x}"))})|{string.Join(";", LinkExtensions)}";
+    public static ISet<string> LinkExtensions { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+      ".dwg", ".dxf", ".dgn", ".sat", ".skp",
+#if REVIT_2022
+      ".3dm",
+#endif
+#if REVIT_2023
+      ".obj", ".stl",
+#endif
+#if REVIT_2025
+      ".stp", ".step", ".stpz",
+#endif
+    };
+
     static void AssertValidPath(string path)
     {
       if (!System.IO.File.Exists(path))
         throw new Exceptions.RuntimeArgumentException("Path", $"File does not exist: {path}");
 
       var extension = System.IO.Path.GetExtension(path);
-      if (extension is null || !SupportedExtensions.Contains(extension))
+      if (extension is null || !ImportExtensions.Contains(extension))
       {
-        var supportedList = string.Join(", ", SupportedExtensions);
+        var supportedList = string.Join(", ", ImportExtensions);
         throw new Exceptions.RuntimeArgumentException(nameof(path), $"File must have one of these extensions: {supportedList}.");
       }
     }

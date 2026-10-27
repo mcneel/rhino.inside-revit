@@ -12,6 +12,12 @@ group: Deployment & Configs
 
 ### RC
 
+- Added 'CAD Read Options' component
+- Added 'Link Drafting CAD File' component.
+- Added 'Link Model CAD File' component.
+- Added 'Import Drafting CAD File' component.
+- Added 'Import Model CAD File' component.
+
 {% endcapture %}
 
 {% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}

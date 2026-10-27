@@ -767,9 +767,9 @@ namespace RhinoInside.Revit.GH.Types
   {
     public static new IReadOnlyDictionary<int, string> NamedValues { get; } = new Dictionary<int, string>
     {
-      { (int) ARDB.ImportPlacement.Site,     "Project Base Point" },
+      //{ (int) ARDB.ImportPlacement.Centered, "Centered" },
       { (int) ARDB.ImportPlacement.Origin,   "Origin" },
-      { (int) ARDB.ImportPlacement.Centered, "Centered" },
+      { (int) ARDB.ImportPlacement.Site,     "Project Base Point" },
       { (int) ARDB.ImportPlacement.Shared,   "Shared Coordinates" },
     };
   }
