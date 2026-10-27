@@ -1,5 +1,4 @@
 using System;
-using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -39,5 +38,15 @@ namespace RhinoInside.Revit.GH.Types
         return base.Nomen;
       }
     }
+  }
+
+  [Kernel.Attributes.Name("Model Type")]
+  public class RevitLinkType : ElementType
+  {
+    protected override Type ValueType => typeof(ARDB.RevitLinkType);
+    public new ARDB.RevitLinkType Value => base.Value as ARDB.RevitLinkType;
+
+    public RevitLinkType() { }
+    public RevitLinkType(ARDB.RevitLinkType type) : base(type) { }
   }
 }
