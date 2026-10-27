@@ -582,13 +582,9 @@ namespace RhinoInside.Revit.GH.Parameters
 {
   using Kernel.Attributes;
 
-  public class Param_Enum<T> : GH_PersistentParam<T>, IGH_ObjectProxy
+  public sealed class Param_Enum<T> : GH_PersistentParam<T>, IGH_ObjectProxy
     where T : class, IGH_Goo, Types.IGH_Enumerate, new()
   {
-    protected Param_Enum(string name, string abbreviation, string description, string category, string subcategory) :
-      base(name, abbreviation, description, category, subcategory)
-    { }
-
     static readonly Guid GenericDataParamComponentGuid = new Guid("{8EC86459-BF01-4409-BAEE-174D0D2B13D0}");
     protected override Bitmap Icon => (Bitmap) Properties.Resources.ResourceManager.GetObject(typeof(T).Name) ??                    // try type name first
                                       (Bitmap) Properties.Resources.ResourceManager.GetObject(typeof(T).Name + "_ValueList") ??     // try with _ValueList e.g. WallFunction_ValueList
@@ -762,7 +758,7 @@ namespace RhinoInside.Revit.GH.Parameters
       }
     }
 
-    protected virtual IGH_ActiveObject CreatePickerObject()
+    IGH_ActiveObject CreatePickerObject()
     {
       if (Types.GH_Enumerate.CreatePickerObject<T>() is IGH_ActiveObject picker)
         return picker;
@@ -794,7 +790,7 @@ namespace RhinoInside.Revit.GH.Parameters
       return list;
     }
 
-    protected void Menu_ExposePicker(object sender, EventArgs e)
+    void Menu_ExposePicker(object sender, EventArgs e)
     {
       if (sender is ToolStripMenuItem)
       {
@@ -822,7 +818,7 @@ namespace RhinoInside.Revit.GH.Parameters
     IGH_InstanceDescription IGH_ObjectProxy.Desc => this;
     GH_Exposure IGH_ObjectProxy.Exposure { get; set; } = exposure;
 
-    protected virtual IGH_DocumentObject CreateInstance() => new Param_Enum<T>();
+    IGH_DocumentObject CreateInstance() => new Param_Enum<T>();
     IGH_DocumentObject IGH_ObjectProxy.CreateInstance() => CreateInstance();
     IGH_ObjectProxy IGH_ObjectProxy.DuplicateProxy() => (IGH_ObjectProxy) MemberwiseClone();
     #endregion

@@ -19,8 +19,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
     public override Guid ComponentGuid => new Guid("1D518EBF-D75D-4D9C-B962-9907352DF89A");
     public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
-    private ARDB.ElementFilter _ElementFilter = new ARDB.ElementClassFilter(typeof(ARDB_AnalyticalElement));
-    protected override ARDB.ElementFilter ElementFilter => _ElementFilter;
+    protected override ARDB.ElementFilter ElementFilter => new ARDB.ElementClassFilter(typeof(ARDB_AnalyticalElement));
 
     public QueryAnalyticalElements() : base
     (
