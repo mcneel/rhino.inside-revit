@@ -119,10 +119,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
       var linkedPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(externalFileRef.GetPath());
       if (string.IsNullOrEmpty(linkedPath)) return false;
 
-      var normalizedLinkedPath = Path.GetFullPath(linkedPath);
-      var normalizedInputPath = Path.GetFullPath(rvtPath);
-
-      if (!string.Equals(normalizedLinkedPath, normalizedInputPath, StringComparison.OrdinalIgnoreCase))
+      if (!PathExtension.Comparer.Equals(linkedPath, rvtPath))
       {
         var typeId = GetLinkTypeId(linkInstance.Document, rvtPath);
         if (!typeId.IsValid())
@@ -205,7 +202,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
             continue;
 
           var currentLinkPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(extRef.GetAbsolutePath());
-          if (string.Equals(currentLinkPath, rvtPath, StringComparison.OrdinalIgnoreCase))
+          if (PathExtension.Comparer.Equals(currentLinkPath, rvtPath))
             return linkType.Id;
         }
       }
