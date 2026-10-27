@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
   using External.DB;
   using External.DB.Extensions;
 
-  [ComponentVersion(introduced: "1.36", updated: "1.36")]
+  [ComponentVersion(introduced: "1.36")]
   public class QueryCADModels : ElementCollectorComponent
   {
     public override Guid ComponentGuid => new Guid("563C1170-6FB2-4557-9B61-CFB6BEC5E1D3");
@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
     static readonly ParamDefinition[] inputs =
     {
       new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
-      ParamDefinition.Create<Param_String>("Name", "N", "Revit linked model instance name", optional: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_String>("Name", "N", "CAD model name", optional: true, relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true, relevance: ParamRelevance.Occasional)
     };
 
