@@ -10,7 +10,7 @@ using Rhino.Geometry;
 namespace RhinoInside.Revit.GH.Parameters
 {
   [ComponentVersion(introduced: "1.12")]
-  public class ViewFrame : GH_PersistentParam<Types.ViewFrame>, IGH_PreviewObject
+  public sealed class ViewFrame : GH_PersistentParam<Types.ViewFrame>, IGH_PreviewObject
   {
     public override GH_Exposure Exposure => GH_Exposure.hidden;
     public override Guid ComponentGuid => new Guid("0CF2E522-D8A2-42E9-AA4F-1D532154F6DD");
