@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
@@ -13,7 +14,7 @@ namespace RhinoInside.Revit.GH.Components.Site
   using RhinoInside.Revit.GH.Exceptions;
 
 #if REVIT_2024
-  [ComponentVersion(introduced: "1.16"), ComponentRevitAPIVersion(min: "2024.0")]
+  [ComponentVersion(introduced: "1.16", updated: "1.36"), ComponentRevitAPIVersion(min: "2024.0")]
   public class AddToposolidSubDivision : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("1C148123-7E04-42EB-8B51-A6C2B731AD21");
@@ -51,6 +52,22 @@ namespace RhinoInside.Revit.GH.Components.Site
           Access = GH_ParamAccess.list
         }
       ),
+      new ParamDefinition
+       (
+        new Parameters.HostObjectType
+        {
+          Name = "Type",
+          NickName = "T",
+          Description = "Sub-Division Type",
+          Optional = true,
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Toposolid
+        },
+#if REVIT_2026
+        ParamRelevance.Primary
+#else
+        ParamRelevance.Secondary
+#endif
+      ),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -85,6 +102,7 @@ namespace RhinoInside.Revit.GH.Components.Site
         {
           // Input
           if (!Params.GetDataList(DA, "Boundary", out IList<Curve> boundary)) return null;
+          if (!Params.TryGetData(DA, "Type", out Types.HostObjectType type)) return null;
 
           var boundaryElevation = Interval.Unset;
           {
@@ -127,17 +145,39 @@ namespace RhinoInside.Revit.GH.Components.Site
           }
 
           // Compute
-          subdivision = Reconstruct(subdivision, host, boundary);
+          subdivision = Reconstruct(subdivision, host, boundary, type?.Value as ARDB.ToposolidType);
           DA.SetData(_Subdivision_, subdivision);
           return subdivision;
         }
       );
     }
 
+    static ARDB.Toposolid ChangeType(ARDB.Toposolid subdivision, ARDB.Toposolid host, ARDB.ToposolidType type)
+    {
+#if REVIT_2026
+      var typeId = type?.Id ?? host.GetTypeId();
+      if (typeId != subdivision.GetTypeId())
+        subdivision.ChangeTypeId(typeId);
+#else
+      subdivision.get_Parameter(ARDB.BuiltInParameter.TOPOSOLID_SUBDIVIDE_MATERIAL).Set
+      (
+        type?.GetCompoundStructure().GetLayers().FirstOrDefault()?.MaterialId ?? ElementIdExtension.Invalid
+      );
+      //subdivision.get_Parameter(ARDB.BuiltInParameter.TOPOSOLID_SUBDIVIDE_HEIGHT).Set
+      //(
+      //  type?.GetCompoundStructure().GetLayers().FirstOrDefault()?.Width ?? 1.0
+      //);
+#endif
+
+      return subdivision;
+    }
+
     bool Reuse
     (
       ref ARDB.Toposolid subdivision,
-      IList<Curve> boundaries
+      ARDB.Toposolid host,
+      IList<Curve> boundaries,
+      ARDB.ToposolidType type
     )
     {
       if (subdivision is null) return false;
@@ -145,17 +185,28 @@ namespace RhinoInside.Revit.GH.Components.Site
       if (!(subdivision.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundaries, Vector3d.ZAxis)))
         return false;
 
+      subdivision = ChangeType(subdivision, host, type);
       return true;
     }
 
     ARDB.Toposolid Create
     (
       ARDB.Toposolid host,
-      IList<Curve> boundary
+      IList<Curve> boundary,
+      ARDB.ToposolidType type
     )
     {
       var curveLoops = boundary.ConvertAll(GeometryEncoder.ToCurveLoop);
+#if REVIT_2026
+      var subdivision = type is object ?
+        host.CreateSubDivision(host.Document, type.Id, curveLoops) :
+        host.CreateSubDivision(host.Document, curveLoops);
+
+      host.ExcavateBy(subdivision.Id);
+#else
       var subdivision = host.CreateSubDivision(host.Document, curveLoops);
+      subdivision = ChangeType(subdivision, host, type);
+#endif
 
       return subdivision;
     }
@@ -164,14 +215,15 @@ namespace RhinoInside.Revit.GH.Components.Site
     (
       ARDB.Toposolid subdivision,
       ARDB.Toposolid host,
-      IList<Curve> boundary
+      IList<Curve> boundary,
+      ARDB.ToposolidType type
     )
     {
-      if (!Reuse(ref subdivision, boundary))
+      if (!Reuse(ref subdivision, host, boundary, type))
       {
         subdivision = subdivision.ReplaceElement
         (
-          Create(host, boundary),
+          Create(host, boundary, type),
           ExcludeUniqueProperties
         );
       }
