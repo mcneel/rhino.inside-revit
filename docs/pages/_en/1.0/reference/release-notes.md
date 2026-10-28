@@ -29,6 +29,7 @@ group: Deployment & Configs
 - Added 'Import Model CAD File' component.
 - Added 'Link Image File' component.
 - Updated 'Add Toposolid Sub-Division' to accept a sub-division type.
+- Fixed 'Host Boundary Profile' to return profile curves on the element location.
 
 {% endcapture %}
 

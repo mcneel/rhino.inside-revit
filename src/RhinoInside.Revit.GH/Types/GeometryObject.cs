@@ -107,7 +107,12 @@ namespace RhinoInside.Revit.GH.Types
             if (element is ARDB.Instance instance)
             {
               if (_Reference.ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_NONE && _Reference.ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_SUBELEMENT)
-                ReferenceTransform = HasReferenceTransform ? ReferenceTransform * instance.GetTransform().ToTransform() : instance.GetTransform().ToTransform();
+              {
+                var stable = geometryReference.ConvertToStableRepresentation(element.Document);
+                var referenceId = External.DB.ReferenceId.Parse(stable, element.Document);
+                if (referenceId.IsInstance)
+                  ReferenceTransform = HasReferenceTransform ? ReferenceTransform * instance.GetTransform().ToTransform() : instance.GetTransform().ToTransform();
+              }
             }
 
             Document = element?.Document;
