@@ -18,6 +18,7 @@ group: Deployment & Configs
 - Added 'Import Drafting CAD File' component.
 - Added 'Import Model CAD File' component.
 - Added 'Link Image File' component.
+- Updated 'Add Toposolid Sub-Division' to accept a sub-division type.
 
 {% endcapture %}
 
