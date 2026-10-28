@@ -217,13 +217,19 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
         Params.TrySetData(DA, "Host", () => host);
         Params.TrySetData(DA, "Plane", () => host.SketchPlane);
 
-        if (host is Types.ISketchAccess access && access.Sketch is Types.Sketch sketch)
-        {
-          if (sketch.IsValid)
-            Params.TrySetDataList(DA, "Profile", () => sketch.Profiles);
-          else
-            Params.TrySetDataList(DA, "Profile", () => Array.Empty<Curve>());
-        }
+        Params.TrySetDataList
+        (
+          DA, "Profile", () =>
+          {
+            if (host is Types.ISketchAccess access && access.Sketch is Types.Sketch sketch && sketch.IsValid)
+            {
+              var sketchPlane = host.SketchPlane;
+              return sketch.Profiles.Select(x => x.ProjectToPlane(sketchPlane));
+            }
+
+            return Array.Empty<Curve>();
+          }
+        );
       }
     }
   }
