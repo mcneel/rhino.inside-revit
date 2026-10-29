@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           NickName = "U",
           Description = "Elements unjoined from the target element. (Cutting elements in the join)",
           Access = GH_ParamAccess.list,
-        }, ParamRelevance.Primary
+        }, ParamRelevance.Secondary
       ),
     };
 
