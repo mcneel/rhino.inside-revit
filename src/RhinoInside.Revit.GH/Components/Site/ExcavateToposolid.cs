@@ -160,6 +160,7 @@ namespace RhinoInside.Revit.GH.Components.Site
               if (!ReportFailure(message))
               {
                 toposolid.Value.RemoveExcavationBy(cutter.Id);
+                toposolid.InvalidateGraphics();
                 excavated.Remove(cutter.Id);
                 removed.Add(cutter);
               }
@@ -177,6 +178,7 @@ namespace RhinoInside.Revit.GH.Components.Site
               else if (!excavated.Contains(cutter.Id))
               {
                 toposolid.Value.ExcavateBy(cutter.Id);
+                toposolid.InvalidateGraphics();
                 added.Add(cutter);
                 excavated.Add(cutter.Id);
               }
