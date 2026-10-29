@@ -143,6 +143,8 @@ namespace RhinoInside.Revit.GH.Components.Site
           {
             foreach (var cutter in remove ?? Array.Empty<Types.GraphicalElement>())
             {
+              if (!(cutter?.IsValid is true)) continue;
+
               var message = string.Empty;
               if (!excavated.Contains(cutter.Id))
               {
@@ -158,6 +160,7 @@ namespace RhinoInside.Revit.GH.Components.Site
               if (!ReportFailure(message))
               {
                 toposolid.Value.RemoveExcavationBy(cutter.Id);
+                toposolid.InvalidateGraphics();
                 excavated.Remove(cutter.Id);
                 removed.Add(cutter);
               }
@@ -165,7 +168,7 @@ namespace RhinoInside.Revit.GH.Components.Site
 
             foreach (var cutter in add ?? Array.Empty<Types.GraphicalElement>())
             {
-              if (!cutter.IsValid) continue;
+              if (!(cutter?.IsValid is true)) continue;
 
               var message = string.Empty;
               if (!toposolid.Value.CanBeExcavatedBy(cutter.Id) || toposolid.Id == cutter.Id)
@@ -175,6 +178,7 @@ namespace RhinoInside.Revit.GH.Components.Site
               else if (!excavated.Contains(cutter.Id))
               {
                 toposolid.Value.ExcavateBy(cutter.Id);
+                toposolid.InvalidateGraphics();
                 added.Add(cutter);
                 excavated.Add(cutter.Id);
               }

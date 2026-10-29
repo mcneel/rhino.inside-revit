@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           NickName = "U",
           Description = "Elements unjoined from the target element. (Cutting elements in the join)",
           Access = GH_ParamAccess.list,
-        }, ParamRelevance.Primary
+        }, ParamRelevance.Secondary
       ),
     };
 
@@ -168,7 +168,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 else
                   continue;
               }
-              else if (!ARDB.JoinGeometryUtils.IsCuttingElementInJoin(element.Document, element.Value, cutter.Value))
+              else if (!ARDB.JoinGeometryUtils.IsCuttingElementInJoin(element.Document, cutter.Value, element.Value))
               {
                 if (FailureProcessingMode != ARDB.FailureProcessingResult.ProceedWithCommit)
                   message = $"The joining element is not joined the target element but the other way around. {{{cutter.Id}}}";
@@ -177,6 +177,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
               if (!ReportFailure(message))
               {
                 ARDB.JoinGeometryUtils.UnjoinGeometry(element.Document, element.Value, cutter.Value);
+                element.InvalidateGraphics();
+                cutter.InvalidateGraphics();
                 cut.Remove(cutter.Id);
                 removed.Add(cutter);
               }
@@ -189,11 +191,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
               var message = string.Empty;
               if (ARDB.JoinGeometryUtils.AreElementsJoined(element.Document, cutter.Value, element.Value))
               {
-                if (ARDB.JoinGeometryUtils.IsCuttingElementInJoin(element.Document, element.Value, cutter.Value))
+                if (!ARDB.JoinGeometryUtils.IsCuttingElementInJoin(element.Document, cutter.Value, element.Value))
                 {
                   if (FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithCommit)
                   {
                     ARDB.JoinGeometryUtils.SwitchJoinOrder(element.Document, element.Value, cutter.Value);
+                    element.InvalidateGraphics();
+                    cutter.InvalidateGraphics();
+
                     added.Add(cutter);
                     cut.Add(cutter.Id);
                     AddContinueFailure($"Join order switched. {{{cutter.Id}}}");
@@ -211,7 +216,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
               {
                 try
                 {
-                  ARDB.JoinGeometryUtils.JoinGeometry(element.Document, element.Value, cutter.Value);
+                  ARDB.JoinGeometryUtils.JoinGeometry(element.Document, cutter.Value, element.Value);
+                  element.InvalidateGraphics();
+                  cutter.InvalidateGraphics();
                   added.Add(cutter);
                   cut.Add(cutter.Id);
                 }
