@@ -180,6 +180,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
           {
             foreach (var cutter in remove ?? Array.Empty<Types.GraphicalElement>())
             {
+              if (!(cutter?.IsValid is true)) continue;
+
               if (!IsElementFromAppropriateContext(element.Document, cutter.Value))
                 throw new RuntimeErrorException($"The cutter element is not valid for solid-solid cut {{{cutter.Id}}}");
 
@@ -189,7 +191,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
             foreach (var cutter in add ?? Array.Empty<Types.GraphicalElement>())
             {
-              if (!cutter.IsValid) continue;
+              if (!(cutter?.IsValid is true)) continue;
 
               if (!IsElementFromAppropriateContext(element.Document, cutter.Value))
                 throw new RuntimeErrorException($"The cutter element is not valid for solid-solid cut {{{cutter.Id}}}");
