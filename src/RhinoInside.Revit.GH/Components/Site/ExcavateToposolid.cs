@@ -2,15 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Parameters;
-using RhinoInside.Revit.Convert.Geometry;
-using RhinoInside.Revit.Convert.Units;
 using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.Exceptions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Site
 {
+#if REVIT_2024
   [ComponentVersion(introduced: "1.37"), ComponentRevitAPIVersion(min: "2025.0")]
   public class ExcavateToposolid : TransactionalChainComponent
   {
@@ -207,4 +205,5 @@ namespace RhinoInside.Revit.GH.Components.Site
 #endif
     }
   }
+#endif
 }

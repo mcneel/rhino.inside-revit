@@ -69,6 +69,16 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Parameters.GraphicalElement()
         {
+          Name = "Cutting",
+          NickName = "c",
+          Description = "Elements being cut by target Element",
+          Access = GH_ParamAccess.list,
+        }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
           Name = "Element",
           NickName = "E",
           Description = "Target element",
@@ -78,9 +88,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Parameters.GraphicalElement()
         {
-          Name = "Cutters",
+          Name = "Cut",
           NickName = "C",
-          Description = "Cutter elements",
+          Description = "Elements cut from target element.",
           Access = GH_ParamAccess.list,
         }, ParamRelevance.Primary
       ),
@@ -88,9 +98,9 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Parameters.GraphicalElement()
         {
-          Name = "Cutting",
-          NickName = "c",
-          Description = "Elements being cut by target Element",
+          Name = "Uncut",
+          NickName = "U",
+          Description = "Elements cut from target element.",
           Access = GH_ParamAccess.list,
         }, ParamRelevance.Secondary
       ),
@@ -166,14 +176,26 @@ namespace RhinoInside.Revit.GH.Components.Elements
     {
       if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
       else DA.SetData("Element", element);
+
       if (!Params.TryGetDataList(DA, "Cut", out IList<Types.GraphicalElement> add)) return;
       if (!Params.TryGetDataList(DA, "Uncut", out IList<Types.GraphicalElement> remove)) return;
 
       if (!IsElementFromAppropriateContext(element.Document, element.Value))
         throw new RuntimeErrorException($"The target element is not valid for solid-solid cut {{{element.Id}}}");
 
+      Params.TrySetDataList(DA, "Cutting", () => GetElementsBeingCut(element.Value).Select(x => element.GetElement<Types.GraphicalElement>(x)));
+
       if (add is object || remove is object)
       {
+        var added = new List<Types.GraphicalElement>(add?.Count ?? 0);
+        var removed = new List<Types.GraphicalElement>(remove?.Count ?? 0);
+
+        var cut = new HashSet<ARDB.ElementId>
+        (
+          GetCuttingElements(element.Value),
+          default(ElementIdEqualityComparer)
+        );
+
         UpdateElement
         (
           element.Value, () =>
@@ -186,7 +208,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 throw new RuntimeErrorException($"The cutter element is not valid for solid-solid cut {{{cutter.Id}}}");
 
               if (CutExistsBetweenElements(cutter.Value, element.Value, out var canRemove) && canRemove)
+              {
                 RemoveCutBetweenElements(element.Document, element.Value, cutter.Value);
+                cut.Remove(cutter.Id);
+                removed.Add(cutter);
+              }
             }
 
             foreach (var cutter in add ?? Array.Empty<Types.GraphicalElement>())
@@ -199,13 +225,17 @@ namespace RhinoInside.Revit.GH.Components.Elements
               if (CanElementCutElement(cutter.Value, element.Value, out var reasson))
               {
                 AddCutBetweenElements(element.Document, element.Value, cutter.Value);
+                added.Add(cutter);
+                cut.Add(cutter.Id);
               }
               else
               {
                 var message = string.Empty;
                 switch (reasson)
                 {
-                  case ARDB.CutFailureReason.CutAlreadyExists: break;
+                  case ARDB.CutFailureReason.CutAlreadyExists:
+                    added.Add(cutter);
+                    break;
                   case ARDB.CutFailureReason.OppositeCutExists:
                     message = $"The target element has already cut the cutting element. {{{cutter.Id}}}"; break;
                   case ARDB.CutFailureReason.CutNotAppropriateForElements:
@@ -229,10 +259,15 @@ namespace RhinoInside.Revit.GH.Components.Elements
             }
           }
         );
-      }
 
-      Params.TrySetDataList(DA, "Cutters", () => GetCuttingElements(element.Value).Select(x => element.GetElement<Types.GraphicalElement>(x)));
-      Params.TrySetDataList(DA, "Cutting", () => GetElementsBeingCut(element.Value).Select(x => element.GetElement<Types.GraphicalElement>(x)));
+        Params.TrySetDataList(DA, "Cut", () => added.Where(x => cut.Contains(x.Id)));
+        Params.TrySetDataList(DA, "Uncut", () => removed.Where(x => !cut.Contains(x.Id)));
+      }
+      else
+      {
+        Params.TrySetDataList(DA, "Cut", () => GetCuttingElements(element.Value).Select(x => element.GetElement<Types.GraphicalElement>(x)));
+        Params.TrySetDataList(DA, "Uncut", () => Array.Empty<Types.GraphicalElement>());
+      }
     }
   }
 }
