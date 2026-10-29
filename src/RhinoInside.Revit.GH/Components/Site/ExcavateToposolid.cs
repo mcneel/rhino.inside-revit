@@ -143,6 +143,8 @@ namespace RhinoInside.Revit.GH.Components.Site
           {
             foreach (var cutter in remove ?? Array.Empty<Types.GraphicalElement>())
             {
+              if (!(cutter?.IsValid is true)) continue;
+
               var message = string.Empty;
               if (!excavated.Contains(cutter.Id))
               {
@@ -165,7 +167,7 @@ namespace RhinoInside.Revit.GH.Components.Site
 
             foreach (var cutter in add ?? Array.Empty<Types.GraphicalElement>())
             {
-              if (!cutter.IsValid) continue;
+              if (!(cutter?.IsValid is true)) continue;
 
               var message = string.Empty;
               if (!toposolid.Value.CanBeExcavatedBy(cutter.Id) || toposolid.Id == cutter.Id)
