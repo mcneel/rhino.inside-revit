@@ -80,10 +80,8 @@ namespace RhinoInside.Revit.GH.Components.Insert
       if (!Params.TryGetData(DA, "Name", out string name)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter)) return;
 
-      var elements = view is null ?
-                    source is Types.Document document ? document.Value.CollectElements() :
-                    (source is Types.RevitLinkInstance link ? view.Value.CollectElements(link.Id) : view.Value.CollectElements()) :
-                    Array.Empty<ARDB.Element>();
+      var elements = view is null ? source.SourceDocument?.Value.CollectElements() ?? Array.Empty<ARDB.Element>() :
+                    (source is Types.RevitLinkInstance link ? view.Value.CollectElements(link.Id) : view.Value.CollectElements());
 
       var imports = elements.OfClass<ARDB.ImportInstance>();
 
