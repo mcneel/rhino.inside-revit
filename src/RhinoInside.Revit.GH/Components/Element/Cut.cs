@@ -210,6 +210,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
               if (CutExistsBetweenElements(cutter.Value, element.Value, out var canRemove) && canRemove)
               {
                 RemoveCutBetweenElements(element.Document, element.Value, cutter.Value);
+                element.InvalidateGraphics();
+                cutter.InvalidateGraphics();
                 cut.Remove(cutter.Id);
                 removed.Add(cutter);
               }
@@ -225,6 +227,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
               if (CanElementCutElement(cutter.Value, element.Value, out var reasson))
               {
                 AddCutBetweenElements(element.Document, element.Value, cutter.Value);
+                element.InvalidateGraphics();
+                cutter.InvalidateGraphics();
                 added.Add(cutter);
                 cut.Add(cutter.Id);
               }
