@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using RhinoInside.Revit.External.DB.Extensions;
 using RhinoInside.Revit.GH.Exceptions;
 using ARDB = Autodesk.Revit.DB;
 
@@ -68,6 +69,16 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Parameters.GraphicalElement()
         {
+          Name = "Joining",
+          NickName = "j",
+          Description = "Joining elements. (Elements being cut by target Element)",
+          Access = GH_ParamAccess.list,
+        }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
           Name = "Element",
           NickName = "E",
           Description = "Target element",
@@ -79,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
         {
           Name = "Joined",
           NickName = "J",
-          Description = "Joined elements. (Cutting elements in the join)",
+          Description = "Elements joined to the target element. (Cutting elements in the join)",
           Access = GH_ParamAccess.list,
         }, ParamRelevance.Primary
       ),
@@ -87,11 +98,11 @@ namespace RhinoInside.Revit.GH.Components.Elements
       (
         new Parameters.GraphicalElement()
         {
-          Name = "Joining",
-          NickName = "j",
-          Description = "Joining elements. (Elements being cut by target Element)",
+          Name = "Unjoined",
+          NickName = "U",
+          Description = "Elements unjoined from the target element. (Cutting elements in the join)",
           Access = GH_ParamAccess.list,
-        }, ParamRelevance.Secondary
+        }, ParamRelevance.Primary
       ),
     };
 
@@ -123,8 +134,26 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (element.Document.IsFamilyDocument)
         throw new RuntimeErrorException("Join functionality is not available for family documents.");
 
+      Params.TrySetDataList
+      (
+        DA, "Joining",
+        () => ARDB.JoinGeometryUtils.GetJoinedElements(element.Document, element.Value).
+              Where(x => ARDB.JoinGeometryUtils.IsCuttingElementInJoin(element.Document, element.Value, element.Document.GetElement(x))).
+              Select(x => element.GetElement<Types.GraphicalElement>(x))
+      );
+
       if (add is object || remove is object)
       {
+        var added = new List<Types.GraphicalElement>(add?.Count ?? 0);
+        var removed = new List<Types.GraphicalElement>(remove?.Count ?? 0);
+
+        var cut = new HashSet<ARDB.ElementId>
+        (
+          ARDB.JoinGeometryUtils.GetJoinedElements(element.Document, element.Value).
+          Where(x => ARDB.JoinGeometryUtils.IsCuttingElementInJoin(element.Document, element.Document.GetElement(x), element.Value)),
+          default(ElementIdEqualityComparer)
+        );
+
         UpdateElement
         (
           element.Value, () =>
@@ -139,14 +168,18 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 else
                   continue;
               }
-              else if (!ARDB.JoinGeometryUtils.IsCuttingElementInJoin(element.Document, cutter.Value, element.Value))
+              else if (!ARDB.JoinGeometryUtils.IsCuttingElementInJoin(element.Document, element.Value, cutter.Value))
               {
                 if (FailureProcessingMode != ARDB.FailureProcessingResult.ProceedWithCommit)
                   message = $"The joining element is not joined the target element but the other way around. {{{cutter.Id}}}";
               }
 
               if (!ReportFailure(message))
+              {
                 ARDB.JoinGeometryUtils.UnjoinGeometry(element.Document, element.Value, cutter.Value);
+                cut.Remove(cutter.Id);
+                removed.Add(cutter);
+              }
             }
 
             foreach (var cutter in add ?? Array.Empty<Types.GraphicalElement>())
@@ -161,10 +194,17 @@ namespace RhinoInside.Revit.GH.Components.Elements
                   if (FailureProcessingMode == ARDB.FailureProcessingResult.ProceedWithCommit)
                   {
                     ARDB.JoinGeometryUtils.SwitchJoinOrder(element.Document, element.Value, cutter.Value);
+                    added.Add(cutter);
+                    cut.Add(cutter.Id);
                     AddContinueFailure($"Join order switched. {{{cutter.Id}}}");
                   }
                   else
                     message = $"The joining element is already joined the other way around to the target element. {{{cutter.Id}}}";
+                }
+                else
+                {
+                  added.Add(cutter);
+                  cut.Add(cutter.Id);
                 }
               }
               else
@@ -172,6 +212,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 try
                 {
                   ARDB.JoinGeometryUtils.JoinGeometry(element.Document, element.Value, cutter.Value);
+                  added.Add(cutter);
+                  cut.Add(cutter.Id);
                 }
                 catch (Autodesk.Revit.Exceptions.ArgumentException) { message = $"The elements cannot be joined. {{{cutter.Id}}}"; }
                 catch (Exception e) { message = e.Message; }
@@ -181,22 +223,21 @@ namespace RhinoInside.Revit.GH.Components.Elements
             }
           }
         );
-      }
 
-      Params.TrySetDataList
-      (
-        DA, "Joined",
-        () => ARDB.JoinGeometryUtils.GetJoinedElements(element.Document, element.Value).
-              Where(x => ARDB.JoinGeometryUtils.IsCuttingElementInJoin(element.Document, element.Document.GetElement(x), element.Value)).
-              Select(x => element.GetElement<Types.GraphicalElement>(x))
-      );
-      Params.TrySetDataList
-      (
-        DA, "Joining",
-        () => ARDB.JoinGeometryUtils.GetJoinedElements(element.Document, element.Value).
-              Where(x => ARDB.JoinGeometryUtils.IsCuttingElementInJoin(element.Document, element.Value, element.Document.GetElement(x))).
-              Select(x => element.GetElement<Types.GraphicalElement>(x))
-      );
+        Params.TrySetDataList(DA, "Joined", () => added.Where(x => cut.Contains(x.Id)));
+        Params.TrySetDataList(DA, "Unjoined", () => removed.Where(x => !cut.Contains(x.Id)));
+      }
+      else
+      {
+        Params.TrySetDataList
+        (
+          DA, "Joined",
+          () => ARDB.JoinGeometryUtils.GetJoinedElements(element.Document, element.Value).
+                Where(x => ARDB.JoinGeometryUtils.IsCuttingElementInJoin(element.Document, element.Document.GetElement(x), element.Value)).
+                Select(x => element.GetElement<Types.GraphicalElement>(x))
+        );
+        Params.TrySetDataList(DA, "Unjoined", () => Array.Empty<Types.GraphicalElement>());
+      }
     }
   }
 }

@@ -18,6 +18,7 @@ group: Deployment & Configs
 - Added 'Add Wall (Sweep)' component.
 - Added 'Check Element Interferences' component.
 - Added 'Query Interfering Elements' component.
+- Added 'Excavate Toposolid' component.
 
 ### RC
 
