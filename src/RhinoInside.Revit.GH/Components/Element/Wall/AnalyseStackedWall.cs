@@ -44,15 +44,10 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // grab input wall type
-      ARDB.Wall wallInstance = default;
-      if (!DA.GetData("Stacked Wall", ref wallInstance))
-        return;
+      if (!Params.GetData(DA, "Stacked Wall", out Types.Wall wall, x => x.IsValid)) return;
 
-      if (wallInstance.IsStackedWall)
-      {
-        DA.SetDataList("Basic Walls", wallInstance.GetStackedWallMemberIds().Select(x => wallInstance.Document.GetElement(x)).Select(x => Types.Element.FromElement(x)).ToList());
-      }
+      if (wall.Value.IsStackedWall)
+        DA.SetDataList("Basic Walls", wall.Value.GetStackedWallMemberIds().Select(x => wall.GetElement<Types.Wall>(x)));
     }
   }
 }

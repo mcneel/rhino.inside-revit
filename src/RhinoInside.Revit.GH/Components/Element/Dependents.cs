@@ -114,8 +114,8 @@ namespace RhinoInside.Revit.GH.Components.Elements
               filter
             );
 
-            DA.SetDataList("Dependents", dependents.Select(x => Types.Element.FromElementId(element.Document, x)));
-            DA.SetDataList("Referentials", relateds.Select(x => Types.Element.FromElementId(element.Document, x)));
+            DA.SetDataList("Dependents", dependents.Select(x => element.GetElement<Types.Element>(x)));
+            DA.SetDataList("Referentials", relateds.Select(x => element.GetElement<Types.Element>(x)));
 
             return;
           }
@@ -125,7 +125,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
         {
           var dependents = element.Value.GetDependentElements(filter);
-          DA.SetDataList("Dependents", dependents.Select(x => Types.Element.FromElementId(element.Document, x)));
+          DA.SetDataList("Dependents", dependents.Select(x => element.GetElement<Types.Element>(x)));
         }
       }
     }

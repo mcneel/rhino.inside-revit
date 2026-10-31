@@ -104,7 +104,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
                 {
                   case Types.HostObjectType hostType:
                     if (panel.FindHostPanel() is ARDB.ElementId hostPanelId && hostPanelId.IsValid())
-                      element = Types.Element.FromElementId(element.Document, hostPanelId) ?? element;
+                      element = element.GetElement<Types.Element>(hostPanelId) ?? element;
                     break;
                 }
               }

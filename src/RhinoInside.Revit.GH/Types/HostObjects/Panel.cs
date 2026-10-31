@@ -37,10 +37,9 @@ namespace RhinoInside.Revit.GH.Types
           Value is ARDB.Panel panel &&
           panel.Document.GetElement(panel.FindHostPanel()) is ARDB.HostObject host
         )
-        {
-          return ElementType.FromElementId(panel.Document, host.GetTypeId()) as ElementType;
-        }
-        else return base.Type;
+          return GetElement<ElementType>(host.GetTypeId());
+
+        return base.Type;
       }
       set
       {

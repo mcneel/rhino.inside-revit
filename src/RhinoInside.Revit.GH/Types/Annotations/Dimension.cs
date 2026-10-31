@@ -423,9 +423,9 @@ namespace RhinoInside.Revit.GH.Types
     public DimensionType() { }
     protected internal DimensionType(ARDB.DimensionType type) : base(type) { }
 
-    internal ElementType TickMark => ElementType.FromElementId(Document, Value?.get_Parameter(ARDB.BuiltInParameter.DIM_LEADER_ARROWHEAD).AsElementId()) as ElementType;
+    internal ElementType TickMark => GetElement<ElementType>(Value?.get_Parameter(ARDB.BuiltInParameter.DIM_LEADER_ARROWHEAD).AsElementId());
 
     internal int? LeaderType => Value?.get_Parameter(ARDB.BuiltInParameter.DIM_LEADER_TYPE).AsInteger();
-    internal ElementType LeaderTickMark => ElementType.FromElementId(Document, Value?.get_Parameter(ARDB.BuiltInParameter.DIM_STYLE_LEADER_TICK_MARK).AsElementId()) as ElementType;
+    internal ElementType LeaderTickMark => GetElement<ElementType>(Value?.get_Parameter(ARDB.BuiltInParameter.DIM_STYLE_LEADER_TICK_MARK).AsElementId());
   }
 }

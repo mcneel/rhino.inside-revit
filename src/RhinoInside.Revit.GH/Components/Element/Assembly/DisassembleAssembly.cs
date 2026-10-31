@@ -52,12 +52,10 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var assembly = default(ARDB.AssemblyInstance);
-      if (!DA.GetData("Assembly", ref assembly))
-        return;
+      if (!Params.GetData(DA, "Assembly", out Types.AssemblyInstance assembly, x => x.IsValid)) return;
 
       StartTransaction(assembly.Document);
-      DA.SetDataList("Elements", assembly.Disassemble().Select(x => Types.Element.FromElementId(assembly.Document, x)));
+      DA.SetDataList("Elements", assembly.Value.Disassemble().Select(x => assembly.GetElement<Types.GraphicalElement>(x)));
     }
   }
 }

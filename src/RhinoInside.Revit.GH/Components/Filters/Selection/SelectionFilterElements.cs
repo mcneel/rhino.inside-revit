@@ -40,18 +40,18 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Selection Filter", out ARDB.SelectionFilterElement selection, x => x.IsValid())) return;
+      if (!Params.GetData(DA, "Selection Filter", out Types.SelectionFilterElement selection, x => x.IsValid)) return;
       else DA.SetData("Selection Filter", selection);
 
       if (Params.GetDataList(DA, "Elements", out IList<Types.Element> elements))
       {
         StartTransaction(selection.Document);
 
-        var elementIds = elements?.Where(x => selection.Document.IsEquivalent(x.Document)).Select(x => x.Id).ToList();
-        selection.SetElementIds(elementIds);
+        var elementIds = elements.Where(x => selection.Document.IsEquivalent(x.Document)).Select(x => x.Id).ToList();
+        selection.Value.SetElementIds(elementIds);
       }
 
-      Params.TrySetDataList(DA, "Elements", () => selection.GetElementIds().Select(x => Types.Element.FromElementId(selection.Document, x)));
+      Params.TrySetDataList(DA, "Elements", () => selection.Value.GetElementIds().Select(x => selection.GetElement<Types.Element>(x)));
     }
   }
 }
