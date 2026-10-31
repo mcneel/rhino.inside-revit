@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Group", out Types.Group group, x => x.IsValid)) return;
-      DA.SetDataList("Members", group.Value.GetMemberIds().Select(x => Types.GraphicalElement.FromElementId(group.Document, x)));
+      DA.SetDataList("Members", group.Value.GetMemberIds().Select(x => group.GetElement<Types.GraphicalElement>(x)));
     }
   }
 }
