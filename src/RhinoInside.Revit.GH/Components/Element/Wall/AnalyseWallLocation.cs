@@ -8,12 +8,12 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Components.Walls
 {
   [ComponentVersion(introduced:"1.0", updated:"1.37")]
-  public class AnalyzeWallLocationCurve : TransactionalChainComponent
+  public class WallLocationLine : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("4C5260C3-B15E-482B-8A1D-38CD868E3E72");
     public override GH_Exposure Exposure => GH_Exposure.septenary;
 
-    public AnalyzeWallLocationCurve() : base
+    public WallLocationLine() : base
     (
       name: "Wall Location Line",
       nickname: "W-Line",
