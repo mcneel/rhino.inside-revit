@@ -15,6 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
   using External.DB.Extensions;
   using GH.Exceptions;
 
+  [ComponentVersion(introduced:"1.0", updated:"1.37")]
   public class WallByCurve : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("37A8C46F-CB5B-49FD-A483-B03D1FE14A22");
@@ -169,7 +170,6 @@ namespace RhinoInside.Revit.GH.Components.Walls
         {
           Name = "Structural Usage",
           NickName = "Su",
-          Description = "Unconnected Height",
           Optional = true
         }, ParamRelevance.Primary
       ),
@@ -193,12 +193,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     public override void AddedToDocument(GH_Document document)
     {
-      if (Params.Input<IGH_Param>("LocationLine") is IGH_Param locationLine)
-        locationLine.Name = "Location Line";
-      if (Params.Input<IGH_Param>("AllowJoins") is IGH_Param allowJoins)
-        allowJoins.Name = "Allow Joins";
-      if (Params.Input<IGH_Param>("StructuralUsage") is IGH_Param structuralUsage)
-        structuralUsage.Name = "Structural Usage";
+      if (Params.Input<IGH_Param>("Level") is IGH_Param level)                     level.Name = "Base";
+      if (Params.Input<IGH_Param>("Height") is IGH_Param height)                   height.Name = "Top";
+      if (Params.Input<IGH_Param>("LocationLine") is IGH_Param locationLine)       locationLine.Name = "Location Line";
+      if (Params.Input<IGH_Param>("AllowJoins") is IGH_Param allowJoins)           allowJoins.Name = "Allow Joins";
+      if (Params.Input<IGH_Param>("StructuralUsage") is IGH_Param structuralUsage) structuralUsage.Name = "Structural Usage";
 
       base.AddedToDocument(document);
     }
