@@ -15,6 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
   using External.DB.Extensions;
   using GH.Exceptions;
 
+  [ComponentVersion(introduced:"1.0", updated:"1.37")]
   public class WallByCurve : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("37A8C46F-CB5B-49FD-A483-B03D1FE14A22");
@@ -169,7 +170,6 @@ namespace RhinoInside.Revit.GH.Components.Walls
         {
           Name = "Structural Usage",
           NickName = "Su",
-          Description = "Unconnected Height",
           Optional = true
         }, ParamRelevance.Primary
       ),
@@ -193,12 +193,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     public override void AddedToDocument(GH_Document document)
     {
-      if (Params.Input<IGH_Param>("LocationLine") is IGH_Param locationLine)
-        locationLine.Name = "Location Line";
-      if (Params.Input<IGH_Param>("AllowJoins") is IGH_Param allowJoins)
-        allowJoins.Name = "Allow Joins";
-      if (Params.Input<IGH_Param>("StructuralUsage") is IGH_Param structuralUsage)
-        structuralUsage.Name = "Structural Usage";
+      if (Params.Input<IGH_Param>("Level") is IGH_Param level)                     level.Name = "Base";
+      if (Params.Input<IGH_Param>("Height") is IGH_Param height)                   height.Name = "Top";
+      if (Params.Input<IGH_Param>("LocationLine") is IGH_Param locationLine)       locationLine.Name = "Location Line";
+      if (Params.Input<IGH_Param>("AllowJoins") is IGH_Param allowJoins)           allowJoins.Name = "Allow Joins";
+      if (Params.Input<IGH_Param>("StructuralUsage") is IGH_Param structuralUsage) structuralUsage.Name = "Structural Usage";
 
       base.AddedToDocument(document);
     }
@@ -249,9 +248,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.HostObjectType type, doc, ARDB.ElementTypeGroup.WallType)) return null;
 
           if (!(type.Value is ARDB.WallType wallType))
-            throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid floor type.");
+            throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid wall type.");
 
-          var bbox = curve.GetBoundingBox(true);
           if (!Params.TryGetData(DA, "Base", out ERDB.ElevationElementReference? baseElevation)) return null;
           if (!Params.TryGetData(DA, "Top", out ERDB.ElevationElementReference? topElevation)) return null;
           if (!Params.TryGetData(DA, "Location Line", out ARDB.WallLocationLine? locationLine)) return null;
@@ -260,6 +258,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           if (!Params.TryGetData(DA, "Structural Usage", out ARDB.Structure.StructuralWallUsage? structuralUsage)) return null;
 
           // Solve missing Base & Top
+          var bbox = curve.GetBoundingBox(true);
           ERDB.ElevationElementReference.SolveBase
           (
             doc.Value, bbox.Min.Z / Revit.ModelUnits,
@@ -314,7 +313,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           (
             wall, doc.Value,
             centerLine,
-            locationLine ?? ARDB.WallLocationLine.FinishFaceInterior,
+            locationLine ?? ARDB.WallLocationLine.WallCenterline,
             wallType,
             baseElevation.Value,
             topElevation ?? new ERDB.ElevationElementReference(type?.Value.GetCompoundStructure()?.SampleHeight ?? 20.0, null),
