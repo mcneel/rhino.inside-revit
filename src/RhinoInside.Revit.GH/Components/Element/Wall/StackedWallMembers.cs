@@ -1,19 +1,18 @@
 using System;
 using System.Linq;
 using Grasshopper.Kernel;
-using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
-  public class AnalyzeStackedWall : Component
+  public class StackedWallMembers : Component
   {
     public override Guid ComponentGuid => new Guid("DF10B918-A30F-4609-AE77-14314E6CDBF1");
     public override GH_Exposure Exposure => GH_Exposure.septenary;
     protected override string IconTag => "ASW";
 
-    public AnalyzeStackedWall() : base(
-      name: "Analyze Stacked Wall",
-      nickname: "A-SW",
+    public StackedWallMembers() : base(
+      name: "Stacked Wall Members",
+      nickname: "SW-Members",
       description: "Analyze given Stacked Wall element",
       category: "Revit",
       subCategory: "Architecture"
