@@ -73,6 +73,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     static readonly ARDB.FailureDefinitionId[] failureDefinitionIdsToFix = new ARDB.FailureDefinitionId[]
     {
+      ARDB.BuiltInFailures.DimensionFailures.RegenConstraintUnsatisfied,
       ARDB.BuiltInFailures.CreationFailures.CannotDrawWallsError,
       ARDB.BuiltInFailures.JoinElementsFailures.CannotJoinElementsError,
       ARDB.BuiltInFailures.WallFailures.ParameterChangeNotAffectingGeometry,
@@ -331,6 +332,9 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
       if (wall is object)
       {
+        if (wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).AsElementId() != level.Value.Id)
+          wall.Document.Regenerate();
+
         wall.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(ARDB.ElementId.InvalidElementId);
         wall.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update((bbox.Max.Z - bbox.Min.Z) / Revit.ModelUnits);
         wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Value.Id);
