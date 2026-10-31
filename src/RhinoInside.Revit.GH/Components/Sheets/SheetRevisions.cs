@@ -53,9 +53,9 @@ namespace RhinoInside.Revit.GH.Components.Sheets
         sheet.Document.Regenerate();
       }
 
-      Params.TrySetData(DA, "Current Revision", () => Types.Element.FromElementId(sheet.Document, sheet.Value.GetCurrentRevision()) as Types.Revision);
-      Params.TrySetDataList(DA, "Revisions on Sheet", () => sheet.Value.GetAdditionalRevisionIds().Select(x => Types.Element.FromElementId(sheet.Document, x)));
-      Params.TrySetDataList(DA, "Scheduled Revisions", () => sheet.Value.GetAllRevisionIds().Select(x => Types.Element.FromElementId(sheet.Document, x)));
+      Params.TrySetData(DA, "Current Revision", () => sheet.GetElement<Types.Revision>(sheet.Value.GetCurrentRevision()));
+      Params.TrySetDataList(DA, "Revisions on Sheet", () => sheet.Value.GetAdditionalRevisionIds().Select(x => sheet.GetElement<Types.Revision>(x)));
+      Params.TrySetDataList(DA, "Scheduled Revisions", () => sheet.Value.GetAllRevisionIds().Select(x => sheet.GetElement<Types.Revision>(x)));
     }
   }
 }

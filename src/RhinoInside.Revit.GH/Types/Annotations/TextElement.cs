@@ -288,6 +288,6 @@ namespace RhinoInside.Revit.GH.Types
     public TextElementType() { }
     protected internal TextElementType(ARDB.TextElementType type) : base(type) { }
 
-    internal ElementType LeaderArrowhead => ElementType.FromElementId(Document, Value?.get_Parameter(ARDB.BuiltInParameter.LEADER_ARROWHEAD).AsElementId()) as ElementType;
+    internal ElementType LeaderArrowhead => GetElement<ElementType>(Value?.get_Parameter(ARDB.BuiltInParameter.LEADER_ARROWHEAD).AsElementId());
   }
 }

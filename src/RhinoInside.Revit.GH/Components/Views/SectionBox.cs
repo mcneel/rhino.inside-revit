@@ -122,8 +122,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
       Params.TrySetData(DA, "Section Box", () =>
       {
-        var ids = view.Value.GetDependentElements(new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_SectionBox));
-        return Types.GraphicalElement.FromElementId(view.Document, ids.FirstOrDefault());
+        return view.GetElement<Types.GraphicalElement>(view.Value.GetDependentElements(new ARDB.ElementCategoryFilter(ARDB.BuiltInCategory.OST_SectionBox)).FirstOrDefault());
       });
     }
   }

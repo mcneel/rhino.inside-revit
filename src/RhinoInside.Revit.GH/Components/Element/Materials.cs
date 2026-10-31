@@ -35,12 +35,10 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      Types.Element element = null;
-      if (!DA.GetData("Element", ref element) || !element.IsValid)
-        return;
+      if (!Params.GetData(DA, "Element", out Types.Element element, x => x.IsValid)) return;
 
-      DA.SetDataList("Materials", element.Value.GetMaterialIds(false).Select(x => Types.Material.FromElementId(element.Document, x)));
-      DA.SetDataList("Paint",     element.Value.GetMaterialIds(true ).Select(x => Types.Material.FromElementId(element.Document, x)));
+      DA.SetDataList("Materials", element.Value.GetMaterialIds(false).Select(x => element.GetElement<Types.Material>(x)));
+      DA.SetDataList("Paint",     element.Value.GetMaterialIds(true ).Select(x => element.GetElement<Types.Material>(x)));
     }
   }
 
