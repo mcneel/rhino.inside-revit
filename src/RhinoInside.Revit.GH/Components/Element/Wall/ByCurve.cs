@@ -248,9 +248,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.HostObjectType type, doc, ARDB.ElementTypeGroup.WallType)) return null;
 
           if (!(type.Value is ARDB.WallType wallType))
-            throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid floor type.");
+            throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid wall type.");
 
-          var bbox = curve.GetBoundingBox(true);
           if (!Params.TryGetData(DA, "Base", out ERDB.ElevationElementReference? baseElevation)) return null;
           if (!Params.TryGetData(DA, "Top", out ERDB.ElevationElementReference? topElevation)) return null;
           if (!Params.TryGetData(DA, "Location Line", out ARDB.WallLocationLine? locationLine)) return null;
@@ -259,6 +258,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           if (!Params.TryGetData(DA, "Structural Usage", out ARDB.Structure.StructuralWallUsage? structuralUsage)) return null;
 
           // Solve missing Base & Top
+          var bbox = curve.GetBoundingBox(true);
           ERDB.ElevationElementReference.SolveBase
           (
             doc.Value, bbox.Min.Z / Revit.ModelUnits,
@@ -313,7 +313,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           (
             wall, doc.Value,
             centerLine,
-            locationLine ?? ARDB.WallLocationLine.FinishFaceInterior,
+            locationLine ?? ARDB.WallLocationLine.WallCenterline,
             wallType,
             baseElevation.Value,
             topElevation ?? new ERDB.ElevationElementReference(type?.Value.GetCompoundStructure()?.SampleHeight ?? 20.0, null),
