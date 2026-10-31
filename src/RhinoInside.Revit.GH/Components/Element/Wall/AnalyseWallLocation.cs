@@ -1,124 +1,124 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Parameters;
 using RhinoInside.Revit.Convert.Geometry;
 using RhinoInside.Revit.External.DB.Extensions;
-using RhinoInside.Revit.GH.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Walls
 {
-  public class AnalyzeWallLocationCurve : Component
+  [ComponentVersion(introduced:"1.0", updated:"1.37")]
+  public class AnalyzeWallLocationCurve : TransactionalChainComponent
   {
     public override Guid ComponentGuid => new Guid("4C5260C3-B15E-482B-8A1D-38CD868E3E72");
     public override GH_Exposure Exposure => GH_Exposure.septenary;
-    protected override string IconTag => "AWLC";
 
-    public AnalyzeWallLocationCurve() : base(
-      name: "Analyze Wall Location Curve",
-      nickname: "A-WLC",
-      description: "Analyze location curve of given wall instance",
+    public AnalyzeWallLocationCurve() : base
+    (
+      name: "Wall Location Line",
+      nickname: "W-Line",
+      description: "Get-Set location line of given wall instance",
       category: "Revit",
       subCategory: "Architecture"
     )
     { }
 
-    // in and out params
-    protected override void RegisterInputParams(GH_InputParamManager manager)
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      manager.AddParameter(
-        param: new Parameters.Wall(),
-        name: "Wall",
-        nickname: "W",
-        description: "Wall element",
-        access: GH_ParamAccess.item
-        );
-    }
+      new ParamDefinition
+      (
+        new Parameters.Wall()
+        {
+          Name = "Wall",
+          NickName = "W",
+          Description = "Wall element",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Param_Enum<Types.WallLocationLine>()
+        {
+          Name = "Location Line",
+          NickName = "Ll",
+          Description = "Wall location line",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+    };
 
-    protected override void RegisterOutputParams(GH_OutputParamManager manager)
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
     {
-      manager.AddParameter(
-        param: new Param_Enum<Types.WallLocationLine>(),
-        name: "Location Line",
-        nickname: "LL",
-        description: "Location line setting of the wall element",
-        access: GH_ParamAccess.item
-        );
-      manager.AddCurveParameter(
-        name: "Center Curve",
-        nickname: "CC",
-        description: "Center curve of the wall element",
-        access: GH_ParamAccess.item
-        );
-      manager.AddCurveParameter(
-        name: "Location Curve",
-        nickname: "LC",
-        description: "Wall base curve at the location curve of the wall element",
-        access: GH_ParamAccess.item
-        );
-      manager.AddNumberParameter(
-        name: "Offset Value",
-        nickname: "O",
-        description: "Offset value of location curve from center curve of wall element",
-        access: GH_ParamAccess.item
-        );
-    }
+      new ParamDefinition
+      (
+        new Parameters.Wall()
+        {
+          Name = "Wall",
+          NickName = "W",
+          Description = "Wall element",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Param_Enum<Types.WallLocationLine>()
+        {
+          Name = "Location Line",
+          NickName = "Ll",
+          Description = "Wall location line",
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Curve()
+        {
+          Name = "Curve",
+          NickName = "C",
+          Description = "Wall curve at location line",
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Number()
+        {
+          Name = "Offset",
+          NickName = "O",
+          Description = "Wall curve offset from center line",
+        }, ParamRelevance.Primary
+      ),
+    };
 
-    // support methods
-    private ARDB.WallType GetApplicableType(ARDB.Wall wall)
+    public override void AddedToDocument(GH_Document document)
     {
-      if (wall.WallType.Kind == ARDB.WallKind.Stacked)
-      {
-        ARDB.ElementId baseWallId = wall.GetStackedWallMemberIds().First();
-        ARDB.Wall baseWall = wall.Document.GetElement(baseWallId) as ARDB.Wall;
-        return baseWall.WallType;
-      }
-      else
-        return wall.WallType;
-    }
+      if (Params.Output<IGH_Param>("Center Curve") is IGH_Param centerCurve)      centerCurve.Name = "Wall";
+      if (Params.Output<IGH_Param>("Location Curve") is IGH_Param locationCurve)  locationCurve.Name = "Curve";
+      if (Params.Output<IGH_Param>("Offset Value") is IGH_Param offsetValue)      offsetValue.Name = "Offset";
 
-    private ARDB.XYZ GetOffsetPlaneNormal(ARDB.Wall wall)
-    {
-      var offsetPlaneNormal = -(ARDB.XYZ.BasisZ);
-      return wall.Flipped ? -offsetPlaneNormal : offsetPlaneNormal;
+      base.AddedToDocument(document);
     }
-
-    private double GetOffsetForLocationCurve(ARDB.Wall wall)
-    {
-      var wallType = GetApplicableType(wall);
-      var cstruct = wallType.GetCompoundStructure();
-      if (cstruct != null)
-      {
-        int wallLocationLine = wall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).AsInteger();
-        return cstruct.GetOffsetForLocationLine(
-          (ARDB.WallLocationLine) Enum.ToObject(typeof(ARDB.WallLocationLine), wallLocationLine)
-          );
-      }
-      else
-        return 0;
-    }
-
-    private ARDB.Curve OffsetLocationCurve(ARDB.Curve centerCurve, double offsetValue, ARDB.XYZ offsetPlaneNormal)
-    {
-      return centerCurve.CreateOffset(offsetValue, offsetPlaneNormal);
-    }
-
-    // solver
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      // grab input wall type
-      ARDB.Wall wall = default;
-      if (!DA.GetData("Wall", ref wall))
-        return;
+      if (!Params.GetData(DA, "Wall", out Types.Wall wall)) return;
+      Params.TrySetData(DA, "Wall", () => wall);
 
-      DA.SetData("Center Curve", (wall.Location as ARDB.LocationCurve)?.Curve.ToCurve());
-      DA.SetData("Location Line", wall?.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).AsGoo());
+      Params.TryGetData(DA, "Location Line", out ARDB.WallLocationLine? locationLine);
+      if (locationLine.HasValue)
+      {
+        StartTransaction(wall.Document);
+        wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(locationLine.Value);
+      }
 
-      var offsetPlaneNormal = GetOffsetPlaneNormal(wall);
-      var offsetValue = GetOffsetForLocationCurve(wall);
-      var locationCurve = OffsetLocationCurve((wall.Location as ARDB.LocationCurve).Curve, offsetValue, offsetPlaneNormal);
-      DA.SetData("Offset Value", offsetValue);
-      DA.SetData("Location Curve", locationCurve.ToCurve());
+      if ((wall.Value.Location as ARDB.LocationCurve)?.Curve is ARDB.Curve curve)
+      {
+        locationLine = wall.Value.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).AsEnum<ARDB.WallLocationLine>();
+        Params.TrySetData(DA, "Location Line", () => locationLine.Value);
+
+        var offset = -wall.Value.WallType.GetOffsetForLocationLine(locationLine.Value);
+        if (wall.Value.Flipped) offset = -offset;
+
+        Params.TrySetData(DA, "Curve", () => curve.CreateOffset(offset, ARDB.XYZ.BasisZ).ToCurve());
+        Params.TrySetData(DA, "Offset", () => offset * Revit.ModelUnits);
+      }
     }
   }
 }
