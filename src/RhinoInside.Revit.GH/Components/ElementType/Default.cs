@@ -54,12 +54,10 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var category = default(Types.Category);
-      if (!DA.GetData("Category", ref category) || !category.IsValid)
-        return;
+      if (!Params.GetData(DA, "Category", out Types.Category category, x => x.IsValid)) return;
 
       var typeId = GetDefaultElementTypeId(category.Document, category.Id);
-      DA.SetData("Type", Types.ElementType.FromElementId(category.Document, typeId));
+      DA.SetData("Type", category.GetElement<Types.ElementType>(typeId));
     }
   }
 }

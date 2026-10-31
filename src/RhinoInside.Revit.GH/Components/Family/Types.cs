@@ -33,11 +33,9 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      ARDB.Family family = null;
-      if (!DA.GetData("Family", ref family))
-        return;
+      if (!Params.GetData(DA, "Family", out Types.Family family, x => x.IsValid)) return;
 
-      DA.SetDataList("Types", family?.GetFamilySymbolIds().Select(x => Types.ElementType.FromElementId(family.Document, x)));
+      DA.SetDataList("Types", family.Value.GetFamilySymbolIds().Select(x => family.GetElement<Types.ElementType>(x)));
     }
   }
 }

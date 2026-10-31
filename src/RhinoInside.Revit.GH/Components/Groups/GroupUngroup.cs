@@ -43,7 +43,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
 
       StartTransaction(group.Document);
 
-      var members = group.Value.UngroupMembers().Select(x => Types.GraphicalElement.FromElementId(group.Document, x)).ToArray();
+      var members = group.Value.UngroupMembers().Select(x => group.GetElement<Types.GraphicalElement>(x)).ToArray();
 
       for (int i = 0; i < members.Length; ++i)
         Params.WriteTrackedElement(_Members_, group.Document, members[i]);

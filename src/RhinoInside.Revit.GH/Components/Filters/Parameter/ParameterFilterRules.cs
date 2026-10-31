@@ -47,7 +47,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Params.GetData(DA, "Rule-based Filter", out ARDB.ParameterFilterElement ruleFilter, x => x.IsValid())) return;
+      if (!Params.GetData(DA, "Rule-based Filter", out Types.ParameterFilterElement ruleFilter, x => x.IsValid)) return;
       else DA.SetData("Rule-based Filter", ruleFilter);
 
       if (Params.GetDataList(DA, "Catgories", out IList<Types.Category> categories))
@@ -66,29 +66,29 @@ namespace RhinoInside.Revit.GH.Components.Filters
               AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Unfilterable category '{ruleFilter.Document.GetCategory(id)?.Name}' was not applied.");
         }
 
-        ruleFilter.SetCategories(categoryIds);
+        ruleFilter.Value.SetCategories(categoryIds);
       } 
 
       if (Params.GetData(DA, "Filter", out Types.ElementFilter filter, x => x.IsValid))
       {
         var filterValue = filter.Value;
-        if (!ruleFilter.ElementFilterIsAcceptableForParameterFilterElement(filterValue))
+        if (!ruleFilter.Value.ElementFilterIsAcceptableForParameterFilterElement(filterValue))
           throw new Exceptions.RuntimeErrorException
           (
 #if REVIT_2019
             $"The input 'Filter' is not acceptable for use by a Rule-based Filter.\r" +
             "Only Parameter Filters or Logical combinations of these are accepted."
 #else
-              "Parameter Filter is partially supported before Revit 2019."
+            "Parameter Filter is partially supported before Revit 2019."
 #endif
           );
 
         StartTransaction(ruleFilter.Document);
-        ruleFilter.SetElementFilter(filterValue);
+        ruleFilter.Value.SetElementFilter(filterValue);
       }
 
-      Params.TrySetDataList(DA, "Categories", () => ruleFilter.GetCategories().Select(x => Types.Element.FromElementId(ruleFilter.Document, x)));
-      Params.TrySetData(DA, "Filter", () => ruleFilter.GetElementFilter());
+      Params.TrySetDataList(DA, "Categories", () => ruleFilter.Value.GetCategories().Select(x => ruleFilter.GetElement<Types.Category>(x)));
+      Params.TrySetData(DA, "Filter", () => ruleFilter.Value.GetElementFilter());
     }
   }
 }

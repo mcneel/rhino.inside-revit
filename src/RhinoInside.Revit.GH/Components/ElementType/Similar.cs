@@ -34,11 +34,9 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var elementType = default(ARDB.ElementType);
-      if (!DA.GetData("Type", ref elementType) || elementType is null)
-        return;
+      if (!Params.GetData(DA, "Type", out Types.ElementType type, x => x.IsValid)) return;
 
-      DA.SetDataList("Types", elementType.GetSimilarTypes().Select(x => Types.ElementType.FromElementId(elementType.Document, x)));
+      DA.SetDataList("Types", type.Value.GetSimilarTypes().Select(x => type.GetElement<Types.ElementType>(x)));
     }
   }
 }
