@@ -198,7 +198,6 @@ namespace RhinoInside.Revit.GH.Types
       switch (sketch.GetOwner())
       {
         // FilledRegion needs the constraints to be edited from the Revi UI latter!!
-        case ARDB.Wall _:     constraintsRemoved = true;  break;
         case ARDB.FilledRegion _:     constraintsRemoved = true;  break;
         case ARDB.FootPrintRoof _:    splitClosed = false;        break;
 #if REVIT_2022
