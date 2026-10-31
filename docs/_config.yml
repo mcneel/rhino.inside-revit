@@ -74,11 +74,11 @@ simple_search: https://google.com/search
 terms:
   mcneel: Robert McNeel & Associates
   rhino: Rhino
-  rhino_versions: 7 or 8
+  rhino_versions: 7,8 or 9
   rir: Rhino.Inside.Revit
   revit: Autodesk Revit®
   bim360: Autodesk BIM360®
-  revit_versions: 2018-2024
+  revit_versions: 2018-2027
   pyrevit: pyRevit
 
 # site collections (various languages)

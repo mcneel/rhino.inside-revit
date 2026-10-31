@@ -329,10 +329,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
         var vector = (point - intersection.XYZPoint).ToUnitXYZ();
         var faces = new Face[] { edge.GetFace(0), edge.GetFace(1) };
-        if (!vector.IsNaN)
+        if (!vector.IsNaN && faces[0] is object && faces[1] is object)
         {
           var dot0 = double.PositiveInfinity;
-          if (faces[0] is object)
           {
             var uv = edge.EvaluateOnFace(intersection.EdgeParameter, faces[0]);
             var normal = (UnitXYZ) faces[0].ComputeNormal(uv);
@@ -340,7 +339,6 @@ namespace RhinoInside.Revit.External.DB.Extensions
           }
 
           var dot1 = double.PositiveInfinity;
-          if (faces[1] is object)
           {
             var uv = edge.EvaluateOnFace(intersection.EdgeParameter, faces[1]);
             var normal = (UnitXYZ) faces[1].ComputeNormal(uv);
