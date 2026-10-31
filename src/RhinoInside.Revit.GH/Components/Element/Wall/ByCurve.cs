@@ -277,33 +277,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           // LocationLine
           if (locationLine.HasValue && locationLine != ARDB.WallLocationLine.WallCenterline)
           {
-            double offsetDist = 0.0;
-            var compoundStructure = type.Value.GetCompoundStructure();
-            if (compoundStructure == null)
-            {
-              switch (locationLine)
-              {
-                case ARDB.WallLocationLine.WallCenterline:
-                case ARDB.WallLocationLine.CoreCenterline:
-                  break;
-                case ARDB.WallLocationLine.FinishFaceExterior:
-                case ARDB.WallLocationLine.CoreExterior:
-                  offsetDist = (type.Value as ARDB.WallType).Width / +2.0;
-                  break;
-                case ARDB.WallLocationLine.FinishFaceInterior:
-                case ARDB.WallLocationLine.CoreInterior:
-                  offsetDist = (type.Value as ARDB.WallType).Width / -2.0;
-                  break;
-              }
-            }
-            else
-            {
-              if (!compoundStructure.IsVerticallyHomogeneous())
-                compoundStructure = ARDB.CompoundStructure.CreateSimpleCompoundStructure(compoundStructure.GetLayers());
-
-              offsetDist = compoundStructure.GetOffsetForLocationLine(locationLine.Value);
-            }
-
+            double offsetDist = type.Value.GetOffsetForLocationLine(locationLine.Value);
             if (offsetDist != 0.0)
               centerLine = centerLine.CreateOffset(flipped is true ? -offsetDist : offsetDist, ARDB.XYZ.BasisZ);
           }
