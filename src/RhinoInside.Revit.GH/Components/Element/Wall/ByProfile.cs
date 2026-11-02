@@ -15,7 +15,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
   using External.DB.Extensions;
   using GH.Exceptions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.8")]
+  [ComponentVersion(introduced: "1.0", updated: "1.37")]
   public class WallByProfile : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("78b02ae8-2b78-45a7-962e-92e7d9097598");
