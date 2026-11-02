@@ -81,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
       if (!Params.GetData(DA, "Assembly", out Types.AssemblyInstance assembly, x => x is object)) return;
       else DA.SetData("Assembly", assembly);
 
-      if (Params.TryGetData(DA, "Origin", out Plane? origin) && origin.HasValue)
+      if (Params.TryGetData(DA, "Origin", assembly, out Plane? origin) && origin.HasValue)
       {
         assembly.Value.GetTransform().GetCoordSystem(out var o, out var x, out var y, out var z);
         var O = origin.Value.Origin.ToXYZ();
@@ -102,7 +102,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
         }
       }
 
-      Params.TrySetData(DA, "Origin", () => assembly.Location);
+      Params.TrySetData(DA, "Origin", assembly, x => x.Location);
     }
   }
 }

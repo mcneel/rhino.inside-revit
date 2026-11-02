@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "View", out Types.View3D view)) return;
-      if (!Params.GetData(DA, "Ray", out Rhino.Geometry.Line? line)) return;
+      if (!Params.GetData(DA, "Ray", view, out Rhino.Geometry.Line? line)) return;
       if (Params.GetData(DA, "Distance", out double? distance) && double.IsNaN(distance.Value)) return;
       if (Params.GetData(DA, "Limit", out int? limit) && limit == 0) return;
       if (!Params.TryGetData(DA, "Filter", out Types.ElementFilter filter)) return;

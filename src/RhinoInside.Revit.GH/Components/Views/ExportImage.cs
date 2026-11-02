@@ -419,7 +419,7 @@ namespace RhinoInside.Revit.GH.Components.Views
             if (cropExtents.Value.IsValid)
             {
               Params.TrySetData(DA, "Crop Extents", () => cropExtents.Value);
-              Params.TrySetData(DA, "Outline", () => view.Surface);
+              Params.TrySetData(DA, "Outline", view, x => x.Surface);
 
               if (!(overwrite.Value == false && imageFile.Exists))
               {
