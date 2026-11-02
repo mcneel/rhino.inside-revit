@@ -80,7 +80,15 @@ namespace RhinoInside.Revit.GH.Components.Walls
     };
     protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix;
 
-    bool Reuse(ref ARDB.Wall element, IList<Curve> boundaries, Plane plane, Line line, double slantAngle, ARDB.WallType type)
+    bool Reuse
+    (
+      ref ARDB.Wall element,
+      IList<Curve> boundaries,
+      Plane plane, BoundingBox bbox,
+      Line line, double slantAngle,
+      ARDB.WallType type,
+      ARDB.Level level
+    )
     {
       if (element is null) return false;
 
@@ -93,6 +101,11 @@ namespace RhinoInside.Revit.GH.Components.Walls
         }
         else return false;
       }
+
+      element.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(ARDB.ElementId.InvalidElementId);
+      element.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update((bbox.Max.Z - bbox.Min.Z) / Revit.ModelUnits);
+      element.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Id);
+      element.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.GetElevation());
 
 #if REVIT_2021
       if (slantAngle == 0.0)
@@ -271,7 +284,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
         }
       }
 
-      if (!Reuse(ref wall, loops, boundaryPlane, line, angle, type.Value))
+      if (!Reuse(ref wall, loops, boundaryPlane, bbox, line, angle, type.Value, level.Value))
       {
         // Wall.Create requires vertical boundaries.
         if (angle != 0.0)
@@ -303,6 +316,8 @@ namespace RhinoInside.Revit.GH.Components.Walls
             ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 1);
           }
 
+          newWall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation());
+
           // Walls are created with the last LocationLine used in the Revit editor!!
           //newWall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(ARDB.WallLocationLine.WallCenterline);
 
@@ -332,13 +347,6 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
       if (wall is object)
       {
-        if (wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).AsElementId() != level.Value.Id)
-          wall.Document.Regenerate();
-
-        wall.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(ARDB.ElementId.InvalidElementId);
-        wall.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update((bbox.Max.Z - bbox.Min.Z) / Revit.ModelUnits);
-        wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Value.Id);
-        wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation());
         wall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(locationLine);
         if (structuralUsage == ARDB.Structure.StructuralWallUsage.NonBearing)
         {
