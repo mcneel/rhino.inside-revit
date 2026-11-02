@@ -17,7 +17,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
 
     public ParameterFilterRules() : base
     (
-      name: "Rule-based Filter Definiton",
+      name: "Rule-based Filter Definition",
       nickname: "RuleDef",
       description: "Get-Set accessor for Rule-based Filter definition.",
       category: "Revit",

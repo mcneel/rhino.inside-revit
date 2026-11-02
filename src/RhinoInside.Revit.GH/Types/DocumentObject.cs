@@ -113,7 +113,7 @@ namespace RhinoInside.Revit.GH.Types
     internal virtual T TransformFrom<T>(T value) => value;
     internal virtual T TransformTo<T>(T value) => value;
 
-    protected static T TransformData<T>(T value, Transform xform)
+    protected static T TransformData<T>(T value, Transform xform, bool readOnly)
     {
       switch (value)
       {
@@ -153,16 +153,19 @@ namespace RhinoInside.Revit.GH.Types
           return (T) (object) (geometry.Transform(xform) ? geometry : null);
 
         case GH_Vector gh_vector:
+          if (readOnly) gh_vector = gh_vector.DuplicateVector();
           gh_vector.Value.Transform(xform);
           return (T) (object) gh_vector;
 
         case GH_Transform gh_transform:
+          if (readOnly) gh_transform = gh_transform.Duplicate() as GH_Transform;
           gh_transform.CompoundTransforms.Add(new Grasshopper.Kernel.Types.Transforms.Generic(xform));
           return (T) (object) gh_transform;
 
-        case IGH_GeometricGoo geometricGoo:
-          geometricGoo.Transform(xform);
-          return (T) (object) geometricGoo;
+        case IGH_GeometricGoo gh_geometry:
+          if (readOnly) gh_geometry = gh_geometry.DuplicateGeometry();
+          gh_geometry = gh_geometry.Transform(xform);
+          return (T) (object) gh_geometry;
       }
 
       return value;

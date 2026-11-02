@@ -180,8 +180,8 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
       if
       (
-        (Params.GetDataList(DA, "Points", out IList<Point3d> points)  && points is object) |
-        (Params.GetDataList(DA, "Creases", out IList<Line> edges)     && edges is object)
+        (Params.GetDataList(DA, "Points", host, out IList<Point3d> points)  && points is object) |
+        (Params.GetDataList(DA, "Creases", host, out IList<Line> edges)     && edges is object)
       )
       {
         StartTransaction(host.Document);
@@ -216,20 +216,20 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
         Params.TrySetDataList
         (
-          DA, "Corners",
-          () => (shapeVertices = shapeVertices ?? shape.SlabShapeVertices).Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Corner).
+          DA, "Corners", host,
+          x => (shapeVertices = shapeVertices ?? shape.SlabShapeVertices).Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Corner).
           Select(x => x.Position.ToPoint3d())
         );
         Params.TrySetDataList
         (
-          DA, "Exteriors",
-          () => (shapeVertices = shapeVertices ?? shape.SlabShapeVertices).Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Edge).
+          DA, "Exteriors", host,
+          x => (shapeVertices = shapeVertices ?? shape.SlabShapeVertices).Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Edge).
           Select(x => x.Position.ToPoint3d())
         );
         Params.TrySetDataList
         (
-          DA, "Interiors",
-          () => (shapeVertices = shapeVertices ?? shape.SlabShapeVertices).Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Interior).
+          DA, "Interiors", host,
+          x => (shapeVertices = shapeVertices ?? shape.SlabShapeVertices).Cast<ARDB.SlabShapeVertex>().Where(x => x.VertexType == ARDB.SlabShapeVertexType.Interior).
           Select(x => x.Position.ToPoint3d())
         );
 
@@ -241,8 +241,8 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
         Params.TrySetDataList
         (
-          DA, "Boundary",
-          () => (shapeCreases = shapeCreases ?? shape.SlabShapeCreases).Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.Boundary).
+          DA, "Boundary", host,
+          x => (shapeCreases = shapeCreases ?? shape.SlabShapeCreases).Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.Boundary).
           Select
           (
             x =>
@@ -255,8 +255,8 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
         );
         Params.TrySetDataList
         (
-          DA, "Creases",
-          () => (shapeCreases = shapeCreases ?? shape.SlabShapeCreases).Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.UserDrawn).
+          DA, "Creases", host,
+          x => (shapeCreases = shapeCreases ?? shape.SlabShapeCreases).Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.UserDrawn).
           Select
           (
             x =>
@@ -269,8 +269,8 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
         );
         Params.TrySetDataList
         (
-          DA, "Auto",
-          () => (shapeCreases = shapeCreases ?? shape.SlabShapeCreases).Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.Auto).
+          DA, "Auto", host,
+          x => (shapeCreases = shapeCreases ?? shape.SlabShapeCreases).Cast<ARDB.SlabShapeCrease>().Where(x => x.CreaseType == ARDB.SlabShapeCreaseType.Auto).
           Select
           (
             x =>
