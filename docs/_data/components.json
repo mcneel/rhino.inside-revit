@@ -1691,6 +1691,18 @@
     "until": null, 
     "uuid": "dc8daf4f-cc93-43e2-a871-3a01a920a722"
   }, 
+    {
+    "desc": "Given its outline curve and a slope arrow, it adds a sloped Floor element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddSlopedFloor.png", 
+    "icontag": null, 
+    "panel": "Architecture", 
+    "since": "1.37", 
+    "tab": "Revit", 
+    "title": "Add Sloped Floor", 
+    "typename": "AddSlopedFloor", 
+    "until": null, 
+    "uuid": "fd260bdc-9f29-4410-8783-ec68a0500495"
+  }, 
   {
     "desc": "Given a curve, it adds a Railing element to the active Revit document", 
     "iconsrc": "/static/images/GH/RailingByCurve.png", 
@@ -3010,6 +3022,54 @@
     "typename": "ElementFilterRuleEndsWith", 
     "until": null, 
     "uuid": "84f29564-1acd-4148-b00f-ea3fcfb6df13"
+  }, 
+  {
+    "desc": "Filter used to match elements if a parameter has a value", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleHasValue.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "since": "1.37", 
+    "tab": "Revit", 
+    "title": "Has Value Rule", 
+    "typename": "ElementFilterRuleHasValue", 
+    "until": null, 
+    "uuid": "01d1280a-3c4e-4a8c-b4f3-10e52baa59e4"
+  }, 
+  {
+    "desc": "Filter used to match elements if a parameter has no value", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleHasNoValue.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "since": "1.37", 
+    "tab": "Revit", 
+    "title": "Has No Value Rule", 
+    "typename": "ElementFilterRuleHasNoValue", 
+    "until": null, 
+    "uuid": "a37b1886-66b2-4d8d-b56c-4fe96ff58e14"
+  }, 
+  {
+    "desc": "Filter used to match elements if a shared parameter is applicable to them", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleSharedParameter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "since": "1.37", 
+    "tab": "Revit", 
+    "title": "Shared Parameter Rule", 
+    "typename": "ElementFilterRuleSharedParameter", 
+    "until": null, 
+    "uuid": "3c917300-2dd3-4821-b486-d2f4e0766197"
+  }, 
+  {
+    "desc": "Filter used to match elements if a parameter is associated with a global parameter", 
+    "iconsrc": "/static/images/GH/ElementFilterRuleGlobalParameter.png", 
+    "icontag": null, 
+    "panel": "Filter", 
+    "since": "1.37", 
+    "tab": "Revit", 
+    "title": "Global Parameter Rule", 
+    "typename": "ElementFilterRuleGlobalParameter", 
+    "until": null, 
+    "uuid": "09c76b00-5d50-4a55-a8e6-c7f3ad299351"
   }, 
   {
     "desc": "Filter used to match elements on a category", 
