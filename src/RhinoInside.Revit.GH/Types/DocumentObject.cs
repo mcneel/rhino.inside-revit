@@ -164,7 +164,7 @@ namespace RhinoInside.Revit.GH.Types
 
         case IGH_GeometricGoo gh_geometry:
           if (readOnly) gh_geometry = gh_geometry.DuplicateGeometry();
-          gh_geometry.Transform(xform);
+          gh_geometry = gh_geometry.Transform(xform);
           return (T) (object) gh_geometry;
       }
 

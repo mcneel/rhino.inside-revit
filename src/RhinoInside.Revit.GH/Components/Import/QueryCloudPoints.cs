@@ -11,6 +11,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
   using Numerical;
   using Convert.Geometry;
   using External.DB.Extensions;
+  using System.Data;
 
   [ComponentVersion(introduced: "1.13")]
   public class QueryCloudPoints : ZuiComponent
@@ -123,25 +124,26 @@ namespace RhinoInside.Revit.GH.Components.Insert
       var corners = box.GetCorners();
       var diagonal = corners[0].DistanceTo(corners[6]);
 
-      var cloud = pointCloud.Value;
-
       var filterValue = filter?.Value;
       if (filterValue is null)
       {
         // One plane should be enough.
-        filter = new Types.PointCloudFilter();
         filterValue = ARDB.PointClouds.PointCloudFilterFactory.CreateMultiPlaneFilter
           (new ARDB.Plane[] { new Plane(corners[0], corners[1], corners[2]).ToPlane() });
       }
+      else if(pointCloud.IsLinked)
+        throw new System.ComponentModel.WarningException("Complex filtering is not supported on linked models.");
 
+      var cloud = pointCloud.Value;
       var points = cloud.GetPoints(filterValue, GeometryEncoder.ToInternalLength(averageDistance ?? diagonal / 1000.0), numPoints.Value);
-      var transform = cloud.GetTransform();
+      var transform = cloud.GetTransform().ToTransform();
+      var modelUnits = Revit.ModelUnits;
 
-      Params.TrySetDataList(DA, "Points", () => points.Select(x => GeometryDecoder.ToPoint3d(transform.OfPoint(x))));
+      Params.TrySetDataList(DA, "Points", pointCloud, x => points.Select(x => transform * (modelUnits * new Point3d(x.X, x.Y, x.Z))));
       if (cloud.HasColor())
       {
-        var type = cloud.Document.GetElement(cloud.GetTypeId()) as ARDB.PointCloudType;
-        Params.TrySetDataList(DA, "Colours", () => points.Select(x => Types.PointCloudInstance.ToColor(type.ColorEncoding, x.Color)));
+        var colorEncoding = cloud.Document.GetElement<ARDB.PointCloudType>(cloud.GetTypeId()).ColorEncoding;
+        Params.TrySetDataList(DA, "Colours", () => points.Select(x => Types.PointCloudInstance.ToColor(colorEncoding, x.Color)));
       }
 
       Params.TrySetData(DA, "Count", () => points.Count);

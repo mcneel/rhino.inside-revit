@@ -106,7 +106,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Params.GetData(DA, "Host", out Types.HostObject host, x => x.IsValid)) return;
-      if (!Params.TryGetData(DA, "Plane", out Plane? plane, x => x.IsValid)) return;
+      if (!Params.TryGetData(DA, "Plane", host, out Plane? plane, x => x.IsValid)) return;
       if (plane is object)
       {
         if (!host.SetSketchPlane(plane.Value))
@@ -116,7 +116,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
         }
       }
 
-      if (Params.GetDataList(DA, "Profile", out IList<Curve> profiles) && profiles.OfType<Curve>().Any())
+      if (Params.GetDataList(DA, "Profile", host, out IList<Curve> profiles) && profiles.OfType<Curve>().Any())
       {
 #if REVIT_2022
         plane ??= host.SketchPlane;
@@ -215,15 +215,15 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
       {
         Params.TrySetData(DA, "Host", () => host);
-        Params.TrySetData(DA, "Plane", () => host.SketchPlane);
+        Params.TrySetData(DA, "Plane", host, x => x.SketchPlane);
 
         Params.TrySetDataList
         (
-          DA, "Profile", () =>
+          DA, "Profile", host, x =>
           {
-            if (host is Types.ISketchAccess access && access.Sketch is Types.Sketch sketch && sketch.IsValid)
+            if (x is Types.ISketchAccess access && access.Sketch is Types.Sketch sketch && sketch.IsValid)
             {
-              var sketchPlane = host.SketchPlane;
+              var sketchPlane = x.SketchPlane;
               return sketch.Profiles.Select(x => x.ProjectToPlane(sketchPlane));
             }
 

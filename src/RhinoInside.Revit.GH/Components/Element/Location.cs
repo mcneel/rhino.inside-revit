@@ -166,17 +166,17 @@ namespace RhinoInside.Revit.GH.Components.Elements
       var tol = GeometryTolerance.Model;
       if
       (
-        Params.GetData(DA, "Location", out Plane? location, x => x.IsValid) &&
-        !element.Location.EpsilonEquals(location.Value, tol.DefaultTolerance)
+        Params.GetData(DA, "Location", element, out Plane? location, x => x.IsValid) &&
+        !element.Location.EpsilonEquals(location.Value, tol.VertexTolerance)
       )
       {
         UpdateElement(element.Value, () => element.SetLocation(location.Value, KeepJoins));
       }
 
-      DA.SetData("Location", element.Location);
-      Params.TrySetData(DA, "Hand", () => element.HandOrientation);
-      Params.TrySetData(DA, "Facing", () => element.FacingOrientation);
-      Params.TrySetData(DA, "Work Plane", () => element.WorkPlaneOrientation);
+      Params.TrySetData(DA, "Location", element, x => x.Location);
+      Params.TrySetData(DA, "Hand", element, x => x.HandOrientation);
+      Params.TrySetData(DA, "Facing", element, x => x.FacingOrientation);
+      Params.TrySetData(DA, "Work Plane", element, x => x.WorkPlaneOrientation);
     }
   }
 
@@ -240,14 +240,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
       var tol = GeometryTolerance.Model;
       if
       (
-        Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid) &&
+        Params.GetData(DA, "Curve", element, out Curve curve, x => x.IsValid) &&
         element.Curve?.GeometryEquals(curve, tol.DefaultTolerance) != true
       )
       {
         UpdateElement(element.Value, () => element.SetCurve(curve, KeepJoins));
       }
 
-      DA.SetData("Curve", element.Curve);
+      Params.TrySetData(DA, "Curve", element, x => x.Curve);
     }
   }
 }

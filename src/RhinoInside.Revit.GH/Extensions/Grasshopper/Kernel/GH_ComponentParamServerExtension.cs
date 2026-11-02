@@ -71,47 +71,12 @@ namespace Grasshopper.Kernel
       return default;
     }
 
-    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value)
-      where T : struct => TryGetData(parameters, DA, name, out value, x => true);
-
-    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value)
-      where T : class => TryGetData(parameters, DA, name, out value, x => true);
-
+    #region GetData
     public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value)
       where T : class => GetData(parameters, DA, name, out value, x => true);
 
     public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value)
       where T : struct => GetData(parameters, DA, name, out value, x => true);
-
-    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value, Predicate<T> predicate)
-      where T : struct
-    {
-      value = default;
-
-      var index = parameters.Input.IndexOf(name, out var param);
-      if (param?.DataType > GH_ParamData.@void)
-      {
-        if (!DA.GetData(index, ref value)) { value = default; return false; }
-        return Requires(parameters.Owner, DA, index, value.Value, predicate);
-      }
-
-      return true;
-    }
-
-    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value, Predicate<T> predicate)
-      where T : class
-    {
-      value = default;
-
-      var index = parameters.Input.IndexOf(name, out var param);
-      if (param?.DataType > GH_ParamData.@void)
-      {
-        if (!DA.GetData(index, ref value)) { value = default; return false; }
-        return Requires(parameters.Owner, DA, index, value, predicate);
-      }
-
-      return true;
-    }
 
     public static bool GetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value, Predicate<T> predicate)
       where T : struct
@@ -143,74 +108,130 @@ namespace Grasshopper.Kernel
       return false;
     }
 
-    public static bool TryGetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out IList<T?> values)
+    public static bool GetData<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, out T value)
+      where R : RhinoInside.Revit.GH.Types.Reference
+      where T : class => GetData(parameters, DA, name, reference, out value, x => true);
+
+    public static bool GetData<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, out T? value)
+      where R : RhinoInside.Revit.GH.Types.Reference
+      where T : struct => GetData(parameters, DA, name, reference, out value, x => true);
+
+    public static bool GetData<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, out T? value, Predicate<T> predicate)
+      where R : RhinoInside.Revit.GH.Types.Reference
       where T : struct
     {
+      value = default;
+
       var index = parameters.Input.IndexOf(name, out var param);
-      if (param?.DataType > GH_ParamData.@void && !param.VolatileData.IsEmpty)
+      if (param?.DataType > GH_ParamData.@void)
       {
-        var goos = new List<IGH_Goo>();
-        if (DA.GetDataList(index, goos))
-        {
-          values = new T?[goos.Count];
-
-          int i = 0;
-          foreach (var goo in goos)
-          {
-            if (goo != null)
-            {
-              if (goo is T data) values[i] = data;
-              else if (goo.CastTo<T>(out data)) values[i] = data;
-            }
-
-            i++;
-          }
-
-          return true;
-        }
+        if (!DA.GetData(index, ref value)) return false;
+        value = reference?.TransformFrom(value.Value) ?? value;
+        return Requires(parameters.Owner, DA, index, value.Value, predicate);
       }
 
-      values = default;
-      return true;
+      return false;
     }
-    public static bool TryGetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out IList<T> values)
+
+    public static bool GetData<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, out T value, Predicate<T> predicate)
+      where R : RhinoInside.Revit.GH.Types.Reference
+      where T : class
     {
+      value = default;
+
       var index = parameters.Input.IndexOf(name, out var param);
-      if (param?.DataType > GH_ParamData.@void && !param.VolatileData.IsEmpty)
+      if (param?.DataType > GH_ParamData.@void)
       {
-        var goos = new List<IGH_Goo>();
-        if (DA.GetDataList(index, goos))
-        {
-          values = new T[goos.Count];
-
-          var TIsGoo = typeof(IGH_Goo).IsAssignableFrom(typeof(T));
-
-          int i = 0;
-          foreach (var goo in goos)
-          {
-            if (goo != null)
-            {
-              if (goo is T data) values[i] = data;
-              else if (goo.CastTo(out data)) values[i] = data;
-              else if (TIsGoo)
-              {
-                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
-                if (TGoo.CastFrom(goo))
-                  values[i] = (T) TGoo;
-              }
-            }
-
-            i++;
-          }
-
-          return true;
-        }
+        if (!DA.GetData(index, ref value)) return false;
+        value = reference?.TransformFrom(value) ?? value;
+        return Requires(parameters.Owner, DA, index, value, predicate);
       }
 
-      values = default;
+      return false;
+    }
+    #endregion
+
+    #region TryGetData
+    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value)
+      where T : struct => TryGetData(parameters, DA, name, out value, x => true);
+
+    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value)
+      where T : class => TryGetData(parameters, DA, name, out value, x => true);
+
+    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T? value, Predicate<T> predicate)
+      where T : struct
+    {
+      value = default;
+
+      var index = parameters.Input.IndexOf(name, out var param);
+      if (param?.DataType > GH_ParamData.@void)
+      {
+        if (!DA.GetData(index, ref value)) { value = default; return false; }
+        return Requires(parameters.Owner, DA, index, value.Value, predicate);
+      }
+
       return true;
     }
 
+    public static bool TryGetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out T value, Predicate<T> predicate)
+      where T : class
+    {
+      value = default;
+
+      var index = parameters.Input.IndexOf(name, out var param);
+      if (param?.DataType > GH_ParamData.@void)
+      {
+        if (!DA.GetData(index, ref value)) { value = default; return false; }
+        return Requires(parameters.Owner, DA, index, value, predicate);
+      }
+
+      return true;
+    }
+
+    public static bool TryGetData<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, out T? value)
+      where R : RhinoInside.Revit.GH.Types.Reference
+      where T : struct => TryGetData(parameters, DA, name, reference, out value, x => true);
+
+    public static bool TryGetData<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, out T value)
+      where R : RhinoInside.Revit.GH.Types.Reference
+      where T : class => TryGetData(parameters, DA, name, reference, out value, x => true);
+
+    public static bool TryGetData<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, out T? value, Predicate<T> predicate)
+      where R : RhinoInside.Revit.GH.Types.Reference
+      where T : struct
+    {
+      value = default;
+
+      var index = parameters.Input.IndexOf(name, out var param);
+      if (param?.DataType > GH_ParamData.@void)
+      {
+        if (!DA.GetData(index, ref value)) { value = default; return false; }
+        value = reference?.TransformFrom(value) ?? value;
+        return Requires(parameters.Owner, DA, index, value.Value, predicate);
+      }
+
+      return true;
+    }
+
+    public static bool TryGetData<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, out T value, Predicate<T> predicate)
+      where R : RhinoInside.Revit.GH.Types.Reference
+      where T : class
+    {
+      value = default;
+
+      var index = parameters.Input.IndexOf(name, out var param);
+      if (param?.DataType > GH_ParamData.@void)
+      {
+        if (!DA.GetData(index, ref value)) { value = default; return false; }
+        value = reference?.TransformFrom(value) ?? value;
+        return Requires(parameters.Owner, DA, index, value, predicate);
+      }
+
+      return true;
+    }
+    #endregion
+
+    #region GetDataList
     public static bool GetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out IList<T?> values)
       where T : struct
     {
@@ -288,6 +309,157 @@ namespace Grasshopper.Kernel
       return false;
     }
 
+    public static bool GetDataList<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, out IList<T?> values)
+      where R : RhinoInside.Revit.GH.Types.Reference
+      where T : struct
+    {
+      var index = parameters.Input.IndexOf(name, out var param);
+      if (reference is object && param?.DataType > GH_ParamData.@void)
+      {
+        var goos = new List<IGH_Goo>();
+        if (DA.GetDataList(index, goos))
+        {
+          values = new T?[goos.Count];
+
+          var TIsGoo = typeof(IGH_Goo).IsAssignableFrom(typeof(T));
+
+          int i = 0;
+          foreach (var goo in goos)
+          {
+            if (goo != null)
+            {
+              if (goo is T?) values[i] = reference.TransformFrom((T) goo);
+              else if (goo.CastTo(out T data)) values[i] = reference.TransformFrom(data);
+              else if (TIsGoo)
+              {
+                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
+                if (TGoo.CastFrom(goo))
+                  values[i] = reference.TransformFrom((T) TGoo);
+              }
+            }
+
+            i++;
+          }
+
+          return true;
+        }
+      }
+
+      values = default;
+      return false;
+    }
+
+    public static bool GetDataList<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, out IList<T> values)
+      where R : RhinoInside.Revit.GH.Types.Reference
+    {
+      var index = parameters.Input.IndexOf(name, out var param);
+      if (reference is object && param?.DataType > GH_ParamData.@void)
+      {
+        var goos = new List<IGH_Goo>();
+        if (DA.GetDataList(index, goos))
+        {
+          values = new T[goos.Count];
+
+          var TIsGoo = typeof(IGH_Goo).IsAssignableFrom(typeof(T));
+
+          int i = 0;
+          foreach (var goo in goos)
+          {
+            if (goo != null)
+            {
+              if (goo is T data) values[i] = reference.TransformFrom(data);
+              else if (goo.CastTo(out data)) values[i] = reference.TransformFrom(data);
+              else if (TIsGoo)
+              {
+                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
+                if (TGoo.CastFrom(goo))
+                  values[i] = reference.TransformFrom((T) TGoo);
+              }
+            }
+
+            i++;
+          }
+
+          return true;
+        }
+      }
+
+      values = default;
+      return false;
+    }
+    #endregion
+
+    #region TryGetDataList
+    public static bool TryGetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out IList<T?> values)
+      where T : struct
+    {
+      var index = parameters.Input.IndexOf(name, out var param);
+      if (param?.DataType > GH_ParamData.@void && !param.VolatileData.IsEmpty)
+      {
+        var goos = new List<IGH_Goo>();
+        if (DA.GetDataList(index, goos))
+        {
+          values = new T?[goos.Count];
+
+          int i = 0;
+          foreach (var goo in goos)
+          {
+            if (goo != null)
+            {
+              if (goo is T data) values[i] = data;
+              else if (goo.CastTo(out data)) values[i] = data;
+            }
+
+            i++;
+          }
+
+          return true;
+        }
+      }
+
+      values = default;
+      return true;
+    }
+    public static bool TryGetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, out IList<T> values)
+    {
+      var index = parameters.Input.IndexOf(name, out var param);
+      if (param?.DataType > GH_ParamData.@void && !param.VolatileData.IsEmpty)
+      {
+        var goos = new List<IGH_Goo>();
+        if (DA.GetDataList(index, goos))
+        {
+          values = new T[goos.Count];
+
+          var TIsGoo = typeof(IGH_Goo).IsAssignableFrom(typeof(T));
+
+          int i = 0;
+          foreach (var goo in goos)
+          {
+            if (goo != null)
+            {
+              if (goo is T data) values[i] = data;
+              else if (goo.CastTo(out data)) values[i] = data;
+              else if (TIsGoo)
+              {
+                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
+                if (TGoo.CastFrom(goo))
+                  values[i] = (T) TGoo;
+              }
+            }
+
+            i++;
+          }
+
+          return true;
+        }
+      }
+
+      values = default;
+      return true;
+    }
+    #endregion
+
+    #region TrySetData
     public static bool TrySetData<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, Func<T?> value)
       where T : struct
     {
@@ -309,6 +481,31 @@ namespace Grasshopper.Kernel
       return index >= 0 && DA.SetData(index, value());
     }
 
+    public static bool TrySetData<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, Func<R, T?> value)
+      where R : RhinoInside.Revit.GH.Types.Reference
+      where T : struct
+    {
+      var index = parameters.Output.IndexOf(name, out var _);
+      if (index >= 0)
+      {
+        var nullable = value(reference);
+        if (nullable.HasValue)
+          return DA.SetData(index, reference.TransformTo(nullable.Value));
+        else
+          return DA.SetData(index, null);
+      }
+
+      return false;
+    }
+    public static bool TrySetData<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, Func<R, T> value)
+      where R : RhinoInside.Revit.GH.Types.Reference
+    {
+      var index = parameters.Output.IndexOf(name, out var _);
+      return index >= 0 && DA.SetData(index, reference.TransformTo(value(reference)));
+    }
+    #endregion
+
+    #region TrySetDataList
     public static bool TrySetDataList<T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, Func<IEnumerable<T?>> list)
       where T : struct
     {
@@ -321,6 +518,24 @@ namespace Grasshopper.Kernel
       return index >= 0 && DA.SetDataList(index, list());
     }
 
+    public static bool TrySetDataList<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, Func<R, IEnumerable<T?>> list)
+      where R : RhinoInside.Revit.GH.Types.Reference
+      where T : struct
+    {
+      var index = parameters.Output.IndexOf(name, out var _);
+      if (reference is null) return false;
+      return index >= 0 && DA.SetDataList(index, list(reference).Select(x => x.HasValue ? (object) reference.TransformTo(x.Value) : null));
+    }
+    public static bool TrySetDataList<R, T>(this GH_ComponentParamServer parameters, IGH_DataAccess DA, string name, R reference, Func<R, IEnumerable<T>> list)
+      where R : RhinoInside.Revit.GH.Types.Reference
+    {
+      var index = parameters.Output.IndexOf(name, out var _);
+      if (reference is null) return false;
+      return index >= 0 && DA.SetDataList(index, list(reference).Select(reference.TransformTo));
+    }
+    #endregion
+
+    #region TrySetDataTree
     readonly struct DataTree<T> : Data.IGH_DataTree
     {
       readonly Data.GH_Path Path;
@@ -363,23 +578,22 @@ namespace Grasshopper.Kernel
 
       return DA.SetDataTree(index, new DataTree<T>(DA.ParameterTargetPath(index).AppendElement(DA.ParameterTargetIndex(index)), tree()));
     }
+    #endregion
 
     internal static IEnumerable<TSource> TakeWhileIsNotEscapeKeyDown<TSource>
-      (this IEnumerable<TSource> source, IGH_DocumentObject documentObject, int frequency = 2)
+      (this IEnumerable<TSource> source, IGH_DocumentObject documentObject)
     {
       if (source is null) throw new ArgumentNullException(nameof(source));
       if (documentObject is null) throw new ArgumentNullException(nameof(documentObject));
 
-      int index = 0;
+      var document = documentObject.OnPingDocument();
       foreach (var item in source)
       {
-        index++;
-        if ((index % frequency == 0) && GH_Document.IsEscapeKeyDown())
+        if (GH_Document.IsEscapeKeyDown())
         {
-          documentObject.OnPingDocument()?.RequestAbortSolution();
+          document?.RequestAbortSolution();
           break;
         }
-
         yield return item;
       }
     }
