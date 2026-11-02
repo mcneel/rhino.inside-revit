@@ -112,7 +112,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
         {
           Name = "Type",
           NickName = "T",
-          Description = "Floor type",
+          Description = "Wall type",
           Optional = true,
           SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Walls
         }, ParamRelevance.Primary
