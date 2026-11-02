@@ -361,13 +361,22 @@ namespace RhinoInside.Revit.GH.Components.Topology
     {
       var index = 0;
 
+      var modelTransform = se.ReferenceTransform;
+      var hasModelTransform = modelTransform.IsIdentity;
+
       var boundary = new GH_Structure<GH_Curve>();
       foreach (var segments in se.Value.GetBoundarySegments(options))
       {
         boundary.EnsurePath(path.AppendElement(index++));
 
         foreach (var segment in segments)
-          boundary.Append(new GH_Curve(segment.GetCurve().ToCurve()));
+        {
+          var curve = new GH_Curve(segment.GetCurve().ToCurve());
+          if (hasModelTransform)
+            curve = curve.Transform(modelTransform) as GH_Curve;
+
+          boundary.Append(curve);
+        }
       }
 
       return boundary;

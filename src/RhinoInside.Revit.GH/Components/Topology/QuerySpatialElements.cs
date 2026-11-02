@@ -239,6 +239,9 @@ namespace RhinoInside.Revit.GH.Components.Topology
       {
         placed = true;
         enclosed = true;
+
+        if (source is Types.RevitLinkInstance instance)
+          point = instance.Value.GetTransform().Inverse.ToTransform() * point.Value;
       }
 
       var tol = GeometryTolerance.Model;
@@ -277,7 +280,6 @@ namespace RhinoInside.Revit.GH.Components.Topology
 
         if (point.HasValue)
         {
-          var xyz = point.Value.ToXYZ();
           areas = areas.Where
           (
             area =>
@@ -426,7 +428,6 @@ namespace RhinoInside.Revit.GH.Components.Topology
     {
       if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Point", out Point3d? point)) return;
-      var xyz = point.HasValue ? point.Value.ToXYZ() : default;
       if (!Params.TryGetData(DA, "Placed", out bool? placed)) return;
       if (!Params.TryGetData(DA, "Number", out string number)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
@@ -441,7 +442,11 @@ namespace RhinoInside.Revit.GH.Components.Topology
       {
         placed = true;
         enclosed = true;
+
+        if (source is Types.RevitLinkInstance instance)
+          point = instance.Value.GetTransform().Inverse.ToTransform() * point.Value;
       }
+      var xyz = point?.ToXYZ();
 
       var tol = GeometryTolerance.Model;
       using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
@@ -526,7 +531,6 @@ namespace RhinoInside.Revit.GH.Components.Topology
     {
       if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
       if (!Params.TryGetData(DA, "Point", out Point3d? point)) return;
-      var xyz = point.HasValue ? point.Value.ToXYZ() : default;
       if (!Params.TryGetData(DA, "Placed", out bool? placed)) return;
       if (!Params.TryGetData(DA, "Number", out string number)) return;
       if (!Params.TryGetData(DA, "Name", out string name)) return;
@@ -541,7 +545,11 @@ namespace RhinoInside.Revit.GH.Components.Topology
       {
         placed = true;
         enclosed = true;
+
+        if (source is Types.RevitLinkInstance instance)
+          point = instance.Value.GetTransform().Inverse.ToTransform() * point.Value;
       }
+      var xyz = point?.ToXYZ();
 
       var tol = GeometryTolerance.Model;
       using (var collector = new ARDB.FilteredElementCollector(source.SourceDocument.Value))
