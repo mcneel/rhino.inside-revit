@@ -10,8 +10,19 @@ group: Deployment & Configs
 
 ### WIP
 
+- Added 'Add Floor (Sloped)' component. [#1129](https://github.com/mcneel/rhino.inside-revit/issues/1129)
+- Added 'Add Ceiling (Sloped)' component. [#1129](https://github.com/mcneel/rhino.inside-revit/issues/1129)
+- Added 'Join Element' component. [#407](https://github.com/mcneel/rhino.inside-revit/issues/407)
+- Added 'Cut Element' component.
+- Added 'Add Wall (Reveal)' component.
+- Added 'Add Wall (Sweep)' component.
+- Added 'Check Element Interferences' component.
+- Added 'Query Interfering Elements' component.
+- Added 'Excavate Toposolid' component.
+
 ### RC
 
+- Now default keyboard shortcuts are only assigned when missing.
 - Added 'CAD Read Options' component
 - Added 'Link Drafting CAD File' component.
 - Added 'Link Model CAD File' component.
