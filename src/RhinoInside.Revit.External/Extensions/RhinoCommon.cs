@@ -962,7 +962,11 @@ namespace Rhino.Geometry
           var points = new Point3d[polyline.PointCount];
           for (int p = 0; p < points.Length; ++p)
             points[p] = plane.ClosestPoint(polyline.Point(p));
-          return new PolylineCurve(points) { Domain = curve.Domain };
+
+          var pline = new PolylineCurve(points);
+          for (int p = 0; p < points.Length; ++p)
+            pline.SetParameter(p, polyline.Parameter(p));
+          return pline;
 
         case ArcCurve arc:
 
