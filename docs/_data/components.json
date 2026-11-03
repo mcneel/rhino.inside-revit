@@ -5844,6 +5844,18 @@
     "uuid": "fe258116-9184-41c9-8554-30bffcc0e640"
   }, 
   {
+    "desc": "Given its Curve, it adds a line based detail item element to the active Revit document", 
+    "iconsrc": "/static/images/GH/AddDetailItemCurve.png", 
+    "icontag": null, 
+    "panel": "Annotate", 
+    "since": "1.37", 
+    "tab": "Revit", 
+    "title": "Add Detail Item (Curve)", 
+    "typename": "AddDetailItemCurve", 
+    "until": null, 
+    "uuid": "8b9f858f-ce8f-4023-b48c-794b6aff910f"
+  }, 
+  {
     "desc": "Given a Curve, it adds a detail line to the given View", 
     "iconsrc": "/static/images/GH/AddDetailLine.png", 
     "icontag": null, 
