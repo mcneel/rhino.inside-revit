@@ -261,15 +261,21 @@ namespace RhinoInside.Revit.External.DB
       if (!baseElevation.HasValue || !baseElevation.Value.IsLevelConstraint(out var baseLevel, out var bottomOffset))
       {
         baseLevel = document.GetNearestLevel(projectElevation + defaultBaseElevation);
-
-        double elevation = projectElevation, offset = defaultBaseElevation;
-        if (baseElevation.HasValue)
+        if (baseLevel is null)
         {
-          if (baseElevation.Value.IsElevation(out elevation)) { offset = 0.0; }
-          else if (baseElevation.Value.IsOffset(out offset)) { elevation = projectElevation; }
+          baseElevation = new ElevationElementReference(projectElevation);
         }
+        else
+        {
+          double elevation = projectElevation, offset = defaultBaseElevation;
+          if (baseElevation?.IsUnlimited() is false)
+          {
+            if (baseElevation.Value.IsElevation(out elevation)) { offset = 0.0; }
+            else if (baseElevation.Value.IsOffset(out offset)) { elevation = projectElevation; }
+          }
 
-        baseElevation = new ElevationElementReference(elevation - baseLevel.ProjectElevation + offset, baseLevel);
+          baseElevation = new ElevationElementReference(elevation - baseLevel.ProjectElevation + offset, baseLevel);
+        }
       }
       else if (bottomOffset is null)
       {
