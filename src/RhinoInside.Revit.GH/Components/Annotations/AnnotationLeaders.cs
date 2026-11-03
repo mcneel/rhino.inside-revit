@@ -159,7 +159,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
       var transactionStatus = Autodesk.Revit.DB.TransactionStatus.Uninitialized;
 
-      if (annotation is Types.IAnnotationLeadersAccess leaderElement)
+      if (annotation is Types.IAnnotationLeadersAccess leaderElement && annotation is Types.Reference reference)
       {
         if (Params.GetData(DA, "Leader", out bool? hasLeader))
         {
@@ -169,7 +169,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
         if (leaderElement.HasLeader is true || hasLeader is true)
         {
-          if (Params.GetDataList(DA, "End Locations", out IList<Point3d?> endPositions))
+          if (Params.GetDataList(DA, "End Locations", reference, out IList<Point3d?> endPositions))
           {
             transactionStatus = StartTransaction(annotation.Document);
 
@@ -205,7 +205,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
             }
           }
 
-          if (Params.GetDataList(DA, "Shoulder Locations", out IList<Point3d?> shoulderPositions))
+          if (Params.GetDataList(DA, "Shoulder Locations", reference, out IList<Point3d?> shoulderPositions))
           {
             transactionStatus = StartTransaction(annotation.Document);
 
@@ -223,7 +223,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         }
         Params.TrySetData(DA, "Leader", () => leaderElement.HasLeader);
 
-        if (Params.GetDataList(DA, "Text Locations", out IList<Point3d?> textPositions))
+        if (Params.GetDataList(DA, "Text Locations", reference, out IList<Point3d?> textPositions))
         {
           transactionStatus = StartTransaction(annotation.Document);
 
@@ -242,35 +242,35 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
         Params.TrySetDataList
         (
-          DA, "Head Locations",
-          () => leaders.Select(x => x.HeadPosition)
+          DA, "Head Locations", reference,
+          x => leaders.Select(x => x.HeadPosition)
         );
 
         if (leaderElement.HasLeader is true)
         {
           Params.TrySetDataList
           (
-            DA, "Curves",
-            () => leaders.Select(x => x.LeaderCurve)
+            DA, "Curves", reference,
+            x => leaders.Select(x => x.LeaderCurve)
           );
 
           Params.TrySetDataList
           (
-            DA, "Shoulder Locations",
-            () => leaders.Select(x => x.HasElbow ? x.ElbowPosition : default(Point3d?))
+            DA, "Shoulder Locations", reference,
+            x => leaders.Select(x => x.HasElbow ? x.ElbowPosition : default(Point3d?))
           );
 
           Params.TrySetDataList
           (
-            DA, "End Locations",
-            () => leaders.Select(x => x.EndPosition)
+            DA, "End Locations", reference,
+            x => leaders.Select(x => x.EndPosition)
           );
         }
 
         Params.TrySetDataList
         (
-          DA, "Text Locations",
-          () => leaders.Select(x => x.TextPosition)
+          DA, "Text Locations", reference,
+          x => leaders.Select(x => x.TextPosition)
         );
       }
     }

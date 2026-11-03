@@ -159,7 +159,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
             {
               if (results.GetGeometry() is ARDB.Solid shell)
               {
-                Params.TrySetData(DA, "Geometry", () => shell.ToBrep());
+                Params.TrySetData(DA, "Geometry", spatialElement, x => shell.ToBrep());
 
                 var _TopFaces_ = Params.IndexOfOutputParam("Top Faces");
                 var _TopElements_ = Params.IndexOfOutputParam("Top Elements");
@@ -205,22 +205,24 @@ namespace RhinoInside.Revit.GH.Components.Topology
                     index++;
 
                     if (faces is null) continue;
+
+                    var modelTransform = spatialElement.ReferenceTransform;
                     foreach (var face in faces)
                     {
                       switch (face.SubfaceType)
                       {
                         case ARDB.SubfaceType.Bottom:
-                          bottomF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
+                          bottomF?.Add(new GH_Brep(face.GetSubface().ToBrep()).Transform(modelTransform) as GH_Brep);
                           bottomE?.Add(spatialElement.GetElement<Types.GraphicalElement>(face.SpatialBoundaryElement));
                           break;
 
                         case ARDB.SubfaceType.Top:
-                          topF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
+                          topF?.Add(new GH_Brep(face.GetSubface().ToBrep()).Transform(modelTransform) as GH_Brep);
                           topE?.Add(spatialElement.GetElement<Types.GraphicalElement>(face.SpatialBoundaryElement));
                           break;
 
                         case ARDB.SubfaceType.Side:
-                          sideF?.Add(new GH_Brep(face.GetSubface().ToBrep()));
+                          sideF?.Add(new GH_Brep(face.GetSubface().ToBrep()).Transform(modelTransform) as GH_Brep);
                           sideE?.Add(spatialElement.GetElement<Types.GraphicalElement>(face.SpatialBoundaryElement));
                           break;
                       }
@@ -359,13 +361,22 @@ namespace RhinoInside.Revit.GH.Components.Topology
     {
       var index = 0;
 
+      var modelTransform = se.ReferenceTransform;
+      var hasModelTransform = modelTransform.IsIdentity;
+
       var boundary = new GH_Structure<GH_Curve>();
       foreach (var segments in se.Value.GetBoundarySegments(options))
       {
         boundary.EnsurePath(path.AppendElement(index++));
 
         foreach (var segment in segments)
-          boundary.Append(new GH_Curve(segment.GetCurve().ToCurve()));
+        {
+          var curve = new GH_Curve(segment.GetCurve().ToCurve());
+          if (hasModelTransform)
+            curve = curve.Transform(modelTransform) as GH_Curve;
+
+          boundary.Append(curve);
+        }
       }
 
       return boundary;

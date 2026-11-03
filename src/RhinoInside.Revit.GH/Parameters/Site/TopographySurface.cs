@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Parameters
   public class TopographySurface : GraphicalElement<Types.TopographySurface, ARDB.Architecture.TopographySurface>
   {
 #if REVIT_2024
-    public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.hidden;
+    public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.obscure | GH_Exposure.hidden;
 #else
     public override GH_Exposure Exposure => GH_Exposure.senary | GH_Exposure.obscure;
 #endif

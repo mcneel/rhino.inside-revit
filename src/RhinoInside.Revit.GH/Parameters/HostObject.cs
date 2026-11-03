@@ -127,7 +127,6 @@ namespace RhinoInside.Revit.GH.Parameters
 
       Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.ArchitecturalWall, "Architecural");
       Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.StructuralWall, "Structural");
-      Menu_AppendPromptNew(create.DropDown, Autodesk.Revit.UI.PostableCommand.WallByFaceWall, "Structural");
     }
     #endregion
   }

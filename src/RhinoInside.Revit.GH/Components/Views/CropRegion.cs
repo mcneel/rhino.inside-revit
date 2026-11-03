@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
       using (var cropManager = view.Value.GetCropRegionShapeManager())
       {
-        if (Params.GetData(DA, "Crop Region", out Curve cropRegion))
+        if (Params.GetData(DA, "Crop Region", view, out Curve cropRegion))
         {
           var viewLocation = view.Location;
           var curveLoop = cropRegion.ProjectToPlane(viewLocation)?.ToCurveLoop();
@@ -176,7 +176,7 @@ namespace RhinoInside.Revit.GH.Components.Views
           // Necessary to make GetCropShape below return updated geometry.
           view.Document.Regenerate();
         }
-        Params.TrySetData(DA, "Crop Region", () =>
+        Params.TrySetData(DA, "Crop Region", view, x =>
         {
           if (!cropManager.Split)
             return cropManager.GetCropShape().Select(GeometryDecoder.ToPolyCurve).FirstOrDefault();

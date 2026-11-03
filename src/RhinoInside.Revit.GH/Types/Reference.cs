@@ -208,12 +208,12 @@ namespace RhinoInside.Revit.GH.Types
     internal sealed override T TransformFrom<T>(T value)
     {
       if (value is null) return default;
-      return HasReferenceTransform ? TransformData(value, ElementTransform) : base.TransformTo(value);
+      return HasReferenceTransform ? TransformData(value, ElementTransform, readOnly:true) : base.TransformTo(value);
     }
     internal sealed override T TransformTo<T>(T value)
     {
       if (value is null) return default;
-      return HasReferenceTransform ? TransformData(value, ReferenceTransform) : base.TransformTo(value);
+      return HasReferenceTransform ? TransformData(value, ReferenceTransform, readOnly:false) : base.TransformTo(value);
     }
     #endregion
 

@@ -101,7 +101,7 @@ namespace RhinoInside.Revit.GH.Components.Views
 
       Params.TrySetData(DA, "Active", () => view.Value.IsSectionBoxActive);
 
-      if (Params.GetData(DA, "Box", out Box? box))
+      if (Params.GetData(DA, "Box", view, out Box? box))
       {
         StartTransaction(view.Document);
         var isSectionBoxActive = view.Value.IsSectionBoxActive;
@@ -112,7 +112,7 @@ namespace RhinoInside.Revit.GH.Components.Views
         view.Document.Regenerate();
       }
 
-      Params.TrySetData(DA, "Box", () =>
+      Params.TrySetData(DA, "Box", view, x =>
       {
         var sbox = view.Value.GetSectionBox();
         sbox.Enabled = true;
