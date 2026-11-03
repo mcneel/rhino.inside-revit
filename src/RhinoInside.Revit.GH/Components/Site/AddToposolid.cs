@@ -283,7 +283,10 @@ namespace RhinoInside.Revit.GH.Components.Site
       if (toposolid is object)
       {
         var host = new Types.Toposolid(toposolid);
+
+        var thickness = toposolid.get_Parameter(ARDB.BuiltInParameter.TOPOSOLID_ATTR_THICKNESS_PARAM).AsDouble();
         host.SetSlabShape(points ?? Array.Empty<Point3d>(), creases ?? Array.Empty<Line>(), out var skipedPoints, out var skipedCreases);
+        toposolid.get_Parameter(ARDB.BuiltInParameter.TOPOSOLID_ATTR_THICKNESS_PARAM).Update(thickness);
 
         foreach (var point in skipedPoints)
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));

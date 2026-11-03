@@ -335,7 +335,7 @@ namespace RhinoInside.Revit.GH.Types
       switch (source)
       {
         case null: return false;
-        case Document document: return document.Value.Equals(Document);
+        case Document document: return document.Value.IsEquivalent(Document) || (acceptLinked && document.Value.Equals(ReferenceDocument));
         case RevitLinkInstance instance: return instance.SourceDocument.Equals(Document) || (acceptLinked && instance.ReferenceDocument.Equals(ReferenceDocument));
       }
 
