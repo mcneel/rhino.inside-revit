@@ -332,14 +332,14 @@ namespace RhinoInside.Revit.GH.Components.Site
           // Solve optional Base
           ERDB.ElevationElementReference.SolveBase
           (
-            doc.Value, GeometryEncoder.ToInternalLength(boundaryElevation.Mid),
+            doc.Value, GeometryEncoder.ToInternalLength(boundaryElevation.Min),
             0.0, ref baseElevation
           );
 
           // Compute
           var bbox = mesh.GetBoundingBox(accurate: true);
           var box = new Box(bbox);
-          box.RepositionBasePlane(new Point3d(0.0, 0.0, bbox.Min.Z));
+          box.RepositionBasePlane(new Point3d(box.Center.X, box.Center.Y, bbox.Min.Z));
 
           toposolid = Reconstruct
           (
@@ -365,8 +365,7 @@ namespace RhinoInside.Revit.GH.Components.Site
       Plane plane,
       IList<Curve> boundaries,
       ARDB.ToposolidType type,
-      ARDB.Level baseLevel,
-      double baseOffset
+      ARDB.Level baseLevel
     )
     {
       if (toposolid is null) return false;
@@ -385,7 +384,6 @@ namespace RhinoInside.Revit.GH.Components.Site
       }
 
       toposolid.get_Parameter(ARDB.BuiltInParameter.LEVEL_PARAM).Update(baseLevel.Id);
-      toposolid.get_Parameter(ARDB.BuiltInParameter.TOPOSOLID_HEIGHTABOVELEVEL_PARAM).Update(baseOffset);
 
       return true;
     }
@@ -426,7 +424,7 @@ namespace RhinoInside.Revit.GH.Components.Site
     {
       if (!baseElevation.IsLevelConstraint(out var baseLevel, out var baseOffset)) return default;
 
-      if (!Reuse(ref toposolid, box.Plane, boundary2d, type, baseLevel, baseOffset ?? 0.0))
+      if (!Reuse(ref toposolid, box.Plane, boundary2d, type, baseLevel))
       {
         toposolid = toposolid.ReplaceElement
         (
@@ -437,6 +435,8 @@ namespace RhinoInside.Revit.GH.Components.Site
 
       if (toposolid is object)
       {
+        toposolid.get_Parameter(ARDB.BuiltInParameter.TOPOSOLID_HEIGHTABOVELEVEL_PARAM).Update(baseOffset ?? 0.0);
+
         var host = new Types.Toposolid(toposolid);
         host.SetSlabShape(boundary2d, boundary3d, points ?? Array.Empty<Point3d>(), creases ?? Array.Empty<Line>(), out var skipedPoints, out var skipedCreases);
 
