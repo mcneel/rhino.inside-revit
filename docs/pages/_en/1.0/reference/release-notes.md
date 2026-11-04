@@ -19,6 +19,7 @@ group: Deployment & Configs
 - Added 'Check Element Interferences' component.
 - Added 'Query Interfering Elements' component.
 - Added 'Excavate Toposolid' component.
+- Added 'Detail Item (Line)' component.
 
 ### RC
 
