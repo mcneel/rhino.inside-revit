@@ -18,9 +18,9 @@ namespace RhinoInside.Revit.GH.Components.Annotations
 
     public AddDetailItemCurve() : base
     (
-      name: "Add Detail Item (Curve)",
+      name: "Add Detail Item (Line)",
       nickname: "C-Item",
-      description: "Given its Curve, it adds a line based detail item element to the active Revit document",
+      description: "Given a line, it adds a line based detail item element to the active Revit document",
       category: "Revit",
       subCategory: "Annotate"
     )
@@ -40,10 +40,10 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       ),
       new ParamDefinition
       (
-        new Param_Curve()
+        new Param_Line()
         {
-          Name = "Curve",
-          NickName = "C",
+          Name = "Line",
+          NickName = "L",
           Description = "Detail Component line.",
         }
       ),
@@ -92,30 +92,23 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         {
           // Input
           if (!view.Value.IsAnnotationView()) throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
-          if (!Params.GetData(DA, "Curve", out Curve curve, x => x.IsValid)) return null;
+          if (!Params.GetData(DA, "Curve", out Line? line, x => x.IsValid)) return null;
           if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Type", out Types.FamilySymbol type, Types.Document.FromValue(view.Document), ARDB.BuiltInCategory.OST_DetailComponents)) return null;
 
           type.AssertPlacementType(ARDB.FamilyPlacementType.CurveBasedDetail);
 
-          var viewPlane = view.DetailPlane;
           var tol = GeometryTolerance.Model;
-
-          if (curve.IsClosed(tol.VertexTolerance))
-            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is closed or end points are under tolerance.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
-
-          if (!curve.IsLinear(tol.VertexTolerance))
-            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve should be a line like curve.\nTolerance is {tol.VertexTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
-
-          var line = new Line(viewPlane.ClosestPoint(curve.PointAtStart), viewPlane.ClosestPoint(curve.PointAtEnd));
-          if (line.Length < tol.ShortCurveTolerance)
-            throw new Exceptions.RuntimeArgumentException("Curve", $"Curve is too short once projected into the view plane.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", curve);
+          var viewPlane = view.DetailPlane;
+          line = new Line(viewPlane.ClosestPoint(line.Value.From), viewPlane.ClosestPoint(line.Value.To));
+          if (line.Value.Length < tol.ShortCurveTolerance)
+            throw new Exceptions.RuntimeArgumentException("Line", $"Line is too short once projected into the view plane.\nMin length is {tol.ShortCurveTolerance} {GH_Format.RhinoUnitSymbol()}", line);
 
           // Compute
           detail = Reconstruct
           (
             detail,
             view.Value,
-            line.ToLine(),
+            line.Value.ToLine(),
             type.Value
           );
 
@@ -136,7 +129,6 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       if (detail is null) return false;
 
       if (detail.OwnerViewId != view.Id) return false;
-      if (!(detail.Location is ARDB.LocationCurve)) return false;
       if (detail.GetTypeId() != type.Id)
       {
         if (!ARDB.Element.IsValidType(detail.Document, new ARDB.ElementId[] { detail.Id }, type.Id))
