@@ -20,6 +20,7 @@ group: Deployment & Configs
 - Added 'Query Interfering Elements' component.
 - Added 'Excavate Toposolid' component.
 - Added 'Detail Item (Line)' component.
+- Added 'Add Toposolid (Mesh)' component.
 
 ### RC
 
