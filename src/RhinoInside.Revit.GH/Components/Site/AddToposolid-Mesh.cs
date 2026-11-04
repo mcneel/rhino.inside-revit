@@ -437,8 +437,6 @@ namespace RhinoInside.Revit.GH.Components.Site
 
       if (toposolid is object)
       {
-        toposolid.get_Parameter(ARDB.BuiltInParameter.TOPOSOLID_ATTR_THICKNESS_PARAM).Update(box.Z.Length);
-
         var host = new Types.Toposolid(toposolid);
         host.SetSlabShape(boundary2d, boundary3d, points ?? Array.Empty<Point3d>(), creases ?? Array.Empty<Line>(), out var skipedPoints, out var skipedCreases);
 
