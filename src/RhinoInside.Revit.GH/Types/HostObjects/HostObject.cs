@@ -203,14 +203,38 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    internal bool SetSlabShape(IList<Point3d> points, IList<Line> creases, out IList<Point3d> skipedPoints, out IList<Line> skipedCreases)
+    private static double GetBoundaryElevation(IList<Curve> boundary2d, IList<Curve> boundary3d, Point3d point)
+    {
+      var point2d = new Point3d(point.X, point.Y, 0.0);
+      var closestPoint = NaN.Point3d;
+      double minDistance = double.PositiveInfinity;
+      for (int c = 0; c < boundary2d.Count; ++c)
+      {
+        if (!boundary2d[c].ClosestPoint(point, out var t, minDistance)) continue;
+        var distance = boundary2d[c].PointAt(t).DistanceTo(point2d);
+        if (distance < minDistance)
+        {
+          minDistance = distance;
+          closestPoint = boundary3d[c].PointAt(t);
+        }
+      }
+
+      return closestPoint.Z;
+    }
+
+    internal bool SetSlabShape
+    (
+      IList<Curve> boundary2d,
+      IList<Curve> boundary3d,
+      IList<Point3d> points,
+      IList<Line> creases,
+      out IList<Point3d> skipedPoints,
+      out IList<Line> skipedCreases
+    )
     {
       if (Value is ARDB.HostObject host)
       {
         InvalidateGraphics();
-
-        skipedPoints = new List<Point3d>();
-        skipedCreases = new List<Line>();
 
         var shape = host.GetSlabShapeEditor();
         using (shape as IDisposable) // ARDB.SlabShapeEditor is IDisposable since Revit 2023
@@ -221,62 +245,79 @@ namespace RhinoInside.Revit.GH.Types
 
           var bbox = BoundingBox;
           var elevation = GeometryEncoder.ToInternalLength(bbox.Max.Z);
-
-          var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>(shape.SlabShapeVertices.Size + (points?.Count ?? 0) + (creases?.Count ?? 0));
-          ARDB.SlabShapeVertex AddVertex(Point3d point)
+          if (!double.IsNaN(elevation))
           {
-            var x = GeometryEncoder.ToInternalLength(point.X);
-            var y = GeometryEncoder.ToInternalLength(point.Y);
-            var z = GeometryEncoder.ToInternalLength(point.Z);
+            skipedPoints = new List<Point3d>();
+            skipedCreases = new List<Line>();
 
-            var xyz = new Point3d(x, y, z);
-            if (!vertices.TryGetValue(xyz, out var vertex))
+            var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>(shape.SlabShapeVertices.Size + (points?.Count ?? 0) + (creases?.Count ?? 0));
+            ARDB.SlabShapeVertex AddVertex(Point3d point)
             {
-              try
-              {
-                if ((vertex = shape.AddPoint(new ARDB.XYZ(x, y, elevation))) is object)
-                  vertices.Add(xyz, vertex);
-              }
-              catch { }
-            }
+              var x = GeometryEncoder.ToInternalLength(point.X);
+              var y = GeometryEncoder.ToInternalLength(point.Y);
+              var z = GeometryEncoder.ToInternalLength(point.Z);
 
-            return vertex?.VertexType == ARDB.SlabShapeVertexType.Invalid ? null : vertex;
-          }
-
-          if (points is object)
-          {
-            foreach (var point in points)
-            {
-              if (AddVertex(point) is null)
-                skipedPoints.Add(point);
-            }
-          }
-
-          if (creases is object)
-          {
-            foreach (var crease in creases)
-            {
-              if (crease.IsValid)
+              var xyz = new Point3d(x, y, z);
+              if (!vertices.TryGetValue(xyz, out var vertex))
               {
                 try
                 {
-                  var from = AddVertex(crease.From);
-                  var to = AddVertex(crease.To);
-                  if (from is null || to is null || shape.AddSplitLine(from, to) is null)
-                    skipedCreases.Add(crease);
+                  if ((vertex = shape.AddPoint(new ARDB.XYZ(x, y, elevation))) is object)
+                    vertices.Add(xyz, vertex);
                 }
-                catch { skipedCreases.Add(crease); }
+                catch { }
               }
-              else skipedCreases.Add(crease);
+
+              return vertex?.VertexType == ARDB.SlabShapeVertexType.Invalid ? null : vertex;
             }
+
+            if (boundary2d is object && boundary3d is object)
+            {
+              foreach (ARDB.SlabShapeVertex vertex in shape.SlabShapeVertices)
+              {
+                if (vertex.VertexType == ARDB.SlabShapeVertexType.Invalid) continue;
+                if (vertex.VertexType == ARDB.SlabShapeVertexType.Interior) continue;
+
+                var xyz = vertex.Position.ToPoint3d();
+                xyz.Z = GetBoundaryElevation(boundary2d, boundary3d, xyz);
+                vertices.Add(xyz / Revit.ModelUnits, vertex);
+              }
+            }
+
+            if (points is object)
+            {
+              foreach (var point in points)
+              {
+                if (AddVertex(point) is null)
+                  skipedPoints.Add(point);
+              }
+            }
+
+            if (creases is object)
+            {
+              foreach (var crease in creases)
+              {
+                if (crease.IsValid)
+                {
+                  try
+                  {
+                    var from = AddVertex(crease.From);
+                    var to = AddVertex(crease.To);
+                    if (from is null || to is null || shape.AddSplitLine(from, to) is null)
+                      skipedCreases.Add(crease);
+                  }
+                  catch { skipedCreases.Add(crease); }
+                }
+                else skipedCreases.Add(crease);
+              }
+            }
+
+            foreach (var vertex in vertices.OrderBy(x => x.Key.Z))
+              shape.ModifySubElement(vertex.Value, vertex.Key.Z - elevation);
+
+            return true;
           }
-
-          var bottomUpVertices = vertices.OrderBy(x => x.Key.Z);
-          foreach (var vertex in bottomUpVertices)
-            shape.ModifySubElement(vertex.Value, vertex.Key.Z - elevation);
         }
-
-        return true;
       }
 
       skipedPoints = default;

@@ -187,7 +187,7 @@ namespace RhinoInside.Revit.GH.Components.Site
           // Solve optional Base
           ERDB.ElevationElementReference.SolveBase
           (
-            doc.Value, GeometryEncoder.ToInternalLength(boundaryElevation.Mid),
+            doc.Value, GeometryEncoder.ToInternalLength(boundaryElevation.Min),
             0.0, ref baseElevation
           );
 
@@ -243,7 +243,8 @@ namespace RhinoInside.Revit.GH.Components.Site
       ARDB.Document document,
       IList<Curve> boundary,
       ARDB.ToposolidType type,
-      ARDB.Level baseLevel
+      ARDB.Level baseLevel,
+      double baseOffset
     )
     {
       // We create a Level here to obtain a toposolid with a <not associated> `SketckPlane`
@@ -253,6 +254,7 @@ namespace RhinoInside.Revit.GH.Components.Site
       var toposolid = ARDB.Toposolid.Create(document, curveLoops, type.Id, level.Id);
 
       toposolid.get_Parameter(ARDB.BuiltInParameter.LEVEL_PARAM).Update(baseLevel.Id);
+      toposolid.get_Parameter(ARDB.BuiltInParameter.TOPOSOLID_HEIGHTABOVELEVEL_PARAM).Update(baseOffset);
       document.Delete(level.Id);
 
       return toposolid;
@@ -275,7 +277,7 @@ namespace RhinoInside.Revit.GH.Components.Site
       {
         toposolid = toposolid.ReplaceElement
         (
-          Create(doc, boundary, type, baseLevel),
+          Create(doc, boundary, type, baseLevel, baseOffset ?? 0.0),
           ExcludeUniqueProperties
         );
       }
@@ -283,10 +285,7 @@ namespace RhinoInside.Revit.GH.Components.Site
       if (toposolid is object)
       {
         var host = new Types.Toposolid(toposolid);
-
-        var thickness = toposolid.get_Parameter(ARDB.BuiltInParameter.TOPOSOLID_ATTR_THICKNESS_PARAM).AsDouble();
-        host.SetSlabShape(points ?? Array.Empty<Point3d>(), creases ?? Array.Empty<Line>(), out var skipedPoints, out var skipedCreases);
-        toposolid.get_Parameter(ARDB.BuiltInParameter.TOPOSOLID_ATTR_THICKNESS_PARAM).Update(thickness);
+        host.SetSlabShape(null, null, points ?? Array.Empty<Point3d>(), creases ?? Array.Empty<Line>(), out var skipedPoints, out var skipedCreases);
 
         foreach (var point in skipedPoints)
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));
