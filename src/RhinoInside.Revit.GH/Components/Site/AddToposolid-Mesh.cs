@@ -182,24 +182,18 @@ namespace RhinoInside.Revit.GH.Components.Site
       {
         var bbox = mesh.GetBoundingBox(accurate: true);
 
-        var vi = new HashSet<Point3d>(mesh.Vertices.Count);
-        for (int e = 0; e < mesh.TopologyEdges.Count; ++e)
+        var vertices = mesh.TopologyVertices;
+        var count = vertices.Count;
+        var vi = new HashSet<Point3d>(count);
+        for (int v = 0; v < count; ++v)
         {
-          var faces = mesh.TopologyEdges.GetConnectedFaces(e);
-          if (faces.Length != 2) continue;
+          var faces = vertices.ConnectedFaces(v);
+          if (faces.Length < 2) continue;
 
-          var face0 = mesh.FaceNormals[faces[0]];
-          var face1 = mesh.FaceNormals[faces[1]];
-          if (face0.Z <= 0.1 && face1.Z <= 0.1) continue;
-
-          var edge = mesh.TopologyEdges.EdgeLine(e);
+          if (faces.Any(f => mesh.FaceNormals[f].Z > 0.1))
           {
-            var pt = edge.From;
-            var ray = new Line(new Point3d(pt.X, pt.Y, pt.Z), new Point3d(pt.X, pt.Y, bbox.Max.Z));
-            if (Intersection.MeshLineSorted(mesh, ray, out var _).Length <= 1) vi.Add(pt);
-          }
-          {
-            var pt = edge.To;
+            var vertex = vertices.MeshVertexIndices(v)[0];
+            var pt = mesh.Vertices.Point3dAt(vertex);
             var ray = new Line(new Point3d(pt.X, pt.Y, pt.Z), new Point3d(pt.X, pt.Y, bbox.Max.Z));
             if (Intersection.MeshLineSorted(mesh, ray, out var _).Length <= 1) vi.Add(pt);
           }
