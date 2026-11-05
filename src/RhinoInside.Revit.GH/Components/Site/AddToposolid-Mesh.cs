@@ -176,7 +176,7 @@ namespace RhinoInside.Revit.GH.Components.Site
       return false;
     }
 
-    static bool TryGetMeshPoints(Mesh mesh, out IList<Point3d> points)
+    static bool TryGetMeshPoints(Mesh mesh, out IList<Point3d> points, int orientation)
     {
       if (mesh.Faces.Count > 0)
       {
@@ -194,8 +194,9 @@ namespace RhinoInside.Revit.GH.Components.Site
           {
             var vertex = vertices.MeshVertexIndices(v)[0];
             var pt = mesh.Vertices.Point3dAt(vertex);
-            var ray = new Line(new Point3d(pt.X, pt.Y, pt.Z), new Point3d(pt.X, pt.Y, bbox.Max.Z));
-            if (Intersection.MeshLineSorted(mesh, ray, out var _).Length <= 1) vi.Add(pt);
+
+            if (IsPointOnSurface(mesh, pt, bbox, orientation))
+              vi.Add(pt);
           }
         }
 
@@ -207,7 +208,7 @@ namespace RhinoInside.Revit.GH.Components.Site
       return false;
     }
 
-    static bool TryGetMeshCreases(Mesh mesh, out IList<Line> creases)
+    static bool TryGetMeshCreases(Mesh mesh, out IList<Line> creases, int orientation)
     {
       var count = mesh.TopologyEdges.Count;
       if (count > 0)
@@ -239,17 +240,8 @@ namespace RhinoInside.Revit.GH.Components.Site
           }
 
           var edge = mesh.TopologyEdges.EdgeLine(e);
-          {
-            var pt = edge.From;
-            var ray = new Line(new Point3d(pt.X, pt.Y, pt.Z), new Point3d(pt.X, pt.Y, bbox.Max.Z));
-            if (Intersection.MeshLineSorted(mesh, ray, out var _).Length > 1) continue;
-          }
-          {
-            var pt = edge.To;
-            var ray = new Line(new Point3d(pt.X, pt.Y, pt.Z), new Point3d(pt.X, pt.Y, bbox.Max.Z));
-            if (Intersection.MeshLineSorted(mesh, ray, out var _).Length > 1) continue;
-          }
-          creases.Add(mesh.TopologyEdges.EdgeLine(e));
+          if (IsPointOnSurface(mesh, edge.From, bbox, orientation) && IsPointOnSurface(mesh, edge.To, bbox, orientation))
+            creases.Add(mesh.TopologyEdges.EdgeLine(e));
         }
 
         return true;
@@ -257,6 +249,15 @@ namespace RhinoInside.Revit.GH.Components.Site
 
       creases = default;
       return false;
+    }
+
+    static bool IsPointOnSurface(Mesh mesh, Point3d pt, BoundingBox bbox, int orientation)
+    {
+      var ray = orientation >= 0 ?
+        new Line(new Point3d(pt.X, pt.Y, pt.Z), new Point3d(pt.X, pt.Y, bbox.Max.Z)):
+        new Line(new Point3d(pt.X, pt.Y, bbox.Min.Z), new Point3d(pt.X, pt.Y, pt.Z));
+
+      return Intersection.MeshLineSorted(mesh, ray, out var _).Length <= 1;
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
@@ -268,13 +269,16 @@ namespace RhinoInside.Revit.GH.Components.Site
         doc.Value, _Toposolid_, toposolid =>
         {
           // Input
-          if (!Params.GetData(DA, "Mesh", out Grasshopper.Kernel.Types.GH_Mesh gh_mesh)) return null;
-          var mesh = gh_mesh.Value.DuplicateShallow() as Mesh;
-          mesh.FaceNormals.ComputeFaceNormals();
+          if (!Params.GetData(DA, "Mesh", out Mesh mesh)) return null;
+
+          if (mesh.FaceNormals.Count != mesh.Faces.Count)
+            mesh.FaceNormals.ComputeFaceNormals();
 
           if (!TryGetMeshBoundaries(mesh, out var boundary2d, out var boundary3d)) return null;
-          if (!TryGetMeshPoints(mesh, out var points)) return null;
-          if (!TryGetMeshCreases(mesh, out var creases)) return null;
+
+          var orientation = mesh.SolidOrientation();
+          if (!TryGetMeshPoints(mesh, out var points, orientation)) return null;
+          if (!TryGetMeshCreases(mesh, out var creases, orientation)) return null;
 
           var boundaryElevation = Interval.Unset;
           {
@@ -306,8 +310,7 @@ namespace RhinoInside.Revit.GH.Components.Site
                   maxArea = properties.Area;
                   maxIndex = index;
 
-                  var orientation = loop.ClosedCurveOrientation(Plane.WorldXY);
-                  if (orientation == CurveOrientation.CounterClockwise)
+                  if (loop.ClosedCurveOrientation(Plane.WorldXY) == CurveOrientation.CounterClockwise)
                     normal.Reverse();
                 }
               }
