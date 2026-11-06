@@ -186,7 +186,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       {
         StartTransaction(host.Document);
 
-        host.SetSlabShape(null, null, points, edges, out var skipedPoints, out var skipedCreases);
+        host.SetSlabShape(null, null, points, edges, out var skipedPoints, out var skipedCreases, this);
 
         foreach (var point in skipedPoints)
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));

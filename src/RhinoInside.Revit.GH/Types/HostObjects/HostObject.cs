@@ -10,6 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
   using External.DB;
   using External.DB.Extensions;
+  using Grasshopper.Kernel;
 
   [Kernel.Attributes.Name("Host")]
   public interface IGH_HostObject : IGH_GeometricElement { }
@@ -229,7 +230,8 @@ namespace RhinoInside.Revit.GH.Types
       IList<Point3d> points,
       IList<Line> creases,
       out IList<Point3d> skipedPoints,
-      out IList<Line> skipedCreases
+      out IList<Line> skipedCreases,
+      IGH_ActiveObject component = null
     )
     {
       if (Value is ARDB.HostObject host)
@@ -250,6 +252,16 @@ namespace RhinoInside.Revit.GH.Types
             skipedPoints = new List<Point3d>();
             skipedCreases = new List<Line>();
 
+#if REVIT_2025
+            var addInPlace = true;
+# elif REVIT_2024
+            // Move the points after crashes in Revit 2024.3.
+            var addInPlace = host is ARDB.Toposolid; 
+#else
+            // Before Revit 2024 is much faster to draw the points on the plane and move them after.
+            var addInPlace = false; 
+#endif
+
             var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>(shape.SlabShapeVertices.Size + (points?.Count ?? 0) + (creases?.Count ?? 0));
             ARDB.SlabShapeVertex AddVertex(Point3d point)
             {
@@ -262,8 +274,16 @@ namespace RhinoInside.Revit.GH.Types
               {
                 try
                 {
-                  if ((vertex = shape.AddPoint(new ARDB.XYZ(x, y, elevation))) is object)
-                    vertices.Add(xyz, vertex);
+                  if (addInPlace)
+                  {
+                    if ((vertex = shape.AddPoint(new ARDB.XYZ(x, y, z))) is object)
+                      vertices.Add(xyz, vertex);
+                  }
+                  else
+                  {
+                    if ((vertex = shape.AddPoint(new ARDB.XYZ(x, y, elevation))) is object)
+                      vertices.Add(xyz, vertex);
+                  }
                 }
                 catch { }
               }
@@ -273,20 +293,27 @@ namespace RhinoInside.Revit.GH.Types
 
             if (boundary2d is object && boundary3d is object)
             {
-              foreach (ARDB.SlabShapeVertex vertex in shape.SlabShapeVertices)
+              for (int b = 0; b < boundary2d.Count; ++b)
+                boundary2d[b] = boundary2d[b].ProjectToPlane(Location);
+
+              foreach (var vertex in shape.SlabShapeVertices.Cast<ARDB.SlabShapeVertex>().TakeWhileIsNotEscapeKeyDown(component))
               {
                 if (vertex.VertexType == ARDB.SlabShapeVertexType.Invalid) continue;
                 if (vertex.VertexType == ARDB.SlabShapeVertexType.Interior) continue;
 
                 var xyz = vertex.Position.ToPoint3d();
                 xyz.Z = GetBoundaryElevation(boundary2d, boundary3d, xyz);
-                vertices.Add(xyz / Revit.ModelUnits, vertex);
+
+                if (addInPlace)
+                  shape.ModifySubElement(vertex, GeometryEncoder.ToInternalLength(xyz.Z) - elevation);
+                else
+                  vertices.Add(xyz / Revit.ModelUnits, vertex);
               }
             }
 
             if (points is object)
             {
-              foreach (var point in points)
+              foreach (var point in points.TakeWhileIsNotEscapeKeyDown(component))
               {
                 if (AddVertex(point) is null)
                   skipedPoints.Add(point);
@@ -295,7 +322,7 @@ namespace RhinoInside.Revit.GH.Types
 
             if (creases is object)
             {
-              foreach (var crease in creases)
+              foreach (var crease in creases.TakeWhileIsNotEscapeKeyDown(component))
               {
                 if (crease.IsValid)
                 {
@@ -303,8 +330,18 @@ namespace RhinoInside.Revit.GH.Types
                   {
                     var from = AddVertex(crease.From);
                     var to = AddVertex(crease.To);
-                    if (from is null || to is null || shape.AddSplitLine(from, to) is null)
-                      skipedCreases.Add(crease);
+                    if (from is object && to is object && shape.AddSplitLine(from, to) is IList<ARDB.SlabShapeCrease> lines)
+                    {
+                      if (!addInPlace && lines.Count > 1)
+                      {
+                        foreach (var line in lines)
+                        {
+                          foreach (ARDB.SlabShapeVertex vertex in line.EndPoints)
+                            AddVertex(vertex.Position.ToPoint3d());
+                        }
+                      }
+                    }
+                    else skipedCreases.Add(crease);
                   }
                   catch { skipedCreases.Add(crease); }
                 }
@@ -312,8 +349,11 @@ namespace RhinoInside.Revit.GH.Types
               }
             }
 
-            foreach (var vertex in vertices.OrderBy(x => x.Key.Z))
-              shape.ModifySubElement(vertex.Value, vertex.Key.Z - elevation);
+            if (!addInPlace)
+            {
+              foreach (var vertex in vertices.OrderBy(x => x.Key.Z))
+                shape.ModifySubElement(vertex.Value, vertex.Key.Z - elevation);
+            }
 
             return true;
           }
