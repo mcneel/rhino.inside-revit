@@ -246,6 +246,7 @@ namespace Rhino.Geometry
 
   static class ExtrusionExtension
   {
+#if !RHINO_9
     public static bool TryGetExtrusion(this Surface surface, out Extrusion extrusion)
     {
       extrusion = null;
@@ -547,6 +548,7 @@ namespace Rhino.Geometry
 
       return false;
     }
+#endif
   }
 
   static class EllipseExtension
