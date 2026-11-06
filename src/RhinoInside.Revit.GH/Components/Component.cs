@@ -438,6 +438,10 @@ namespace RhinoInside.Revit.GH.Components
           AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: {e.Message}");
           break;
 
+        case OperationCanceledException _:
+          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Operation cancelled by the user");
+          break;
+
         case System.MissingMemberException _:
           if (e.Message.Contains("Autodesk.Revit.DB."))
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"{e.Source}: Please consider update Revit to the latest revision.{OS.NewLine}{e.Message.TripleDot(128)}");

@@ -591,13 +591,10 @@ namespace Grasshopper.Kernel
       {
 #if RHINO_9
         if(document?.AbortRequested is true)
-          break;
+          throw new OperationCanceledException();
 #else
         if (GH_Document.IsEscapeKeyDown())
-        {
-          document?.RequestAbortSolution();
-          break;
-        }
+          throw new OperationCanceledException();
 #endif
         yield return item;
       }
