@@ -142,28 +142,45 @@ namespace RhinoInside.Revit.GH.Components.Site
 
         var plane = new Plane(new Point3d(0.0, 0.0, bbox.Min.Z), Vector3d.ZAxis);
         var polylines2d = mesh.GetOutlines(plane);
+
+        // Clean overlapped edges.
+        {
+          var breps = Brep.CreatePlanarBreps(new Rhino.Collections.CurveList(polylines2d.Select(x => new PolylineCurve(x))), DocumentTolerance());
+          if (breps?.Length > 0)
+          {
+            polylines2d = breps.SelectMany(x => x.Loops.Select(x => x.To3dCurve())).
+              Select(x => x.ToPolyline(0.0, double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity).ToPolyline()).
+              ToArray();
+          }
+        }
+
         var polylines3d = new List<Polyline>();
 
         var silhouette = boundaries3d;
         foreach (var polyline2d in polylines2d)
         {
-          var polyline3d = new Polyline
+          polyline2d.MergeColinearSegments(GeometryTolerance.Model.AngleTolerance, includeSeam: true);
+          polyline2d.CollapseShortSegments(GeometryTolerance.Model.VertexTolerance);
+
+          polylines3d.Add
           (
-            polyline2d.Select
+            new Polyline
             (
-              pt =>
+              polyline2d.Select
               (
-                Silhouette: silhouette.
-                Select(c => Intersection.CurveLine(c, new Line(new Point3d(pt.X, pt.Y, bbox.Max.Z), new Point3d(pt.X, pt.Y, bbox.Min.Z)), 0.1, 0.01)).
-                SelectMany(x => x).
-                OrderByDescending(x => x.PointA.Z).
-                FirstOrDefault(),
-                Outline: pt
-              )
-            ).
-            Select(x => x.Silhouette?.PointA ?? x.Outline)
+                pt =>
+                (
+                  Silhouette: silhouette.
+                  Select(c => Intersection.CurveLine(c, new Line(new Point3d(pt.X, pt.Y, bbox.Max.Z), new Point3d(pt.X, pt.Y, bbox.Min.Z)), 0.1, 0.01)).
+                  SelectMany(x => x).
+                  OrderByDescending(x => x.PointA.Z).
+                  FirstOrDefault(),
+                  Outline: pt
+                )
+              ).
+              Select(x => x.Silhouette?.PointA ?? x.Outline)
+            )
           );
-          polylines3d.Add(polyline3d ?? polyline2d);
         }
 
         boundaries3d = polylines3d.Select(x => new PolylineCurve(x)).ToArray();
