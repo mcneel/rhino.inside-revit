@@ -17,6 +17,7 @@ namespace RhinoInside.Revit.GH.Components.Site
   using External.DB.Extensions;
   using GH.Exceptions;
   using Grasshopper.Kernel.Types;
+  using Grasshopper.Rhinoceros.Params;
 
 #if REVIT_2024
   [ComponentVersion(introduced: "1.37"), ComponentRevitAPIVersion(min: "2024.0")]
@@ -55,6 +56,20 @@ namespace RhinoInside.Revit.GH.Components.Site
           Name = "Shape",
           NickName = "S",
           Description = "Toposolid surface shape"
+        }
+      ),
+      new ParamDefinition
+      (
+#if RHINO_8
+        new Param_ModelMeshingParameters
+#else
+        new Param_MeshParameters
+#endif
+        {
+          Name = "Settings",
+          NickName = "Ms",
+          Description = "Meshing settings",
+          Optional = true
         }
       ),
       new ParamDefinition
@@ -306,16 +321,58 @@ namespace RhinoInside.Revit.GH.Components.Site
       return null;
     }
 
-    private static Mesh ToMesh(IGH_GeometricGoo geometry, out Brep shell)
+
+    private static Mesh ToMesh(IGH_GeometricGoo geometry, MeshingParameters meshing)
     {
       switch (geometry)
       {
-        case GH_Mesh mesh: shell = null; return mesh.Value;
-        case GH_Brep brep: shell = brep.Value; return MergeFragments(Mesh.CreateFromBrep(brep.Value, MeshingParameters.Default));
-        case GH_Surface surface: shell = surface.Value; return MergeFragments(Mesh.CreateFromBrep(surface.Value, MeshingParameters.Default));
-        case GH_Extrusion extrusion: shell = extrusion.Value.ToBrep(false); return Mesh.CreateFromExtrusion(extrusion.Value, MeshingParameters.Default);
-        case GH_SubD subD: shell = subD.Value.ToBrep(new SubDToBrepOptions(true, SubDToBrepOptions.ExtraordinaryVertexProcessOption.LocalG1xx));
-          return Mesh.CreateFromSubD(subD.Value, (int) SubDDisplayParameters.Density.MediumDensity);
+        case GH_Mesh mesh: return mesh.Value;
+        case GH_Surface surface: return MergeFragments(Mesh.CreateFromBrep(surface.Value, meshing));
+        case GH_Brep brep: return MergeFragments(Mesh.CreateFromBrep(brep.Value, meshing));
+        case GH_Extrusion extrusion: return Mesh.CreateFromExtrusion(extrusion.Value, meshing);
+        case GH_SubD subD: return Mesh.CreateFromSubD(subD.Value, (int) SubDDisplayParameters.Density.MediumDensity);
+      }
+
+      return null;
+    }
+
+    private static Brep ToBrep(IGH_GeometricGoo geometry)
+    {
+      switch (geometry)
+      {
+        case GH_Brep brep: return brep.Value;
+        case GH_Surface surface: return surface.Value;
+        case GH_Extrusion extrusion: return extrusion.Value.ToBrep(false);
+        case GH_SubD subD: return subD.Value.ToBrep(new SubDToBrepOptions(true, SubDToBrepOptions.ExtraordinaryVertexProcessOption.LocalG1xx));
+      }
+
+      return null;
+    }
+
+    private static Mesh GetShapeMesh(IGH_GeometricGoo geometry, IGH_Goo parameters, out Brep shell)
+    {
+      if (parameters.CastTo(out QuadRemeshParameters quads))
+      {
+        shell = ToBrep(geometry);
+        if (shell is object)
+          return Mesh.QuadRemeshBrep(shell, quads);
+
+        if (geometry.CastTo(out Mesh mesh))
+          return mesh.QuadRemesh(quads);
+      }
+      else
+      {
+        if (!parameters.CastTo(out MeshingParameters meshing))
+        {
+          if (parameters.CastTo(out GH_MeshingParameters mp))
+            meshing = mp.Value;
+        }
+
+        if (ToMesh(geometry, meshing ?? MeshingParameters.Default) is Mesh mesh)
+        {
+          shell = ToBrep(geometry);
+          return mesh;
+        }
       }
 
       shell = null;
@@ -332,7 +389,9 @@ namespace RhinoInside.Revit.GH.Components.Site
         {
           // Input
           if (!Params.GetData(DA, "Shape", out IGH_GeometricGoo shape)) return null;
-          var mesh = ToMesh(shape, out var shell);
+          if (!Params.GetData(DA, "Settings", out IGH_Goo parameters)) return null;
+
+          var mesh = GetShapeMesh(shape, parameters, out var shell);
           if (mesh is null)
           {
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to mesh input Shape");
