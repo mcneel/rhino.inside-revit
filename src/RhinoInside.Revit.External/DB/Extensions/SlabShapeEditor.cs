@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -6,7 +8,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
   {
 #if !REVIT_2025
     public static SlabShapeVertex AddPoint(this SlabShapeEditor editor, XYZ location) => editor.DrawPoint(location);
-    public static SlabShapeCreaseArray AddSplitLine(this SlabShapeEditor editor, SlabShapeVertex startVertex, SlabShapeVertex endVertex) => editor.DrawSplitLine(startVertex, endVertex);
+    public static IList<SlabShapeCrease> AddSplitLine(this SlabShapeEditor editor, SlabShapeVertex startVertex, SlabShapeVertex endVertex) => editor.DrawSplitLine(startVertex, endVertex)?.Cast<SlabShapeCrease>().ToArray();
 #endif
   }
 }
