@@ -187,6 +187,14 @@ namespace RhinoInside.Revit.GH.Components.Elements
       ParamDefinition.Create<Parameters.GraphicalElement>("Elements", "E", "Elements list", GH_ParamAccess.list)
     };
 
+    static bool AssertValidViewSource(Types.View view, Types.IGH_ElementSource source)
+    {
+      if (source is Types.RevitLinkInstance instance && instance.ReferenceDocument.Equals(view.ReferenceDocument))
+        return true;
+
+      return view.AssertValidElementSource(source, acceptLinked: false);
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.ElementSource.GetElementSourceOrCurrent(this, DA, out var source)) return;
@@ -194,7 +202,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.TryGetDataList(DA, "Categories", out IList<Types.Category> categories)) return;
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
-      if (view.AssertValidElementSource(source, acceptLinked: true))
+      if (AssertValidViewSource(view, source))
       {
         if (filter?.IsEmpty() is true) return;
         var elements = source is Types.RevitLinkInstance link ?
@@ -241,6 +249,77 @@ namespace RhinoInside.Revit.GH.Components.Elements
           TakeWhileIsNotEscapeKeyDown(this)
         );
       }
+    }
+  }
+
+  [ComponentVersion(introduced: "1.37")]
+  public class QueryInterferingElements : ElementCollectorComponent
+  {
+    public override Guid ComponentGuid => new Guid("6ADE8C09-F553-4031-BA96-32D7595489BD");
+    public override GH_Exposure Exposure => GH_Exposure.tertiary;
+    protected override ARDB.ElementFilter ElementFilter => ElementFilters.Intersect
+    (
+      ElementFilters.ElementIsViewSpecificFilter(inverted: true),
+      ElementFilters.GraphicalElementFilter
+    );
+
+    public QueryInterferingElements() : base
+    (
+      name: "Query Interfering Elements",
+      nickname: "Interfering",
+      description: "Get solid elements that interfere in space and time with the provided element.",
+      category: "Revit",
+      subCategory: "Filter"
+    )
+    { }
+
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
+    {
+      new ParamDefinition(Parameters.ElementSource.QuerySource(), ParamRelevance.Occasional),
+      ParamDefinition.Create<Parameters.GraphicalElement>("Element", "E", "Target element"),
+      ParamDefinition.Create<Param_Boolean>("Voids", "V", "Check also family voids", defaultValue: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Param_Boolean>("Phasing", "P", "Check that elements also coincide on time", defaultValue: true, relevance: ParamRelevance.Primary),
+      ParamDefinition.Create<Parameters.ElementFilter>("Filter", "F", "Filter", optional: true),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.GraphicalElement()
+        {
+          Name = "Element",
+          NickName = "E",
+          Description = "Target element",
+          DataMapping = GH_DataMapping.Graft
+        },ParamRelevance.Primary
+      ),
+      ParamDefinition.Create<Parameters.GraphicalElement>("Interferences", "I", "Element interferences list", GH_ParamAccess.list)
+    };
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Parameters.ElementSource.TryGetElementSource(this, DA, out var source)) return;
+      if (!Params.GetData(DA, "Element", out Types.GraphicalElement element)) return;
+      Params.TrySetData(DA, "Element", () => element);
+      if (!Params.TryGetData(DA, "Voids", out bool? voids)) return;
+      if (!Params.TryGetData(DA, "Phasing", out bool? phasing)) return;
+      if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
+
+      source ??= element?.Source;
+      DA.SetDataList
+      (
+        "Interferences",
+        element.GetSolidInterferencesFrom
+        (
+          source,
+          source?.SourceDocument.Value.CollectElements(),
+          voids ?? false,
+          phasing ?? false
+        ).TakeWhileIsNotEscapeKeyDown(this)
+      );
     }
   }
 }
