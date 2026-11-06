@@ -16,17 +16,18 @@ namespace RhinoInside.Revit.GH.Components.Site
   using Convert.System.Collections.Generic;
   using External.DB.Extensions;
   using GH.Exceptions;
+  using Grasshopper.Kernel.Types;
 
 #if REVIT_2024
   [ComponentVersion(introduced: "1.37"), ComponentRevitAPIVersion(min: "2024.0")]
-  public class AddToposolidByMesh : ElementTrackerComponent
+  public class AddToposolidShape : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("D9B0616F-6433-4628-B304-14BC6643E5C4");
     public override GH_Exposure Exposure => SDKCompliancy(GH_Exposure.tertiary);
 
-    public AddToposolidByMesh() : base
+    public AddToposolidShape() : base
     (
-      name: "Add Toposolid (Mesh)",
+      name: "Add Toposolid (Shape)",
       nickname: "M-Toposolid",
       description: "Given a mesh, it adds a Toposolid element to the active Revit document",
       category: "Revit",
@@ -48,12 +49,12 @@ namespace RhinoInside.Revit.GH.Components.Site
         }, ParamRelevance.Occasional
       ),
       new ParamDefinition
-       (
-        new Param_Mesh
+      (
+        new Param_Geometry
         {
-          Name = "Mesh",
-          NickName = "M",
-          Description = "Toposolid surface"
+          Name = "Shape",
+          NickName = "S",
+          Description = "Toposolid surface shape"
         }
       ),
       new ParamDefinition
@@ -103,8 +104,23 @@ namespace RhinoInside.Revit.GH.Components.Site
       ARDB.BuiltInParameter.TOPOSOLID_HEIGHTABOVELEVEL_PARAM,
     };
 
-    static bool TryGetMeshBoundaries(Mesh mesh, out IList<Curve> boundaries2d, out IList<Curve> boundaries3d, int orientation)
+    static bool TryGetMeshBoundaries(Mesh mesh, Brep shell, out IList<Curve> boundaries2d, out IList<Curve> boundaries3d, int orientation)
     {
+      if (shell is object)
+      {
+        var silhouettes = Silhouette.Compute(shell, SilhouetteType.Boundary, Vector3d.ZAxis, DocumentTolerance(), DocumentAngleTolerance());
+        boundaries3d = Curve.JoinCurves(silhouettes.Select(x => x.Curve));
+        boundaries2d = default;
+
+        var bbox = BoundingBox.Empty;
+        foreach (var edge in boundaries3d)
+          bbox.Union(edge.GetBoundingBox(accurate:true));
+
+        var plane = new Plane(new Point3d(0.0, 0.0, bbox.Min.Z), orientation < 0 ? -Vector3d.ZAxis : Vector3d.ZAxis);
+        boundaries2d = boundaries3d.Select(x => x.ProjectToPlane(plane)).ToArray();
+        return true;
+      }
+
       var count = mesh.TopologyEdges.Count;
       var edges = new List<Line>(count);
       if (count > 0)
@@ -216,7 +232,7 @@ namespace RhinoInside.Revit.GH.Components.Site
         }
 
         points = vi.ToArray();
-        return points.Count > 0;
+        return true;
       }
 
       points = default;
@@ -275,6 +291,37 @@ namespace RhinoInside.Revit.GH.Components.Site
       return Intersection.MeshLine(mesh, ray).Length <= 1;
     }
 
+    private static Mesh MergeFragments(params Mesh[] fragments)
+    {
+      switch (fragments.Length)
+      {
+        case 0: break;
+        case 1: return fragments[0];
+        default:
+          var result = new Mesh();
+          result.Append(fragments);
+          return result;
+      }
+
+      return null;
+    }
+
+    private static Mesh ToMesh(IGH_GeometricGoo geometry, out Brep shell)
+    {
+      switch (geometry)
+      {
+        case GH_Mesh mesh: shell = null; return mesh.Value;
+        case GH_Brep brep: shell = brep.Value; return MergeFragments(Mesh.CreateFromBrep(brep.Value, MeshingParameters.Default));
+        case GH_Surface surface: shell = surface.Value; return MergeFragments(Mesh.CreateFromBrep(surface.Value, MeshingParameters.Default));
+        case GH_Extrusion extrusion: shell = extrusion.Value.ToBrep(false); return Mesh.CreateFromExtrusion(extrusion.Value, MeshingParameters.Default);
+        case GH_SubD subD: shell = subD.Value.ToBrep(new SubDToBrepOptions(true, SubDToBrepOptions.ExtraordinaryVertexProcessOption.LocalG1xx));
+          return Mesh.CreateFromSubD(subD.Value, (int) SubDDisplayParameters.Density.MediumDensity);
+      }
+
+      shell = null;
+      return null;
+    }
+
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
@@ -284,13 +331,19 @@ namespace RhinoInside.Revit.GH.Components.Site
         doc.Value, _Toposolid_, toposolid =>
         {
           // Input
-          if (!Params.GetData(DA, "Mesh", out Mesh mesh)) return null;
+          if (!Params.GetData(DA, "Shape", out IGH_GeometricGoo shape)) return null;
+          var mesh = ToMesh(shape, out var shell);
+          if (mesh is null)
+          {
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to mesh input Shape");
+            return null;
+          }
 
           mesh.Faces.ConvertQuadsToTriangles();
           mesh.FaceNormals.ComputeFaceNormals();
 
           var orientation = mesh.SolidOrientation();
-          if (!TryGetMeshBoundaries(mesh, out var boundary2d, out var boundary3d, orientation)) return null;
+          if (!TryGetMeshBoundaries(mesh, shell, out var boundary2d, out var boundary3d, orientation)) return null;
           if (!TryGetMeshPoints(mesh, out var points, orientation)) return null;
           if (!TryGetMeshCreases(mesh, out var creases, orientation)) return null;
 
@@ -449,7 +502,7 @@ namespace RhinoInside.Revit.GH.Components.Site
         toposolid.get_Parameter(ARDB.BuiltInParameter.TOPOSOLID_HEIGHTABOVELEVEL_PARAM).Update(baseOffset ?? 0.0);
 
         var host = new Types.Toposolid(toposolid);
-        host.SetSlabShape(boundary2d, boundary3d, points ?? Array.Empty<Point3d>(), creases ?? Array.Empty<Line>(), out var skipedPoints, out var skipedCreases);
+        host.SetSlabShape(boundary2d, boundary3d, points ?? Array.Empty<Point3d>(), creases ?? Array.Empty<Line>(), out var skipedPoints, out var skipedCreases, this);
 
         foreach (var point in skipedPoints)
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));
