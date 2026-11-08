@@ -309,13 +309,21 @@ namespace RhinoInside.Revit.GH.Components.Elements
       if (!Params.TryGetData(DA, "Filter", out ARDB.ElementFilter filter, x => x.IsValidObject)) return;
 
       source ??= element?.Source;
+      var elements = source?.SourceDocument.Value.CollectElements();
+      if (filter is object && elements is object)
+      {
+        if (filter.IsEmpty()) return;
+        filter.AssertIsValidFiler(source.SourceInstance.Value);
+        elements = elements.WherePasses(filter);
+      }
+
       DA.SetDataList
       (
         "Interferences",
         element.GetSolidInterferencesFrom
         (
           source,
-          source?.SourceDocument.Value.CollectElements(),
+          elements,
           voids ?? false,
           phasing ?? false
         ).TakeWhileIsNotEscapeKeyDown(this)
