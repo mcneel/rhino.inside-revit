@@ -344,8 +344,12 @@ namespace RhinoInside.Revit.GH.Components.Site
       {
         case GH_Brep brep: return brep.Value;
         case GH_Surface surface: return surface.Value;
+#if RHINO_8
         case GH_Extrusion extrusion: return extrusion.Value.ToBrep(false);
         case GH_SubD subD: return subD.Value.ToBrep(new SubDToBrepOptions(true, SubDToBrepOptions.ExtraordinaryVertexProcessOption.LocalG1xx));
+#else
+        case GH_SubD subD: return subD.Value.ToBrep(new SubDToBrepOptions(true, SubDToBrepOptions.ExtraordinaryVertexProcessOption.LocalG1x));
+#endif
       }
 
       return null;
@@ -576,4 +580,4 @@ namespace RhinoInside.Revit.GH.Components.Site
     }
   }
 #endif
-}
+      }
