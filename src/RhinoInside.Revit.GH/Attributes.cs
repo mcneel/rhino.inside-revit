@@ -151,6 +151,6 @@ namespace RhinoInside.Revit.GH
     internal AbortToken(Func<bool> lambda) => Lambda = lambda;
 
     public bool CanBeAborted => Lambda is object;
-    public bool IsAbortedRequested => Lambda();
+    public bool IsAbortedRequested => CanBeAborted && Lambda();
   }
 }

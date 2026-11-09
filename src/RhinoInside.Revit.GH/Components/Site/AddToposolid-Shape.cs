@@ -359,7 +359,7 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     private static Mesh GetShapeMesh(IGH_GeometricGoo geometry, IGH_Goo parameters, out Brep shell)
     {
-      if (parameters.CastTo(out QuadRemeshParameters quads))
+      if (parameters?.CastTo(out QuadRemeshParameters quads) is true)
       {
         shell = ToBrep(geometry);
         if (shell is object)
@@ -370,7 +370,8 @@ namespace RhinoInside.Revit.GH.Components.Site
       }
       else
       {
-        if (!parameters.CastTo(out MeshingParameters meshing))
+        MeshingParameters meshing = null;
+        if (parameters?.CastTo(out meshing) is false)
         {
           if (parameters.CastTo(out GH_MeshingParameters mp))
             meshing = mp.Value;
