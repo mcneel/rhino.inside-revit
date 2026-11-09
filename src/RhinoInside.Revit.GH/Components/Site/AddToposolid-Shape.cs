@@ -331,7 +331,9 @@ namespace RhinoInside.Revit.GH.Components.Site
         case GH_Mesh mesh: return mesh.Value;
         case GH_Surface surface: return MergeFragments(Mesh.CreateFromBrep(surface.Value, meshing));
         case GH_Brep brep: return MergeFragments(Mesh.CreateFromBrep(brep.Value, meshing));
+#if RHINO_8
         case GH_Extrusion extrusion: return Mesh.CreateFromExtrusion(extrusion.Value, meshing);
+#endif
         case GH_SubD subD: return Mesh.CreateFromSubD(subD.Value, (int) SubDDisplayParameters.Density.MediumDensity);
       }
 
