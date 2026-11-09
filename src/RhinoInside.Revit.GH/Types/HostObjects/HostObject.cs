@@ -254,16 +254,15 @@ namespace RhinoInside.Revit.GH.Types
           host.Document.Regenerate();
 
           var elevation = Location.OriginZ;
-          var compoundStructure = Type.CompoundStructure;
-          var minElevation = compoundStructure.VariableLayerIndex >= 0 ?
-            elevation - compoundStructure.Thickness ?? 0.0 : double.NegativeInfinity;
-
-          elevation = GeometryEncoder.ToInternalLength(elevation);
-          minElevation = GeometryEncoder.ToInternalLength(minElevation);
-
-          var bbox = BoundingBox;
           if (!double.IsNaN(elevation))
           {
+            var compoundStructure = Type.CompoundStructure;
+            var minElevation = compoundStructure.VariableLayerIndex >= 0 ?
+              elevation - compoundStructure.Thickness ?? 0.0 : double.NegativeInfinity;
+
+            elevation = GeometryEncoder.ToInternalLength(elevation);
+            minElevation = GeometryEncoder.ToInternalLength(minElevation);
+
             skipedPoints = new List<Point3d>();
             skipedCreases = new List<Line>();
 
