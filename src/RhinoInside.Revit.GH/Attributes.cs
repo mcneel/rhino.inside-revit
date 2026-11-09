@@ -144,4 +144,13 @@ namespace RhinoInside.Revit.GH
       return version is object;
     }
   }
+
+  internal readonly struct AbortToken
+  {
+    internal readonly Func<bool> Lambda;
+    internal AbortToken(Func<bool> lambda) => Lambda = lambda;
+
+    public bool CanBeAborted => Lambda is object;
+    public bool IsAbortedRequested => Lambda();
+  }
 }

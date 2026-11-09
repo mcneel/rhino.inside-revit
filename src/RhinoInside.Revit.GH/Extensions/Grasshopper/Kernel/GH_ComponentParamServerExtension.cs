@@ -581,21 +581,30 @@ namespace Grasshopper.Kernel
     #endregion
 
     internal static IEnumerable<TSource> TakeWhileIsNotEscapeKeyDown<TSource>
-      (this IEnumerable<TSource> source, IGH_DocumentObject documentObject)
+    (this IEnumerable<TSource> source, RhinoInside.Revit.GH.Components.Component component)
+    {
+      return TakeWhileNotAborted(source, component.AbortToken);
+    }
+
+    internal static IEnumerable<TSource> TakeWhileNotAborted<TSource>
+      (this IEnumerable<TSource> source, RhinoInside.Revit.GH.AbortToken token)
     {
       if (source is null) throw new ArgumentNullException(nameof(source));
-      if (documentObject is null) throw new ArgumentNullException(nameof(documentObject));
+      if (!token.CanBeAborted) return source;
+      return TakeWhileNotAborted(source, token.Lambda);
+    }
 
-      var document = documentObject.OnPingDocument();
+    static IEnumerable<TSource> TakeWhileNotAborted<TSource>
+      (this IEnumerable<TSource> source, Func<bool> isAbortRequested)
+    {
+      if (source is null) throw new ArgumentNullException(nameof(source));
+      if (isAbortRequested is null) throw new ArgumentNullException(nameof(isAbortRequested));
+
       foreach (var item in source)
       {
-#if RHINO_9
-        if(document?.AbortRequested is true)
-          throw new OperationCanceledException();
-#else
-        if (GH_Document.IsEscapeKeyDown())
-          throw new OperationCanceledException();
-#endif
+        if (isAbortRequested())
+          break;
+
         yield return item;
       }
     }

@@ -173,7 +173,7 @@ namespace RhinoInside.Revit.GH.Components.Geometry
         result = result.
           Where(x => x.GetReference().ElementReferenceType != ARDB.ElementReferenceType.REFERENCE_TYPE_NONE).
           Take(Math.Abs(limit.Value)).
-          TakeWhileIsNotEscapeKeyDown(this);
+          TakeWhileNotAborted(AbortToken);
 
         Params.TrySetDataList(DA, "References", () => SelectGeometryObject(view, result));
         Params.TrySetDataList(DA, "Points", () => result.Select(x => line.Value.PointAtLength(x.Proximity * Revit.ModelUnits)));

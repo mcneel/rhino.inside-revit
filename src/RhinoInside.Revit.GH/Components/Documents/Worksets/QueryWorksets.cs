@@ -81,7 +81,7 @@ namespace RhinoInside.Revit.GH.Components.Worksets
         (
           "Worksets",
           worksets.Select(x => new Types.Workset(source.SourceDocument.Value, x)).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

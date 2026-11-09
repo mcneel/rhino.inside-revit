@@ -82,7 +82,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
           materials.
           Select(x => new Types.Material(x)).
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

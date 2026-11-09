@@ -7,10 +7,12 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
+  using System.Threading;
   using Convert.Geometry;
   using External.DB;
   using External.DB.Extensions;
   using Grasshopper.Kernel;
+  using static Grasshopper.Kernel.GH_ComponentParamServerExtension;
 
   [Kernel.Attributes.Name("Host")]
   public interface IGH_HostObject : IGH_GeometricElement { }
@@ -237,7 +239,7 @@ namespace RhinoInside.Revit.GH.Types
       IList<Line> creases,
       out IList<Point3d> skipedPoints,
       out IList<Line> skipedCreases,
-      IGH_ActiveObject component = null
+      AbortToken token = default
     )
     {
       if (Value is ARDB.HostObject host)
@@ -309,7 +311,7 @@ namespace RhinoInside.Revit.GH.Types
               for (int b = 0; b < boundary2d.Count; ++b)
                 boundary2d[b] = boundary2d[b].ProjectToPlane(Location);
 
-              foreach (var vertex in shape.SlabShapeVertices.Cast<ARDB.SlabShapeVertex>().TakeWhileIsNotEscapeKeyDown(component))
+              foreach (var vertex in shape.SlabShapeVertices.Cast<ARDB.SlabShapeVertex>().TakeWhileNotAborted(token))
               {
                 if (vertex.VertexType == ARDB.SlabShapeVertexType.Invalid) continue;
                 if (vertex.VertexType == ARDB.SlabShapeVertexType.Interior) continue;
@@ -326,7 +328,7 @@ namespace RhinoInside.Revit.GH.Types
 
             if (points is object)
             {
-              foreach (var point in points.TakeWhileIsNotEscapeKeyDown(component))
+              foreach (var point in points.TakeWhileNotAborted(token))
               {
                 if (AddVertex(point) is null)
                   skipedPoints.Add(point);
@@ -335,7 +337,7 @@ namespace RhinoInside.Revit.GH.Types
 
             if (creases is object)
             {
-              foreach (var crease in creases.TakeWhileIsNotEscapeKeyDown(component))
+              foreach (var crease in creases.TakeWhileNotAborted(token))
               {
                 if (crease.IsValid)
                 {

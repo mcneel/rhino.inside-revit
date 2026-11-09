@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
           elementCollector.
           WhereTypeIdEqualsTo(elementType.Id).
           Select(Types.Element.FromElement).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

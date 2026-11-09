@@ -80,7 +80,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
           "Fill Patterns",
           patterns.
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
           assemblies.
           Select(x => new Types.AssemblyInstance(x)).
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

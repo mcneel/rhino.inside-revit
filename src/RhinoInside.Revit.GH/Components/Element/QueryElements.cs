@@ -131,7 +131,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
               Select(Types.Element.FromElement).
               FromSource(source).
               Take(limit ?? int.MaxValue).
-              TakeWhileIsNotEscapeKeyDown(this);
+              TakeWhileNotAborted(AbortToken);
           }) &&
           limit.HasValue &&
           Math.Abs(limit.Value) <= (Params.Output[_Elements_].VolatileData.get_Branch(DA.ParameterTargetPath(_Elements_))?.Count ?? 0)
@@ -246,7 +246,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           elements.
           OfType<Types.GraphicalElement>().
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

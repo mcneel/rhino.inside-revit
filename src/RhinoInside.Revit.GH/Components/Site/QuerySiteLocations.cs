@@ -75,7 +75,7 @@ namespace RhinoInside.Revit.GH.Components.Site
         OrderBy(x => x.Id.ToValue()).
         Cast<Types.SiteLocation>().
         FromSource(source).
-        TakeWhileIsNotEscapeKeyDown(this)
+        TakeWhileNotAborted(AbortToken)
       );
     }
   }
