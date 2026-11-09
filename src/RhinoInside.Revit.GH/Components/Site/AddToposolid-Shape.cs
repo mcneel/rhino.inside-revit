@@ -389,7 +389,7 @@ namespace RhinoInside.Revit.GH.Components.Site
         {
           // Input
           if (!Params.GetData(DA, "Shape", out IGH_GeometricGoo shape)) return null;
-          if (!Params.GetData(DA, "Settings", out IGH_Goo parameters)) return null;
+          if (!Params.TryGetData(DA, "Settings", out IGH_Goo parameters)) return null;
 
           var mesh = GetShapeMesh(shape, parameters, out var shell);
           if (mesh is null)
