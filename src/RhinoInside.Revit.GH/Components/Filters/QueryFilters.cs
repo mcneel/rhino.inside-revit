@@ -67,7 +67,7 @@ namespace RhinoInside.Revit.GH.Components.Filters
       {
         var filtersCollector = collector.WherePasses(ElementFilter);
 
-        var filters = filtersCollector.TakeWhileIsNotEscapeKeyDown(this).Cast<ARDB.FilterElement>();
+        var filters = filtersCollector.TakeWhileNotAborted(AbortToken).Cast<ARDB.FilterElement>();
 
         if (!string.IsNullOrEmpty(name))
           filters = filters.Where(x => x.Name.IsSymbolNameLike(name));

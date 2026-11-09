@@ -134,7 +134,7 @@ namespace RhinoInside.Revit.GH.Components.Views
           views.
           OfType<Types.View>().
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

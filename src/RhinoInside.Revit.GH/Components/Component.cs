@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components
 
     readonly VersioningIssues VersioningStatus = default;
 
-    #if DEBUG
+#if DEBUG
     public override string InstanceDescription =>
       $"{base.InstanceDescription}{OS.NewLine}{VersionDescription}";
 
@@ -123,7 +123,7 @@ namespace RhinoInside.Revit.GH.Components
         return versionDescription;
       }
     }
-    #endif
+#endif
 
     #region Obsolete
     public override bool Obsolete => VersioningStatus.HasFlag(VersioningIssues.Obsolete) || base.Obsolete;
@@ -275,21 +275,24 @@ namespace RhinoInside.Revit.GH.Components
     protected bool IsAborted => UnhandledException is object;
     protected virtual bool AbortOnContinuableException => false;
 
-    public static implicit operator AbortToken(Component activeObject)
+    internal AbortToken AbortToken
     {
-      return activeObject?.OnPingDocument() is GH_Document document ?
-        new AbortToken(() =>
-        {
+      get
+      {
+        return OnPingDocument() is GH_Document document ?
+          new AbortToken(() =>
+          {
 #if RHINO_9
-          if (document.AbortRequested is true)
+            if (document.AbortRequested is true)
 #else
             if (GH_Document.IsEscapeKeyDown())
 #endif
-            throw new OperationCanceledException();
+              throw new OperationCanceledException();
 
-          return true;
-        }) :
+            return true;
+          }) :
         default;
+      }
     }
 
     static Component ComputingComponent;

@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
       (
         "Viewports",
         viewports.
-        TakeWhileIsNotEscapeKeyDown(this)
+        TakeWhileNotAborted(AbortToken)
       );
     }
   }

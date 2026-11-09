@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
 
       if (Params.Output.Count > 0)
       {
-        imports = imports.TakeWhileIsNotEscapeKeyDown(this).ToArray();
+        imports = imports.TakeWhileNotAborted(AbortToken).ToArray();
 
         Params.TrySetDataList
         (

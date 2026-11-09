@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.GH
     }
   }
 
-  public readonly struct AbortToken
+  internal readonly struct AbortToken
   {
     internal readonly Func<bool> Lambda;
     internal AbortToken(Func<bool> lambda) => Lambda = lambda;

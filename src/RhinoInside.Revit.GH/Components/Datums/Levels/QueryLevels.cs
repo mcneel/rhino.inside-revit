@@ -88,7 +88,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Levels
           levels.
           Select(x => new Types.Level(x)).
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

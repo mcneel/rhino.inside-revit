@@ -79,7 +79,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
           styles.
           Select(x => new Types.GraphicsStyle(x)).
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

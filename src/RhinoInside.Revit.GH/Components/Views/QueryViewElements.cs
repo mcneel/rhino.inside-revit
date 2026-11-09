@@ -85,7 +85,7 @@ namespace RhinoInside.Revit.GH.Components.Views
           "Elements",
           elementCollector.
           Select(view.GetElement<Types.Element>).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }
@@ -165,7 +165,7 @@ namespace RhinoInside.Revit.GH.Components.Views
           "Elements",
           elementCollector.
           Select(view.GetElement<Types.GraphicalElement>).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Walls
           elementsCollector.
           Select(Types.AnalyticalElement.FromElement).
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

@@ -581,9 +581,9 @@ namespace Grasshopper.Kernel
     #endregion
 
     internal static IEnumerable<TSource> TakeWhileIsNotEscapeKeyDown<TSource>
-    (this IEnumerable<TSource> source, RhinoInside.Revit.GH.AbortToken token)
+    (this IEnumerable<TSource> source, RhinoInside.Revit.GH.Components.Component component)
     {
-      return TakeWhileNotAborted(source, token);
+      return TakeWhileNotAborted(source, component.AbortToken);
     }
 
     internal static IEnumerable<TSource> TakeWhileNotAborted<TSource>
