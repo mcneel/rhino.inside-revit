@@ -1,3 +1,4 @@
+#if REVIT_2024
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,6 @@ namespace RhinoInside.Revit.GH.Components.Site
   using Grasshopper.Kernel.Types;
   using Grasshopper.Rhinoceros.Params;
 
-#if REVIT_2024
   [ComponentVersion(introduced: "1.37"), ComponentRevitAPIVersion(min: "2024.0")]
   public class AddToposolidShape : ElementTrackerComponent
   {
@@ -561,7 +561,7 @@ namespace RhinoInside.Revit.GH.Components.Site
         toposolid.get_Parameter(ARDB.BuiltInParameter.TOPOSOLID_HEIGHTABOVELEVEL_PARAM).Update(baseOffset ?? 0.0);
 
         var host = new Types.Toposolid(toposolid);
-        host.SetSlabShape(boundary2d, boundary3d, points ?? Array.Empty<Point3d>(), creases ?? Array.Empty<Line>(), out var skipedPoints, out var skipedCreases, this);
+        host.SetSlabShape(boundary2d, boundary3d, points ?? Array.Empty<Point3d>(), creases ?? Array.Empty<Line>(), out var skipedPoints, out var skipedCreases, AbortToken);
 
         foreach (var point in skipedPoints)
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));
@@ -573,5 +573,5 @@ namespace RhinoInside.Revit.GH.Components.Site
       return toposolid;
     }
   }
-#endif
 }
+#endif
