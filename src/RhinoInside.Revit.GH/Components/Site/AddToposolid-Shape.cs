@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Components.Site
           NickName = "Ms",
           Description = "Meshing settings",
           Optional = true
-        }
+        }, ParamRelevance.Secondary
       ),
       new ParamDefinition
        (
