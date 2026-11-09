@@ -257,8 +257,7 @@ namespace RhinoInside.Revit.GH.Types
           if (!double.IsNaN(elevation))
           {
             var compoundStructure = Type.CompoundStructure;
-            var minElevation = compoundStructure.VariableLayerIndex >= 0 ?
-              elevation - compoundStructure.Thickness ?? 0.0 : double.NegativeInfinity;
+            var minElevation = compoundStructure.VariableLayerIndex >= 0 ? elevation - compoundStructure.Thickness ?? 0.0 : double.NegativeInfinity;
 
             elevation = GeometryEncoder.ToInternalLength(elevation);
             minElevation = GeometryEncoder.ToInternalLength(minElevation);
