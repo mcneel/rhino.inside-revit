@@ -96,7 +96,7 @@ namespace RhinoInside.Revit.GH.Components.Materials
           assets.
           Select(x => new Types.AppearanceAssetElement(x)).
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

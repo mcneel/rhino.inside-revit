@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.GH.Components.Model
     {
       if (Params.GetDataList(DA, "References", out IList<Types.GeometryObject> list))
       {
-        var references = list.TakeWhileIsNotEscapeKeyDown(this);
+        var references = list.TakeWhileNotAborted(AbortToken);
 
         Params.TrySetDataList(DA, "Elements", () => references.OfType<Types.GeometryElement>());
         Params.TrySetDataList(DA, "Subelements", () => references.OfType<Types.GeometrySubelement>());

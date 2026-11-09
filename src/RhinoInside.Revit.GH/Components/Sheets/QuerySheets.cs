@@ -116,7 +116,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           sheets.
           Select(x => new Types.ViewSheet(x)).
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
           options.
           Select(x => new Types.DesignOptionSet(x)).
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }
@@ -175,7 +175,7 @@ namespace RhinoInside.Revit.GH.Components.DesignOptions
             options.
             Select(x => new Types.DesignOption(x)).
             FromSource(source).
-            TakeWhileIsNotEscapeKeyDown(this)
+            TakeWhileNotAborted(AbortToken)
           );
         }
       }

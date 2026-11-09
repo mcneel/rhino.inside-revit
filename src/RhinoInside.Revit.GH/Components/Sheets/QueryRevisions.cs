@@ -130,7 +130,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           revisions.
           Select(Types.Revision.FromElement).
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

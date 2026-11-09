@@ -9,8 +9,8 @@ using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
-using SD = System.Drawing;
 using OS = System.Environment;
+using SD = System.Drawing;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -90,7 +90,7 @@ namespace RhinoInside.Revit.GH.Components
 
     readonly VersioningIssues VersioningStatus = default;
 
-    #if DEBUG
+#if DEBUG
     public override string InstanceDescription =>
       $"{base.InstanceDescription}{OS.NewLine}{VersionDescription}";
 
@@ -123,7 +123,7 @@ namespace RhinoInside.Revit.GH.Components
         return versionDescription;
       }
     }
-    #endif
+#endif
 
     #region Obsolete
     public override bool Obsolete => VersioningStatus.HasFlag(VersioningIssues.Obsolete) || base.Obsolete;
@@ -274,6 +274,26 @@ namespace RhinoInside.Revit.GH.Components
     Exception UnhandledException;
     protected bool IsAborted => UnhandledException is object;
     protected virtual bool AbortOnContinuableException => false;
+
+    internal AbortToken AbortToken
+    {
+      get
+      {
+        return OnPingDocument() is GH_Document document ?
+          new AbortToken(() =>
+          {
+#if RHINO_9
+            if (document.AbortRequested is true)
+#else
+            if (GH_Document.IsEscapeKeyDown())
+#endif
+              throw new OperationCanceledException();
+
+            return true;
+          }) :
+        default;
+      }
+    }
 
     static Component ComputingComponent;
     public sealed override void ComputeData()

@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Components.Families
           var familiesSet = new HashSet<ARDB.ElementType>
           (
             elementCollector.
-            TakeWhileIsNotEscapeKeyDown(this).
+            TakeWhileNotAborted(AbortToken).
             Cast<ARDB.ElementType>(),
             default(FamilyNameComparer)
           );

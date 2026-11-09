@@ -114,7 +114,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
         DA, "Model Lines", () =>
         sketch?.Value?.GetProfileCurveElements().
         Select(x => x.Select(Types.CurveElement.FromElement)).
-        TakeWhileIsNotEscapeKeyDown(this)
+        TakeWhileNotAborted(AbortToken)
       );
 
       Params.TrySetDataTree
@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
               default: return Enumerable.Repeat(0, x.Count);
             }
           }).
-          TakeWhileIsNotEscapeKeyDown(this);
+          TakeWhileNotAborted(AbortToken);
         }
       );
 

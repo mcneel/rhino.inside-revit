@@ -61,7 +61,7 @@ namespace RhinoInside.Revit.GH.Components.Sheets
           "Title Blocks",
           elementCollector.
           Select(sheet.GetElement<Types.FamilyInstance>).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }
