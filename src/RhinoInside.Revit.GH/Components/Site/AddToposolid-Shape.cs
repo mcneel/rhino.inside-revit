@@ -1,9 +1,12 @@
-#if REVIT_2024
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Parameters;
+#if RHINO_8
+using Grasshopper.Rhinoceros.Params;
+#endif
 using Rhino;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
@@ -17,9 +20,8 @@ namespace RhinoInside.Revit.GH.Components.Site
   using Convert.System.Collections.Generic;
   using External.DB.Extensions;
   using GH.Exceptions;
-  using Grasshopper.Kernel.Types;
-  using Grasshopper.Rhinoceros.Params;
 
+#if REVIT_2024
   [ComponentVersion(introduced: "1.37"), ComponentRevitAPIVersion(min: "2024.0")]
   public class AddToposolidShape : ElementTrackerComponent
   {
@@ -573,5 +575,5 @@ namespace RhinoInside.Revit.GH.Components.Site
       return toposolid;
     }
   }
-}
 #endif
+}
