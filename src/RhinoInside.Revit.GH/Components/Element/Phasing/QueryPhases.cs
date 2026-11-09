@@ -78,7 +78,7 @@ namespace RhinoInside.Revit.GH.Components.Phasing
           Select(x => new Types.Phase(x)).
           OrderBy(x => x.SequenceNumber).
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

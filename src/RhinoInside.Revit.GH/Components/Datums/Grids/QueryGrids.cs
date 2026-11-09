@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations.Grids
           grids.
           Select(x => new Types.Grid(x)).
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this)
+          TakeWhileNotAborted(AbortToken)
         );
       }
     }

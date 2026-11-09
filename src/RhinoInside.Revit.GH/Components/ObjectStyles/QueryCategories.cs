@@ -145,7 +145,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
           categories.
           Select(x => new Types.Category(x)).
           FromSource(source).
-          TakeWhileIsNotEscapeKeyDown(this).
+          TakeWhileNotAborted(AbortToken).
           OrderBy(x => x.Id.ToValue())
         );
       }

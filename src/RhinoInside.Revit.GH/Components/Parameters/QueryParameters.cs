@@ -100,7 +100,7 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
         parameters.
         Select(x => new Types.ParameterKey(source.SourceDocument.Value, x)).
         FromSource(source).
-        TakeWhileIsNotEscapeKeyDown(this)
+        TakeWhileNotAborted(AbortToken)
       );
     }
   }

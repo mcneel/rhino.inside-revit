@@ -285,7 +285,7 @@ namespace RhinoInside.Revit.GH.Components.Site
       if (toposolid is object)
       {
         var host = new Types.Toposolid(toposolid);
-        host.SetSlabShape(null, null, points ?? Array.Empty<Point3d>(), creases ?? Array.Empty<Line>(), out var skipedPoints, out var skipedCreases, this);
+        host.SetSlabShape(null, null, points ?? Array.Empty<Point3d>(), creases ?? Array.Empty<Line>(), out var skipedPoints, out var skipedCreases, AbortToken);
 
         foreach (var point in skipedPoints)
           AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Point projection is outside boundary.", new Point(point));

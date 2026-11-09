@@ -298,7 +298,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
           );
         }
 
-        DA.SetDataList("Areas", areas.FromSource(source).TakeWhileIsNotEscapeKeyDown(this));
+        DA.SetDataList("Areas", areas.FromSource(source).TakeWhileNotAborted(AbortToken));
       }
     }
   }
@@ -385,7 +385,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (!string.IsNullOrEmpty(name))
           areas = areas.Where(x => x.Nomen.IsSymbolNameLike(name));
 
-        DA.SetDataList("Area Schemes", areas.FromSource(source).TakeWhileIsNotEscapeKeyDown(this));
+        DA.SetDataList("Area Schemes", areas.FromSource(source).TakeWhileNotAborted(AbortToken));
       }
     }
   }
@@ -488,7 +488,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (xyz is object)
           rooms = rooms.Where(room => room.Value.IsPointInRoom(xyz));
 
-        DA.SetDataList("Rooms",rooms.FromSource(source).TakeWhileIsNotEscapeKeyDown(this));
+        DA.SetDataList("Rooms",rooms.FromSource(source).TakeWhileNotAborted(AbortToken));
       }
     }
   }
@@ -591,7 +591,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         if (xyz is object)
           spaces = spaces.Where(room => room.Value.IsPointInSpace(xyz));
 
-        DA.SetDataList("Spaces", spaces.FromSource(source).TakeWhileIsNotEscapeKeyDown(this));
+        DA.SetDataList("Spaces", spaces.FromSource(source).TakeWhileNotAborted(AbortToken));
       }
     }
   }
