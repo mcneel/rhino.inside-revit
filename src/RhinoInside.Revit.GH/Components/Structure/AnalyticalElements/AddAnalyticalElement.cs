@@ -130,11 +130,21 @@ namespace RhinoInside.Revit.GH.Components.Structure
     {
       if (!Reuse(analyticalPanel, curve, normal))
       {
+#if REVIT_2024
         analyticalPanel = analyticalPanel.ReplaceElement
         (
           ARDB_AnalyticalPanel.Create(doc, curve, normal),
           ExcludePanelUniqueProperties
         );
+#else
+        var curveLoop = new ARDB.CurveLoop();
+        curveLoop.Append(curve);
+        analyticalPanel = analyticalPanel.ReplaceElement
+        (
+          ARDB_AnalyticalPanel.Create(doc, curveLoop),
+          ExcludePanelUniqueProperties
+        );
+#endif
       }
 
       return analyticalPanel;
@@ -197,6 +207,6 @@ namespace RhinoInside.Revit.GH.Components.Structure
     }
 #endif
 
-    #endregion
-  }
+#endregion
+      }
 }
