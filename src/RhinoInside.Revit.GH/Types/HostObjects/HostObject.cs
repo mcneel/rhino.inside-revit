@@ -24,6 +24,12 @@ namespace RhinoInside.Revit.GH.Types
     public HostObject() { }
     protected internal HostObject(ARDB.HostObject host) : base(host) { }
 
+    public new HostObjectType Type
+    {
+      get => (HostObjectType) base.Type;
+      set => base.Type = value;
+    }
+
     public override Plane Location
     {
       get
@@ -245,8 +251,15 @@ namespace RhinoInside.Revit.GH.Types
           shape.Enable();
           host.Document.Regenerate();
 
+          var elevation = Location.OriginZ;
+          var compoundStructure = Type.CompoundStructure;
+          var minElevation = compoundStructure.VariableLayerIndex >= 0 ?
+            elevation - compoundStructure.Thickness ?? 0.0 : double.NegativeInfinity;
+
+          elevation = GeometryEncoder.ToInternalLength(elevation);
+          minElevation = GeometryEncoder.ToInternalLength(minElevation);
+
           var bbox = BoundingBox;
-          var elevation = GeometryEncoder.ToInternalLength(bbox.Max.Z);
           if (!double.IsNaN(elevation))
           {
             skipedPoints = new List<Point3d>();
@@ -267,7 +280,7 @@ namespace RhinoInside.Revit.GH.Types
             {
               var x = GeometryEncoder.ToInternalLength(point.X);
               var y = GeometryEncoder.ToInternalLength(point.Y);
-              var z = GeometryEncoder.ToInternalLength(point.Z);
+              var z = Math.Max(GeometryEncoder.ToInternalLength(point.Z), minElevation);
 
               var xyz = new Point3d(x, y, z);
               if (!vertices.TryGetValue(xyz, out var vertex))

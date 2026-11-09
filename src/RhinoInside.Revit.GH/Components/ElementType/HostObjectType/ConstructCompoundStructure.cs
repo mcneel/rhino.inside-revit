@@ -138,7 +138,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       update |= Params.GetDataList(DA, "Exterior Layers", out IList<Types.CompoundStructureLayer> exterior);
       update |= Params.GetDataList(DA, "Core Layers", out IList<Types.CompoundStructureLayer> core);
       update |= Params.GetDataList(DA, "Interior Layers", out IList<Types.CompoundStructureLayer> interior);
-      update |= Params.GetData(DA, "Total Thickness", out double? minThickness);
+      update |= Params.GetData(DA, "Total Thickness", out double? thickness);
       update |= Params.GetData(DA, "Wrapping At Inserts", out Types.OpeningWrappingCondition openingWrapping);
       update |= Params.GetData(DA, "Wrapping At Ends", out Types.EndCapCondition endCaps);
       update |= Params.GetData(DA, "Sample Height", out double? sampleHeight);
@@ -152,7 +152,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
         structure.SetLayers(exterior, core, interior);
 
-        if(minThickness.HasValue) structure.SetWidth(minThickness.Value);
+        structure.Thickness = thickness;
         structure.OpeningWrapping = openingWrapping;
         structure.EndCap = endCaps;
 

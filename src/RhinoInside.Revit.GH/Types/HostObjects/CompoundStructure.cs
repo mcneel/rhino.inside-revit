@@ -206,26 +206,26 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public double GetWidth()
+    public double? Thickness
     {
-      return Value is ARDB.CompoundStructure structure ? structure.GetWidth() * Revit.ModelUnits : 0.0;
-    }
-
-    public void SetWidth(double width)
-    {
-      width /= Revit.ModelUnits;
-      if (Value is ARDB.CompoundStructure structure)
+      get => Value is ARDB.CompoundStructure structure ? structure.GetWidth() * Revit.ModelUnits : default(double?);
+      set
       {
-        var total = structure.GetWidth();
-        var count = structure.LayerCount;
-        for (int l = 0; l < count; ++l)
+        if (!value.HasValue) return;
+        var thickness = value.Value / Revit.ModelUnits;
+        if (Value is ARDB.CompoundStructure structure)
         {
-          var w = structure.GetLayerWidth(l);
-          if (w == 0.0) continue;
+          var total = structure.GetWidth();
+          var count = structure.LayerCount;
+          for (int l = 0; l < count; ++l)
+          {
+            var w = structure.GetLayerWidth(l);
+            if (w == 0.0) continue;
 
-          var function = structure.GetLayerFunction(l);
-          if(function != ARDB.MaterialFunctionAssignment.StructuralDeck)
-            structure.SetLayerWidth(l, w / total * width);
+            var function = structure.GetLayerFunction(l);
+            if (function != ARDB.MaterialFunctionAssignment.StructuralDeck)
+              structure.SetLayerWidth(l, w / total * thickness);
+          }
         }
       }
     }
@@ -268,6 +268,18 @@ namespace RhinoInside.Revit.GH.Types
         if (value is object && Value is ARDB.CompoundStructure structure)
           structure.CutoffHeight = value.Value / Revit.ModelUnits;
       }
+    }
+
+    public int? StructuralLayerIndex
+    {
+      get => Value?.StructuralMaterialIndex;
+      set { if (value.HasValue && Value is object) Value.StructuralMaterialIndex = value.Value; }
+    }
+
+    public int? VariableLayerIndex
+    {
+      get => Value?.VariableLayerIndex;
+      set { if (value.HasValue && Value is object) Value.VariableLayerIndex = value.Value; }
     }
     #endregion
   }
