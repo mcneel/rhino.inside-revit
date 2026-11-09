@@ -289,7 +289,7 @@ namespace RhinoInside.Revit.GH.Components
 #endif
               throw new OperationCanceledException();
 
-            return true;
+            return false;
           }) :
         default;
       }
