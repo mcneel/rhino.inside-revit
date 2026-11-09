@@ -65,7 +65,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           voids ?? false,
           phasing ?? false
         ).
-        TakeWhileIsNotEscapeKeyDown(this)
+        TakeWhileNotAborted(AbortToken)
       );
     }
   }
