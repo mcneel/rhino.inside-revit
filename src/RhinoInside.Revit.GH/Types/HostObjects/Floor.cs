@@ -1,5 +1,4 @@
 using System;
-using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -7,7 +6,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Floor")]
-  public sealed class Floor : HostObject, ISketchAccess
+  public sealed class Floor : CeilingAndFloor
   {
     protected override Type ValueType => typeof(ARDB.Floor);
     public new ARDB.Floor Value => base.Value as ARDB.Floor;
@@ -15,33 +14,8 @@ namespace RhinoInside.Revit.GH.Types
     public Floor() { }
     public Floor(ARDB.Floor floor) : base(floor) { }
 
-    public double? LevelOffset =>
+    public override double? LevelOffset =>
       Value?.get_Parameter(ARDB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM).AsDouble() * Revit.ModelUnits;
-
-    #region Location
-    public override Plane Location
-    {
-      get
-      {
-        if (Sketch is Sketch sketch)
-        {
-          var plane = sketch.ProfilesPlane;
-
-          var center = plane.Origin;
-          center.Z = Level.Elevation + LevelOffset.Value;
-          plane.Origin = center;
-
-          return plane;
-        }
-
-        return base.Location;
-      }
-    }
-    #endregion
-
-    #region ISketchAccess
-    public Sketch Sketch => GetElement<Sketch>(Value?.GetSketchId());
-    #endregion
 
     #region Structure
     public override bool Structural => Value?.get_Parameter(ARDB.BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).AsBoolean() is true;
