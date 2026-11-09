@@ -9,8 +9,8 @@ using Rhino.Geometry;
 using ARDB = Autodesk.Revit.DB;
 using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
-using SD = System.Drawing;
 using OS = System.Environment;
+using SD = System.Drawing;
 
 namespace RhinoInside.Revit.GH.Components
 {
@@ -274,6 +274,23 @@ namespace RhinoInside.Revit.GH.Components
     Exception UnhandledException;
     protected bool IsAborted => UnhandledException is object;
     protected virtual bool AbortOnContinuableException => false;
+
+    public static implicit operator AbortToken(Component activeObject)
+    {
+      return activeObject?.OnPingDocument() is GH_Document document ?
+        new AbortToken(() =>
+        {
+#if RHINO_9
+          if (document.AbortRequested is true)
+#else
+            if (GH_Document.IsEscapeKeyDown())
+#endif
+            throw new OperationCanceledException();
+
+          return true;
+        }) :
+        default;
+    }
 
     static Component ComputingComponent;
     public sealed override void ComputeData()
