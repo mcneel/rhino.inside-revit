@@ -1486,7 +1486,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     #region Structural
     public static bool IsPhysicalElement(this Document document, ElementId id)
     {
-#if REVIT_2023
+#if REVIT_2024
       return Autodesk.Revit.DB.Structure.AnalyticalToPhysicalAssociationManager.IsPhysicalElement(document, id);
 #else
       return document.GetElement(id)?.get_Parameter(BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL) is object;
@@ -1495,9 +1495,10 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool IsAnalyticalElement(this Document document, ElementId id)
     {
-#if REVIT_2023
-
+#if REVIT_2024
       return Autodesk.Revit.DB.Structure.AnalyticalToPhysicalAssociationManager.IsAnalyticalElement(document, id);
+#elif REVIT_2023
+      return document.GetElement(id) is Autodesk.Revit.DB.Structure.AnalyticalElement;
 #else
       return document.GetElement(id) is Autodesk.Revit.DB.Structure.AnalyticalModel;
 #endif
