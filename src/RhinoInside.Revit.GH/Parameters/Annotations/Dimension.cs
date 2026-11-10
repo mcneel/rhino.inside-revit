@@ -169,7 +169,7 @@ namespace RhinoInside.Revit.GH.Parameters
           }
         }
 
-        listBox.SelectedIndex = listBox.Items.Cast<Types.DimensionType>().IndexOf(PersistentValue, 0).FirstOr(ListBox.NoMatches);
+        listBox.SelectedIndex = listBox.Items.Cast<Types.DimensionType>().IndexOf(PersistentValue, 0).FirstOrDefault(ListBox.NoMatches);
       }
       finally
       {

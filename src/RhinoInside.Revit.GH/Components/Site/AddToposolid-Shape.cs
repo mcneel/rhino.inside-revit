@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Parameters;
 #if RHINO_8
 using Grasshopper.Rhinoceros.Params;
 #endif
-using Rhino;
 using Rhino.Geometry;
-using Rhino.Geometry.Intersect;
 using ARDB = Autodesk.Revit.DB;
 using ERDB = RhinoInside.Revit.External.DB;
 using OS = System.Environment;
@@ -121,273 +118,6 @@ namespace RhinoInside.Revit.GH.Components.Site
       ARDB.BuiltInParameter.TOPOSOLID_HEIGHTABOVELEVEL_PARAM,
     };
 
-    static bool TryGetMeshBoundaries(Mesh mesh, Brep shell, out IList<Curve> boundaries2d, out IList<Curve> boundaries3d, int orientation)
-    {
-      if (shell is object)
-      {
-        var silhouettes = Silhouette.Compute(shell, SilhouetteType.Boundary, Vector3d.ZAxis, DocumentTolerance(), DocumentAngleTolerance());
-        boundaries3d = Curve.JoinCurves(silhouettes.Select(x => x.Curve));
-        boundaries2d = default;
-
-        var bbox = BoundingBox.Empty;
-        foreach (var edge in boundaries3d)
-          bbox.Union(edge.GetBoundingBox(accurate:true));
-
-        var plane = new Plane(new Point3d(0.0, 0.0, bbox.Min.Z), orientation < 0 ? -Vector3d.ZAxis : Vector3d.ZAxis);
-        boundaries2d = boundaries3d.Select(x => x.ProjectToPlane(plane)).ToArray();
-        return true;
-      }
-
-      var count = mesh.TopologyEdges.Count;
-      var edges = new List<Line>(count);
-      if (count > 0)
-      {
-        var tol = GeometryTolerance.Model;
-
-        // Find relevant edges
-        for (int e = 0; e < count; ++e)
-        {
-          var faces = mesh.TopologyEdges.GetConnectedFaces(e);
-          switch (faces.Length)
-          {
-            case 1:
-            {
-              var face0 = mesh.FaceNormals[faces[0]];
-              if (face0.Z <= 0.0) continue;
-            }
-            break;
-            case 2:
-            {
-              var face0 = mesh.FaceNormals[faces[0]];
-              var face1 = mesh.FaceNormals[faces[1]];
-              if (face0.Z <= 0.0 == face1.Z <= 0.0) continue;
-            }
-            break;
-            default: continue;
-          }
-
-          edges.Add(mesh.TopologyEdges.EdgeLine(e));
-        }
-
-        var bbox = BoundingBox.Empty;
-        foreach (var edge in edges)
-          bbox.Union(edge.BoundingBox);
-
-        // Compute outlines
-        var plane = new Plane(new Point3d(0.0, 0.0, bbox.Min.Z), orientation < 0 ? -Vector3d.ZAxis : Vector3d.ZAxis);
-        var polylines2d = mesh.GetOutlines(plane);
-        {
-          // Clean overlapped edges.
-          var breps = Brep.CreatePlanarBreps(new Rhino.Collections.CurveList(polylines2d.Select(x => new PolylineCurve(x))), DocumentTolerance());
-          if (breps?.Length > 0)
-          {
-            polylines2d = breps.SelectMany(x => x.Loops.Select(x => x.To3dCurve())).
-              Select(x => x.ToPolyline(0.0, double.PositiveInfinity, double.PositiveInfinity, double.PositiveInfinity).ToPolyline()).
-              ToArray();
-          }
-        }
-
-        // Pull back outlines back to edges
-        var polylines3d = new List<Polyline>();
-        foreach (var polyline2d in polylines2d)
-        {
-          // Clean out outline
-          polyline2d.MergeColinearSegments(tol.AngleTolerance, includeSeam: true);
-          polyline2d.CollapseShortSegments(tol.VertexTolerance);
-
-          polylines3d.Add
-          (
-            new Polyline
-            (
-              polyline2d.Select
-              (
-                pt => Intersection.MeshLine(mesh, new Line(new Point3d(pt.X, pt.Y, bbox.Min.Z), new Point3d(pt.X, pt.Y, bbox.Max.Z))).
-                //pt => edges.Select
-                //(
-                //  c => Intersection.LineLine(c, new Line(new Point3d(pt.X, pt.Y, bbox.Min.Z), new Point3d(pt.X, pt.Y, bbox.Max.Z)), out var a, out var b, 0.0, true) & false ?
-                //        c.PointAt(a) : pt
-                //).
-                OrderByDescending(x => orientation < 0 ? -x.Z : x.Z).
-                FirstOr(pt)
-              )
-            )
-          );
-        }
-
-        boundaries3d = polylines3d.Select(x => new PolylineCurve(x)).ToArray();
-        boundaries2d = polylines2d.Select(x => new PolylineCurve(x)).ToArray();
-        return true;
-      }
-
-      boundaries2d = default;
-      boundaries3d = default;
-      return false;
-    }
-
-    static bool TryGetMeshPoints(Mesh mesh, out IList<Point3d> points, int orientation)
-    {
-      if (mesh.Faces.Count > 0)
-      {
-        var bbox = mesh.GetBoundingBox(accurate: true);
-
-        var vertices = mesh.TopologyVertices;
-        var count = vertices.Count;
-        var vi = new HashSet<Point3d>(count);
-        for (int v = 0; v < count; ++v)
-        {
-          var faces = vertices.ConnectedFaces(v);
-          if (faces.Length < 2) continue;
-
-          if (faces.Any(f => mesh.FaceNormals[f].Z > 0.1))
-          {
-            var vertex = vertices.MeshVertexIndices(v)[0];
-            var pt = mesh.Vertices.Point3dAt(vertex);
-
-            if (IsPointOnSurface(mesh, pt, bbox, orientation))
-              vi.Add(pt);
-          }
-        }
-
-        points = vi.ToArray();
-        return true;
-      }
-
-      points = default;
-      return false;
-    }
-
-    static bool TryGetMeshCreases(Mesh mesh, out IList<Line> creases, int orientation)
-    {
-      var count = mesh.TopologyEdges.Count;
-      if (count > 0)
-      {
-        var bbox = mesh.GetBoundingBox(accurate: true);
-
-        creases = new List<Line>(count);
-        for (int e = 0; e < count; ++e)
-        {
-          var faces = mesh.TopologyEdges.GetConnectedFaces(e);
-          switch (faces.Length)
-          {
-            case 1:
-            {
-              var face0 = mesh.FaceNormals[faces[0]];
-              if (face0.Z <= 0.0) continue;
-            }
-            break;
-            case 2:
-            {
-              var face0 = mesh.FaceNormals[faces[0]];
-              var face1 = mesh.FaceNormals[faces[1]];
-              if (face0.Z <= 0.0 && face1.Z <= 0.0) continue;
-              var angle = Vector3d.VectorAngle(face0, face1);
-              if (angle < RhinoMath.ToRadians(1.0)) continue;
-            }
-            break;
-            default: continue;
-          }
-
-          var edge = mesh.TopologyEdges.EdgeLine(e);
-          if (IsPointOnSurface(mesh, edge.From, bbox, orientation) && IsPointOnSurface(mesh, edge.To, bbox, orientation))
-            creases.Add(edge);
-        }
-
-        return true;
-      }
-
-      creases = default;
-      return false;
-    }
-
-    static bool IsPointOnSurface(Mesh mesh, Point3d pt, BoundingBox bbox, int orientation)
-    {
-      var ray = orientation >= 0 ?
-        new Line(new Point3d(pt.X, pt.Y, pt.Z), new Point3d(pt.X, pt.Y, bbox.Max.Z)) :
-        new Line(new Point3d(pt.X, pt.Y, bbox.Min.Z), new Point3d(pt.X, pt.Y, pt.Z));
-
-      return Intersection.MeshLine(mesh, ray).Length <= 1;
-    }
-
-    private static Mesh MergeFragments(params Mesh[] fragments)
-    {
-      switch (fragments.Length)
-      {
-        case 0: break;
-        case 1: return fragments[0];
-        default:
-          var result = new Mesh();
-          result.Append(fragments);
-          return result;
-      }
-
-      return null;
-    }
-
-
-    private static Mesh ToMesh(IGH_GeometricGoo geometry, MeshingParameters meshing)
-    {
-      switch (geometry)
-      {
-        case GH_Mesh mesh: return mesh.Value;
-        case GH_Surface surface: return MergeFragments(Mesh.CreateFromBrep(surface.Value, meshing));
-        case GH_Brep brep: return MergeFragments(Mesh.CreateFromBrep(brep.Value, meshing));
-#if RHINO_8
-        case GH_Extrusion extrusion: return Mesh.CreateFromExtrusion(extrusion.Value, meshing);
-#endif
-        case GH_SubD subD: return Mesh.CreateFromSubD(subD.Value, (int) SubDDisplayParameters.Density.MediumDensity);
-      }
-
-      return null;
-    }
-
-    private static Brep ToBrep(IGH_GeometricGoo geometry)
-    {
-      switch (geometry)
-      {
-        case GH_Brep brep: return brep.Value;
-        case GH_Surface surface: return surface.Value;
-#if RHINO_8
-        case GH_Extrusion extrusion: return extrusion.Value.ToBrep(false);
-        case GH_SubD subD: return subD.Value.ToBrep(new SubDToBrepOptions(true, SubDToBrepOptions.ExtraordinaryVertexProcessOption.LocalG1xx));
-#else
-        case GH_SubD subD: return subD.Value.ToBrep(new SubDToBrepOptions(true, SubDToBrepOptions.ExtraordinaryVertexProcessOption.LocalG1x));
-#endif
-      }
-
-      return null;
-    }
-
-    private static Mesh GetShapeMesh(IGH_GeometricGoo geometry, IGH_Goo parameters, out Brep shell)
-    {
-      if (parameters?.CastTo(out QuadRemeshParameters quads) is true)
-      {
-        shell = ToBrep(geometry);
-        if (shell is object)
-          return Mesh.QuadRemeshBrep(shell, quads);
-
-        if (geometry.CastTo(out Mesh mesh))
-          return mesh.QuadRemesh(quads);
-      }
-      else
-      {
-        MeshingParameters meshing = null;
-        if (parameters?.CastTo(out meshing) is false)
-        {
-          if (parameters.CastTo(out GH_MeshingParameters mp))
-            meshing = mp.Value;
-        }
-
-        if (ToMesh(geometry, meshing ?? MeshingParameters.Default) is Mesh mesh)
-        {
-          shell = ToBrep(geometry);
-          return mesh;
-        }
-      }
-
-      shell = null;
-      return null;
-    }
-
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
@@ -400,7 +130,7 @@ namespace RhinoInside.Revit.GH.Components.Site
           if (!Params.GetData(DA, "Shape", out IGH_GeometricGoo shape)) return null;
           if (!Params.TryGetData(DA, "Settings", out IGH_Goo parameters)) return null;
 
-          var mesh = GetShapeMesh(shape, parameters, out var shell);
+          var mesh = Types.SlabEditScope.GetShapeMesh(shape, parameters, out var shell);
           if (mesh is null)
           {
             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to mesh input Shape");
@@ -411,9 +141,9 @@ namespace RhinoInside.Revit.GH.Components.Site
           mesh.FaceNormals.ComputeFaceNormals();
 
           var orientation = mesh.SolidOrientation();
-          if (!TryGetMeshBoundaries(mesh, shell, out var boundary2d, out var boundary3d, orientation)) return null;
-          if (!TryGetMeshPoints(mesh, out var points, orientation)) return null;
-          if (!TryGetMeshCreases(mesh, out var creases, orientation)) return null;
+          if (!Types.SlabEditScope.TryGetBoundaries(mesh, shell, out var boundary2d, out var boundary3d, orientation)) return null;
+          if (!Types.SlabEditScope.TryGetMeshPoints(mesh, out var points, orientation)) return null;
+          if (!Types.SlabEditScope.TryGetMeshCreases(mesh, out var creases, orientation)) return null;
 
           var boundaryElevation = Interval.Unset;
           {
@@ -583,4 +313,4 @@ namespace RhinoInside.Revit.GH.Components.Site
     }
   }
 #endif
-      }
+}
