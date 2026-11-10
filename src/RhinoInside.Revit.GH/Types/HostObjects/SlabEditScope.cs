@@ -203,7 +203,7 @@ namespace RhinoInside.Revit.GH.Types
               if (x.Curve is object && x.GeometryComponentIndex.ComponentIndexType == ComponentIndexType.BrepEdge)
               {
                 var edge = shell.Edges[x.GeometryComponentIndex.Index];
-                var point = x.Curve.PointAtMid;
+                var point = x.Curve.PointAt(x.Curve.Domain.Mid);
                 foreach (var fi in edge.AdjacentFaces())
                 {
                   var face = shell.Faces[fi];
