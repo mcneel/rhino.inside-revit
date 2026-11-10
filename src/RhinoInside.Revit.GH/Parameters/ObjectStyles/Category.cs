@@ -93,7 +93,7 @@ namespace RhinoInside.Revit.GH.Parameters
         foreach (var category in categories)
           listBox.Items.Add(Types.Category.FromCategory(category));
 
-        listBox.SelectedIndex = listBox.Items.Cast<Types.Category>().IndexOf(PersistentValue, 0).FirstOr(-1);
+        listBox.SelectedIndex = listBox.Items.Cast<Types.Category>().IndexOf(PersistentValue, 0).FirstOrDefault(-1);
       }
 
       listBox.EndUpdate();

@@ -29,23 +29,6 @@ namespace System.Collections.Generic
         yield return value is T t ? t : default;
     }
 
-    public static T FirstOr<T>(this IEnumerable<T> values, T value)
-    {
-      if (values is IList<T> list)
-      {
-        if (list.Count > 0) return list[0];
-      }
-      else
-      {
-        using (var e = values.GetEnumerator())
-        {
-          if (e.MoveNext()) return e.Current;
-        }
-      }
-
-      return value;
-    }
-
     public static IEnumerable<int> IndexOf<T>(this IEnumerable<T> values, T value, int index)
     {
       if (index < 0)

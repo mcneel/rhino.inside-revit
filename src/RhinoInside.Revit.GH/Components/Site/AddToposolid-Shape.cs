@@ -208,7 +208,7 @@ namespace RhinoInside.Revit.GH.Components.Site
                 //        c.PointAt(a) : pt
                 //).
                 OrderByDescending(x => orientation < 0 ? -x.Z : x.Z).
-                FirstOr(pt)
+                FirstOrDefault(pt)
               )
             )
           );
