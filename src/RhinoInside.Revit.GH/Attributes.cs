@@ -147,10 +147,19 @@ namespace RhinoInside.Revit.GH
 
   internal readonly struct AbortToken
   {
-    internal readonly Func<bool> Lambda;
-    internal AbortToken(Func<bool> lambda) => Lambda = lambda;
+    private class TokenSource
+    {
+      public bool Aborted = false;
+      public readonly Func<bool> Lambda;
 
-    public bool CanBeAborted => Lambda is object;
-    public bool IsAbortedRequested => CanBeAborted && Lambda();
+      public TokenSource(Func<bool> lambda) => Lambda = lambda;
+      public bool IsAbortedRequested => Aborted || (Aborted |= Lambda());
+    }
+
+    readonly TokenSource Source;
+    internal AbortToken(Func<bool> lambda) => Source = lambda is object ? new TokenSource(lambda) : null;
+
+    public readonly bool CanBeAborted => Source is object;
+    public readonly bool IsAbortedRequested => CanBeAborted && Source.IsAbortedRequested;
   }
 }

@@ -7,12 +7,9 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using System.Threading;
   using Convert.Geometry;
   using External.DB;
   using External.DB.Extensions;
-  using Grasshopper.Kernel;
-  using static Grasshopper.Kernel.GH_ComponentParamServerExtension;
 
   [Kernel.Attributes.Name("Host")]
   public interface IGH_HostObject : IGH_GeometricElement { }

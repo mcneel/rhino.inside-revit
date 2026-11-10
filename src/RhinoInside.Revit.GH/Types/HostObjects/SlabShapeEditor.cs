@@ -78,10 +78,10 @@ namespace RhinoInside.Revit.GH.Types
         var addInPlace = true;
 #elif REVIT_2024
         // Move the points after crashes in Revit 2024.3.
-        var addInPlace = host.Value is ARDB.Toposolid; 
+        var addInPlace = Host.Value is ARDB.Toposolid;
 #else
         // Before Revit 2024 is much faster to draw the points on the plane and move them after.
-        var addInPlace = false; 
+        var addInPlace = false;
 #endif
 
         var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>(Editor.SlabShapeVertices.Size + (points?.Count ?? 0) + (creases?.Count ?? 0));
@@ -177,7 +177,7 @@ namespace RhinoInside.Revit.GH.Types
             Editor.ModifySubElement(vertex.Value, vertex.Key.Z - elevation);
         }
 
-        return true;
+        return !token.IsAbortedRequested;
       }
 
       skipedPoints = null;
