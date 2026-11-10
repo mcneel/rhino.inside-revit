@@ -9,11 +9,11 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  internal sealed class SlabShapeEditor : IDisposable
+  internal sealed class SlabEditScope : IDisposable
   {
     readonly HostObject Host;
     readonly ARDB.SlabShapeEditor Editor;
-    public SlabShapeEditor(HostObject host)
+    public SlabEditScope(HostObject host)
     {
       Host = host;
       Editor = Host.Value?.GetSlabShapeEditor();

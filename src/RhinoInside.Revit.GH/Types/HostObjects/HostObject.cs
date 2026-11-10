@@ -220,7 +220,7 @@ namespace RhinoInside.Revit.GH.Types
       AbortToken token = default
     )
     {
-      using (var editor = new SlabShapeEditor(this))
+      using (var editor = new SlabEditScope(this))
       {
         if (editor.IsAvailable)
         {
