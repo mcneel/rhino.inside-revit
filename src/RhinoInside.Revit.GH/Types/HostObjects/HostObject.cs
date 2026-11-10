@@ -212,25 +212,6 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    private static double GetBoundaryElevation(IList<Curve> boundary2d, IList<Curve> boundary3d, Point3d point)
-    {
-      var point2d = new Point3d(point.X, point.Y, 0.0);
-      var closestPoint = NaN.Point3d;
-      double minDistance = double.PositiveInfinity;
-      for (int c = 0; c < boundary2d.Count; ++c)
-      {
-        if (!boundary2d[c].ClosestPoint(point, out var t, minDistance)) continue;
-        var distance = boundary2d[c].PointAt(t).DistanceTo(point2d);
-        if (distance < minDistance)
-        {
-          minDistance = distance;
-          closestPoint = boundary3d[c].PointAt(t);
-        }
-      }
-
-      return closestPoint.Z;
-    }
-
     internal bool SetSlabShape
     (
       IList<Curve> boundary2d,
@@ -242,133 +223,23 @@ namespace RhinoInside.Revit.GH.Types
       AbortToken token = default
     )
     {
-      if (Value is ARDB.HostObject host)
+      using (var editor = new SlabShapeEditor(this))
       {
-        InvalidateGraphics();
-
-        var shape = host.GetSlabShapeEditor();
-        using (shape as IDisposable) // ARDB.SlabShapeEditor is IDisposable since Revit 2023
+        if (editor.IsAvailable)
         {
-          shape.ResetSlabShape();
-          shape.Enable();
-          host.Document.Regenerate();
-
-          var elevation = Location.OriginZ;
-          if (!double.IsNaN(elevation))
+          using (var scope = Document.CommitScope())
           {
-            var compoundStructure = Type.CompoundStructure;
-            var minElevation = compoundStructure.VariableLayerIndex >= 0 ? elevation - compoundStructure.Thickness ?? 0.0 : double.NegativeInfinity;
-
-            elevation = GeometryEncoder.ToInternalLength(elevation);
-            minElevation = GeometryEncoder.ToInternalLength(minElevation);
-
-            skipedPoints = new List<Point3d>();
-            skipedCreases = new List<Line>();
-
-#if REVIT_2025
-            var addInPlace = true;
-# elif REVIT_2024
-            // Move the points after crashes in Revit 2024.3.
-            var addInPlace = host is ARDB.Toposolid; 
-#else
-            // Before Revit 2024 is much faster to draw the points on the plane and move them after.
-            var addInPlace = false; 
-#endif
-
-            var vertices = new Dictionary<Point3d, ARDB.SlabShapeVertex>(shape.SlabShapeVertices.Size + (points?.Count ?? 0) + (creases?.Count ?? 0));
-            ARDB.SlabShapeVertex AddVertex(Point3d point)
+            editor.ResetSlabShape();
+            if (editor.Enable())
             {
-              var x = GeometryEncoder.ToInternalLength(point.X);
-              var y = GeometryEncoder.ToInternalLength(point.Y);
-              var z = Math.Max(GeometryEncoder.ToInternalLength(point.Z), minElevation);
-
-              var xyz = new Point3d(x, y, z);
-              if (!vertices.TryGetValue(xyz, out var vertex))
+              Document.Regenerate();
+              if (editor.SetSlabShape(boundary2d, boundary3d, points, creases, out skipedPoints, out skipedCreases, token))
               {
-                try
-                {
-                  if (addInPlace)
-                  {
-                    if ((vertex = shape.AddPoint(new ARDB.XYZ(x, y, z))) is object)
-                      vertices.Add(xyz, vertex);
-                  }
-                  else
-                  {
-                    if ((vertex = shape.AddPoint(new ARDB.XYZ(x, y, elevation))) is object)
-                      vertices.Add(xyz, vertex);
-                  }
-                }
-                catch { }
-              }
-
-              return vertex?.VertexType == ARDB.SlabShapeVertexType.Invalid ? null : vertex;
-            }
-
-            if (boundary2d is object && boundary3d is object)
-            {
-              for (int b = 0; b < boundary2d.Count; ++b)
-                boundary2d[b] = boundary2d[b].ProjectToPlane(Location);
-
-              foreach (var vertex in shape.SlabShapeVertices.Cast<ARDB.SlabShapeVertex>().TakeWhileNotAborted(token))
-              {
-                if (vertex.VertexType == ARDB.SlabShapeVertexType.Invalid) continue;
-                if (vertex.VertexType == ARDB.SlabShapeVertexType.Interior) continue;
-
-                var xyz = vertex.Position.ToPoint3d();
-                xyz.Z = GetBoundaryElevation(boundary2d, boundary3d, xyz);
-
-                if (addInPlace)
-                  shape.ModifySubElement(vertex, GeometryEncoder.ToInternalLength(xyz.Z) - elevation);
-                else
-                  vertices.Add(xyz / Revit.ModelUnits, vertex);
+                InvalidateGraphics();
+                scope.Commit();
+                return true;
               }
             }
-
-            if (points is object)
-            {
-              foreach (var point in points.TakeWhileNotAborted(token))
-              {
-                if (AddVertex(point) is null)
-                  skipedPoints.Add(point);
-              }
-            }
-
-            if (creases is object)
-            {
-              foreach (var crease in creases.TakeWhileNotAborted(token))
-              {
-                if (crease.IsValid)
-                {
-                  try
-                  {
-                    var from = AddVertex(crease.From);
-                    var to = AddVertex(crease.To);
-                    if (from is object && to is object && shape.AddSplitLine(from, to) is IList<ARDB.SlabShapeCrease> lines)
-                    {
-                      if (!addInPlace && lines.Count > 1)
-                      {
-                        foreach (var line in lines)
-                        {
-                          foreach (ARDB.SlabShapeVertex vertex in line.EndPoints)
-                            AddVertex(vertex.Position.ToPoint3d());
-                        }
-                      }
-                    }
-                    else skipedCreases.Add(crease);
-                  }
-                  catch { skipedCreases.Add(crease); }
-                }
-                else skipedCreases.Add(crease);
-              }
-            }
-
-            if (!addInPlace)
-            {
-              foreach (var vertex in vertices.OrderBy(x => x.Key.Z))
-                shape.ModifySubElement(vertex.Value, vertex.Key.Z - elevation);
-            }
-
-            return true;
           }
         }
       }

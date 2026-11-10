@@ -125,10 +125,10 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
 
       Params.TrySetData(DA, "Function", () => layer.Function);
       Params.TrySetData(DA, "Material", () => layer.Material);
-      Params.TrySetData(DA, "Thickness", () => layer.Width);
+      Params.TrySetData(DA, "Thickness", () => layer.Thickness);
       Params.TrySetData(DA, "Wraps", () => layer.LayerCapFlag);
       Params.TrySetData(DA, "Structural Material", () => layer.StructuralMaterial);
-      Params.TrySetData(DA, "Variable", () => layer.VariableWidth);
+      Params.TrySetData(DA, "Variable", () => layer.VariableThickness);
       Params.TrySetData(DA, "Deck Profile", () => layer.DeckProfile);
       Params.TrySetData(DA, "Deck Usage", () => layer.DeckEmbeddingType);
     }

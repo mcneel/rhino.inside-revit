@@ -142,21 +142,21 @@ namespace RhinoInside.Revit.GH.Types
         {
           exterior[e] = new CompoundStructureLayer(Document, layers[l]);
           if (l == material) exterior[e].StructuralMaterial = true;
-          if (l == variable) exterior[e].VariableWidth = true;
+          if (l == variable) exterior[e].VariableThickness = true;
         }
 
         for (int c = 0; c < core.Count; ++c, ++l)
         {
           core[c] = new CompoundStructureLayer(Document, layers[l]);
           if (l == material) core[c].StructuralMaterial = true;
-          if (l == variable) core[c].VariableWidth = true;
+          if (l == variable) core[c].VariableThickness = true;
         }
 
         for (int i = 0; i < interior.Count; ++i, ++l)
         {
           interior[i] = new CompoundStructureLayer(Document, layers[l]);
           if (l == material) interior[i].StructuralMaterial = true;
-          if (l == variable) interior[i].VariableWidth= true;
+          if (l == variable) interior[i].VariableThickness= true;
         }
       }
       else exterior = core = interior = default;
@@ -188,19 +188,19 @@ namespace RhinoInside.Revit.GH.Types
           for (int e = 0; e < exterior?.Count; ++e, ++l)
           {
             structure.SetParticipatesInWrapping(l, exterior[e].LayerCapFlag.Value);
-            if (exterior[e].VariableWidth.Value) structure.VariableLayerIndex = l;
+            if (exterior[e].VariableThickness.Value) structure.VariableLayerIndex = l;
           }
 
           for (int c = 0; c < core?.Count; ++c, ++l)
           {
             if (core[c].StructuralMaterial.Value) structure.StructuralMaterialIndex = l;
-            if (core[c].VariableWidth.Value) structure.VariableLayerIndex = l;
+            if (core[c].VariableThickness.Value) structure.VariableLayerIndex = l;
           }
 
           for (int i = 0; i < interior?.Count; ++i, ++l)
           {
             structure.SetParticipatesInWrapping(l, interior[i].LayerCapFlag.Value);
-            if (interior[i].VariableWidth.Value) structure.VariableLayerIndex = l;
+            if (interior[i].VariableThickness.Value) structure.VariableLayerIndex = l;
           }
         }
       }
@@ -281,6 +281,11 @@ namespace RhinoInside.Revit.GH.Types
       get => Value?.VariableLayerIndex;
       set { if (value.HasValue && Value is object) Value.VariableLayerIndex = value.Value; }
     }
+
+    public double? VariableLayerThickness
+    {
+      get => Value?.VariableLayerIndex >= 0 ? Value.GetLayerWidth(Value.VariableLayerIndex) * Revit.ModelUnits : default(double?);
+    }
     #endregion
   }
 
@@ -348,7 +353,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public static double MinWidth => ARDB.CompoundStructure.GetMinimumLayerThickness() * Revit.ModelUnits;
 
-    public double? Width
+    public double? Thickness
     {
       get => Value is ARDB.CompoundStructureLayer layer ? layer.Width * Revit.ModelUnits : default;
       set
@@ -358,14 +363,14 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    bool variableWidth = false;
-    public bool? VariableWidth
+    bool variableThickness = false;
+    public bool? VariableThickness
     {
-      get => Value is ARDB.CompoundStructureLayer ? variableWidth : default;
+      get => Value is ARDB.CompoundStructureLayer ? variableThickness : default;
       set
       {
         if (value is object && Value is ARDB.CompoundStructureLayer layer)
-          variableWidth = value.Value;
+          variableThickness = value.Value;
       }
     }
 

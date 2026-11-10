@@ -134,7 +134,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       bool update = false;
       update |= Params.GetData(DA, "Function", out Types.LayerFunction function);
       update |= Params.GetData(DA, "Material", out Types.Material material);
-      update |= Params.GetData(DA, "Thickness", out double? width);
+      update |= Params.GetData(DA, "Thickness", out double? thickness);
       update |= Params.GetData(DA, "Wraps", out bool? wraps);
       update |= Params.GetData(DA, "Structural Material", out bool? structuralMaterial);
       update |= Params.GetData(DA, "Variable", out bool? variableThickness);
@@ -144,12 +144,12 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       var layer = update ? new Types.CompoundStructureLayer(doc.Value)
       {
         Function = function?.IsValid == true ? function :
-        new Types.LayerFunction(width == 0.0 ? ARDB.MaterialFunctionAssignment.Membrane : ARDB.MaterialFunctionAssignment.Structure),
+        new Types.LayerFunction(thickness == 0.0 ? ARDB.MaterialFunctionAssignment.Membrane : ARDB.MaterialFunctionAssignment.Structure),
         Material = material,
-        Width = width,
+        Thickness = thickness,
         LayerCapFlag = wraps,
         StructuralMaterial = structuralMaterial,
-        VariableWidth = variableThickness,
+        VariableThickness = variableThickness,
         DeckProfile = deckProfile,
         DeckEmbeddingType = deckType
       } :
@@ -159,12 +159,12 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       {
         if (layer.Function.Value == ARDB.MaterialFunctionAssignment.Membrane)
         {
-          if (layer.Width.Value != 0.0)
+          if (layer.Thickness.Value != 0.0)
             AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, Types.CompoundStructure.ToString(ARDB.CompoundStructureError.MembraneTooThick));
         }
         else if (layer.Function.Value != ARDB.MaterialFunctionAssignment.Membrane)
         {
-          if (layer.Width.Value == 0.0)
+          if (layer.Thickness.Value == 0.0)
             AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, Types.CompoundStructure.ToString(ARDB.CompoundStructureError.NonmembraneTooThin));
         }
       }
