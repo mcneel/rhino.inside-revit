@@ -580,29 +580,20 @@ namespace Grasshopper.Kernel
     }
     #endregion
 
-    internal static IEnumerable<TSource> TakeWhileIsNotEscapeKeyDown<TSource>
-    (this IEnumerable<TSource> source, RhinoInside.Revit.GH.Components.Component component)
-    {
-      return TakeWhileNotAborted(source, component.AbortToken);
-    }
-
     internal static IEnumerable<TSource> TakeWhileNotAborted<TSource>
       (this IEnumerable<TSource> source, RhinoInside.Revit.GH.AbortToken token)
     {
       if (source is null) throw new ArgumentNullException(nameof(source));
       if (!token.CanBeAborted) return source;
-      return TakeWhileNotAborted(source, token.Lambda);
+      return CreateTakeWhileNotAbortedEnumerable(source, token);
     }
 
-    static IEnumerable<TSource> TakeWhileNotAborted<TSource>
-      (this IEnumerable<TSource> source, Func<bool> isAbortRequested)
+    static IEnumerable<TSource> CreateTakeWhileNotAbortedEnumerable<TSource>
+      (this IEnumerable<TSource> source, RhinoInside.Revit.GH.AbortToken token)
     {
-      if (source is null) throw new ArgumentNullException(nameof(source));
-      if (isAbortRequested is null) throw new ArgumentNullException(nameof(isAbortRequested));
-
       foreach (var item in source)
       {
-        if (isAbortRequested())
+        if (token.IsAbortedRequested)
           break;
 
         yield return item;
