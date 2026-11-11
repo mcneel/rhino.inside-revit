@@ -13,7 +13,7 @@ namespace RhinoInside.Revit.GH.Components.Openings
     public OpeningBoundaryProfile() : base
     (
       name: "Opening Boundary Profile",
-      nickname: "OpeningBoundProf",
+      nickname: "O-Profile",
       description: "Get the boundary profile of the given opening",
       category: "Revit",
       subCategory: "Architecture"

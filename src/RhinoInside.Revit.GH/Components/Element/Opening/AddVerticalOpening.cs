@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 
 namespace RhinoInside.Revit.GH.Components.Openings
 {
-  [ComponentVersion(introduced: "1.7")]
+  [ComponentVersion(introduced: "1.7", updated: "1.36")]
   public class AddVerticalOpening : AddOpening
   {
     public override Guid ComponentGuid => new Guid("C9C0F4D2-B75E-42C8-A98F-909DF4AB4A1A");

@@ -23,7 +23,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
     public HostObjectBoundaryProfile() : base
     (
       name: "Host Boundary Profile",
-      nickname: "BoundProf",
+      nickname: "H-Profile",
       description: "Get the boundary profile of the given host element",
       category: "Revit",
       subCategory: "Architecture"
