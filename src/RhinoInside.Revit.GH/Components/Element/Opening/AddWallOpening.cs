@@ -9,7 +9,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Openings
 {
-  [ComponentVersion(introduced: "1.6")]
+  [ComponentVersion(introduced: "1.6", updated: "1.36")]
   public class AddWallOpening : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("C86ED84C-2431-4E4F-A890-E5EFFED43BE2");
@@ -29,16 +29,6 @@ namespace RhinoInside.Revit.GH.Components.Openings
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition
-      (
-        new Parameters.Document()
-        {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document",
-          Optional = true
-        }, ParamRelevance.Occasional
-      ),
       new ParamDefinition
       (
         new Parameters.Wall()
@@ -86,19 +76,18 @@ namespace RhinoInside.Revit.GH.Components.Openings
 
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
+      if (!Params.GetData(DA, "Wall", out Types.Wall wall, x => x.IsValid)) return;
 
       ReconstructElement<ARDB.Opening>
       (
-        doc.Value, _Opening_, opening =>
+        wall.Document, _Opening_, opening =>
         {
           // Input
-          if (!Params.GetData(DA, "Wall", out ARDB.Wall wall)) return null;
           if (!Params.GetData(DA, "Point A", out Point3d? pointA)) return null;
           if (!Params.GetData(DA, "Point B", out Point3d? pointB)) return null;
 
           // Compute
-          opening = Reconstruct(opening, doc.Value, wall, pointA.Value, pointB.Value);
+          opening = Reconstruct(opening, wall.Document, wall.Value, pointA.Value, pointB.Value);
 
           DA.SetData(_Opening_, opening);
           return opening;
