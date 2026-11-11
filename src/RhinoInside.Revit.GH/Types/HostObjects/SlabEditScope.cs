@@ -424,6 +424,7 @@ namespace RhinoInside.Revit.GH.Types
         case GH_Mesh mesh: return mesh.Value;
         case GH_Surface surface: return MergeFragments(Mesh.CreateFromBrep(surface.Value, meshing));
         case GH_Brep brep: return MergeFragments(Mesh.CreateFromBrep(brep.Value, meshing));
+        case GH_Box box: return box.Mesh();
 #if RHINO_8
         case GH_Extrusion extrusion: return Mesh.CreateFromExtrusion(extrusion.Value, meshing);
 #endif
@@ -437,8 +438,9 @@ namespace RhinoInside.Revit.GH.Types
     {
       switch (geometry)
       {
-        case GH_Brep brep: return brep.Value;
         case GH_Surface surface: return surface.Value;
+        case GH_Brep brep: return brep.Value;
+        case GH_Box box: return box.Brep();
 #if RHINO_8
         case GH_Extrusion extrusion: return extrusion.Value.ToBrep(false);
         case GH_SubD subD: return subD.Value.ToBrep(new SubDToBrepOptions(true, SubDToBrepOptions.ExtraordinaryVertexProcessOption.LocalG1xx));
@@ -470,7 +472,7 @@ namespace RhinoInside.Revit.GH.Types
             meshing = mp.Value;
         }
 
-        if (ToMesh(geometry, meshing ?? MeshingParameters.Default) is Mesh mesh)
+        if (ToMesh(geometry, meshing ?? new MeshingParameters(MeshingParameters.Default) { SimplePlanes = true }) is Mesh mesh)
         {
           shell = ToBrep(geometry);
           return mesh;
