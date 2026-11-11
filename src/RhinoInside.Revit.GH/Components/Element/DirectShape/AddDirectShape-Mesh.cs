@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     void ReconstructAddDirectShapeMesh
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [Name("Mesh"), NickName("M"), Description("New Mesh Shape")]
