@@ -472,7 +472,7 @@ namespace RhinoInside.Revit.GH.Types
             meshing = mp.Value;
         }
 
-        if (ToMesh(geometry, meshing ?? new MeshingParameters(MeshingParameters.Default) { SimplePlanes = true }) is Mesh mesh)
+        if (ToMesh(geometry, meshing ?? new MeshingParameters() { SimplePlanes = true }) is Mesh mesh)
         {
           shell = ToBrep(geometry);
           return mesh;
