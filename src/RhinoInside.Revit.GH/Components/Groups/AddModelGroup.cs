@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components.Groups
 
     void ReconstructGroupByLocation
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [Description("New Group Element")]

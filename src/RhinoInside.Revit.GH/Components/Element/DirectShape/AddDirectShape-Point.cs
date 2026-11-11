@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     void ReconstructAddDirectShapePoint
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [Name("Point"), NickName("P"), Description("New Point Shape")]

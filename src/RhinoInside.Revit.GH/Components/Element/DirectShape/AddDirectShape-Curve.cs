@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     void ReconstructAddDirectShapeCurve
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [Name("Curve"), NickName("C"), Description("New Curve Shape")]

@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     void ReconstructAddDirectShapeBrep
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [Name("Brep"), NickName("B"), Description("New Brep Shape")]

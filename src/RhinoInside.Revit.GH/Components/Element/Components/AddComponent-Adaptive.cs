@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructAddComponentAdaptive
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [Description("New Adaptive Component element")]
