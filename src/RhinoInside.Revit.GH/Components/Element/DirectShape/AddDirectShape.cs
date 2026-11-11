@@ -309,13 +309,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     {
       new ParamDefinition
       (
-        new Parameters.Document()
-        {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document",
-          Optional = true
-        }, ParamRelevance.Occasional
+        Parameters.Document.AddTarget(), ParamRelevance.Occasional
       ),
       new ParamDefinition
        (

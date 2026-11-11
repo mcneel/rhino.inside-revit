@@ -20,20 +20,24 @@ namespace RhinoInside.Revit.GH.Parameters
 
     internal static readonly string DefaultName = "Document";
     internal static readonly string DefaultNickName = "DOC";
-    internal static readonly string DefaultDescription = "Contains a collection of Revit documents";
+    internal static readonly string DefaultDescription = "Revit document";
 
     public Document() : base
     (
-      name: DefaultName,
-      nickname: DefaultName,
-      description: DefaultDescription,
+      name: "Document",
+      nickname: string.Empty,
+      description: "Contains a collection of Revit documents",
       category: "Params",
       subcategory: "Revit"
     )
     { }
 
-    protected override Types.IGH_Document PreferredCast(object data) => Types.Document.FromValue(data);
+    public static Document AddTarget() => new Document() { Name = DefaultName, NickName = DefaultNickName, Description = "Target document" };
+    public static Document Input(bool optional = false) => new Document() { Name = DefaultName, NickName = DefaultNickName, Description = "Input document", Optional = optional };
+    public static Document Output() => new Document() { Name = DefaultName, NickName = DefaultName.Substring(0, 1), Description = "Output document" };
+
     protected override Types.IGH_Document InstantiateT() => new Types.Document();
+    protected override Types.IGH_Document PreferredCast(object data) => Types.Document.FromValue(data);
 
     public static bool TryGetCurrentDocument(IGH_ActiveObject activeObject, out Types.Document document)
     {
