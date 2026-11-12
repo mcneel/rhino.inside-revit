@@ -46,6 +46,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The vector's length is 0.0 within the <paramref name="tolerance"/>.</returns>
     public static bool IsZeroVector(this XYZ xyz)
     {
+      if (xyz is null) return false;
+
       return Euclidean.IsZero3(xyz.X, xyz.Y, xyz.Z, Constant.DefaultTolerance);
     }
 
@@ -60,18 +62,23 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// <returns>The vector's length is 1.0 within the <paramref name="tolerance"/>.</returns>
     public static bool IsUnitVector(this XYZ xyz)
     {
+      if (xyz is null) return false;
+
       return Euclidean.IsUnit3(xyz.X, xyz.Y, xyz.Z, Constant.DefaultTolerance);
     }
 
     public static bool AlmostEqualVectors(this XYZ a, XYZ b)
     {
+      if (a is null || b is null) return false;
+
       return Euclidean.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, Constant.DefaultTolerance);
     }
 
     public static bool AlmostEqualPoints(this XYZ a, XYZ b, double tolerance = Constant.DefaultTolerance * 100.0)
     {
-      tolerance = Math.Max(tolerance, Constant.DefaultTolerance * 2.0);
+      if (a is null || b is null) return false;
 
+      tolerance = Math.Max(tolerance, Constant.DefaultTolerance * 2.0);
       return Euclidean.IsZero3(a.X - b.X, a.Y - b.Y, a.Z - b.Z, tolerance);
     }
 
@@ -89,7 +96,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       tolerance = Math.Max(tolerance, Constant.Upsilon);
 
-      var norm = Euclidean.Norm(xyz.X, xyz.Y, xyz.Z);
+      var (x, y, z) = xyz;
+      var norm = Euclidean.Norm(x, y, z);
       return norm < tolerance ? 0.0 : norm;
     }
 

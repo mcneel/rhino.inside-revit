@@ -150,7 +150,8 @@ namespace RhinoInside.Revit.External.DB
   [DebuggerDisplay("{Left} .. {Right}")]
   readonly struct BoundingInterval
   {
-    public static readonly BoundingInterval Empty    = (double.NaN,                           double.NaN);
+    public static readonly BoundingInterval NaN      = (double.NaN,                           double.NaN);
+    public static readonly BoundingInterval Empty    = (double.PositiveInfinity, double.NegativeInfinity);
     public static readonly BoundingInterval Universe = (double.NegativeInfinity, double.PositiveInfinity);
 
     public readonly BoundingValue Left;
@@ -195,8 +196,9 @@ namespace RhinoInside.Revit.External.DB
     public bool IsDecreasing => Left > Right;
     public bool IsDegenerate => Left == Right;
     public bool IsProper => Left != Right;
-    public bool IsEmpty => !IsDegenerate && !IsProper;
     public bool IsFinite => Left.IsEnabled && Right.IsEnabled;
+    public bool IsEmpty => !IsFinite && IsDecreasing;
+    public bool IsUniverse => !IsFinite && IsIncreasing;
     #endregion
 
     #region Operators
@@ -209,7 +211,6 @@ namespace RhinoInside.Revit.External.DB
     public static BoundingInterval operator &(BoundingInterval left, BoundingInterval right) => (BoundingValue.MaxBound(left.Left, right.Left), BoundingValue.MinBound(left.Right, right.Right));
     public static BoundingInterval operator |(BoundingInterval left, BoundingInterval right) => (BoundingValue.MinBound(left.Left, right.Left), BoundingValue.MaxBound(left.Right, right.Right));
     #endregion
-
 
     public bool Contains(BoundingValue value, bool closed = true)
     {

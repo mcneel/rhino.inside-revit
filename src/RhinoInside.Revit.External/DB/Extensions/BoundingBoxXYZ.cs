@@ -20,8 +20,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       out XYZ min, out XYZ max
     )
     {
-      min = value.get_Bounds(BoundsMin);
-      max = value.get_Bounds(BoundsMax);
+      min = value?.get_Bounds(BoundsMin);
+      max = value?.get_Bounds(BoundsMax);
     }
 
     public static void Deconstruct
@@ -30,6 +30,13 @@ namespace RhinoInside.Revit.External.DB.Extensions
       out XYZ min, out XYZ max, out Transform transform, out bool[,] bounded
     )
     {
+      if (value is null)
+      {
+        min = max = null;
+        transform = null;
+        bounded = null;
+      }
+
       min = value.get_Bounds(BoundsMin);
       max = value.get_Bounds(BoundsMax);
       transform = value.Transform;
@@ -59,26 +66,35 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       var ((minX, minY, minZ), (maxX, maxY, maxZ)) = value;
 
-      var xDecreasing = maxX < minX;
-      x = new BoundingInterval
-      (
-        (minX, value.get_BoundEnabled(BoundsMin, AxisX) ? BoundingValue.Bounding.Enabled : xDecreasing ? BoundingValue.Bounding.DisabledMax : BoundingValue.Bounding.DisabledMin),
-        (maxX, value.get_BoundEnabled(BoundsMax, AxisX) ? BoundingValue.Bounding.Enabled : xDecreasing ? BoundingValue.Bounding.DisabledMin : BoundingValue.Bounding.DisabledMax)
-      );
+      if (value is object)
+      {
+        var xDecreasing = maxX < minX;
+        x = new BoundingInterval
+        (
+          (minX, value.get_BoundEnabled(BoundsMin, AxisX) ? BoundingValue.Bounding.Enabled : xDecreasing ? BoundingValue.Bounding.DisabledMax : BoundingValue.Bounding.DisabledMin),
+          (maxX, value.get_BoundEnabled(BoundsMax, AxisX) ? BoundingValue.Bounding.Enabled : xDecreasing ? BoundingValue.Bounding.DisabledMin : BoundingValue.Bounding.DisabledMax)
+        );
 
-      var yDecreasing = maxY < minY;
-      y = new BoundingInterval
-      (
-        (minY, value.get_BoundEnabled(BoundsMin, AxisY) ? BoundingValue.Bounding.Enabled : yDecreasing ? BoundingValue.Bounding.DisabledMax : BoundingValue.Bounding.DisabledMin),
-        (maxY, value.get_BoundEnabled(BoundsMax, AxisY) ? BoundingValue.Bounding.Enabled : yDecreasing ? BoundingValue.Bounding.DisabledMin : BoundingValue.Bounding.DisabledMax)
-      );
+        var yDecreasing = maxY < minY;
+        y = new BoundingInterval
+        (
+          (minY, value.get_BoundEnabled(BoundsMin, AxisY) ? BoundingValue.Bounding.Enabled : yDecreasing ? BoundingValue.Bounding.DisabledMax : BoundingValue.Bounding.DisabledMin),
+          (maxY, value.get_BoundEnabled(BoundsMax, AxisY) ? BoundingValue.Bounding.Enabled : yDecreasing ? BoundingValue.Bounding.DisabledMin : BoundingValue.Bounding.DisabledMax)
+        );
 
-      var zDecreasing = maxZ < minZ;
-      z = new BoundingInterval
-      (
-        (minZ, value.get_BoundEnabled(BoundsMin, AxisZ) ? BoundingValue.Bounding.Enabled : zDecreasing ? BoundingValue.Bounding.DisabledMax : BoundingValue.Bounding.DisabledMin),
-        (maxZ, value.get_BoundEnabled(BoundsMax, AxisZ) ? BoundingValue.Bounding.Enabled : zDecreasing ? BoundingValue.Bounding.DisabledMin : BoundingValue.Bounding.DisabledMax)
-      );
+        var zDecreasing = maxZ < minZ;
+        z = new BoundingInterval
+        (
+          (minZ, value.get_BoundEnabled(BoundsMin, AxisZ) ? BoundingValue.Bounding.Enabled : zDecreasing ? BoundingValue.Bounding.DisabledMax : BoundingValue.Bounding.DisabledMin),
+          (maxZ, value.get_BoundEnabled(BoundsMax, AxisZ) ? BoundingValue.Bounding.Enabled : zDecreasing ? BoundingValue.Bounding.DisabledMin : BoundingValue.Bounding.DisabledMax)
+        );
+      }
+      else
+      {
+        x = BoundingInterval.NaN;
+        y = BoundingInterval.NaN;
+        z = BoundingInterval.NaN;
+      }
     }
 
     public static BoundingBoxXYZ Empty => new BoundingBoxXYZ()
