@@ -184,9 +184,9 @@ namespace RhinoInside.Revit.External.DB
     /// <summary>
     /// Coordinate System X axis according to the Arbitrary Axis Algorithm.
     /// </summary>
-    /// <seealso cref="UnitXYZ.Right(double)"/>
+    /// <seealso cref="UnitXYZ.Up(double)"/>
     /// <param name="tolerance"></param>
-    /// <returns>X axis of the corresponding coordinate system</returns>
+    /// <returns>Looking from the vector head to the tail, the X axis of the corresponding coordinate system</returns>
     public UnitXYZ Right(double tolerance = Constant.DefaultTolerance)
     {
       var (x, y, z) = Direction;
@@ -212,7 +212,7 @@ namespace RhinoInside.Revit.External.DB
     /// </summary>
     /// <seealso cref="UnitXYZ.Right(double)"/>
     /// <param name="tolerance"></param>
-    /// <returns>Y axis of the corresponding coordinate system</returns>
+    /// <returns>Looking from the vector head to the tail, the Y axis of the corresponding coordinate system</returns>
     public UnitXYZ Up(double tolerance = Constant.DefaultTolerance)
     {
       // To save creating the Right XYZ and some operations on the cross product.
