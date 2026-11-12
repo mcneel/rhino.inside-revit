@@ -76,7 +76,7 @@ namespace RhinoInside.Revit.GH.Components
       ARDB.BuiltInParameter.ELEM_TYPE_PARAM
     };
 
-    protected static void ChangeElementTypeId<T>(ref T element, ARDB.ElementId elementTypeId) where T : ARDB.Element
+    static void ChangeElementTypeId<T>(ref T element, ARDB.ElementId elementTypeId) where T : ARDB.Element
     {
       if (element is object && elementTypeId != element.GetTypeId())
       {
