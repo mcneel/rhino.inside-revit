@@ -31,12 +31,9 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
+      new ParamDefinition(Parameters.Document.AddTarget(), ParamRelevance.Occasional),
       new ParamDefinition
       (
-        Parameters.Document.AddTarget(), ParamRelevance.Occasional
-      ),
-      new ParamDefinition
-       (
         new Param_Curve
         {
           Name = "Boundary",
