@@ -259,7 +259,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
         {
           var basisZ = inverse.GetPrincipalComponent(0D);
           origin = new PlaneEquation(cov.Origin, basisZ).Project(start + (curveDirection * 0.5));
-          UnitXYZ.Orthonormal(basisZ, basisX, out basisY);
+          return UnitXYZ.Orthonormalize(basisZ, basisX, out basisZ, out basisX, out basisY);
         }
         else
         {
