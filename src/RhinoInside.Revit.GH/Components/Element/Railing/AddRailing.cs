@@ -44,7 +44,7 @@ namespace RhinoInside.Revit.GH.Components
           NickName = "T",
           Description = "Railing type",
           Optional = true,
-          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Railings
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_StairsRailing
         }, ParamRelevance.Primary
       ),
       new ParamDefinition
