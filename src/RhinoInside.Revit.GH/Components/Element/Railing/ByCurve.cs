@@ -27,7 +27,7 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructRailingByCurve
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [Description("New Railing"), ParamType(typeof(Parameters.GraphicalElement))]

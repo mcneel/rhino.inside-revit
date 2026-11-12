@@ -185,7 +185,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     void ReconstructAddDirectShapeGeometry
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [Name("DirectShape"), NickName("DS"), Description("New DirectShape")]
@@ -247,7 +247,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 
     void ReconstructAddDirectShapeType
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [Description("New DirectShape Type")]
@@ -309,13 +309,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     {
       new ParamDefinition
       (
-        new Parameters.Document()
-        {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document",
-          Optional = true
-        }, ParamRelevance.Occasional
+        Parameters.Document.AddTarget(), ParamRelevance.Occasional
       ),
       new ParamDefinition
        (
