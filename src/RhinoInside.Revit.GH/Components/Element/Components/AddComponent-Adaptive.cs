@@ -49,7 +49,7 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Type",
           NickName = "T",
           Description = "Adaptive component type.",
-          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_AdaptivePoints
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_GenericModel
         }
       ),
     };
@@ -122,6 +122,7 @@ namespace RhinoInside.Revit.GH.Components
                   vertex.Position = position;
               }
 
+              DA.SetData(_Component_, component);
               return component;
             }
           }
@@ -140,6 +141,7 @@ namespace RhinoInside.Revit.GH.Components
             component = component.ReplaceElement(doc.Value.GetElement(newElementIds.First()) as ARDB.FamilyInstance, ExcludeUniqueProperties);
           }
 
+          DA.SetData(_Component_, component);
           return component;
         }
       );
