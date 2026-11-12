@@ -24,13 +24,13 @@ namespace RhinoInside.Revit.GH.Components.Documents
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.Input(), ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.Output(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_Boolean>("Edited", "E", "Identifies if the document has been modified since it was opened", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Editable", "EB", "Identifies if the document is read-only or can possibly be modified", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Guid>("Created", "C", "Document episode when it was created", relevance: ParamRelevance.Primary),

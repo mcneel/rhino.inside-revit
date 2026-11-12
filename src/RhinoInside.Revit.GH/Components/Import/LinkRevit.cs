@@ -28,16 +28,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition
-      (
-        new Parameters.Document()
-        {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Target document for linking the Revit file",
-          Optional = true
-        }, ParamRelevance.Occasional
-      ),
+      new ParamDefinition(Parameters.Document.AddTarget(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Param_FilePath
@@ -106,10 +97,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
       var linkedPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(externalFileRef.GetPath());
       if (string.IsNullOrEmpty(linkedPath)) return false;
 
-      var normalizedLinkedPath = Path.GetFullPath(linkedPath);
-      var normalizedInputPath = Path.GetFullPath(rvtPath);
-
-      if (!string.Equals(normalizedLinkedPath, normalizedInputPath, StringComparison.OrdinalIgnoreCase))
+      if (!PathExtension.Comparer.Equals(linkedPath, rvtPath))
       {
         var typeId = GetLinkTypeId(linkInstance.Document, rvtPath);
         if (!typeId.IsValid())
@@ -158,7 +146,7 @@ namespace RhinoInside.Revit.GH.Components.Insert
             continue;
 
           var currentLinkPath = ARDB.ModelPathUtils.ConvertModelPathToUserVisiblePath(extRef.GetAbsolutePath());
-          if (string.Equals(currentLinkPath, rvtPath, StringComparison.OrdinalIgnoreCase))
+          if (PathExtension.Comparer.Equals(currentLinkPath, rvtPath))
             return linkType.Id;
         }
       }

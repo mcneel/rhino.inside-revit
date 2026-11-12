@@ -51,7 +51,7 @@ namespace RhinoInside.Revit.GH.Components
 
     void ReconstructRoofByOutline
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [Description("New Roof")]

@@ -147,7 +147,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
       {
         var currentCategory = new Types.Category(doc, new ARDB.ElementId(SelectedBuiltInCategory));
-        categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.Category>().IndexOf(currentCategory, 0).FirstOr(ListBox.NoMatches);
+        categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.Category>().IndexOf(currentCategory, 0).FirstOrDefault(ListBox.NoMatches);
       }
     }
 
@@ -184,7 +184,7 @@ namespace RhinoInside.Revit.GH.Parameters
           }
         }
 
-        familiesBox.SelectedIndex = familiesBox.Items.Cast<Types.Family>().IndexOf(PersistentValue, 0).FirstOr(-1);
+        familiesBox.SelectedIndex = familiesBox.Items.Cast<Types.Family>().IndexOf(PersistentValue, 0).FirstOrDefault(-1);
       }
       finally { familiesBox.EndUpdate(); }
       familiesBox.SelectedIndexChanged += FamiliesBox_SelectedIndexChanged;
