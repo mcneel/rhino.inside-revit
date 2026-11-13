@@ -31,18 +31,9 @@ namespace RhinoInside.Revit.GH.Components
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
+      new ParamDefinition(Parameters.Document.AddTarget(), ParamRelevance.Occasional),
       new ParamDefinition
       (
-        new Parameters.Document()
-        {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document",
-          Optional = true
-        }, ParamRelevance.Occasional
-      ),
-      new ParamDefinition
-       (
         new Param_Curve
         {
           Name = "Boundary",
@@ -79,7 +70,8 @@ namespace RhinoInside.Revit.GH.Components
           Name = "Structural",
           NickName = "S",
           Description = "Whether floor is structural or not",
-        }.SetDefaultVale(true), ParamRelevance.Primary
+          Optional = true
+        }, ParamRelevance.Primary
       )
     };
 
