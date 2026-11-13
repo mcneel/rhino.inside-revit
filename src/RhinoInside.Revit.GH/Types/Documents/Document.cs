@@ -771,6 +771,53 @@ namespace RhinoInside.Revit.GH.Types
   {
     public ProjectDocument() : base(default) { }
     internal ProjectDocument(ARDB.Document value) : base(value) { }
+
+    public override bool CastTo<Q>(out Q target)
+    {
+      if (Value is object)
+      {
+        if (typeof(Q).IsAssignableFrom(typeof(Phase)))
+        {
+          if (Value.Phases?.Cast<ARDB.Phase>().LastOrDefault() is ARDB.Phase lastPhase)
+            target = (Q) (object) Phase.FromElement(lastPhase);
+          else
+            target = (Q) (object) new Phase();
+
+          return true;
+        }
+        else if (typeof(Q).IsAssignableFrom(typeof(Workset)))
+        {
+          if (Value.GetWorksetTable() is ARDB.WorksetTable table)
+            target = (Q) (object) new Workset(Value, table.GetActiveWorksetId());
+          else
+            target = (Q) (object) new Workset();
+
+          return true;
+        }
+        else if (typeof(Q).IsAssignableFrom(typeof(DesignOption)))
+        {
+          var designOptionId = ARDB.DesignOption.GetActiveDesignOptionId(Value);
+          if (designOptionId.IsValid())
+            target = (Q) (object) new DesignOption(Value, designOptionId);
+          else
+            target = (Q) (object) new DesignOption();
+
+          return true;
+        }
+        else if (typeof(Q).IsAssignableFrom(typeof(DesignOptionSet)))
+        {
+          var designOptionId = ARDB.DesignOption.GetActiveDesignOptionId(Value);
+          if (Value.GetElement(designOptionId)?.get_Parameter(ARDB.BuiltInParameter.OPTION_SET_ID).AsElementId() is ARDB.ElementId designOptionSetId)
+            target = (Q) (object) new DesignOptionSet(Value, designOptionSetId);
+          else
+            target = (Q) (object) new DesignOptionSet();
+
+          return true;
+        }
+      }
+
+      return base.CastTo(out target);
+    }
   }
 
   [Kernel.Attributes.Name("Family Document")]
@@ -778,6 +825,20 @@ namespace RhinoInside.Revit.GH.Types
   {
     public FamilyDocument() : base(default) { }
     internal FamilyDocument(ARDB.Document value) : base(value) { }
+
+    public override bool CastTo<Q>(out Q target)
+    {
+      if (Value is object)
+      {
+        if (typeof(Q).IsAssignableFrom(typeof(Family)))
+        {
+          target = (Q) (object) Family.FromElement(Value.OwnerFamily);
+          return true;
+        }
+      }
+
+      return base.CastTo(out target);
+    }
   }
 
   class DocumentState : IGH_Goo, IEquatable<DocumentState>
