@@ -178,6 +178,12 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(GeometryCurve)))
+      {
+        target = (Q) (object) GetGeometryObjectFromReference<GeometryCurve>(Value?.GeometryCurve.Reference);
+        return true;
+      }
+
       return base.ConvertTo(out target);
     }
     #endregion
