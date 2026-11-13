@@ -24,7 +24,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.Input(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Parameters.CompoundStructureLayer()

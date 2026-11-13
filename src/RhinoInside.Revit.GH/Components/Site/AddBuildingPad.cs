@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     void ReconstructBuildingPadByOutline
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [Description("New BuildingPad"), NickName("BP")]

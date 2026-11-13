@@ -39,7 +39,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     void ReconstructAddForm
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), Description("New Form")]
