@@ -23,6 +23,8 @@ namespace RhinoInside.Revit.GH.Parameters
     )
     { }
 
+    protected override Types.LinePatternElement PreferredCast(object data) => Types.LinePatternElement.Cast(data);
+
     #region UI
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {

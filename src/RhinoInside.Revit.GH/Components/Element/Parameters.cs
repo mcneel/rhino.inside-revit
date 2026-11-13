@@ -186,15 +186,22 @@ namespace RhinoInside.Revit.GH
           return parameter.Update(text);
 
         case ARDB.StorageType.ElementId:
-          var element = new Types.Element();
-          if (!element.ConvertFrom(value))
-            throw new InvalidCastException();
+          if (value is Types.Reference reference)
+          {
+            if (!reference.Id.IsBuiltInId() && !parameter.Element.Document.IsEquivalent(reference.Document))
+              throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Definition.Name);
 
-          var elementId = element.Id;
-          if (!elementId.IsBuiltInId() && !parameter.Element.Document.IsEquivalent(element.Document))
-            throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Definition.Name);
+            return parameter.Update(reference.Id);
+          }
+          else if (Types.Element.FromValue(parameter.Element.Document, value.ScriptVariable()) is Types.Element element)
+          {
+            if (!element.Id.IsBuiltInId() && !parameter.Element.Document.IsEquivalent(element.Document))
+              throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Definition.Name);
 
-          return parameter.Update(elementId);
+            return parameter.Update(element.Id);
+          }
+
+          throw new InvalidCastException();
 
         default:
           throw new NotImplementedException();
@@ -444,7 +451,7 @@ namespace RhinoInside.Revit.GH.Components.ElementParameters
         var message = $"Parameter '{key.DisplayName}' is not defined on 'Element'. {{{element.Id.ToValue()}}}";
         throw new Exceptions.RuntimeArgumentException("Parameter", message);
       }
-      else Params.TrySetData(DA, "Parameter", () => new Types.ParameterKey(element.Document, parameter.Definition as ARDB.InternalDefinition));
+      else Params.TrySetData(DA, "Parameter", () => new Types.ParameterKey(parameter));
 
       if (Params.GetData(DA, "Value", out IGH_Goo value, x => x.IsValid))
       {

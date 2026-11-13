@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
       if (phase is object && !element.Document.IsEquivalent(phase.Document))
         throw new Exceptions.RuntimeArgumentException("Phase", $"Invalid document. {{{phase.Id}}}");
 
-      phase = phase ?? Types.Phase.FromValue(element.Document.Phases.Cast<ARDB.Phase>().LastOrDefault()) as Types.Phase;
+      phase = phase ?? Types.Phase.FromElement(element.Document.Phases.Cast<ARDB.Phase>().LastOrDefault()) as Types.Phase;
       var phaseStaus = element.Value.GetPhaseStatus(phase.Id);
       if (phaseStaus == ARDB.ElementOnPhaseStatus.Existing || phaseStaus == ARDB.ElementOnPhaseStatus.New)
       {

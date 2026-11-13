@@ -20,6 +20,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public ParameterKey() : base("Parameter", "Parameter", "Contains a collection of Revit parameters", "Params", "Revit") { }
 
+    protected override Types.ParameterKey PreferredCast(object data) => Types.ParameterKey.Cast(data);
+
     public static bool GetDocumentParameter(IGH_Component component, IGH_DataAccess DA, string name, out Types.ParameterKey key)
     {
       if (!component.Params.GetData(DA, name, out key, x => x.IsValid)) return false;
