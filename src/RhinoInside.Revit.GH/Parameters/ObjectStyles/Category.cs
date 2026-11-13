@@ -16,6 +16,8 @@ namespace RhinoInside.Revit.GH.Parameters
 
     public Category() : base("Category", "Category", "Contains a collection of Revit categories", "Params", "Revit") { }
 
+    protected override Types.Category PreferredCast(object data) => Types.Category.Cast(data);
+
     #region UI
     public override void Menu_AppendActions(ToolStripDropDown menu)
     {

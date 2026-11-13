@@ -129,7 +129,7 @@ namespace RhinoInside.Revit.GH.Parameters
       new string[] { "Document", "Workset", "Category" }
     );
 
-    protected override T PreferredCast(object data) => data is R ? Types.Element.FromValue(data) as T : null;
+    protected override T PreferredCast(object data) => data is R element ? Types.Element.FromElement(element) as T : Types.Element.Cast(data) as T;
 
     internal static IEnumerable<T> ToElementIds(IGH_Structure data) =>
       data.

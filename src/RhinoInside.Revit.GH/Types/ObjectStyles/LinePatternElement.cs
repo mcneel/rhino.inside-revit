@@ -28,11 +28,8 @@ namespace RhinoInside.Revit.GH.Types
 
     internal static readonly ARDB.ElementId SolidId = ElementIdExtension.FromValue((int) External.DB.BuiltInLinePattern.Solid);
 
-    public sealed override bool ConvertFrom(object source)
+    public static LinePatternElement Cast(object source)
     {
-      if (base.ConvertFrom(source))
-        return true;
-
       var document = Revit.ActiveDBDocument;
       var patternId = ARDB.ElementId.InvalidElementId;
 
@@ -57,12 +54,9 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       if (patternId.TryGetBuiltInLinePattern(out var _))
-      {
-        SetValue(document, patternId);
-        return true;
-      }
+        return FromElementId(document, patternId);
 
-      return false;
+      return null;
     }
 
     public override bool ConvertTo<Q>(out Q target)
