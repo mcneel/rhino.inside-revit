@@ -56,14 +56,6 @@ namespace RhinoInside.Revit.GH.Types
             SetValue(default, ElementIdExtension.Invalid);
 
           return true;
-
-        case ARDB.Document document:
-          if (!document.IsFamilyDocument && document.Phases?.Cast<ARDB.Phase>().LastOrDefault() is ARDB.Phase lastPhase)
-            SetValue(lastPhase);
-          else
-            SetValue(default, ElementIdExtension.Invalid);
-
-          return true;
       }
 
       return base.ConvertFrom(source);

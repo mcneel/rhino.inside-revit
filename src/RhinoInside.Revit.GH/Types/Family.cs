@@ -62,14 +62,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool ConvertFrom(object source)
-    {
-      if (source is Document doc)
-        return SetValue(doc.Value.OwnerFamily);
-
-      return base.ConvertFrom(source);
-    }
-
     public override bool ConvertTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(Category)))
