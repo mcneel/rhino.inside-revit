@@ -38,7 +38,7 @@ namespace RhinoInside.Revit.GH.Components.Families
 
     void ReconstructAddMassLoft
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [ParamType(typeof(Parameters.GraphicalElement)), Description("New Form")]

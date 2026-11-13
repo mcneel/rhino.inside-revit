@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document() { Optional = true }, ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.Input(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Parameters.OverrideGraphicSettings() { Name = "Overrides", NickName = "O", Description = "Graphic Overrides", Optional = true}, ParamRelevance.Primary
@@ -126,7 +126,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.Output(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Parameters.OverrideGraphicSettings() { Name = "Overrides", NickName = "O", Description = "Graphic Overrides", }
