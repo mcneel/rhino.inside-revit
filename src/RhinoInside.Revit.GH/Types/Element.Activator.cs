@@ -80,11 +80,13 @@ namespace RhinoInside.Revit.GH.Types
           }
           if (Panel.IsValidElement(element)) return new Panel(familyInstance);
           if (MassInstance.IsValidElement(element)) return new MassInstance(familyInstance);
+          if (AdaptiveInstance.IsValidElement(element)) return new AdaptiveInstance(familyInstance);
           break;
 
         case ARDB.FamilySymbol familySymbol:
           if (PanelType.IsValidElement(element)) return new PanelType(familySymbol);
           if (ProfileType.IsValidElement(element)) return new ProfileType(familySymbol);
+          if (AdaptiveType.IsValidElement(element)) return new AdaptiveType(familySymbol);
           break;
 
         case ARDB.ElementType elementType:
