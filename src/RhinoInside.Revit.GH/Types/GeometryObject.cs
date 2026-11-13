@@ -527,32 +527,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (base.ConvertTo(out target)) return true;
 
-      if (typeof(Q).IsAssignableFrom(typeof(ARDB.GeometryElement)))
-      {
-        target = (Q) (object) (IsValid ? Value : null);
-        return true;
-      }
-
       return Element?.ConvertTo(out target) ?? false;
-    }
-
-    public override bool ConvertFrom(object source)
-    {
-      if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
-
-      switch (source)
-      {
-        case ARDB.Element element:
-          if (element.GetDefaultReference() is ARDB.Reference reference && reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_NONE)
-          {
-            SetValue(element.Document, reference);
-            return true;
-          }
-          break;
-      }
-
-      return base.ConvertFrom(source);
     }
     #endregion
   }
@@ -629,25 +604,6 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return false;
-    }
-
-    public override bool ConvertFrom(object source)
-    {
-      if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
-
-      switch (source)
-      {
-        case ARDB.Subelement element:
-          if (element.GetReference() is ARDB.Reference reference && reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_SUBELEMENT)
-          {
-            SetValue(element.Document, reference);
-            return true;
-          }
-          break;
-      }
-
-      return base.ConvertFrom(source);
     }
     #endregion
   }
@@ -1112,25 +1068,6 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
-
-    public override bool ConvertFrom(object source)
-    {
-      if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
-
-      switch (source)
-      {
-        case ARDB.Element element:
-          if (element.GetDefaultReference() is ARDB.Reference reference && reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_LINEAR)
-          {
-            SetValue(element.Document, reference);
-            return true;
-          }
-          break;
-      }
-
-      return base.ConvertFrom(source);
-    }
     #endregion
   }
 
@@ -1389,25 +1326,6 @@ namespace RhinoInside.Revit.GH.Types
 
       return false;
     }
-
-    public override bool ConvertFrom(object source)
-    {
-      if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
-
-      switch (source)
-      {
-        case ARDB.Element element:
-          if (element.GetDefaultReference() is ARDB.Reference reference && reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_SURFACE)
-          {
-            SetValue(element.Document, reference);
-            return true;
-          }
-          break;
-      }
-
-      return base.ConvertFrom(source);
-    }
     #endregion
   }
 
@@ -1577,25 +1495,6 @@ namespace RhinoInside.Revit.GH.Types
       }
 
       return false;
-    }
-
-    public override bool ConvertFrom(object source)
-    {
-      if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
-
-      switch (source)
-      {
-        case ARDB.Element element:
-          if (element.GetDefaultReference() is ARDB.Reference reference && reference.ElementReferenceType == ARDB.ElementReferenceType.REFERENCE_TYPE_MESH)
-          {
-            SetValue(element.Document, reference);
-            return true;
-          }
-          break;
-      }
-
-      return base.ConvertFrom(source);
     }
     #endregion
   }
