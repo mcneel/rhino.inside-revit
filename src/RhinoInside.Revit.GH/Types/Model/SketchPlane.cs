@@ -19,25 +19,6 @@ namespace RhinoInside.Revit.GH.Types
     public SketchPlane() : base() { }
     public SketchPlane(ARDB.SketchPlane sketchPlane) : base(sketchPlane) { }
 
-    public override bool ConvertFrom(object source)
-    {
-      var value = source;
-
-      if (source is IGH_Goo goo)
-        value = goo.ScriptVariable();
-
-      if (value is ARDB.View view)
-        return SetValue(view.SketchPlane);
-
-      if (value is ARDB.CurveElement curveElement)
-        return SetValue(curveElement.SketchPlane);
-
-      if (value is ARDB.DatumPlane datum)
-        return SetValue(datum.GetSketchPlane());
-
-      return base.ConvertFrom(source);
-    }
-
     public override BoundingBox GetBoundingBox(Transform xform)
     {
       var location = Location;
@@ -96,19 +77,6 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (!IsValidElement(grid))
         throw new ArgumentException("Invalid Element", nameof(grid));
-    }
-
-    public override bool ConvertFrom(object source)
-    {
-      var value = source;
-
-      if (source is IGH_Goo goo)
-        value = goo.ScriptVariable();
-
-      if (value is ARDB.View view)
-        return SetValue(view.Document.GetElement(view.GetSketchGridId()));
-
-      return base.ConvertFrom(source);
     }
 
     public override BoundingBox GetBoundingBox(Transform xform)

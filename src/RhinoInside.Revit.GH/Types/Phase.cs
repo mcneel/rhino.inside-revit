@@ -25,14 +25,6 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (value)
       {
-        case ARDB.View view:
-          if (view.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE) is ARDB.Parameter viewPhase && viewPhase.HasValue)
-            SetValue(view.Document, viewPhase.AsElementId());
-          else
-            SetValue(default, ElementIdExtension.Invalid);
-
-          return true;
-
         case ARDB.SpatialElement spatialElement:
           if (spatialElement.get_Parameter(ARDB.BuiltInParameter.ROOM_PHASE) is ARDB.Parameter phase && phase.HasValue)
             SetValue(spatialElement.Document, phase.AsElementId() ?? ElementIdExtension.Invalid);
@@ -44,14 +36,6 @@ namespace RhinoInside.Revit.GH.Types
         case ARDB.Mechanical.Zone zone:
           if (zone.Phase is ARDB.Phase zonePhase)
             SetValue(zonePhase);
-          else
-            SetValue(default, ElementIdExtension.Invalid);
-
-          return true;
-
-        case ARDB.Element element:
-          if (element.HasPhases())
-            SetValue(element.Document, element.CreatedPhaseId);
           else
             SetValue(default, ElementIdExtension.Invalid);
 

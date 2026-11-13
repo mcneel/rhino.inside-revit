@@ -26,6 +26,21 @@ namespace RhinoInside.Revit.GH.Types
     public DatumPlane(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public DatumPlane(ARDB.DatumPlane plane) : base(plane) { }
 
+    public SketchPlane SketchPlane => GetElement<SketchPlane>(Value.GetSketchPlane());
+
+    public override bool ConvertTo<Q>(out Q target)
+    {
+      target = default;
+
+      if (typeof(Q).IsAssignableFrom(typeof(SketchPlane)))
+      {
+        target = (Q) (object) SketchPlane;
+        return true;
+      }
+
+      return base.ConvertTo(out target);
+    }
+
     protected internal static Surface CreateVerticalSurface(Curve curve, Interval v)
     {
       var curveA = curve.DuplicateCurve(); curveA.Translate(0.0, 0.0, v.Min - curve.PointAtStart.Z);
@@ -57,24 +72,6 @@ namespace RhinoInside.Revit.GH.Types
     public Level() { }
     public Level(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public Level(ARDB.Level level) : base(level) { }
-
-    public override bool ConvertFrom(object source)
-    {
-      var value = source;
-
-      if (value is View view)
-      {
-        SetValue(view.Document, view.GenLevelId);
-        return true;
-      }
-      else if (value is GraphicalElement element)
-      {
-        SetValue(element.Document, element.LevelId ?? ARDB.ElementId.InvalidElementId);
-        return true;
-      }
-
-      return base.ConvertFrom(source);
-    }
 
     public override BoundingBox GetBoundingBox(Transform xform) => NaN.BoundingBox;
 
