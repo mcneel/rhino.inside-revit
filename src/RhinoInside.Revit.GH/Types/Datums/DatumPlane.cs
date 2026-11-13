@@ -26,6 +26,21 @@ namespace RhinoInside.Revit.GH.Types
     public DatumPlane(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public DatumPlane(ARDB.DatumPlane plane) : base(plane) { }
 
+    public SketchPlane SketchPlane => GetElement<SketchPlane>(Value.GetSketchPlane());
+
+    public override bool ConvertTo<Q>(out Q target)
+    {
+      target = default;
+
+      if (typeof(Q).IsAssignableFrom(typeof(SketchPlane)))
+      {
+        target = (Q) (object) SketchPlane;
+        return true;
+      }
+
+      return base.ConvertTo(out target);
+    }
+
     protected internal static Surface CreateVerticalSurface(Curve curve, Interval v)
     {
       var curveA = curve.DuplicateCurve(); curveA.Translate(0.0, 0.0, v.Min - curve.PointAtStart.Z);

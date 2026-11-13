@@ -163,15 +163,27 @@ namespace RhinoInside.Revit.GH.Types
         return target is object;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(Phase)))
+      {
+        target = (Q) (object) Phase;
+        return target is object;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(Level)))
       {
         target = (Q) (object) GenLevel;
         return target is object;
       }
 
-      if (typeof(Q).IsAssignableFrom(typeof(Phase)))
+      if (typeof(Q).IsAssignableFrom(typeof(SketchPlane)))
       {
-        target = (Q) (object) Phase;
+        target = (Q) (object) SketchPlane;
+        return target is object;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(SketchPlaneGrid)))
+      {
+        target = (Q) (object) GetElement<SketchPlaneGrid>(Value?.GetSketchGridId());
         return target is object;
       }
 

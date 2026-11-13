@@ -8,7 +8,6 @@ using ERDB = RhinoInside.Revit.External.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using Autodesk.Revit.DB.Structure;
   using Convert.Geometry;
   using External.DB.Extensions;
 
@@ -26,21 +25,6 @@ namespace RhinoInside.Revit.GH.Types
 
     public Sketch() : base() { }
     public Sketch(ARDB.Sketch sketch) : base(sketch) { }
-
-    public override bool ConvertFrom(object source)
-    {
-      if (source is Element element)
-      {
-        if (element.Value?.GetSketch() is ARDB.Sketch sketch) return SetValue(sketch);
-        else
-        {
-          ResetValue();
-          return true;
-        }
-      }
-
-      return base.ConvertFrom(source);
-    }
 
     #region IGH_PreviewData
     protected override void DrawViewportWires(GH_PreviewWireArgs args)

@@ -278,6 +278,12 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(Sketch)))
+      {
+        target = (Q) (object) (this as ISketchAccess)?.Sketch;
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(Phase)))
       {
         target = (Q) (object) CreatedPhase;
