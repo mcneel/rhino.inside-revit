@@ -166,5 +166,20 @@ namespace RhinoInside.Revit.GH.Types
 
     public SketchPlane SketchPlane => GetElement<SketchPlane>(Value?.SketchPlane);
     #endregion
+
+    #region Casting
+    public override bool ConvertTo<Q>(out Q target)
+    {
+      target = default;
+
+      if (typeof(Q).IsAssignableFrom(typeof(SketchPlane)))
+      {
+        target = (Q) (object) SketchPlane;
+        return true;
+      }
+
+      return base.ConvertTo(out target);
+    }
+    #endregion
   }
 }

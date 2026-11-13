@@ -275,6 +275,12 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(Workset)))
+      {
+        target = (Q) (object) Workset;
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(Category)))
       {
         target = (Q) (object) Category;
@@ -497,7 +503,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public Phase CreatedPhase
     {
-      get => Value is ARDB.Element element && element.HasPhases() ? GetElement(new Phase(element.Document, element.CreatedPhaseId)) : default;
+      get => Value is ARDB.Element element && element.HasPhases() ? GetElement<Phase>(element.CreatedPhaseId) : default;
       set
       {
         if (value is object && Value is ARDB.Element element && element.HasPhases())
@@ -516,7 +522,7 @@ namespace RhinoInside.Revit.GH.Types
 
     public Phase DemolishedPhase
     {
-      get => Value is ARDB.Element element && element.HasPhases() ? GetElement(new Phase(element.Document, element.DemolishedPhaseId)) : default;
+      get => Value is ARDB.Element element && element.HasPhases() ? GetElement<Phase>(element.DemolishedPhaseId) : default;
       set
       {
         if (value is object && Value is ARDB.Element element && element.HasPhases())
