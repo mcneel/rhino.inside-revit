@@ -142,28 +142,36 @@ namespace RhinoInside.Revit.GH.Types
       if (typeof(Q).IsAssignableFrom(typeof(GH_Transform)))
       {
         target = (Q) (object) new GH_Transform(GetModelToProjectionTransform());
-
         return true;
       }
 
       if (typeof(Q).IsAssignableFrom(typeof(Viewer)))
       {
         target = (Q) (object) Viewer;
-
         return target is object;
       }
 
       if (typeof(Q).IsAssignableFrom(typeof(Viewport)))
       {
         target = (Q) (object) Viewport;
-
         return target is object;
       }
 
       if (typeof(Q).IsAssignableFrom(typeof(ViewSheet)))
       {
         target = (Q) (object) Viewport?.Sheet;
+        return target is object;
+      }
 
+      if (typeof(Q).IsAssignableFrom(typeof(Level)))
+      {
+        target = (Q) (object) GenLevel;
+        return target is object;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(Phase)))
+      {
+        target = (Q) (object) Phase;
         return target is object;
       }
 
@@ -589,7 +597,7 @@ namespace RhinoInside.Revit.GH.Types
     #region Phasing
     public Phase Phase
     {
-      get => GetElement<Phase>(Value.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElement());
+      get => GetElement<Phase>(Value?.get_Parameter(ARDB.BuiltInParameter.VIEW_PHASE)?.AsElementId());
       set
       {
         if (value is object && Value is ARDB.View view)

@@ -272,6 +272,12 @@ namespace RhinoInside.Revit.GH.Types
     {
       target = default;
 
+      if (typeof(Q).IsAssignableFrom(typeof(Level)))
+      {
+        target = (Q) (object) Level;
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GeometryObject)))
       {
         target = (Q) (object) new GeometryElement(this);

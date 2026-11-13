@@ -58,24 +58,6 @@ namespace RhinoInside.Revit.GH.Types
     public Level(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public Level(ARDB.Level level) : base(level) { }
 
-    public override bool ConvertFrom(object source)
-    {
-      var value = source;
-
-      if (value is View view)
-      {
-        SetValue(view.Document, view.GenLevelId);
-        return true;
-      }
-      else if (value is GraphicalElement element)
-      {
-        SetValue(element.Document, element.LevelId ?? ARDB.ElementId.InvalidElementId);
-        return true;
-      }
-
-      return base.ConvertFrom(source);
-    }
-
     public override BoundingBox GetBoundingBox(Transform xform) => NaN.BoundingBox;
 
     #region IGH_PreviewData
