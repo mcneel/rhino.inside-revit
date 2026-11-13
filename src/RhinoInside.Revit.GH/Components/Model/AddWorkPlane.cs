@@ -29,7 +29,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document() { Optional = true }, ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.AddTarget(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Param_Plane()
@@ -132,7 +132,7 @@ namespace RhinoInside.Revit.GH.Components.ModelElements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document() { Optional = true }, ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.AddTarget(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Parameters.GeometryFace()

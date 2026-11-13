@@ -70,7 +70,7 @@ namespace RhinoInside.Revit.GH.Parameters
           listBox.Items.Add(new Types.LinePatternElement(pattern));
       }
 
-      listBox.SelectedIndex = listBox.Items.Cast<Types.LinePatternElement>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.Cast<Types.LinePatternElement>().IndexOf(PersistentValue, 0).FirstOrDefault(-1);
       listBox.EndUpdate();
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
