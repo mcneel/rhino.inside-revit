@@ -180,7 +180,7 @@ namespace RhinoInside.Revit.GH.Parameters
       if (SelectedBuiltInCategory != ARDB.BuiltInCategory.INVALID)
       {
         var currentCategory = new Types.CategoryId(SelectedBuiltInCategory);
-        categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.CategoryId>().IndexOf(currentCategory, 0).FirstOr(-1);
+        categoriesBox.SelectedIndex = categoriesBox.Items.Cast<Types.CategoryId>().IndexOf(currentCategory, 0).FirstOrDefault(-1);
       }
 
       categoriesBox.EndUpdate();
@@ -213,7 +213,7 @@ namespace RhinoInside.Revit.GH.Parameters
       foreach (var parameter in parameters)
         listBox.Items.Add(Types.ParameterKey.FromElementId(doc, parameter));
 
-      listBox.SelectedIndex = listBox.Items.Cast<Types.ParameterKey>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.Cast<Types.ParameterKey>().IndexOf(PersistentValue, 0).FirstOrDefault(-1);
       listBox.EndUpdate();
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }

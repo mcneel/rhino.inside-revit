@@ -178,7 +178,7 @@ namespace RhinoInside.Revit.GH.Parameters
         }
       }
 
-      listBox.SelectedIndex = listBox.Items.OfType<Types.IGH_View>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.OfType<Types.IGH_View>().IndexOf(PersistentValue, 0).FirstOrDefault(-1);
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 
@@ -395,7 +395,7 @@ namespace RhinoInside.Revit.GH.Parameters
           listBox.Items.Add(Types.ViewFamilyType.FromElement(view));
       }
 
-      listBox.SelectedIndex = listBox.Items.OfType<Types.ViewFamilyType>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.OfType<Types.ViewFamilyType>().IndexOf(PersistentValue, 0).FirstOrDefault(-1);
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }
 

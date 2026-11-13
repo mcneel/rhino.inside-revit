@@ -24,5 +24,33 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
       return null;
     }
+
+    internal static double GetOffsetForLocationLine(this HostObjAttributes type, WallLocationLine location)
+    {
+      if (type.GetCompoundStructure() is CompoundStructure compoundStructure)
+      {
+        if (!compoundStructure.IsVerticallyHomogeneous())
+          compoundStructure = CompoundStructure.CreateSimpleCompoundStructure(compoundStructure.GetLayers());
+
+        return compoundStructure.GetOffsetForLocationLine(location);
+      }
+      else if (type is WallType wallType)
+      {
+        switch (location)
+        {
+          case WallLocationLine.WallCenterline:
+          case WallLocationLine.CoreCenterline:
+            return 0.0;
+          case WallLocationLine.FinishFaceExterior:
+          case WallLocationLine.CoreExterior:
+            return wallType.Width / +2.0;
+          case WallLocationLine.FinishFaceInterior:
+          case WallLocationLine.CoreInterior:
+            return wallType.Width / -2.0;
+        }
+      }
+
+      return 0.0;
+    }
   }
 }
