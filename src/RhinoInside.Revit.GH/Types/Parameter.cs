@@ -35,13 +35,13 @@ namespace RhinoInside.Revit.GH.Types
       this(value.Element.Document, value.Id)
     {
       userModifiable = value.UserModifiable;
-      if (value.IsShared)
-      {
-        guid = value.GUID;
+      if (value.IsShared) guid = value.GUID;
+
 #if REVIT_2026
+      if (!value.Id.IsBuiltInId())
         description = value.Description;
 #endif
-      }
+
       if (value.Definition is ARDB.Definition definition)
       {
         name = definition.Name;
