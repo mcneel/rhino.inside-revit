@@ -40,14 +40,6 @@ namespace RhinoInside.Revit.GH.Types
             SetValue(default, ElementIdExtension.Invalid);
 
           return true;
-
-        case ARDB.Element element:
-          if (element.HasPhases())
-            SetValue(element.Document, element.CreatedPhaseId);
-          else
-            SetValue(default, ElementIdExtension.Invalid);
-
-          return true;
       }
 
       return base.ConvertFrom(source);

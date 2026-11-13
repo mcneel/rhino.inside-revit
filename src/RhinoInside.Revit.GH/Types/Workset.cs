@@ -118,22 +118,6 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public override bool ConvertFrom(object source)
-    {
-      var value = source;
-
-      if (source is IGH_Goo goo)
-        value = goo.ScriptVariable();
-
-      if (value is ARDB.Element element)
-      {
-        SetValue(element.Document, element.WorksetId);
-        return true;
-      }
-
-      return base.ConvertFrom(source);
-    }
-
     public override bool ConvertTo<Q>(out Q target)
     {
       if (typeof(Q).IsAssignableFrom(typeof(GH_Integer)))

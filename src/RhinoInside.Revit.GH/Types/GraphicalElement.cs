@@ -278,6 +278,18 @@ namespace RhinoInside.Revit.GH.Types
         return true;
       }
 
+      if (typeof(Q).IsAssignableFrom(typeof(Phase)))
+      {
+        target = (Q) (object) CreatedPhase;
+        return true;
+      }
+
+      if (typeof(Q).IsAssignableFrom(typeof(DesignOption)))
+      {
+        target = (Q) (object) GetElement<DesignOption>(Value?.DesignOption);
+        return true;
+      }
+
       if (typeof(Q).IsAssignableFrom(typeof(GeometryObject)))
       {
         target = (Q) (object) new GeometryElement(this);
