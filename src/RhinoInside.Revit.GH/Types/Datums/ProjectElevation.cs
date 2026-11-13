@@ -458,7 +458,7 @@ namespace RhinoInside.Revit.GH.Types
     {
       if (Value.IsProjectElevation(out var b, out var o) is true)
       {
-        basePoint = GraphicalElement.FromValue(b) as IGH_BasePoint;
+        basePoint = GraphicalElement.FromElement(b) as IGH_BasePoint;
         offset = o * Revit.ModelUnits;
         return true;
       }

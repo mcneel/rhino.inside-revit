@@ -10,6 +10,40 @@ namespace RhinoInside.Revit.GH.Types
 
   public partial class Element
   {
+    public static Element Cast(object data)
+    {
+      if (data is Grasshopper.Kernel.Types.IGH_Goo goo)
+        data = goo.ScriptVariable();
+
+      switch (data)
+      {
+        case string s:
+          if (ERDB.FullUniqueId.TryParse(s, out var documentId, out var stableId))
+          {
+            if (Types.Document.TryGetDocument(documentId, out var doc))
+            {
+              if (doc.TryGetLinkElementId(stableId, out var linkElementId))
+                return FromLinkElementId(doc, linkElementId);
+            }
+          }
+
+          return null;
+      }
+
+      return null;
+    }
+
+    public static Element FromValue(object data)
+    {
+      switch (data)
+      {
+        case ARDB.Category category: return new Category(category);
+        case ARDB.Element element: return Element.FromElement(element);
+      }
+
+      return null;
+    }
+
     public static Element FromValue(ARDB.Document doc, object data)
     {
       try
@@ -28,14 +62,11 @@ namespace RhinoInside.Revit.GH.Types
               return FromLinkElementId(doc, linkElementId);
 
             return default;
-
           case ARDB.BuiltInCategory c: return FromElementId(doc, new ARDB.ElementId(c));
           case ARDB.BuiltInParameter p: return FromElementId(doc, new ARDB.ElementId(p));
           case ARDB.ElementId id: return FromElementId(doc, id);
           case ARDB.LinkElementId id: return FromLinkElementId(doc, id);
           case ARDB.Reference r: return FromReference(doc, r);
-          case ARDB.Element element: return doc.IsEquivalent(element.Document) ? FromElement(element) : null;
-          case ARDB.Category category: return doc.IsEquivalent(category.Document()) ? new Category(category) : null;
 #if REVIT_2024
           case Int64 id: return FromElementId(doc, new ARDB.ElementId(id));
           case IConvertible convertible: return FromElementId(doc, new ARDB.ElementId(System.Convert.ToInt64(convertible)));
@@ -46,17 +77,6 @@ namespace RhinoInside.Revit.GH.Types
         }
       }
       catch { }
-
-      return null;
-    }
-
-    public static Element FromValue(object data)
-    {
-      switch (data)
-      {
-        case ARDB.Category category: return new Category(category);
-        case ARDB.Element element: return Element.FromElement(element);
-      }
 
       return null;
     }

@@ -31,11 +31,8 @@ namespace RhinoInside.Revit.GH.Types
     public override bool IsValid => (Id?.TryGetBuiltInCategory(out var _) == true) || base.IsValid;
     public override object ScriptVariable() => ScriptCategory;
 
-    public sealed override bool ConvertFrom(object source)
+    public static Category Cast(object source)
     {
-      if (base.ConvertFrom(source))
-        return true;
-
       if (source is IGH_Goo goo)
       {
         switch (source)
@@ -50,25 +47,22 @@ namespace RhinoInside.Revit.GH.Types
 
       switch (source)
       {
-        case null:                      return false;
+        case null:                      return null;
         case int i:                     categoryId = ElementIdExtension.FromValue(i); break;
         case ARDB.BuiltInCategory bic:  categoryId = new ARDB.ElementId(bic); break;
         case ARDB.ElementId id:         categoryId = id; break;
-        case ARDB.Category c:           SetValue(c.Document(), c.Id); return true;
+        case ARDB.Category c:           return new Category(c.Document(), c.Id);
         case string n:
-          if (!DBXS.CategoryId.TryParse(n, null, out var cid)) return false;
+          if (!DBXS.CategoryId.TryParse(n, null, out var cid)) return null;
           categoryId = new ARDB.ElementId(cid);
 
           break;
       }
 
       if (categoryId.TryGetBuiltInCategory(out var _))
-      {
-        SetValue(document, categoryId);
-        return true;
-      }
+        return FromElementId(document, categoryId);
 
-      return false;
+      return null;
     }
 
     public override bool ConvertTo<Q>(out Q target)

@@ -197,14 +197,26 @@ namespace RhinoInside.Revit.GH.Components.ParameterElements
             return true;
 
           case ARDB.ElementIdParameterValue id:
-            var element = new Types.Element();
-            if (!element.ConvertFrom(value))
-              throw new InvalidCastException();
+            if (value is Types.Reference reference)
+            {
+              if (!reference.Id.IsBuiltInId() && !parameter.Document.IsEquivalent(reference.Document))
+                throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Name);
 
-            id.Value = parameter.Document.LookupElement(element.Document, element.Id);
-            parameter.SetValue(id);
-            return true;
+              id.Value = reference.Id;
+              parameter.SetValue(id);
+              return true;
+            }
+            else if (Types.Element.FromValue(parameter.Document, value.ScriptVariable()) is Types.Element element)
+            {
+              if (!element.Id.IsBuiltInId() && !parameter.Document.IsEquivalent(element.Document))
+                throw new ArgumentException("Failed to assign an element from a diferent document.", parameter.Name);
 
+              id.Value = element.Id;
+              parameter.SetValue(id);
+              return true;
+            }
+
+            throw new InvalidCastException();
           default:
             throw new NotImplementedException();
         }

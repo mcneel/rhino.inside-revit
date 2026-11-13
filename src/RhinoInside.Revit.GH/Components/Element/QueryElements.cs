@@ -55,10 +55,6 @@ namespace RhinoInside.Revit.GH.Components.Elements
 
       switch (goo)
       {
-        case Types.Element element:
-          DA.SetData("Element", Types.Element.FromElementId(source.SourceDocument.Value, element.Id).FromSource(source));
-          return;
-
         case Types.Reference reference:
           DA.SetData("Element", Types.Element.FromElementId(source.SourceDocument.Value, reference.Id).FromSource(source));
           return;
@@ -72,7 +68,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           return;
       }
 
-      DA.SetData("Element", Types.Element.FromValue(source.SourceDocument.Value, goo.ScriptVariable())?.FromSource(source));
+      DA.SetData("Element", Types.Element.FromValue(source.SourceDocument.Value, goo?.ScriptVariable())?.FromSource(source));
     }
   }
 
