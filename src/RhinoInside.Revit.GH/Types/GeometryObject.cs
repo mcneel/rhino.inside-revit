@@ -52,7 +52,7 @@ namespace RhinoInside.Revit.GH.Types
         target = (Q) (object) GetReference();
         return true;
       }
-      else if (typeof(IGH_Element).IsAssignableFrom(typeof(Q)))
+      else if (typeof(GraphicalElement).IsAssignableFrom(typeof(Q)))
       {
         if (GetReference() is ARDB.Reference reference)
           target = (Q) (object) (Element.FromReference(ReferenceDocument, reference) is Q element ? element : default);
@@ -1258,9 +1258,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    public Material Material => Value is ARDB.Face face ?
-      face.MaterialElementId.IsValid() ? GetElement<Material>(face.MaterialElementId) : new Material() :
-      null;
+    public Material Material => GetElement<Material>(Value?.MaterialElementId);
     #endregion
 
     #region IGH_PreviewData
