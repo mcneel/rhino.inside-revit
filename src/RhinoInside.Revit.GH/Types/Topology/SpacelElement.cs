@@ -33,4 +33,29 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
   }
+
+  [Kernel.Attributes.Name("Zone")]
+  public class ZoneElement : GraphicalElement
+  {
+    protected override Type ValueType => typeof(ARDB.Mechanical.Zone);
+    public new ARDB.Mechanical.Zone Value => base.Value as ARDB.Mechanical.Zone;
+
+    public ZoneElement() { }
+    public ZoneElement(ARDB.Mechanical.Zone element) : base(element) { }
+
+    #region Casting
+    public override bool ConvertTo<Q>(out Q target)
+    {
+      target = default;
+
+      if (typeof(Q).IsAssignableFrom(typeof(Phase)))
+      {
+        target = (Q) (object) GetElement<Phase>(Value?.Phase);
+        return true;
+      }
+
+      return base.ConvertTo(out target);
+    }
+    #endregion
+  }
 }

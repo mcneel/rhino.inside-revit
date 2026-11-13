@@ -162,5 +162,20 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
     #endregion
+
+    #region Casting
+    public override bool ConvertTo<Q>(out Q target)
+    {
+      target = default;
+
+      if (typeof(Q).IsAssignableFrom(typeof(Phase)))
+      {
+        target = (Q) (object) Phase;
+        return true;
+      }
+
+      return base.ConvertTo(out target);
+    }
+    #endregion
   }
 }
