@@ -235,26 +235,6 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region Casters
-    public override bool ConvertFrom(object source)
-    {
-      if (source is IGH_Goo goo)
-        source = goo.ScriptVariable();
-
-      if (source is string uniqueid)
-      {
-        if (ERDB.FullUniqueId.TryParse(uniqueid, out var documentId, out var uniqueId))
-        {
-          if (Types.Document.TryGetDocument(documentId, out var doc))
-          {
-            try { source = doc.GetElement(uniqueId); }
-            catch { }
-          }
-        }
-      }
-
-      return SetValue(source as ARDB.Element);
-    }
-
     public override bool ConvertTo<Q>(out Q target)
     {
       if (base.ConvertTo(out target))
