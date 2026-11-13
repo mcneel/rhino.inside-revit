@@ -50,6 +50,18 @@ namespace RhinoInside.Revit.GH.Types
       {
         switch (data)
         {
+          case string s:
+
+            if (ERDB.FullUniqueId.TryParse(s, out var documentId, out var stableId))
+            {
+              if (documentId != doc.GetPersistentGUID()) return null;
+              s = stableId;
+            }
+
+            if (doc.TryGetLinkElementId(s, out var linkElementId))
+              return FromLinkElementId(doc, linkElementId);
+
+            return default;
           case ARDB.BuiltInCategory c: return FromElementId(doc, new ARDB.ElementId(c));
           case ARDB.BuiltInParameter p: return FromElementId(doc, new ARDB.ElementId(p));
           case ARDB.ElementId id: return FromElementId(doc, id);

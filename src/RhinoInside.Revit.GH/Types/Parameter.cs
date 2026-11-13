@@ -38,7 +38,9 @@ namespace RhinoInside.Revit.GH.Types
       if (value.IsShared)
       {
         guid = value.GUID;
+#if REVIT_2026
         description = value.Description;
+#endif
       }
       if (value.Definition is ARDB.Definition definition)
       {
