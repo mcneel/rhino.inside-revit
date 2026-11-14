@@ -322,19 +322,6 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-    protected internal T SetElement<T>(Element element) where T : ARDB.Element
-    {
-      if (element?.IsValid is true)
-      {
-        if (!Document.IsEquivalent(element.Document))
-          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid {typeof(T)} Document");
-
-        return (T) element.Value;
-      }
-
-      return null;
-    }
-
     internal T GetElementFromReference<T>(ARDB.Reference reference) where T : Element
     {
       return Element.FromReference(ReferenceDocument, GetAbsoluteReference(reference)) as T;
@@ -348,6 +335,22 @@ namespace RhinoInside.Revit.GH.Types
     internal GeometryElement GetGeometryElementFromReference(ARDB.Reference reference)
     {
       return GeometryObject.FromLinkElementId(ReferenceDocument, GetAbsoluteReference(reference).ToLinkElementId()) as GeometryElement;
+    }
+
+    protected internal T AssertValid<T>(Element element, string paramName) where T : ARDB.Element
+    {
+      if (AssertValidDocument(element, paramName))
+        return (T) element.Value;
+
+      return null;
+    }
+
+    protected internal T AssertValid<T>(Category category, string paramName) where T : ARDB.Category
+    {
+      if (AssertValidDocument(category, paramName))
+        return (T) category.APIObject;
+
+      return null;
     }
 
     internal bool AssertValidElementSource(IGH_ElementSource source, bool acceptLinked = false)
