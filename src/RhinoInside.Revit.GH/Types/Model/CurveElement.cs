@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.GH.Types
     #region Category
     public override Category Subcategory
     {
-      get => GetElement(Category.FromCategory(LineStyle?.Value.GraphicsStyleCategory));
+      get => GetElement(LineStyle?.Value.GraphicsStyleCategory);
       set
       {
         if (value is object && Value is ARDB.CurveElement element)

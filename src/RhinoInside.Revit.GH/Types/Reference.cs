@@ -301,7 +301,12 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-    protected internal T GetElement<T>(T element) where T : Element
+    protected internal Category GetElement(ARDB.Category category)
+    {
+      return GetElement<Category>(Category.FromCategory(category));
+    }
+
+    T GetElement<T>(T element) where T : Element
     {
       if (element is object)
       {
@@ -312,6 +317,19 @@ namespace RhinoInside.Revit.GH.Types
           throw new Exceptions.RuntimeArgumentException(nameof(element), "Invalid Document");
 
         return element;
+      }
+
+      return null;
+    }
+
+    protected internal T SetElement<T>(Element element) where T : ARDB.Element
+    {
+      if (element?.IsValid is true)
+      {
+        if (!Document.IsEquivalent(element.Document))
+          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid {typeof(T)} Document");
+
+        return (T) element.Value;
       }
 
       return null;

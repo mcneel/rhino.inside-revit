@@ -54,7 +54,7 @@ namespace RhinoInside.Revit.GH.Types
             familyCategory = type.Category;
 
           return familyCategory is ARDB.Category category ?
-            GetElement(Category.FromCategory(category)) :
+            GetElement(category) :
             new Category();
         }
 

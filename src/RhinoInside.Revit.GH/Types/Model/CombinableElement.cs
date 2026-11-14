@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -45,8 +46,9 @@ namespace RhinoInside.Revit.GH.Types
           {
             if (parameter?.AsElementId() is ARDB.ElementId categoryId)
             {
-              var category = new Category(Document, categoryId);
-              return category.APIObject?.Parent is null ? new Category() : GetElement(category);
+              return Document.GetCategory(categoryId) is ARDB.Category category && category.Parent is object?
+                GetElement(category) :
+                new Category();
             }
           }
         }
