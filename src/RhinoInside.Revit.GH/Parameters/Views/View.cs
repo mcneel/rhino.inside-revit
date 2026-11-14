@@ -19,8 +19,6 @@ namespace RhinoInside.Revit.GH.Parameters
       base(name, nickname, description, category, subcategory)
     { }
 
-    protected override T InstantiateT() => Activator.CreateInstance<T>();
-
     protected virtual ARDB.ViewFamily ViewFamily => ARDB.ViewFamily.Invalid;
 
     #region UI
