@@ -13,7 +13,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB_ProfileType);
     public new ARDB_ProfileType Value => base.Value as ARDB_ProfileType;
 
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static bool IsValidElement(ARDB.Element element)
     {
       return element is ARDB_ProfileType &&

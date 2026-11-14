@@ -11,7 +11,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Mass Component")]
   public sealed class MassInstance : FamilyInstance
   {
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
       if (!ARDB.Analysis.MassLevelData.IsMassFamilyInstance(element.Document, element.Id))

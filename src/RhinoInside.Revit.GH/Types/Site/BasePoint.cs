@@ -21,7 +21,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.BasePoint);
     public new ARDB.BasePoint Value => base.Value as ARDB.BasePoint;
 
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element is ARDB.BasePoint &&
@@ -178,7 +177,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB_InternalOrigin);
     public new ARDB_InternalOrigin Value => base.Value as ARDB_InternalOrigin;
 
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
 #if REVIT_2021

@@ -10,9 +10,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Design Option Set")]
   public sealed class DesignOptionSet : Element
   {
-    protected override bool SetValue(ARDB.Element element) =>
-      IsValidElement(element) && base.SetValue(element);
-
     public static bool IsValidElement(ARDB.Element element) => IsValidElementFilter.PassesFilter(element);
 
     internal static readonly ARDB.ElementFilter IsValidElementFilter = new ARDB.LogicalAndFilter

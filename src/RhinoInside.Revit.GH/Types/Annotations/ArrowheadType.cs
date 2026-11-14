@@ -8,7 +8,6 @@ namespace RhinoInside.Revit.GH.Types
     public ArrowheadType() { }
     public ArrowheadType(ARDB.ElementType type) : base(type) { }
 
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static bool IsValidElement(ARDB.Element elementType)
     {
       return elementType.Category is null && elementType.get_Parameter(ARDB.BuiltInParameter.ARROW_TYPE) is object;
