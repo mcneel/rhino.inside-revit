@@ -107,7 +107,7 @@ namespace RhinoInside.Revit.GH.Parameters
           listBox.Items.Add(Types.FilterElement.FromElement(filter));
       }
 
-      listBox.SelectedIndex = listBox.Items.Cast<Types.FilterElement>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.Cast<Types.FilterElement>().IndexOf(PersistentValue, 0).FirstOrDefault(-1);
       listBox.EndUpdate();
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }

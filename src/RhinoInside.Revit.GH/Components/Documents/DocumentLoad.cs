@@ -64,13 +64,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     {
       new ParamDefinition
       (
-        new Parameters.Document()
-        {
-          Name = _Output_,
-          NickName = _Output_.Substring(0, 1),
-          Description = $"Output {_Output_}",
-          Access = GH_ParamAccess.item
-        }
+        Parameters.Document.Output()
       )
     };
 
