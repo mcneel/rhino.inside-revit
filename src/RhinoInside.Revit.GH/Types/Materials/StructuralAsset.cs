@@ -9,7 +9,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.PropertySetElement);
     public new ARDB.PropertySetElement Value => base.Value as ARDB.PropertySetElement;
 
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static bool IsValidElement(ARDB.Element element)
     {
       if (element is ARDB.PropertySetElement pset)

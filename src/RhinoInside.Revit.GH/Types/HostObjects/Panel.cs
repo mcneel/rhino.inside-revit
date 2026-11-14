@@ -6,7 +6,6 @@ namespace RhinoInside.Revit.GH.Types
   public sealed class Panel : FamilyInstance
   {
     static readonly ARDB.ElementId CurtainWallPanelsId = new ARDB.ElementId(ARDB.BuiltInCategory.OST_CurtainWallPanels);
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
       if (element is ARDB.Panel)
@@ -64,7 +63,6 @@ namespace RhinoInside.Revit.GH.Types
   public sealed class PanelType : FamilySymbol
   {
     static readonly ARDB.ElementId CurtainWallPanelsId = new ARDB.ElementId(ARDB.BuiltInCategory.OST_CurtainWallPanels);
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static bool IsValidElement(ARDB.Element element)
     {
       if (element is ARDB.PanelType)

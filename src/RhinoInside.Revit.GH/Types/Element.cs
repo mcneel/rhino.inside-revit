@@ -100,23 +100,6 @@ namespace RhinoInside.Revit.GH.Types
         base.Value = value;
       }
     }
-
-    protected virtual bool SetValue(ARDB.Element element)
-    {
-      if (ValueType.IsInstanceOfType(element))
-      {
-        _ReferenceDocument = Document = element.Document;
-        _ReferenceId = _Id = element.Id;
-
-        ReferenceDocumentId = _ReferenceDocument.GetPersistentGUID();
-        ReferenceUniqueId = element.UniqueId;
-
-        base.Value = element;
-        return true;
-      }
-
-      return false;
-    }
     #endregion
 
     #region ReferenceObject

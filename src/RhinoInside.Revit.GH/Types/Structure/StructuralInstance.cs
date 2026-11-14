@@ -12,7 +12,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Structural Component")]
   public class StructuralInstance : FamilyInstance, IGH_StructuralInstance
   {
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
       return ((element as ARDB.FamilyInstance)?.StructuralType) != ARDB.Structure.StructuralType.NonStructural;
@@ -118,7 +117,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Structural Beam")]
   public class StructuralBeam : StructuralInstance
   {
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
       return ((element as ARDB.FamilyInstance)?.StructuralType) == ARDB.Structure.StructuralType.Beam;
@@ -165,7 +163,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Structural Brace")]
   public class StructuralBrace : StructuralInstance
   {
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
       return ((element as ARDB.FamilyInstance)?.StructuralType) == ARDB.Structure.StructuralType.Brace;
@@ -178,7 +175,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Structural Column")]
   public class StructuralColumn : StructuralInstance
   {
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
       return ((element as ARDB.FamilyInstance)?.StructuralType) == ARDB.Structure.StructuralType.Column;
@@ -226,7 +222,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Structural Foundation")]
   public class StructuralFooting : StructuralInstance
   {
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
       return ((element as ARDB.FamilyInstance)?.StructuralType) == ARDB.Structure.StructuralType.Footing;
@@ -239,7 +234,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Structural Framing")]
   public class StructuralFraming : StructuralInstance
   {
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
       return ((element as ARDB.FamilyInstance)?.StructuralType) == ARDB.Structure.StructuralType.UnknownFraming;

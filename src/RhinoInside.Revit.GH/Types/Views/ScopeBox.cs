@@ -22,7 +22,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB_ScopeBox);
     public new ARDB_ScopeBox Value => base.Value as ARDB_ScopeBox;
 
-    protected override bool SetValue(ARDB_ScopeBox element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB_ScopeBox element)
     {
       return element.GetType() == typeof(ARDB_ScopeBox) &&
