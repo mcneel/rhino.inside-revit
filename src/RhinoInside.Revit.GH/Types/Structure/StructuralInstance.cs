@@ -17,8 +17,8 @@ namespace RhinoInside.Revit.GH.Types
       return ((element as ARDB.FamilyInstance)?.StructuralType) != ARDB.Structure.StructuralType.NonStructural;
     }
 
-    public StructuralInstance() { }
-    public StructuralInstance(ARDB.FamilyInstance value) : base(value) { }
+    internal StructuralInstance() { }
+    internal StructuralInstance(ARDB.FamilyInstance value) : base(value) { }
 
     #region Joins
     public bool? IsJoinAllowedAtStart
@@ -115,7 +115,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Beam")]
-  public class StructuralBeam : StructuralInstance
+  public sealed class StructuralBeam : StructuralInstance
   {
     public static new bool IsValidElement(ARDB.Element element)
     {
@@ -161,7 +161,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Brace")]
-  public class StructuralBrace : StructuralInstance
+  public sealed class StructuralBrace : StructuralInstance
   {
     public static new bool IsValidElement(ARDB.Element element)
     {
@@ -173,7 +173,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Column")]
-  public class StructuralColumn : StructuralInstance
+  public sealed class StructuralColumn : StructuralInstance
   {
     public static new bool IsValidElement(ARDB.Element element)
     {
@@ -220,7 +220,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Foundation")]
-  public class StructuralFooting : StructuralInstance
+  public sealed class StructuralFooting : StructuralInstance
   {
     public static new bool IsValidElement(ARDB.Element element)
     {
@@ -232,7 +232,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Structural Framing")]
-  public class StructuralFraming : StructuralInstance
+  public sealed class StructuralFraming : StructuralInstance
   {
     public static new bool IsValidElement(ARDB.Element element)
     {

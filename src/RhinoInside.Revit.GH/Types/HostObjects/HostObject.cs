@@ -20,8 +20,8 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.HostObject);
     public new ARDB.HostObject Value => base.Value as ARDB.HostObject;
 
-    public HostObject() { }
-    protected internal HostObject(ARDB.HostObject host) : base(host) { }
+    internal HostObject() { }
+    internal HostObject(ARDB.HostObject host) : base(host) { }
 
     public new HostObjectType Type
     {

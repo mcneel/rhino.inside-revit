@@ -18,8 +18,8 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.SpatialElementTag);
     public new ARDB.SpatialElementTag Value => base.Value as ARDB.SpatialElementTag;
 
-    public SpatialElementTag() { }
-    public SpatialElementTag(ARDB.SpatialElementTag element) : base(element) { }
+    internal SpatialElementTag() { }
+    internal SpatialElementTag(ARDB.SpatialElementTag element) : base(element) { }
 
     public override string DisplayName => Value is ARDB.SpatialElementTag tag && tag.IsOrphaned ?
       base.DisplayName + " (Orphaned)" : base.DisplayName;

@@ -6,9 +6,9 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Wall Foundation")]
-  public class WallFoundation : HostObject, IHostElementAccess
+  public sealed class WallFoundation : HostObject, IHostElementAccess
   {
-    protected override Type ValueType => typeof(ARDB.WallFoundation);
+    protected sealed override Type ValueType => typeof(ARDB.WallFoundation);
     public new ARDB.WallFoundation Value => base.Value as ARDB.WallFoundation;
 
     public WallFoundation() { }

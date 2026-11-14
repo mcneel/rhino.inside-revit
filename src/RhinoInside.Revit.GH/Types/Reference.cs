@@ -234,13 +234,13 @@ namespace RhinoInside.Revit.GH.Types
     protected virtual void SubInvalidateGraphics() { }
     #endregion
 
-    public Reference() { }
-    protected Reference(Reference reference)
+    internal Reference() { }
+    internal Reference(Reference reference)
     {
       _ReferenceTransform = reference._ReferenceTransform;
     }
 
-    protected Reference(ARDB.Document doc, object value) : base(doc, value) { }
+    internal Reference(ARDB.Document doc, object value) : base(doc, value) { }
 
     protected internal ARDB.Reference GetAbsoluteReference(ARDB.Reference reference)
     {

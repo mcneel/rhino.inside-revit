@@ -140,7 +140,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Point Cloud Filter")]
-  public class PointCloudFilter : GH_Goo<ARDB.PointClouds.PointCloudFilter>
+  public sealed class PointCloudFilter : GH_Goo<ARDB.PointClouds.PointCloudFilter>
   {
     public PointCloudFilter() { }
     public PointCloudFilter(ARDB.PointClouds.PointCloudFilter filter) : base(filter) { }

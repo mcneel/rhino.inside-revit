@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Roof")]
-  public class Roof : HostObject, ISketchAccess, ICurtainGridsAccess
+  public sealed class Roof : HostObject, ISketchAccess, ICurtainGridsAccess
   {
     protected override Type ValueType => typeof(ARDB.RoofBase);
     public new ARDB.RoofBase Value => base.Value as ARDB.RoofBase;

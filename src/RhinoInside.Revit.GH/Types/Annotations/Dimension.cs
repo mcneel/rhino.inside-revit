@@ -20,8 +20,8 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.Dimension);
     public new ARDB.Dimension Value => base.Value as ARDB.Dimension;
 
-    public Dimension() { }
-    public Dimension(ARDB.Dimension element) : base(element) { }
+    internal Dimension() { }
+    internal Dimension(ARDB.Dimension element) : base(element) { }
 
     public new DimensionType Type => base.Type as DimensionType;
 
@@ -415,13 +415,13 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Dimension Type")]
-  public class DimensionType : AnnotationType
+  public sealed class DimensionType : AnnotationType
   {
     protected override Type ValueType => typeof(ARDB.DimensionType);
     public new ARDB.DimensionType Value => base.Value as ARDB.DimensionType;
 
-    public DimensionType() { }
-    protected internal DimensionType(ARDB.DimensionType type) : base(type) { }
+    internal DimensionType() { }
+    internal DimensionType(ARDB.DimensionType type) : base(type) { }
 
     internal ElementType TickMark => GetElement<ElementType>(Value?.get_Parameter(ARDB.BuiltInParameter.DIM_LEADER_ARROWHEAD).AsElementId());
 

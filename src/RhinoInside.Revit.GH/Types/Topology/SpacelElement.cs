@@ -9,9 +9,9 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
 
   [Kernel.Attributes.Name("Space")]
-  public class SpaceElement : SpatialElement
+  public sealed class SpaceElement : SpatialElement
   {
-    protected override Type ValueType => typeof(ARDB.Mechanical.Space);
+    protected sealed override Type ValueType => typeof(ARDB.Mechanical.Space);
     public new ARDB.Mechanical.Space Value => base.Value as ARDB.Mechanical.Space;
 
     public SpaceElement() { }

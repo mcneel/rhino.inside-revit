@@ -9,17 +9,15 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Elevation")]
-  public class ElevationView : ViewSection
+  public sealed class ElevationView : ViewSection
   {
-    protected override Type ValueType => typeof(ARDB.ViewSection);
-
     public ElevationView() { }
     public ElevationView(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public ElevationView(ARDB.ViewSection view) : base(view) { }
   }
 
   [Kernel.Attributes.Name("Elevation Marker")]
-  public class ElevationMarker : GraphicalElement
+  public sealed class ElevationMarker : GraphicalElement
   {
     protected override Type ValueType => typeof(ARDB.ElevationMarker);
     public new ARDB.ElevationMarker Value => base.Value as ARDB.ElevationMarker;

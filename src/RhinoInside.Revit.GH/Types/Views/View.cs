@@ -31,9 +31,9 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.View);
     public new ARDB.View Value => base.Value as ARDB.View;
 
-    public View() { }
-    protected View(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
-    protected internal View(ARDB.View view) : base(view) { }
+    internal View() { }
+    internal View(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    internal View(ARDB.View view) : base(view) { }
 
     internal static new View FromElementId(ARDB.Document doc, ARDB.ElementId id)
     {

@@ -4,9 +4,9 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Beam System")]
-  public class BeamSystem : GeometricElement
+  public sealed class BeamSystem : GeometricElement
   {
-    protected override Type ValueType => typeof(ARDB.BeamSystem);
+    protected sealed override Type ValueType => typeof(ARDB.BeamSystem);
     public new ARDB.BeamSystem Value => base.Value as ARDB.BeamSystem;
 
     public BeamSystem() { }
