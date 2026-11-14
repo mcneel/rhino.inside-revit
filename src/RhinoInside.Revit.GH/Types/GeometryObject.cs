@@ -311,8 +311,8 @@ namespace RhinoInside.Revit.GH.Types
     protected virtual void DrawViewportMeshes(GH_PreviewMeshArgs args) { }
     #endregion
 
-    protected GeometryObject() { }
-    protected GeometryObject(Reference reference) : base(reference)
+    internal GeometryObject() { }
+    internal GeometryObject(Reference reference) : base(reference)
     {
       ReferenceDocumentId = reference.ReferenceDocumentId;
       ReferenceUniqueId = reference.ReferenceUniqueId;
@@ -323,8 +323,8 @@ namespace RhinoInside.Revit.GH.Types
       Document = reference.Document;
     }
 
-    protected GeometryObject(ARDB.Document document, ARDB.GeometryObject geometryObject) : base(document, geometryObject) { }
-    protected GeometryObject(ARDB.Document document, ARDB.Reference reference)
+    internal GeometryObject(ARDB.Document document, ARDB.GeometryObject geometryObject) : base(document, geometryObject) { }
+    internal GeometryObject(ARDB.Document document, ARDB.Reference reference)
     {
       if (reference is null) document = null;
 
@@ -415,7 +415,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Name("Element")]
-  public class GeometryElement : GeometryObject,
+  public sealed class GeometryElement : GeometryObject,
     IGH_PreviewData,
     Bake.IGH_BakeAwareElement
   {
@@ -534,7 +534,7 @@ namespace RhinoInside.Revit.GH.Types
 
 #if REVIT_2018
   [Name("Subelement")]
-  public class GeometrySubelement : GeometryObject, IGH_PreviewData
+  public sealed class GeometrySubelement : GeometryObject, IGH_PreviewData
   {
     public override object ScriptVariable() => base.Value;
 
@@ -610,7 +610,7 @@ namespace RhinoInside.Revit.GH.Types
 #endif
 
   [Name("Point")]
-  public class GeometryPoint : GeometryObject, IGH_PreviewData
+  public sealed class GeometryPoint : GeometryObject, IGH_PreviewData
   {
     public override object ScriptVariable() => Value;
 
@@ -810,7 +810,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Name("Curve")]
-  public class GeometryCurve : GeometryObject, IGH_PreviewData, IGH_Goo
+  public sealed class GeometryCurve : GeometryObject, IGH_PreviewData, IGH_Goo
   {
     public override object ScriptVariable() => base.Value;
 
@@ -1072,7 +1072,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Name("Face")]
-  public class GeometryFace : GeometryObject, IGH_PreviewData
+  public sealed class GeometryFace : GeometryObject, IGH_PreviewData
   {
     public override object ScriptVariable() => base.Value;
 
@@ -1330,7 +1330,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Name("Mesh")]
-  public class GeometryMesh : GeometryObject, IGH_PreviewData
+  public sealed class GeometryMesh : GeometryObject, IGH_PreviewData
   {
     public override object ScriptVariable() => base.Value;
 

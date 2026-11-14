@@ -43,9 +43,9 @@ namespace RhinoInside.Revit.GH.Types
     IGH_GraphicalElement,
     IGH_PreviewData
   {
-    public GraphicalElement() { }
-    public GraphicalElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
-    public GraphicalElement(ARDB.Element element) : base(element) { }
+    internal GraphicalElement() { }
+    internal GraphicalElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    internal GraphicalElement(ARDB.Element element) : base(element) { }
 
     public static bool IsValidElement(ARDB.Element element)
     {

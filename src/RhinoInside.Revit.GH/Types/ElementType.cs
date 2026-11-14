@@ -18,8 +18,8 @@ namespace RhinoInside.Revit.GH.Types
     public static explicit operator ARDB.ElementType(ElementType value) => value?.Value;
     public new ARDB.ElementType Value => base.Value as ARDB.ElementType;
 
-    public ElementType() { }
-    protected ElementType(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    internal ElementType() { }
+    internal ElementType(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
 
     public ElementType(ARDB.ElementType elementType) : base(elementType) { }
 

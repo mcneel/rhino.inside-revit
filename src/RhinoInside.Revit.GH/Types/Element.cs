@@ -194,7 +194,7 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-    public Element() { }
+    internal Element() { }
     internal Element(ARDB.Document doc, ARDB.ElementId id) => SetValue(doc, id);
     protected Element(ARDB.Element element) : base(element?.Document, element)
     {

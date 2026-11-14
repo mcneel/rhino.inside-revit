@@ -17,8 +17,8 @@ namespace RhinoInside.Revit.GH.Types
 
     public new ARDB.Structure.BoundaryConditions Value => base.Value as ARDB.Structure.BoundaryConditions;
 
-    public BoundaryConditions() { }
-    public BoundaryConditions(ARDB.Structure.BoundaryConditions boundaryConditions) : base(boundaryConditions) { }
+    internal BoundaryConditions() { }
+    internal BoundaryConditions(ARDB.Structure.BoundaryConditions boundaryConditions) : base(boundaryConditions) { }
 
     public override Plane Location
     {
@@ -54,9 +54,9 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Point Boundary Conditions")]
-  public class PointBoundaryConditions : BoundaryConditions
+  public sealed class PointBoundaryConditions : BoundaryConditions
   {
-    protected override Type ValueType => typeof(PointBoundaryConditions);
+    protected sealed override Type ValueType => typeof(PointBoundaryConditions);
     protected override string State => Value.get_Parameter(ARDB.BuiltInParameter.BOUNDARY_PARAM_PRESET).AsValueString();
     public PointBoundaryConditions() { }
     public PointBoundaryConditions(ARDB.Structure.BoundaryConditions boundaryConditions) : base(boundaryConditions) { }
@@ -75,9 +75,9 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Line Boundary Conditions")]
-  public class LineBoundaryConditions : BoundaryConditions
+  public sealed class LineBoundaryConditions : BoundaryConditions
   {
-    protected override Type ValueType => typeof(LineBoundaryConditions);
+    protected sealed override Type ValueType => typeof(LineBoundaryConditions);
     public LineBoundaryConditions() { }
     public LineBoundaryConditions(ARDB.Structure.BoundaryConditions boundaryConditions) : base(boundaryConditions) { }
     protected override string State => Value.get_Parameter(ARDB.BuiltInParameter.BOUNDARY_PARAM_PRESET_LINEAR).AsValueString();
@@ -105,9 +105,9 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Area Boundary Conditions")]
-  public class AreaBoundaryConditions : BoundaryConditions
+  public sealed class AreaBoundaryConditions : BoundaryConditions
   {
-    protected override Type ValueType => typeof(AreaBoundaryConditions);
+    protected sealed override Type ValueType => typeof(AreaBoundaryConditions);
     public AreaBoundaryConditions() { }
     public AreaBoundaryConditions(ARDB.Structure.BoundaryConditions boundaryConditions) : base(boundaryConditions) { }
     protected override string State => Value.get_Parameter(ARDB.BuiltInParameter.BOUNDARY_PARAM_PRESET_AREA).AsValueString();

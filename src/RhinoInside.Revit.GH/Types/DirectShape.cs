@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Direct Shape")]
   public sealed class DirectShape : GeometricElement
   {
-    protected override Type ValueType => typeof(ARDB.DirectShape);
+    protected sealed override Type ValueType => typeof(ARDB.DirectShape);
     public new ARDB.DirectShape Value => base.Value as ARDB.DirectShape;
 
     public DirectShape() { }

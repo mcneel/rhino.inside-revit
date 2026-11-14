@@ -4,7 +4,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Import Symbol")]
-  public class ImportInstance : Instance
+  public sealed class ImportInstance : Instance
   {
     protected override Type ValueType => typeof(ARDB.ImportInstance);
     public new ARDB.ImportInstance Value => base.Value as ARDB.ImportInstance;
@@ -25,7 +25,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Symbol Type")]
-  public class CADLinkType : ElementType
+  public sealed class CADLinkType : ElementType
   {
     protected override Type ValueType => typeof(ARDB.CADLinkType);
     public new ARDB.CADLinkType Value => base.Value as ARDB.CADLinkType;

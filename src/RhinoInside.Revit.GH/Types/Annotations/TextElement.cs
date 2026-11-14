@@ -12,7 +12,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Text Element")]
-  public class TextElement : GraphicalElement, IGH_Annotation,
+  public sealed class TextElement : GraphicalElement, IGH_Annotation,
     IAnnotationLeadersAccess
   {
     protected override Type ValueType => typeof(ARDB.TextElement);
@@ -280,7 +280,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Text Element Type")]
-  public class TextElementType : LineAndTextAttrSymbol
+  public sealed class TextElementType : LineAndTextAttrSymbol
   {
     protected override Type ValueType => typeof(ARDB.TextElementType);
     public new ARDB.TextElementType Value => base.Value as ARDB.TextElementType;
