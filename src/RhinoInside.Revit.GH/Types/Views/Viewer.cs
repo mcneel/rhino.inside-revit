@@ -12,9 +12,9 @@ namespace RhinoInside.Revit.GH.Types
   using ARDB_Viewer = ARDB.Element;
 
   [Kernel.Attributes.Name("Viewer")]
-  public class Viewer : GraphicalElement, ISketchAccess
+  public sealed class Viewer : GraphicalElement, ISketchAccess
   {
-    protected override Type ValueType => typeof(ARDB_Viewer);
+    protected sealed override Type ValueType => typeof(ARDB_Viewer);
     public new ARDB_Viewer Value => base.Value as ARDB_Viewer;
 
     public static new bool IsValidElement(ARDB_Viewer element)
