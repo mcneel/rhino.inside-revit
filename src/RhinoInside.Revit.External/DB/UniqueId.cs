@@ -355,8 +355,11 @@ namespace RhinoInside.Revit.External.DB
 
     public static bool TryParse(string s, out ReferenceId referenceId, ARDB.Document document)
     {
-      try { referenceId = Parse(s, document); return true; }
-      catch (FormatException) { }
+      if (!string.IsNullOrWhiteSpace(s))
+      {
+        try { referenceId = Parse(s, document); return true; }
+        catch (FormatException) { }
+      }
 
       referenceId = new ReferenceId(new GeometryObjectId(-1));
       return false;
