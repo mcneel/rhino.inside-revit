@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
+using OS = System.Environment;
 #if RHINO_8
 using Grasshopper.Rhinoceros.Model;
 #endif
@@ -15,11 +15,10 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
 {
   using Convert.Geometry;
   using External.DB.Extensions;
-  using Kernel.Attributes;
 
-  public abstract class ReconstructDirectShapeComponent : ReconstructElementComponent
+  public abstract class AddDirectShapeComponent : ElementTrackerComponent
   {
-    protected ReconstructDirectShapeComponent(string name, string nickname, string description, string category, string subCategory) :
+    protected AddDirectShapeComponent(string name, string nickname, string description, string category, string subCategory) :
     base(name, nickname, description, category, subCategory) { }
 
     protected static GeometryBase AsGeometryBase(IGH_GeometricGoo obj)
@@ -62,6 +61,22 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
       }
 
       return scriptVariable as GeometryBase;
+    }
+
+    private static bool ThrowIfNotValid(string paramName, GeometryBase value)
+    {
+      if (value is null) throw new Exceptions.RuntimeArgumentNullException(paramName);
+      if (!value.IsValidWithLog(out var log))
+      {
+        throw new Exceptions.RuntimeArgumentException
+        (
+          paramName,
+          $"Input geometry is not valid.{OS.NewLine}{log}",
+          value
+        );
+      }
+
+      return true;
     }
 
     internal static readonly IList<ARDB.GeometryObject> ShapeEmpty = Array.Empty<ARDB.GeometryObject>();
@@ -168,69 +183,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     }
   }
 
-  public class AddDirectShapeGeometry : ReconstructDirectShapeComponent
-  {
-    public override Guid ComponentGuid => new Guid("0BFBDA45-49CC-4AC6-8D6D-ECD2CFED062A");
-    public override GH_Exposure Exposure => GH_Exposure.secondary;
-
-    public AddDirectShapeGeometry() : base
-    (
-      name: "Add DirectShape (Geometry)",
-      nickname: "G-Shape",
-      description: "Given its Geometry, it adds a DirectShape element to the active Revit document",
-      category: "Revit",
-      subCategory: "DirectShape"
-    )
-    { }
-
-    void ReconstructAddDirectShapeGeometry
-    (
-      [Optional, NickName("DOC")]
-      ARDB.Document document,
-
-      [Name("DirectShape"), NickName("DS"), Description("New DirectShape")]
-      ref ARDB.DirectShape element,
-
-      [Optional] string name,
-      Optional<ARDB.Category> category,
-      IList<IGH_GeometricGoo> geometry,
-      [Optional] IList<ARDB.Material> material
-    )
-    {
-      SolveOptionalCategory(ref category, document, ARDB.BuiltInCategory.OST_GenericModel, nameof(geometry));
-
-      if (IsValidCategoryId(category.Value.Id, document))
-      {
-        //Remove nulls.
-        geometry = geometry.OfType<IGH_GeometricGoo>().ToArray();
-
-        var bbox = BoundingBox.Empty;
-        foreach (var g in geometry) bbox.Union(g.Boundingbox);
-
-        if (element is object && element.Category.Id == category.Value.Id) element.Pinned = false;
-        else ReplaceElement(ref element, ARDB.DirectShape.CreateElement(document, category.Value.Id));
-
-        element.Name = name ?? string.Empty;
-        element.SetShape(ReconstructDirectShapeComponent.ShapeEmpty);
-        if (bbox.IsValid)
-        {
-          element.Pinned = false;
-          element.Location.Move(-bbox.Center.ToXYZ());
-          element.SetShape(BuildShape(element, bbox.Center, geometry, material, out var paintIds));
-          element.Location.Move(bbox.Center.ToXYZ());
-          PaintElementSolids(element, paintIds);
-        }
-        else AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"DirectShape geometry is empty. {{{element.Id.ToString("D")}}}");
-      }
-      else
-      {
-        element = null;
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{category.Value.Name}' category may not be used as a DirectShape category.");
-      }
-    }
-  }
-
-  public class AddDirectShapeType : ReconstructDirectShapeComponent
+  public class AddDirectShapeType : AddDirectShapeComponent
   {
     public override Guid ComponentGuid => new Guid("25DCFE8E-5BE9-460C-80E8-51B7041D8FED");
     public override GH_Exposure Exposure => GH_Exposure.secondary;
@@ -245,47 +198,114 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     )
     { }
 
-    void ReconstructAddDirectShapeType
-    (
-      [Optional, NickName("DOC")]
-      ARDB.Document document,
-
-      [Description("New DirectShape Type")]
-      ref ARDB.DirectShapeType type,
-
-      [Optional, Name("Family Name"), NickName("FN")]
-      string familyName,
-      string name,
-      Optional<ARDB.Category> category,
-      IList<IGH_GeometricGoo> geometry,
-      [Optional] IList<ARDB.Material> material
-    )
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      SolveOptionalCategory(ref category, document, ARDB.BuiltInCategory.OST_GenericModel, nameof(geometry));
+      new ParamDefinition(Parameters.Document.AddTarget(), ParamRelevance.Occasional),
+      new ParamDefinition
+      (
+        new Param_String
+        {
+          Name = "Family Name",
+          NickName = "FN",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_String
+        {
+          Name = "Name",
+          NickName = "N",
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Category
+        {
+          Name = "Category",
+          NickName = "C",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Geometry
+        {
+          Name = "Geometry",
+          NickName = "G",
+          Access = GH_ParamAccess.list
+        }
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Material
+        {
+          Name = "Material",
+          NickName = "M",
+          Optional = true,
+          Access = GH_ParamAccess.list
+        }, ParamRelevance.Primary
+      ),
+    };
 
-      if (IsValidCategoryId(category.Value.Id, document))
-      {
-        if (type is ARDB.DirectShapeType directShapeType && directShapeType.Category.Id == category.Value.Id) { }
-        else directShapeType = ARDB.DirectShapeType.Create(document, name, category.Value.Id);
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.DirectShapeType()
+        {
+          Name = _Type_,
+          NickName = "T",
+          Description = $"Output {_Type_}",
+        }
+      )
+    };
+
+    const string _Type_ = "Type";
+
+    protected override void TrySolveInstance(IGH_DataAccess DA)
+    {
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
+
+      ReconstructElement<ARDB.DirectShapeType>
+      (
+        doc.Value, _Type_, type =>
+        {
+          if (!Params.GetData(DA, "Family Name", out string familyName, x => ElementNaming.IsValidName(x))) return null;
+          if (!Params.GetData(DA, "Name", out string name, x => ElementNaming.IsValidName(x))) return null;
+          if (!Params.GetData(DA, "Category", out Types.Category category, x => x.IsValid)) return null;
+          if (!Params.GetDataList(DA, "Category", out IList<IGH_GeometricGoo> geometry)) return null;
+          if (!Params.GetDataList(DA, "Materials", out IList<Types.Material> materials)) return null;
+
+          var categoryId = category?.Id ?? new ARDB.ElementId(ARDB.BuiltInCategory.OST_GenericModel);
+          if (!IsValidCategoryId(categoryId, doc.Value))
+            throw new Exceptions.RuntimeArgumentException("Category", $"Input category may not be used as a DirectShape category. {{{categoryId}}}");
+
+          if (type is null || type.Category.Id != categoryId)
+            type = type.ReplaceElement(ARDB.DirectShapeType.Create(doc.Value, name, categoryId), Array.Empty<ARDB.BuiltInParameter>());
 
 #if REVIT_2022
-        directShapeType.SetFamilyName(familyName ?? name);
+          type.SetFamilyName(familyName ?? name);
 #else
-        if (familyName is object)
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "'Family Name' on DirectShape Types is only supported on Revit 2022 or above.");
+          if (familyName is object)
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "'Family Name' on DirectShape Types is only supported on Revit 2022 or above.");
 #endif
-        directShapeType.Name = name;
-        directShapeType.SetShape(BuildShape(directShapeType, Point3d.Origin, geometry, material, out var paintIds));
+          type.Name = name;
 
-        ReplaceElement(ref type, directShapeType);
+          var shape = BuildShape
+          (
+            type,
+            Point3d.Origin, geometry,
+            materials?.Select(x => x.Value).ToArray() ?? Array.Empty<ARDB.Material>(),
+            out var paintIds
+          );
+          type.SetShape(shape);
 
-        PaintElementSolids(directShapeType, paintIds);
-      }
-      else
-      {
-        type = null;
-        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"'{category.Value.Name}' category may not be used as a DirectShape category.");
-      }
+          return type;
+        }
+      );
     }
   }
 
@@ -307,16 +327,7 @@ namespace RhinoInside.Revit.GH.Components.DirectShapes
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition
-      (
-        new Parameters.Document()
-        {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document",
-          Optional = true
-        }, ParamRelevance.Occasional
-      ),
+      new ParamDefinition(Parameters.Document.AddTarget(), ParamRelevance.Occasional),
       new ParamDefinition
        (
         new Param_Plane
