@@ -17,7 +17,6 @@ namespace RhinoInside.Revit.GH.Types
     public Instance() { }
     public Instance(ARDB.Instance instance) : base(instance) { }
 
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element is ARDB.Instance && !(element is ARDB.FamilyInstance);

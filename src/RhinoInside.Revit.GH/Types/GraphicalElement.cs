@@ -45,7 +45,6 @@ namespace RhinoInside.Revit.GH.Types
     public GraphicalElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
     public GraphicalElement(ARDB.Element element) : base(element) { }
 
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static bool IsValidElement(ARDB.Element element)
     {
       if (!element.IsValid())
