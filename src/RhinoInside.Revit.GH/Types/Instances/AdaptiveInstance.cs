@@ -5,7 +5,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Adaptive Component")]
   public sealed class AdaptiveInstance : FamilyInstance
   {
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
       if (element is ARDB.FamilyInstance instance)
@@ -28,7 +27,6 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Adaptive Component Type")]
   public sealed class AdaptiveType : FamilySymbol
   {
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static bool IsValidElement(ARDB.Element element)
     {
       if (element is ARDB.FamilySymbol symbol)
