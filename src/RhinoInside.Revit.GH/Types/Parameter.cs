@@ -299,28 +299,24 @@ namespace RhinoInside.Revit.GH.Types
 
       public Proxy(ParameterKey o) : base(o) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
-      public override bool IsParsable() => owner.IsReferencedData;
-      public override string FormatInstance()
-      {
-        if (owner.IsReferencedData)
-        {
-          var id = owner.Id ?? ARDB.ElementId.InvalidElementId;
-          if (id.TryGetBuiltInParameter(out var bip) == true)
-            return bip.ToStringGeneric();
-
-          return id.ToValue().ToString();
-        }
-        else return owner.DisplayName;
-      }
+      public override bool IsParsable() => !owner.IsReferencedData || owner.Document is object;
       public override bool FromString(string str)
       {
-        if (Enum.TryParse(str, out ARDB.BuiltInParameter builtInParameter))
-        {
-          owner.SetValue(owner.Document ?? Revit.ActiveUIDocument.Document, new ARDB.ElementId(builtInParameter));
-          return true;
-        }
+        var doc = owner.Document ?? Revit.ActiveUIDocument.Document;
 
-        return false;
+        if (string.IsNullOrWhiteSpace(str))
+          owner.SetValue(default, default);
+        else if (Enum.TryParse(str, out ARDB.BuiltInParameter builtInParameter))
+          owner.SetValue(doc, new ARDB.ElementId(builtInParameter));
+        else if (doc is object)
+        {
+          if (BuiltInParameters.TryGetByStringLocalized(str, out var parameters))
+            owner.SetValue(doc, new ARDB.ElementId(parameters[0]));
+        }
+        else return false;
+
+        owner.UnloadReferencedData();
+        return owner.LoadReferencedData();
       }
 
       #region Misc

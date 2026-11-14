@@ -164,12 +164,14 @@ namespace RhinoInside.Revit.GH.Types
     public abstract ARDB.ElementId ReferenceId { get; }
 
     public bool IsLinked => !ReferenceDocument.IsEquivalent(Document);
+
     internal IGH_ElementSource Source => IsLinked ?
       RevitLinkInstance.FromElementId(ReferenceDocument, ReferenceId) as IGH_ElementSource :
       Types.Document.FromValue(Document);
-    public string UniqueId =>
-      Document is ARDB.Document document && External.DB.ReferenceId.TryParse(ReferenceUniqueId, out var referenceId, ReferenceDocument) ?
-      referenceId.Element.ToString(document) : default;
+
+    public string UniqueId => External.DB.ReferenceId.TryParse(ReferenceUniqueId, out var referenceId, ReferenceDocument) ?
+      referenceId.Element.ToString(Document) :
+      default;
     #endregion
 
     #region Reference Transform

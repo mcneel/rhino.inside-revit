@@ -42,7 +42,8 @@ namespace RhinoInside.Revit.External.DB.Schemas
     {
       return (empty && id == string.Empty) || // 'Other'
              id.StartsWith("autodesk.parameter.aec") ||
-             id.StartsWith("autodesk.revit.parameter");
+             id.StartsWith("autodesk.revit.parameter") ||
+             id.StartsWith("revit.local.family:");
     }
     #endregion
 
