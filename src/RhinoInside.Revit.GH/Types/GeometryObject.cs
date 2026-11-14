@@ -1215,7 +1215,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    protected Mesh[] GetPreviewMeshes(MeshingParameters meshingParameters)
+    Mesh[] GetPreviewMeshes(MeshingParameters meshingParameters)
     {
       if (meshingParameters.LevelOfDetail() != _LevelOfDetail)
       {
