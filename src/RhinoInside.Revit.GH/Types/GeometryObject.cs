@@ -1199,7 +1199,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_PreviewData
-    protected Curve[] Edges
+    Curve[] Edges
     {
       get
       {

@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Types
 
     internal static readonly ARDB.ElementId SolidId = ElementIdExtension.FromValue((int) External.DB.BuiltInLinePattern.Solid);
 
-    public static LinePatternElement Cast(object source)
+    public static new LinePatternElement Cast(object source)
     {
       var document = Revit.ActiveDBDocument;
       var patternId = ARDB.ElementId.InvalidElementId;
