@@ -35,17 +35,20 @@ namespace RhinoInside.Revit.GH.Components.ElementTypes
 
     static ARDB.ElementId GetDefaultElementTypeId(ARDB.Document doc, ARDB.ElementId categoryId)
     {
-      var elementTypeId = doc.GetDefaultFamilyTypeId(categoryId);
-      if (elementTypeId.IsValid())
-        return elementTypeId;
-
-      if (categoryId.TryGetBuiltInCategory(out var _))
+      if (doc is object)
       {
-        foreach (var elementTypeGroup in Enum.GetValues(typeof(ARDB.ElementTypeGroup)).Cast<ARDB.ElementTypeGroup>())
+        var elementTypeId = doc.GetDefaultFamilyTypeId(categoryId);
+        if (elementTypeId.IsValid())
+          return elementTypeId;
+
+        if (categoryId.TryGetBuiltInCategory(out var _))
         {
-          var type = doc.GetElement(doc.GetDefaultElementTypeId(elementTypeGroup)) as ARDB.ElementType;
-          if (type?.Category?.Id == categoryId || type?.Category?.Parent?.Id == categoryId)
-            return type.Id;
+          foreach (var elementTypeGroup in Enum.GetValues(typeof(ARDB.ElementTypeGroup)).Cast<ARDB.ElementTypeGroup>())
+          {
+            var type = doc.GetElement(doc.GetDefaultElementTypeId(elementTypeGroup)) as ARDB.ElementType;
+            if (type?.Category?.Id == categoryId || type?.Category?.Parent?.Id == categoryId)
+              return type.Id;
+          }
         }
       }
 
