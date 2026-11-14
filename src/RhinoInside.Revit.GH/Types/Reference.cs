@@ -256,7 +256,7 @@ namespace RhinoInside.Revit.GH.Types
       return reference;
     }
 
-    protected internal T GetElement<T>(ARDB.ElementId id) where T : Element, new()
+    protected internal T GetElement<T>(ARDB.ElementId id) where T : Element
     {
       if (id.IsValid())
       {
@@ -266,10 +266,10 @@ namespace RhinoInside.Revit.GH.Types
           Element.FromElementId(Document, id));
       }
 
-      return id == ElementIdExtension.Invalid ? new T() : null;
+      return id == ElementIdExtension.Invalid ? (T) Activator.CreateInstance(typeof(T), nonPublic: true) : null;
     }
 
-    protected internal T GetElement<T>(ARDB.LinkElementId id) where T : Element, new()
+    protected internal T GetElement<T>(ARDB.LinkElementId id) where T : Element
     {
       if (id is object)
       {

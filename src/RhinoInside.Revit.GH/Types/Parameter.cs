@@ -1088,7 +1088,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (target is null)
         {
-          try { target = Activator.CreateInstance<Q>(); }
+          try { target = (Q) Activator.CreateInstance(typeof(Q), nonPublic: true); }
           catch { return false; }
         }
 
@@ -1099,7 +1099,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    object IGH_Goo.ScriptVariable() => Value.AsGoo() is IGH_Goo goo ? goo.ScriptVariable() : default;
+    object IGH_Goo.ScriptVariable() => Value.AsGoo()?.ScriptVariable();
     #endregion
 
     #region IGH_QuickCast

@@ -80,7 +80,7 @@ namespace RhinoInside.Revit.GH.Types
           try
           {
             var value = System.Convert.ChangeType(this, targetType, System.Globalization.CultureInfo.InvariantCulture);
-            if (Activator.CreateInstance<Q>() is IGH_Goo goo && goo.CastFrom(value))
+            if (Activator.CreateInstance(typeof(Q), nonPublic: true) is IGH_Goo goo && goo.CastFrom(value))
             {
               target = (Q) goo;
               return true;
