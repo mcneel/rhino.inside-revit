@@ -285,8 +285,8 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.TextElementType);
     public new ARDB.TextElementType Value => base.Value as ARDB.TextElementType;
 
-    public TextElementType() { }
-    protected internal TextElementType(ARDB.TextElementType type) : base(type) { }
+    internal TextElementType() { }
+    internal TextElementType(ARDB.TextElementType type) : base(type) { }
 
     internal ElementType LeaderArrowhead => GetElement<ElementType>(Value?.get_Parameter(ARDB.BuiltInParameter.LEADER_ARROWHEAD).AsElementId());
   }

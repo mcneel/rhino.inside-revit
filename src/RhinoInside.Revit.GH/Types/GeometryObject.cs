@@ -1199,7 +1199,7 @@ namespace RhinoInside.Revit.GH.Types
     #endregion
 
     #region IGH_PreviewData
-    protected Curve[] Edges
+    Curve[] Edges
     {
       get
       {
@@ -1215,7 +1215,7 @@ namespace RhinoInside.Revit.GH.Types
       }
     }
 
-    protected Mesh[] GetPreviewMeshes(MeshingParameters meshingParameters)
+    Mesh[] GetPreviewMeshes(MeshingParameters meshingParameters)
     {
       if (meshingParameters.LevelOfDetail() != _LevelOfDetail)
       {
