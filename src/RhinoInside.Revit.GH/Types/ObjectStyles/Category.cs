@@ -234,14 +234,6 @@ namespace RhinoInside.Revit.GH.Types
 
       base.ResetValue();
     }
-
-    protected override bool SetValue(ARDB.Element element)
-    {
-      if (DocumentExtension.AsCategory(element) is ARDB.Category)
-        return base.SetValue(element);
-
-      return false;
-    }
     #endregion
 
     #region ReferenceObject

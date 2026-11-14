@@ -16,7 +16,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB_SectionBox);
     public new ARDB_SectionBox Value => base.Value as ARDB_SectionBox;
 
-    protected override bool SetValue(ARDB_SectionBox element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB_SectionBox element)
     {
       return element.GetType() == typeof(ARDB_SectionBox) &&

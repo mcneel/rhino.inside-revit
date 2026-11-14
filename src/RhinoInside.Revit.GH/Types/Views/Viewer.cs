@@ -17,7 +17,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB_Viewer);
     public new ARDB_Viewer Value => base.Value as ARDB_Viewer;
 
-    protected override bool SetValue(ARDB_Viewer element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB_Viewer element)
     {
       if (element.GetType() != typeof(ARDB_Viewer))

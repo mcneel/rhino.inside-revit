@@ -28,7 +28,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB_ImageInstance);
     public new ARDB_ImageInstance Value => base.Value as ARDB_ImageInstance;
 
-    protected override bool SetValue(ARDB.Element element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB.Element element)
     {
       return element.GetType() == typeof(ARDB_ImageInstance) &&

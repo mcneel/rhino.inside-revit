@@ -65,7 +65,6 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB_SketchPlaneGrid);
     public new ARDB_SketchPlaneGrid Value => base.Value as ARDB_SketchPlaneGrid;
 
-    protected override bool SetValue(ARDB_SketchPlaneGrid element) => IsValidElement(element) && base.SetValue(element);
     public static new bool IsValidElement(ARDB_SketchPlaneGrid element)
     {
       return element.GetType() == typeof(ARDB_SketchPlaneGrid) &&
