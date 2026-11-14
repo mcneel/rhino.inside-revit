@@ -43,6 +43,8 @@ namespace RhinoInside.Revit.GH.Types
     public ZoneElement() { }
     public ZoneElement(ARDB.Mechanical.Zone element) : base(element) { }
 
+    public Phase Phase => GetElement<Phase>(Value?.Phase);
+
     #region Casting
     public override bool ConvertTo<Q>(out Q target)
     {
@@ -50,7 +52,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(Phase)))
       {
-        target = (Q) (object) GetElement<Phase>(Value?.Phase);
+        target = (Q) (object) Phase;
         return true;
       }
 

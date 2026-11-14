@@ -820,7 +820,7 @@ namespace RhinoInside.Revit.GH.Types
           }
 #else
           if (Value.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.AsBoolean() is true)
-            return Value.GetDependents<ARDB.Structure.AnalyticalModel>().Select(x => GetElement<AnalyticalElement>(x)).ToArray();
+            return Value.GetDependents<ARDB.Structure.AnalyticalModel>().Select(GetElement<AnalyticalElement>).ToArray();
 #endif
         }
 
