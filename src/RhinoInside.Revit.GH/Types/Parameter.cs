@@ -555,8 +555,8 @@ namespace RhinoInside.Revit.GH.Types
                       {
                         try
                         {
-                          using (var field = schedule.Definition.AddField(ARDB.ScheduleFieldType.Instance, Id))
-                            dataType = field.GetDataType();
+                          using (var _field = schedule.Definition.AddField(ARDB.ScheduleFieldType.Instance, Id))
+                            dataType = _field.GetDataType();
 
                           break;
                         }
@@ -564,8 +564,8 @@ namespace RhinoInside.Revit.GH.Types
 
                         try
                         {
-                          using (var field = schedule.Definition.AddField(ARDB.ScheduleFieldType.ElementType, Id))
-                            dataType = field.GetDataType();
+                          using (var _field = schedule.Definition.AddField(ARDB.ScheduleFieldType.ElementType, Id))
+                            dataType = _field.GetDataType();
 
                           break;
                         }

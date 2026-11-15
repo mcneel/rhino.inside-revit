@@ -594,35 +594,23 @@ namespace RhinoInside.Revit.GH.ElementTracking
           builder.SetWriteAccessLevel(ARDBES.AccessLevel.Vendor);
           builder.SetVendorId("com.mcneel");
 
-          {
-            var field = builder.AddSimpleField("UniqueId", typeof(string));
-            field.SetDocumentation("Entity owner element UniqueId");
-          }
+          builder.AddSimpleField("UniqueId", typeof(string)).
+          SetDocumentation("Entity owner element UniqueId");
 
-          {
-            var field = builder.AddSimpleField("Flags", typeof(int));
-            field.SetDocumentation("Element flags on the stream");
-          }
+          builder.AddSimpleField("Flags", typeof(int)).
+          SetDocumentation("Element flags on the stream");
 
-          {
-            var field = builder.AddArrayField("Authority", typeof(Guid));
-            field.SetDocumentation("Stream Authority");
-          }
+          builder.AddArrayField("Authority", typeof(Guid)).
+          SetDocumentation("Stream Authority");
 
-          {
-            var field = builder.AddSimpleField("Name", typeof(string));
-            field.SetDocumentation("Stream Name");
-          }
+          builder.AddSimpleField("Name", typeof(string)).
+          SetDocumentation("Stream Name");
 
-          {
-            var field = builder.AddSimpleField("Index", typeof(int));
-            field.SetDocumentation("Element index on the stream");
-          }
+          builder.AddSimpleField("Index", typeof(int)).
+          SetDocumentation("Element index on the stream");
 
-          {
-            var field = builder.AddSimpleField("Data", typeof(string));
-            field.SetDocumentation("Element additional stream data");
-          }
+          builder.AddSimpleField("Data", typeof(string)).
+          SetDocumentation("Element additional stream data");
 
           schema = builder.Finish();
         }
