@@ -8,7 +8,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Model Text")]
-  public class ModelText : GeometricElement
+  public sealed class ModelText : GeometricElement
   {
     protected override Type ValueType => typeof(ARDB.ModelText);
     public new ARDB.ModelText Value => base.Value as ARDB.ModelText;

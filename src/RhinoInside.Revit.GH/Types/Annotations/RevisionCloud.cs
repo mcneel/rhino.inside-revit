@@ -7,9 +7,9 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Revision Cloud")]
-  public class RevisionCloud : GeometricElement, ISketchAccess
+  public sealed class RevisionCloud : GeometricElement, ISketchAccess
   {
-    protected override Type ValueType => typeof(ARDB.RevisionCloud);
+    protected sealed override Type ValueType => typeof(ARDB.RevisionCloud);
     public new ARDB.RevisionCloud Value => base.Value as ARDB.RevisionCloud;
 
     public RevisionCloud() { }

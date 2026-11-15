@@ -9,9 +9,9 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
 
   [Kernel.Attributes.Name("Room")]
-  public class RoomElement : SpatialElement
+  public sealed class RoomElement : SpatialElement
   {
-    protected override Type ValueType => typeof(ARDB.Architecture.Room);
+    protected sealed override Type ValueType => typeof(ARDB.Architecture.Room);
     public new ARDB.Architecture.Room Value => base.Value as ARDB.Architecture.Room;
 
     public RoomElement() { }

@@ -1,6 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
+using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.ObjectStyles
 {
@@ -64,9 +65,9 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles
       update |= Params.GetData(DA, "Line Pattern [cut]", out Types.LinePatternElement lpc);
       update |= Params.GetData(DA, "Material", out Types.Material material);
 
-      if (update)
+      if (update && category.Document is ARDB.Document doc)
       {
-        StartTransaction(category.Document);
+        StartTransaction(doc);
         category.ProjectionLineWeight = lwp;
         category.CutLineWeight = lwc;
         category.LineColor = color;
@@ -108,8 +109,8 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles.Obsolete
       manager.AddIntegerParameter("LineWeight [projection]", "LWP", "Category line weight [projection]", GH_ParamAccess.item);
       manager.AddIntegerParameter("LineWeight [cut]", "LWC", "Category line weigth [cut]", GH_ParamAccess.item);
       manager.AddColourParameter("LineColor", "LC", "Category line color", GH_ParamAccess.item);
-      manager.AddParameter(new Parameters.Element(), "LinePattern [projection]", "LPP", "Category line pattern [projection]", GH_ParamAccess.item);
-      manager.AddParameter(new Parameters.Element(), "LinePattern [cut]", "LPC", "Category line pattern [cut]", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.LinePatternElement(), "LinePattern [projection]", "LPP", "Category line pattern [projection]", GH_ParamAccess.item);
+      manager.AddParameter(new Parameters.LinePatternElement(), "LinePattern [cut]", "LPC", "Category line pattern [cut]", GH_ParamAccess.item);
       manager.AddParameter(new Parameters.Material(), "Material", "M", "Category material", GH_ParamAccess.item);
       manager.AddBooleanParameter("Cuttable", "C", "Indicates if the category is cuttable or not", GH_ParamAccess.item);
     }
@@ -117,7 +118,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles.Obsolete
     protected override void TrySolveInstance(IGH_DataAccess DA)
     {
       Types.Category category = null;
-      if (!DA.GetData("Category", ref category) || category.APIObject is null)
+      if (!DA.GetData("Category", ref category))
         return;
 
       DA.SetData("LineWeight [projection]", category.ProjectionLineWeight);
@@ -126,7 +127,7 @@ namespace RhinoInside.Revit.GH.Components.ObjectStyles.Obsolete
       DA.SetData("LinePattern [projection]", category.ProjectionLinePattern);
       DA.SetData("LinePattern [cut]", category.CutLinePattern);
       DA.SetData("Material", category.Material);
-      DA.SetData("Cuttable", category.APIObject.IsCuttable);
+      DA.SetData("Cuttable", category.IsCuttable);
     }
   }
 }

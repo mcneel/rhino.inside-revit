@@ -17,9 +17,9 @@ namespace RhinoInside.Revit.GH.Types
     IAnnotationReferencesAccess,
     IAnnotationLeadersAccess
   {
-    protected TagElement() { }
-    protected TagElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
-    protected TagElement(ARDB.Element element) : base(element) { }
+    internal TagElement() { }
+    internal TagElement(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    internal TagElement(ARDB.Element element) : base(element) { }
 
     #region IAnnotationReferencesAcces
     public abstract GeometryObject[] References { get; }
@@ -32,7 +32,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Element Tag")]
-  public class IndependentTag : TagElement
+  public sealed class IndependentTag : TagElement
   {
     protected override Type ValueType => typeof(ARDB.IndependentTag);
     public new ARDB.IndependentTag Value => base.Value as ARDB.IndependentTag;

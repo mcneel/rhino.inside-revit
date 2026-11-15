@@ -22,8 +22,8 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB_Structure_AnalyticalElement);
     public new ARDB_Structure_AnalyticalElement Value => base.Value as ARDB_Structure_AnalyticalElement;
 
-    public AnalyticalElement() { }
-    public AnalyticalElement(ARDB_Structure_AnalyticalElement element) : base(element) { }
+    internal AnalyticalElement() { }
+    internal AnalyticalElement(ARDB_Structure_AnalyticalElement element) : base(element) { }
 
 #if REVIT_2023
     public bool IsEnabled => true;
@@ -192,9 +192,9 @@ namespace RhinoInside.Revit.GH.Types
 #endif
 
   [Kernel.Attributes.Name("Analytical Member")]
-  public class AnalyticalMember : AnalyticalElement
+  public sealed class AnalyticalMember : AnalyticalElement
   {
-    protected override Type ValueType => typeof(ARDB_Structure_AnalyticalMember);
+    protected sealed override Type ValueType => typeof(ARDB_Structure_AnalyticalMember);
     public new ARDB_Structure_AnalyticalMember Value => base.Value as ARDB_Structure_AnalyticalMember;
 
     public AnalyticalMember() { }
@@ -235,8 +235,8 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB_Structure_AnalyticalSurfaceBase);
     public new ARDB_Structure_AnalyticalSurfaceBase Value => base.Value as ARDB_Structure_AnalyticalSurfaceBase;
 
-    public AnalyticalSurface() { }
-    public AnalyticalSurface(ARDB_Structure_AnalyticalSurfaceBase element) : base(element) { }
+    internal AnalyticalSurface() { }
+    internal AnalyticalSurface(ARDB_Structure_AnalyticalSurfaceBase element) : base(element) { }
 
     protected static ARDB.CurveLoop GetOuterContour(ARDB_Structure_AnalyticalSurfaceBase surface)
     {
@@ -275,9 +275,9 @@ namespace RhinoInside.Revit.GH.Types
 #endif
 
   [Kernel.Attributes.Name("Analytical Panel")]
-  public class AnalyticalPanel : AnalyticalSurface
+  public sealed class AnalyticalPanel : AnalyticalSurface
   {
-    protected override Type ValueType => typeof(ARDB_Structure_AnalyticalPanel);
+    protected sealed override Type ValueType => typeof(ARDB_Structure_AnalyticalPanel);
     public new ARDB_Structure_AnalyticalPanel Value => base.Value as ARDB_Structure_AnalyticalPanel;
 
     public AnalyticalPanel() { }
@@ -296,9 +296,9 @@ namespace RhinoInside.Revit.GH.Types
 #endif
 
   [Kernel.Attributes.Name("Analytical Opening")]
-  public class AnalyticalOpening : AnalyticalSurface
+  public sealed class AnalyticalOpening : AnalyticalSurface
   {
-    protected override Type ValueType => typeof(ARDB_Structure_AnalyticalOpening);
+    protected sealed override Type ValueType => typeof(ARDB_Structure_AnalyticalOpening);
     public new ARDB_Structure_AnalyticalOpening Value => base.Value as ARDB_Structure_AnalyticalOpening;
 
     public AnalyticalOpening() { }
