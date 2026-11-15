@@ -77,12 +77,12 @@ namespace RhinoInside.Revit.GH.Components.Walls
 
     static readonly ARDB.FailureDefinitionId[] failureDefinitionIdsToFix = new ARDB.FailureDefinitionId[]
     {
-      ARDB.BuiltInFailures.JoinElementsFailures.CannotJoinElementsError,
-      ARDB.BuiltInFailures.CreationFailures.CannotMakeWall,
-      ARDB.BuiltInFailures.CreationFailures.CannotDrawWallsError,
       ARDB.BuiltInFailures.CreationFailures.CannotDrawWalls,
+      ARDB.BuiltInFailures.CreationFailures.CannotDrawWallsError,
+      ARDB.BuiltInFailures.CreationFailures.CannotMakeWall,
+      ARDB.BuiltInFailures.JoinElementsFailures.CannotJoinElementsError,
     };
-    protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix.Reverse();
+    protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix;
 
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
