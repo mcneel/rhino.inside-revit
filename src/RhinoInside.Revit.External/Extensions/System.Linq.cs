@@ -28,6 +28,12 @@ namespace System.Linq
 #endif
 
     #region AsReversed
+    /// <summary>
+    /// Inverts the order of the elements in a sequence.
+    /// </summary>
+    /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+    /// <param name="source">A sequence of values to enumerate in reverse order.</param>
+    /// <returns>A sequence whose elements correspond to those of the input sequence in reverse order.</returns>
     public static IEnumerable<TSource> AsReversed<TSource>(this IEnumerable<TSource> source)
     {
       switch (source)
