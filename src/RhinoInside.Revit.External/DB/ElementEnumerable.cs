@@ -275,7 +275,7 @@ namespace RhinoInside.Revit.External.DB
 
     public static IEnumerable<T> Take<T>(this IEnumerable<T> source, int count) where T : Element
     {
-      if (count < 0) source = source.Reverse();
+      if (count < 0) source = source.AsReversed();
 
       switch (count)
       {
