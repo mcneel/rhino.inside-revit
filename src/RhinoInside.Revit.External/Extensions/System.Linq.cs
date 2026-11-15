@@ -30,11 +30,13 @@ namespace System.Linq
     #region AsReversed
     public static IEnumerable<TSource> AsReversed<TSource>(this IEnumerable<TSource> source)
     {
-      if (source is TSource[] array) return AsReversed(array);
-      if (source is IList<TSource> list) return AsReversed(list);
-      if (source is IReadOnlyList<TSource> readOnlyList) return AsReversed(readOnlyList);
-
-      return Enumerable.Reverse(source);
+      switch (source)
+      {
+        case TSource[] array:             return AsReversed(array);
+        case IList<TSource> list:         return AsReversed(list);
+        case IReadOnlyList<TSource> list: return AsReversed(list);
+        default:                          return Enumerable.Reverse(source);
+      }
     }
 
     public static IEnumerable<TSource> AsReversed<TSource>(TSource[] array)
