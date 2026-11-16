@@ -194,11 +194,10 @@ namespace RhinoInside.Revit.GH.Components.Geometry
             if (curve.ScriptVariable() is ARDB.Curve c)
             {
               var transform = reference.GetInstanceTransform();
-              var inverse = transform.Inverse;
 
               // Some curves inside instances report wrong hits.
               // Check structural beam with an S shape axis.
-              valid = c.Distance(inverse.OfPoint(geometryReference.GlobalPoint)) < view.Document.Application.VertexTolerance;
+              valid = c.Distance(transform.InverseOfPoint(geometryReference.GlobalPoint)) < view.Document.Application.VertexTolerance;
             }
             break;
         }
