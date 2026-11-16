@@ -241,7 +241,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         enclosed = true;
 
         if (source is Types.RevitLinkInstance instance)
-          point = instance.Value.GetTransform().Inverse.ToTransform() * point.Value;
+          point = instance.Value.GetTransform().InverseOfPoint(point.Value.ToXYZ()).ToPoint3d();
       }
 
       var tol = GeometryTolerance.Model;
@@ -444,7 +444,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         enclosed = true;
 
         if (source is Types.RevitLinkInstance instance)
-          point = instance.Value.GetTransform().Inverse.ToTransform() * point.Value;
+          point = instance.Value.GetTransform().InverseOfPoint(point.Value.ToXYZ()).ToPoint3d();
       }
       var xyz = point?.ToXYZ();
 
@@ -547,7 +547,7 @@ namespace RhinoInside.Revit.GH.Components.Topology
         enclosed = true;
 
         if (source is Types.RevitLinkInstance instance)
-          point = instance.Value.GetTransform().Inverse.ToTransform() * point.Value;
+          point = instance.Value.GetTransform().InverseOfPoint(point.Value.ToXYZ()).ToPoint3d();
       }
       var xyz = point?.ToXYZ();
 

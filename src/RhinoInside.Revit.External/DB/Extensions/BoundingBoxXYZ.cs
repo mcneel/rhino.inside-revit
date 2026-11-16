@@ -315,14 +315,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (xyz.Length > 0)
       {
-        using (var inverse = value.Transform.Inverse)
+        using (var transform = value.Transform)
         {
           var minX = double.PositiveInfinity; var minY = double.PositiveInfinity; var minZ = double.PositiveInfinity;
           var maxX = double.NegativeInfinity; var maxY = double.NegativeInfinity; var maxZ = double.NegativeInfinity;
 
           for (int p = 0; p < xyz.Length; p++)
           {
-            var (x, y, z) = inverse.OfPoint(xyz[p]);
+            var (x, y, z) = transform.InverseOfPoint(xyz[p]);
             minX = Arithmetic.Min(minX, x); maxX = Arithmetic.Max(maxX, x);
             minY = Arithmetic.Min(minY, y); maxY = Arithmetic.Max(maxY, y);
             minZ = Arithmetic.Min(minZ, z); maxZ = Arithmetic.Max(maxZ, z);
@@ -366,14 +366,14 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       if (xyz.Length > 0)
       {
-        using (var inverse = value.Transform.Inverse)
+        using (var transform = value.Transform)
         {
           var minX = double.PositiveInfinity; var minY = double.PositiveInfinity; var minZ = double.PositiveInfinity;
           var maxX = double.NegativeInfinity; var maxY = double.NegativeInfinity; var maxZ = double.NegativeInfinity;
 
           for (int p = 0; p < xyz.Length; p++)
           {
-            var (x, y, z) = inverse.OfPoint(xyz[p]);
+            var (x, y, z) = transform.InverseOfPoint(xyz[p]);
             minX = Arithmetic.Min(minX, x); maxX = Arithmetic.Max(maxX, x);
             minY = Arithmetic.Min(minY, y); maxY = Arithmetic.Max(maxY, y);
             minZ = Arithmetic.Min(minZ, z); maxZ = Arithmetic.Max(maxZ, z);
@@ -561,7 +561,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
     public static bool IsInside(this BoundingBoxXYZ value, XYZ point)
     {
       var (min, max, transform, bounded) = value;
-      var (x, y, z) = transform.Inverse.OfPoint(point);
+      var (x, y, z) = transform.InverseOfPoint(point);
 
       if (bounded[BoundsMin, AxisX] && x < min.X) return false;
       if (bounded[BoundsMax, AxisX] && x > max.X) return false;

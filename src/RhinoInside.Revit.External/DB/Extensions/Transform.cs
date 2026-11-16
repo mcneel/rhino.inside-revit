@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.External.DB.Extensions
@@ -143,6 +144,29 @@ namespace RhinoInside.Revit.External.DB.Extensions
       }
 
       return principal;
+    }
+
+    /// <summary>
+    /// Applies the inverse transformation to a point and returns the result.
+    /// </summary>
+    /// <param name="transform">The transform to apply the inverse.</param>
+    /// <param name="equation">The point to transform.</param>
+    /// <returns>The transformed point</returns>
+    /// <remarks>
+    /// Transformation of a point is affected by the translational part of the transformation.
+    /// </remarks>
+    internal static XYZ InverseOfPoint(this Transform transform, XYZ point)
+    {
+      Debug.Assert(transform.IsConformal);
+
+      var delta = point - transform.Origin;
+      var invScale = 1.0 / transform.Scale;
+      return new XYZ
+      (
+          XYZExtension.DotProduct(delta, transform.BasisX) * invScale,
+          XYZExtension.DotProduct(delta, transform.BasisY) * invScale,
+          XYZExtension.DotProduct(delta, transform.BasisZ) * invScale
+      );
     }
 
     /// <summary>
