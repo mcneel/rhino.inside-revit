@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Types
     public override bool IsValid => (Id?.TryGetBuiltInCategory(out var _) == true) || base.IsValid;
     public override object ScriptVariable() => ScriptCategory;
 
-    public static Category Cast(object source)
+    public static new Category Cast(object source)
     {
       if (source is IGH_Goo goo)
       {
