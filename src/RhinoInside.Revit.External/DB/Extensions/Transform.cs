@@ -206,12 +206,12 @@ namespace RhinoInside.Revit.External.DB.Extensions
     {
       Debug.Assert(transform.IsConformal);
 
-      var invScale = 1.0 / transform.Scale;
-      return (UnitXYZ) new XYZ
+      return new UnitXYZ
       (
-        XYZExtension.DotProduct(vector, transform.BasisX) * invScale,
-        XYZExtension.DotProduct(vector, transform.BasisY) * invScale,
-        XYZExtension.DotProduct(vector, transform.BasisZ) * invScale
+        XYZExtension.DotProduct(vector, transform.BasisX),
+        XYZExtension.DotProduct(vector, transform.BasisY),
+        XYZExtension.DotProduct(vector, transform.BasisZ),
+        out var _
       );
     }
 
