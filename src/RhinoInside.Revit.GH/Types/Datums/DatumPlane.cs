@@ -22,9 +22,9 @@ namespace RhinoInside.Revit.GH.Types
     public new ARDB.DatumPlane Value => base.Value as ARDB.DatumPlane;
     public static explicit operator ARDB.DatumPlane(DatumPlane value) => value?.Value;
 
-    public DatumPlane() { }
-    public DatumPlane(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
-    public DatumPlane(ARDB.DatumPlane plane) : base(plane) { }
+    internal DatumPlane() { }
+    internal DatumPlane(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
+    internal DatumPlane(ARDB.DatumPlane plane) : base(plane) { }
 
     public SketchPlane SketchPlane => GetElement<SketchPlane>(Value.GetSketchPlane());
 

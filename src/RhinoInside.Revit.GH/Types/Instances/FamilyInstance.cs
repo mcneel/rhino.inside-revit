@@ -29,8 +29,8 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.FamilyInstance);
     public new ARDB.FamilyInstance Value => base.Value as ARDB.FamilyInstance;
 
-    public FamilyInstance() { }
-    public FamilyInstance(ARDB.FamilyInstance value) : base(value) { }
+    internal FamilyInstance() { }
+    internal FamilyInstance(ARDB.FamilyInstance value) : base(value) { }
 
     #region IGH_BakeAwareElement
     bool IGH_BakeAwareData.BakeGeometry(RhinoDoc doc, ObjectAttributes att, out Guid guid) =>

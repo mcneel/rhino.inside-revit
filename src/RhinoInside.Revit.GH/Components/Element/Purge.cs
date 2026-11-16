@@ -352,7 +352,7 @@ namespace RhinoInside.Revit.GH.Components.Elements
           finally
           {
             // In case we still have transaction groups here something bad happened
-            foreach (var group in transactionGroups.Cast<ARDB.TransactionGroup>().Reverse())
+            foreach (var group in transactionGroups.AsReversed())
             {
               using (group)
               {

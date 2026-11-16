@@ -216,7 +216,7 @@ namespace RhinoInside.Revit.External.DB
 
       transactionLinks = default;
 
-      foreach (var transaction in transactionChain.Values.Reverse())
+      foreach (var transaction in transactionChain.Values.AsReversed())
       {
         // Some exceptions like assigning an already used name to a DB.Material
         // corrupts the transaction, so we catch any exception here.
@@ -305,7 +305,7 @@ namespace RhinoInside.Revit.External.DB
       {
         using (this)
         {
-          foreach (var transaction in transactionChain.Values.Reverse())
+          foreach (var transaction in transactionChain.Values.AsReversed())
             transaction.RollBack();
 
           status = TransactionStatus.RolledBack;

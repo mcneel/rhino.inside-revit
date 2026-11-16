@@ -25,8 +25,8 @@ namespace RhinoInside.Revit.GH.Components.Documents
 
     protected override void RegisterOutputParams(GH_OutputParamManager manager)
     {
-      manager.AddParameter(new Parameters.Document(), "Projects", "P", "Active Project documents list", GH_ParamAccess.list);
-      manager.AddParameter(new Parameters.Document(), "Families", "F", "Active Family documents list", GH_ParamAccess.list);
+      manager.AddParameter(Parameters.Document.Output(), "Projects", "P", "Active Project documents list", GH_ParamAccess.list);
+      manager.AddParameter(Parameters.Document.Output(), "Families", "F", "Active Family documents list", GH_ParamAccess.list);
     }
 
     protected override void TrySolveInstance(IGH_DataAccess DA)

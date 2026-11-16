@@ -7,7 +7,7 @@ using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.Assemblies
 {
-  [ComponentVersion(introduced: "1.2", updated: "1.5")]
+  [ComponentVersion(introduced: "1.2", updated: "1.37")]
   public class AssemblyByMembers : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("6915b697-f10d-4bc8-8faa-f25438f393a8");
@@ -26,6 +26,7 @@ namespace RhinoInside.Revit.GH.Components.Assemblies
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
+      new ParamDefinition(Parameters.Document.AddTarget(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Parameters.GraphicalElement()

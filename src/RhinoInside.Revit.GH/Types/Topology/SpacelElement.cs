@@ -9,9 +9,9 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
 
   [Kernel.Attributes.Name("Space")]
-  public class SpaceElement : SpatialElement
+  public sealed class SpaceElement : SpatialElement
   {
-    protected override Type ValueType => typeof(ARDB.Mechanical.Space);
+    protected sealed override Type ValueType => typeof(ARDB.Mechanical.Space);
     public new ARDB.Mechanical.Space Value => base.Value as ARDB.Mechanical.Space;
 
     public SpaceElement() { }
@@ -43,6 +43,8 @@ namespace RhinoInside.Revit.GH.Types
     public ZoneElement() { }
     public ZoneElement(ARDB.Mechanical.Zone element) : base(element) { }
 
+    public Phase Phase => GetElement<Phase>(Value?.Phase);
+
     #region Casting
     public override bool ConvertTo<Q>(out Q target)
     {
@@ -50,7 +52,7 @@ namespace RhinoInside.Revit.GH.Types
 
       if (typeof(Q).IsAssignableFrom(typeof(Phase)))
       {
-        target = (Q) (object) GetElement<Phase>(Value?.Phase);
+        target = (Q) (object) Phase;
         return true;
       }
 

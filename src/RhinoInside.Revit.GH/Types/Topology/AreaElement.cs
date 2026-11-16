@@ -6,9 +6,9 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Area")]
-  public class AreaElement : SpatialElement
+  public sealed class AreaElement : SpatialElement
   {
-    protected override Type ValueType => typeof(ARDB.Area);
+    protected sealed override Type ValueType => typeof(ARDB.Area);
     public new ARDB.Area Value => base.Value as ARDB.Area;
 
     public AreaElement() { }

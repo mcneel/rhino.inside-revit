@@ -1,6 +1,5 @@
 using System;
 using Grasshopper.Kernel;
-using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.HostObjects
 {
@@ -49,7 +48,7 @@ namespace RhinoInside.Revit.GH.Components.HostObjects
       }
 
       // Default to Level if hostId is null
-      DA.SetData("Host", element.GetElement<Types.GraphicalElement>(element.Level));
+      DA.SetData("Host", element.Level);
     }
   }
 }
