@@ -118,7 +118,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static Curve CreateBounded(this Curve crv, double startParameter, double endParameter)
     {
-      crv = crv.CreateTransformed(Transform.Identity);
+      crv = crv.Clone();
       crv.MakeBound(startParameter, endParameter);
       return crv;
     }
