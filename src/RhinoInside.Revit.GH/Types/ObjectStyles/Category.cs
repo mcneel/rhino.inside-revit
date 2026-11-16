@@ -31,7 +31,7 @@ namespace RhinoInside.Revit.GH.Types
     public override bool IsValid => (Id?.TryGetBuiltInCategory(out var _) == true) || base.IsValid;
     public override object ScriptVariable() => ScriptCategory;
 
-    public static Category Cast(object source)
+    public static new Category Cast(object source)
     {
       if (source is IGH_Goo goo)
       {
@@ -112,42 +112,7 @@ namespace RhinoInside.Revit.GH.Types
 
       public Proxy(Category c) : base(c) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
-      public override bool IsParsable() => !owner.IsReferencedData || owner.Document is object;
-      public override string FormatInstance()
-      {
-        if (owner.IsReferencedData && owner.IsReferencedDataLoaded)
-          return owner.DisplayName;
-
-        return base.FormatInstance();
-      }
-      public override bool FromString(string str)
-      {
-        var doc = owner.Document ?? Revit.ActiveUIDocument.Document;
-
-        if (Enum.TryParse(str, out ARDB.BuiltInCategory builtInCategory) && builtInCategory.IsValid())
-          owner.SetValue(doc, new ARDB.ElementId(builtInCategory));
-        else if (str == string.Empty)
-          owner.SetValue(default, new ARDB.ElementId(ARDB.BuiltInCategory.INVALID));
-        else if (doc is object)
-        {
-          foreach (var category in doc.GetCategories())
-          {
-            if (category.FullName() == str)
-            {
-              owner.SetValue(doc, category.Id);
-              break;
-            }
-          }
-        }
-        else
-          return false;
-
-        owner.UnloadReferencedData();
-        return owner.LoadReferencedData();
-      }
-
       #region Misc
-      protected override bool IsValidId(ARDB.Document doc, ARDB.ElementId id) => id.IsCategoryId(doc);
       public override Type ObjectType => IsBuiltIn ? typeof(ARDB.BuiltInCategory) : base.ObjectType;
 
       [System.ComponentModel.Description("Category BuiltIn Id.")]
@@ -907,7 +872,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.GraphicsStyle style)
         {
           return style.GraphicsStyleCategory is ARDB.Category category ?
-            GetElement(Category.FromCategory(category)) :
+            GetElement(category) :
             new Category();
         }
 

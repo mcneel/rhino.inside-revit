@@ -7,7 +7,7 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Building Pad")]
-  public class BuildingPad : HostObject, ISketchAccess
+  public sealed class BuildingPad : HostObject, ISketchAccess
   {
     protected override Type ValueType => typeof(ARDB.Architecture.BuildingPad);
     public new ARDB.Architecture.BuildingPad Value => base.Value as ARDB.Architecture.BuildingPad;

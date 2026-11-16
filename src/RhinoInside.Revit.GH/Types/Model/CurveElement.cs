@@ -124,14 +124,13 @@ namespace RhinoInside.Revit.GH.Types
     #region Category
     public override Category Subcategory
     {
-      get => GetElement(Category.FromCategory(LineStyle?.Value.GraphicsStyleCategory));
+      get => GetElement(LineStyle?.Value.GraphicsStyleCategory);
       set
       {
         if (value is object && Value is ARDB.CurveElement element)
         {
-          AssertValidDocument(value, nameof(Subcategory));
-          var styleType = LineStyle?.Value.GraphicsStyleType ?? ARDB.GraphicsStyleType.Projection;
-          var style = value.APIObject?.GetGraphicsStyle(styleType);
+          var category = AssertValid<ARDB.Category>(value, nameof(Subcategory));
+          var style = category?.GetGraphicsStyle(((ARDB.GraphicsStyle) element.LineStyle)?.GraphicsStyleType ?? ARDB.GraphicsStyleType.Projection);
           element.LineStyle = style;
         }
       }
@@ -143,7 +142,7 @@ namespace RhinoInside.Revit.GH.Types
       set
       {
         if (value is object && Value is ARDB.CurveElement element)
-          element.LineStyle = SetElement<ARDB.GraphicsStyle>(value);
+          element.LineStyle = AssertValid<ARDB.GraphicsStyle>(value, nameof(LineStyle));
       }
     }
     #endregion

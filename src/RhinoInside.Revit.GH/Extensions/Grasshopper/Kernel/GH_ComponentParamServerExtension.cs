@@ -254,7 +254,7 @@ namespace Grasshopper.Kernel
               else if (goo.CastTo(out T data)) values[i] = data;
               else if (TIsGoo)
               {
-                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
+                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T), nonPublic: true);
                 if (TGoo.CastFrom(goo))
                   values[i] = (T) TGoo;
               }
@@ -292,7 +292,7 @@ namespace Grasshopper.Kernel
               else if (goo.CastTo(out data)) values[i] = data;
               else if (TIsGoo)
               {
-                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
+                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T), nonPublic: true);
                 if (TGoo.CastFrom(goo))
                   values[i] = (T) TGoo;
               }
@@ -332,7 +332,7 @@ namespace Grasshopper.Kernel
               else if (goo.CastTo(out T data)) values[i] = reference.TransformFrom(data);
               else if (TIsGoo)
               {
-                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
+                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T), nonPublic: true);
                 if (TGoo.CastFrom(goo))
                   values[i] = reference.TransformFrom((T) TGoo);
               }
@@ -371,7 +371,7 @@ namespace Grasshopper.Kernel
               else if (goo.CastTo(out data)) values[i] = reference.TransformFrom(data);
               else if (TIsGoo)
               {
-                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
+                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T), nonPublic: true);
                 if (TGoo.CastFrom(goo))
                   values[i] = reference.TransformFrom((T) TGoo);
               }
@@ -441,7 +441,7 @@ namespace Grasshopper.Kernel
               else if (goo.CastTo(out data)) values[i] = data;
               else if (TIsGoo)
               {
-                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T));
+                var TGoo = (IGH_Goo) Activator.CreateInstance(typeof(T), nonPublic: true);
                 if (TGoo.CastFrom(goo))
                   values[i] = (T) TGoo;
               }

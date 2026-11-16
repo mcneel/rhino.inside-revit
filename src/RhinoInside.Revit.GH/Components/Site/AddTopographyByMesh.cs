@@ -35,7 +35,7 @@ namespace RhinoInside.Revit.GH.Components.Site
 
     void ReconstructTopographyByMesh
     (
-      [Optional, NickName("DOC")]
+      [NickName("DOC")]
       ARDB.Document document,
 
       [Description("New Topography")]

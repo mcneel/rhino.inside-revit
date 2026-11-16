@@ -27,13 +27,13 @@ namespace RhinoInside.Revit.GH.Components.Documents
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.Input(), ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.Output(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_Guid>("Document ID", "ID", "A unique identifier for the document"),
       ParamDefinition.Create<Param_String>("Model Path", "MP", "The document path"),
       ParamDefinition.Create<Param_String>("Name", "N", "Document name.\nLink type name used when document is linked.", relevance: ParamRelevance.Secondary),
@@ -76,13 +76,13 @@ namespace RhinoInside.Revit.GH.Components.Documents
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.Input(), ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.Output(), ParamRelevance.Occasional),
       ParamDefinition.Create<Param_Boolean>("Saved", "S", "Identifies if the document has been saved", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_FilePath>("Path", "P", "The fully qualified path of the document's local disk file"),
       ParamDefinition.Create<Param_String>("Name", "N", "The document's local file name", relevance: ParamRelevance.Secondary),
@@ -152,7 +152,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.Input(), ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;
@@ -210,7 +210,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Occasional),
+      new ParamDefinition(Parameters.Document.Input(), ParamRelevance.Occasional),
     };
 
     protected override ParamDefinition[] Outputs => outputs;

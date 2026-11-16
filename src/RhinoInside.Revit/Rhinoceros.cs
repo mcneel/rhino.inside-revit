@@ -463,7 +463,7 @@ namespace RhinoInside.Revit
       if (guests is null)
         return;
 
-      foreach (var guestInfo in Enumerable.Reverse(guests))
+      foreach (var guestInfo in guests.AsReversed())
       {
         if (guestInfo.Guest is null)
           continue;

@@ -186,7 +186,7 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-    public static ParameterKey Cast(object source)
+    public static new ParameterKey Cast(object source)
     {
       var document = Revit.ActiveDBDocument;
       var parameterId = ARDB.ElementId.InvalidElementId;
@@ -299,28 +299,7 @@ namespace RhinoInside.Revit.GH.Types
 
       public Proxy(ParameterKey o) : base(o) { (this as IGH_GooProxy).UserString = FormatInstance(); }
 
-      public override bool IsParsable() => !owner.IsReferencedData || owner.Document is object;
-      public override bool FromString(string str)
-      {
-        var doc = owner.Document ?? Revit.ActiveUIDocument.Document;
-
-        if (string.IsNullOrWhiteSpace(str))
-          owner.SetValue(default, default);
-        else if (Enum.TryParse(str, out ARDB.BuiltInParameter builtInParameter))
-          owner.SetValue(doc, new ARDB.ElementId(builtInParameter));
-        else if (doc is object)
-        {
-          if (BuiltInParameters.TryGetByStringLocalized(str, out var parameters))
-            owner.SetValue(doc, new ARDB.ElementId(parameters[0]));
-        }
-        else return false;
-
-        owner.UnloadReferencedData();
-        return owner.LoadReferencedData();
-      }
-
       #region Misc
-      protected override bool IsValidId(ARDB.Document doc, ARDB.ElementId id) => id.IsParameterId(doc);
       public override Type ObjectType => !owner.IsReferencedData ?
         typeof(ARDB.Definition) :
         IsBuiltIn ? typeof(ARDB.BuiltInParameter) : base.ObjectType;
@@ -1088,7 +1067,7 @@ namespace RhinoInside.Revit.GH.Types
       {
         if (target is null)
         {
-          try { target = Activator.CreateInstance<Q>(); }
+          try { target = (Q) Activator.CreateInstance(typeof(Q), nonPublic: true); }
           catch { return false; }
         }
 
@@ -1099,7 +1078,7 @@ namespace RhinoInside.Revit.GH.Types
       return false;
     }
 
-    object IGH_Goo.ScriptVariable() => Value.AsGoo() is IGH_Goo goo ? goo.ScriptVariable() : default;
+    object IGH_Goo.ScriptVariable() => Value.AsGoo()?.ScriptVariable();
     #endregion
 
     #region IGH_QuickCast
