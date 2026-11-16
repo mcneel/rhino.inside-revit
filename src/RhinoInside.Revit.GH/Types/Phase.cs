@@ -1,12 +1,8 @@
 using System;
-using System.Linq;
-using Grasshopper.Kernel.Types;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
 {
-  using External.DB.Extensions;
-
   [Kernel.Attributes.Name("Phase")]
   public sealed class Phase : Element
   {

@@ -121,7 +121,7 @@ namespace RhinoInside.Revit.GH.Parameters
           listBox.Items.Add(new Types.Material(material));
       }
 
-      listBox.SelectedIndex = listBox.Items.Cast<Types.Material>().IndexOf(PersistentValue, 0).FirstOr(-1);
+      listBox.SelectedIndex = listBox.Items.Cast<Types.Material>().IndexOf(PersistentValue, 0).FirstOrDefault(-1);
       listBox.EndUpdate();
       listBox.SelectedIndexChanged += ListBox_SelectedIndexChanged;
     }

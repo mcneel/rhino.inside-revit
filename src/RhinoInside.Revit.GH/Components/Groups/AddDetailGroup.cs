@@ -37,7 +37,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         {
           Name = "View",
           NickName = "V",
-          Description = "View to add a specific detail component"
+          Description = "View to add a specific detail group"
         }
       ),
       new ParamDefinition
@@ -46,7 +46,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         {
           Name = "Point",
           NickName = "P",
-          Description = "Detail Component center.",
+          Description = "Detail group origin.",
         }
       ),
       new ParamDefinition
@@ -55,7 +55,7 @@ namespace RhinoInside.Revit.GH.Components.Annotations
         {
           Name = "Rotation",
           NickName = "R",
-          Description = "Detail Component rotation",
+          Description = "Detail group rotation",
           Optional = true,
           AngleParameter = true,
         }, ParamRelevance.Secondary
@@ -144,13 +144,14 @@ namespace RhinoInside.Revit.GH.Components.Annotations
       (
         view.Document, _Group_, group =>
         {
-          var tol = GeometryTolerance.Model;
-
           // Input
           if (!view.Value.IsAnnotationView()) throw new Exceptions.RuntimeArgumentException("View", $"View '{view.Nomen}' does not support detail items creation", view);
           if (!Params.GetData(DA, "Point", out Point3d? point)) return null;
           if (!Params.TryGetData(DA, "Rotation", out double? rotation)) return null;
           if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.ElementType type, Types.Document.FromValue(view.Document), ARDB.ElementTypeGroup.DetailGroupType)) return null;
+
+          if (type.Value.Category.ToBuiltInCategory() != ARDB.BuiltInCategory.OST_IOSDetailGroups)
+            throw new Exceptions.RuntimeArgumentException(nameof(type), $"'{type.DisplayName}' is not a Detail Group Type.");
 
           var viewPlane = view.DetailPlane;
           point = viewPlane.ClosestPoint(point.Value);

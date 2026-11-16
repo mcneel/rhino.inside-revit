@@ -41,7 +41,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Model Type")]
-  public class RevitLinkType : ElementType
+  public sealed class RevitLinkType : ElementType
   {
     protected override Type ValueType => typeof(ARDB.RevitLinkType);
     public new ARDB.RevitLinkType Value => base.Value as ARDB.RevitLinkType;

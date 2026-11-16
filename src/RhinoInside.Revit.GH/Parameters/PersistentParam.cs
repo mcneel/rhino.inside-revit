@@ -133,7 +133,19 @@ namespace RhinoInside.Revit.GH.Parameters
       Debug.Assert(errors.Count == 0, builder.ToString());
     }
 
-    protected override T InstantiateT() => typeof(T).IsAbstract || typeof(T).IsInterface ? default : base.InstantiateT();
+    protected override T InstantiateT()
+    {
+      if (!typeof(T).IsAbstract && !typeof(T).IsInterface)
+      {
+        try { return (T) Activator.CreateInstance(typeof(T), nonPublic: true); }
+        catch (Exception e)
+        {
+          Grasshopper.Tracing.Assert(new Guid("{EBD8CEF2-61E2-4fef-A5C8-46B9866701DE}"), "InstantiateT() cannot be called if T is an abstract type or if T has no default constructor. " + OS.NewLine + e.Message);
+        }
+      }
+      return null;
+    }
+
     protected override void Menu_AppendManageCollection(ToolStripDropDown menu)
     {
       if (InstantiateT() is object)

@@ -15,8 +15,8 @@ namespace RhinoInside.Revit.GH.Types
     IGH_PreviewMeshData,
     Bake.IGH_BakeAwareElement
   {
-    public GeometricElement() { }
-    public GeometricElement(ARDB.Element element) : base(element) { }
+    internal GeometricElement() { }
+    internal GeometricElement(ARDB.Element element) : base(element) { }
 
     public static new bool IsValidElement(ARDB.Element element)
     {

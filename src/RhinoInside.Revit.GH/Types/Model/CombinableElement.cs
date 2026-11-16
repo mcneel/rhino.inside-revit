@@ -1,5 +1,6 @@
 using System;
 using Grasshopper.Kernel.Types;
+using RhinoInside.Revit.External.DB.Extensions;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Types
@@ -10,14 +11,14 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.CombinableElement);
     public new ARDB.CombinableElement Value => base.Value as ARDB.CombinableElement;
 
-    public CombinableElement() { }
-    public CombinableElement(ARDB.CombinableElement element) : base(element) { }
+    internal CombinableElement() { }
+    internal CombinableElement(ARDB.CombinableElement element) : base(element) { }
   }
 
   [Kernel.Attributes.Name("Combination")]
-  public class GeomCombination : CombinableElement
+  public sealed class GeomCombination : CombinableElement
   {
-    protected override Type ValueType => typeof(ARDB.GeomCombination);
+    protected sealed override Type ValueType => typeof(ARDB.GeomCombination);
     public new ARDB.GeomCombination Value => base.Value as ARDB.GeomCombination;
 
     public GeomCombination() { }
@@ -25,9 +26,9 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Form")]
-  public class GenericForm : CombinableElement
+  public sealed class GenericForm : CombinableElement
   {
-    protected override Type ValueType => typeof(ARDB.GenericForm);
+    protected sealed override Type ValueType => typeof(ARDB.GenericForm);
     public new ARDB.GenericForm Value => base.Value as ARDB.GenericForm;
 
     public GenericForm() { }
@@ -45,8 +46,9 @@ namespace RhinoInside.Revit.GH.Types
           {
             if (parameter?.AsElementId() is ARDB.ElementId categoryId)
             {
-              var category = new Category(Document, categoryId);
-              return category.APIObject?.Parent is null ? new Category() : GetElement(category);
+              return Document.GetCategory(categoryId) is ARDB.Category category && category.Parent is object?
+                GetElement(category) :
+                new Category();
             }
           }
         }

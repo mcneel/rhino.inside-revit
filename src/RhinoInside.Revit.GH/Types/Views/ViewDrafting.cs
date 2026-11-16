@@ -4,9 +4,9 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Drafting View")]
-  public class ViewDrafting : View
+  public sealed class ViewDrafting : View
   {
-    protected override Type ValueType => typeof(ARDB.ViewDrafting);
+    protected sealed override Type ValueType => typeof(ARDB.ViewDrafting);
     public new ARDB.ViewDrafting Value => base.Value as ARDB.ViewDrafting;
 
     public ViewDrafting() { }
