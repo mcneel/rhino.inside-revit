@@ -36,6 +36,7 @@ namespace RhinoInside.Revit.External.DB
         var inv = 1.0 / length;
         Direction = new XYZ(x * inv, y * inv, z * inv);
       }
+      else Direction = NaN.Direction;
     }
 
     public static implicit operator XYZ(UnitXYZ unit) => unit.Direction;
