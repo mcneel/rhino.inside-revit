@@ -160,7 +160,8 @@ namespace RhinoInside.Revit.External.DB.Extensions
       Debug.Assert(transform.IsConformal);
 
       var delta = point - transform.Origin;
-      var invScale = 1.0 / transform.Scale;
+      var scale = transform.Scale;
+      var invScale = 1.0 / (scale * scale);
       return new XYZ
       (
         XYZExtension.DotProduct(delta, transform.BasisX) * invScale,
