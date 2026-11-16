@@ -163,9 +163,54 @@ namespace RhinoInside.Revit.External.DB.Extensions
       var invScale = 1.0 / transform.Scale;
       return new XYZ
       (
-          XYZExtension.DotProduct(delta, transform.BasisX) * invScale,
-          XYZExtension.DotProduct(delta, transform.BasisY) * invScale,
-          XYZExtension.DotProduct(delta, transform.BasisZ) * invScale
+        XYZExtension.DotProduct(delta, transform.BasisX) * invScale,
+        XYZExtension.DotProduct(delta, transform.BasisY) * invScale,
+        XYZExtension.DotProduct(delta, transform.BasisZ) * invScale
+      );
+    }
+
+    /// <summary>
+    /// Applies the inverse transformation to a vector and returns the result.
+    /// </summary>
+    /// <param name="transform">The transform to apply the inverse.</param>
+    /// <param name="equation">The vector to transform.</param>
+    /// <returns>The transformed vector</returns>
+    /// <remarks>
+    /// Transformation of a vector is not affected by the translational part of the transformation.
+    /// </remarks>
+    internal static XYZ InverseOfVector(this Transform transform, XYZ vector)
+    {
+      Debug.Assert(transform.IsConformal);
+
+      var scale = transform.Scale;
+      var invScale = 1.0 / (scale * scale);
+      return new XYZ
+      (
+        XYZExtension.DotProduct(vector, transform.BasisX) * invScale,
+        XYZExtension.DotProduct(vector, transform.BasisY) * invScale,
+        XYZExtension.DotProduct(vector, transform.BasisZ) * invScale
+      );
+    }
+
+    /// <summary>
+    /// Applies the inverse transformation to a vector and returns the result.
+    /// </summary>
+    /// <param name="transform">The transform to apply the inverse.</param>
+    /// <param name="equation">The vector to transform.</param>
+    /// <returns>The transformed vector</returns>
+    /// <remarks>
+    /// Transformation of a vector is not affected by the translational part of the transformation.
+    /// </remarks>
+    internal static UnitXYZ InverseOfVector(this Transform transform, UnitXYZ vector)
+    {
+      Debug.Assert(transform.IsConformal);
+
+      var invScale = 1.0 / transform.Scale;
+      return (UnitXYZ) new XYZ
+      (
+        XYZExtension.DotProduct(vector, transform.BasisX) * invScale,
+        XYZExtension.DotProduct(vector, transform.BasisY) * invScale,
+        XYZExtension.DotProduct(vector, transform.BasisZ) * invScale
       );
     }
 
