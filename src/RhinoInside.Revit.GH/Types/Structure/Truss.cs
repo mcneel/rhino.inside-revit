@@ -4,9 +4,9 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Truss")]
-  public class Truss : GeometricElement
+  public sealed class Truss : GeometricElement
   {
-    protected override Type ValueType => typeof(ARDB.Structure.Truss);
+    protected sealed override Type ValueType => typeof(ARDB.Structure.Truss);
     public new ARDB.Structure.Truss Value => base.Value as ARDB.Structure.Truss;
 
     public Truss() { }

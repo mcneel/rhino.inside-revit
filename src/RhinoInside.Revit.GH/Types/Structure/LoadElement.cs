@@ -12,8 +12,8 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.Structure.LoadBase);
     public new ARDB.Structure.LoadBase Value => base.Value as ARDB.Structure.LoadBase;
 
-    public LoadElement() { }
-    public LoadElement(ARDB.Structure.LoadBase element) : base(element) { }
+    internal LoadElement() { }
+    internal LoadElement(ARDB.Structure.LoadBase element) : base(element) { }
   }
 }
 
@@ -22,9 +22,9 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
 
   [Kernel.Attributes.Name("Point Load")]
-  public class PointLoad : LoadElement
+  public sealed class PointLoad : LoadElement
   {
-    protected override Type ValueType => typeof(PointLoad);
+    protected sealed override Type ValueType => typeof(PointLoad);
     public new ARDB.Structure.PointLoad Value => base.Value as ARDB.Structure.PointLoad;
 
     public PointLoad() { }
@@ -50,9 +50,9 @@ namespace RhinoInside.Revit.GH.Types
   using Convert.Geometry;
 
   [Kernel.Attributes.Name("Line Load")]
-  public class LineLoad : LoadElement
+  public sealed class LineLoad : LoadElement
   {
-    protected override Type ValueType => typeof(LineLoad);
+    protected sealed override Type ValueType => typeof(LineLoad);
     public new ARDB.Structure.LineLoad Value => base.Value as ARDB.Structure.LineLoad;
 
     public LineLoad() { }
@@ -75,9 +75,9 @@ namespace RhinoInside.Revit.GH.Types
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Area Load")]
-  public class AreaLoad : LoadElement
+  public sealed class AreaLoad : LoadElement
   {
-    protected override Type ValueType => typeof(AreaLoad);
+    protected sealed override Type ValueType => typeof(AreaLoad);
     public new ARDB.Structure.AreaLoad Value => base.Value as ARDB.Structure.AreaLoad;
 
     public AreaLoad() { }

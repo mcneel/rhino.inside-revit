@@ -382,7 +382,7 @@ namespace RhinoInside.Revit.GH.Types
       }
       else if (value == string.Empty)
       {
-        result = Activator.CreateInstance(typeof(T)) as T;
+        result = Activator.CreateInstance<T>();
         if (!result.IsEmpty)
           throw new ArgumentException(nameof(value));
 
@@ -394,7 +394,7 @@ namespace RhinoInside.Revit.GH.Types
         {
           if (value[0] == '#')
           {
-            result = Activator.CreateInstance(typeof(T)) as T;
+            result = Activator.CreateInstance<T>();
             result.Value = (int) Enum.Parse(result.UnderlyingEnumType, value.Substring(1));
             return true;
           }
@@ -405,14 +405,14 @@ namespace RhinoInside.Revit.GH.Types
             if (!inverse.TryGetValue(value, out var val))
               throw new ArgumentException($"'{value}' is not one of the named constants defined for the type {typeof(T)}", nameof(value));
 
-            result = Activator.CreateInstance(typeof(T)) as T;
+            result = Activator.CreateInstance<T>();
             result.Value = val;
             return true;
           }
         }
         else
         {
-          result = Activator.CreateInstance(typeof(T)) as T;
+          result = Activator.CreateInstance<T>();
           result.Value = (int) Enum.Parse(result.UnderlyingEnumType, value);
           return true;
         }

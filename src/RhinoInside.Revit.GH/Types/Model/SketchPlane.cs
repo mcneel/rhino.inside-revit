@@ -60,7 +60,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Work Plane Grid")]
-  public class SketchPlaneGrid : GeometricElement
+  public sealed class SketchPlaneGrid : GeometricElement
   {
     protected override Type ValueType => typeof(ARDB_SketchPlaneGrid);
     public new ARDB_SketchPlaneGrid Value => base.Value as ARDB_SketchPlaneGrid;

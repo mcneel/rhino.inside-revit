@@ -1,12 +1,10 @@
 using System;
-using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using ARDB = Autodesk.Revit.DB;
 
 namespace RhinoInside.Revit.GH.Components.LinePatternElements
 {
-  using ElementTracking;
   using External.DB.Extensions;
 
   public class LinePatternByName : ElementTrackerComponent
@@ -27,17 +25,7 @@ namespace RhinoInside.Revit.GH.Components.LinePatternElements
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition
-      (
-        new Parameters.Document()
-        {
-          Name = "Document",
-          NickName = "DOC",
-          Description = "Document",
-          Optional = true
-        },
-        ParamRelevance.Occasional
-      ),
+      new ParamDefinition(Parameters.Document.AddTarget(), ParamRelevance.Occasional),
       new ParamDefinition
       (
         new Param_String()
