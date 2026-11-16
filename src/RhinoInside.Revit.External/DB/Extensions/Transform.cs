@@ -20,7 +20,7 @@ namespace RhinoInside.Revit.External.DB.Extensions
 
     public static bool TryGetInverse(this Transform transform, out Transform inverse)
     {
-      if (Numerical.Constant.DefaultTolerance < transform.Determinant)
+      if (Numerical.Constant.DefaultTolerance < Math.Abs(transform.Determinant))
       {
         try { inverse = transform.Inverse; return true; }
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { }
@@ -165,18 +165,62 @@ namespace RhinoInside.Revit.External.DB.Extensions
     /// Applies the transformation to a plane equation and returns the result.
     /// </summary>
     /// <param name="transform">The transform to apply.</param>
-    /// <param name="value">The box to transform.</param>
-    /// <returns>The transformed bounding box</returns>
+    /// <param name="equation">The plane to transform.</param>
+    /// <returns>The transformed plane</returns>
     /// <remarks>
-    /// Transformation of a bounding box is affected by the translational part of the transformation.
+    /// Transformation of a plane is affected by the translational part of the transformation.
     /// </remarks>
     internal static PlaneEquation OfPlaneEquation(this Transform transform, PlaneEquation equation)
     {
-      return new PlaneEquation
+      var n = equation.Normal;
+      var (origin, basisX, basisY, basisZ) = transform;
+
+      var a = XYZExtension.CrossProduct(basisY, basisZ);
+      var b = XYZExtension.CrossProduct(basisZ, basisX);
+      var c = XYZExtension.CrossProduct(basisX, basisY);
+      var d = basisX.DotProduct(a);
+
+      var sign = 0.0;
+      if (d < -Numerical.Constant.Upsilon) sign = -1.0;
+      if (d > +Numerical.Constant.Upsilon) sign = +1.0;
+      if (sign == 0.0)
+        throw new ArgumentException("Transform is not conformal", nameof(transform));
+
+      double A = n.DotProduct(a) * sign;
+      double B = n.DotProduct(b) * sign;
+      double C = n.DotProduct(c) * sign;
+      double D = (equation.Offset * d * sign) - (A * origin.X + B * origin.Y + C * origin.Z);
+
+      var pp = new PlaneEquation(new UnitXYZ(A, B, C, out var length), D / length);
+      return pp;
+    }
+
+    /// <summary>
+    /// Applies the inverse transformation to a plane equation and returns the result.
+    /// </summary>
+    /// <param name="transform">The transform to apply the inverse.</param>
+    /// <param name="equation">The plane to transform.</param>
+    /// <returns>The transformed plane</returns>
+    /// <remarks>
+    /// Transformation of a plane is affected by the translational part of the transformation.
+    /// </remarks>
+    internal static PlaneEquation InverseOfPlaneEquation(this Transform transform, PlaneEquation equation)
+    {
+      var n = equation.Normal;
+      var (origin, basisX, basisY, basisZ) = transform;
+
+      var ABC = new UnitXYZ
       (
-        transform.OfPoint(equation.Point),
-        transform.OfVector(equation.Normal).ToUnitXYZ()
+        n.DotProduct(basisX),
+        n.DotProduct(basisY),
+        n.DotProduct(basisZ),
+        out var length
       );
+      if (ABC.IsNaN)
+        throw new ArgumentException("Transform is not conformal", nameof(transform));
+
+      double D = n.DotProduct(origin) + equation.Offset;
+      return new PlaneEquation(ABC, D / length);
     }
 
     /// <summary>

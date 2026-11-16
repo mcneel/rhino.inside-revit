@@ -318,7 +318,7 @@ namespace RhinoInside.Revit.Numerical
     {
       x = Math.Abs(x);
 
-      if (x < Constant.Upsilon) return 0.0;
+      if (!(x >= Constant.Upsilon)) return 0.0;
 
       return x;
     }
@@ -336,7 +336,7 @@ namespace RhinoInside.Revit.Numerical
 
       double u = x, v = y;
       if (x > v) { u = y; v = x; }
-      if (v < Constant.Upsilon) return 0.0;
+      if (!(v >= Constant.Upsilon)) return 0.0;
 
       u /= v;
 
@@ -358,11 +358,34 @@ namespace RhinoInside.Revit.Numerical
       double u = x, v = y, w = z;
       if (x > w) { u = y; v = z; w = x; }
       if (y > w) { u = z; v = x; w = y; }
-      if (w < Constant.Upsilon) return 0.0;
+      if (!(w >= Constant.Upsilon)) return 0.0;
 
       u /= w; v /= w;
-
       return Math.Sqrt(1.0 + (u * u + v * v)) * w;
+    }
+
+    /// <summary>
+    /// Norm of {<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>, <paramref name="w"/>}.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="z"></param>
+    /// <param name="w"></param>
+    /// <returns>Distance from {0, 0, 0, 0}.</returns>
+    /// <remarks>This method returns denormals as zero.</remarks>
+    internal static double Norm(double x, double y, double z, double w)
+    {
+      x = Math.Abs(x); y = Math.Abs(y); z = Math.Abs(z); w = Math.Abs(w);
+
+      double a = x, b = y, c = z, d = w;
+      if (x > d) { a = y; b = z; c = w; d = x; }
+      if (y > d) { a = z; b = w; c = x; d = y; }
+      if (z > d) { a = w; b = x; c = y; d = z; }
+      if (!(d >= Constant.Upsilon)) return 0.0;
+
+      a /= d; b /= d; c /= d;
+
+      return Math.Sqrt(1.0 + (a * a + b * b + c * c)) * d;
     }
     #endregion
 
