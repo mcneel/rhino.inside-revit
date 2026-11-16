@@ -31,9 +31,9 @@ namespace RhinoInside.Revit.GH.Types
 
     public void ResetSlabShape() => Editor?.ResetSlabShape();
 
-    private static double GetBoundaryElevation(IList<Curve> boundary2d, IList<Curve> boundary3d, Point3d point)
+    private static double GetBoundaryElevation(IList<Curve> boundary2d, Plane plane, IList<Curve> boundary3d, Point3d point)
     {
-      var point2d = new Point3d(point.X, point.Y, 0.0);
+      var point2d = plane.ClosestPoint(point);
       var closestPoint = NaN.Point3d;
       double minDistance = double.PositiveInfinity;
       for (int c = 0; c < boundary2d.Count; ++c)
@@ -124,7 +124,7 @@ namespace RhinoInside.Revit.GH.Types
             if (vertex.VertexType == ARDB.SlabShapeVertexType.Interior) continue;
 
             var xyz = vertex.Position.ToPoint3d();
-            xyz.Z = GetBoundaryElevation(boundary2d, boundary3d, xyz);
+            xyz.Z = GetBoundaryElevation(boundary2d, hostLocation, boundary3d, xyz);
 
             if (addInPlace)
               Editor.ModifySubElement(vertex, GeometryEncoder.ToInternalLength(xyz.Z) - elevation);
