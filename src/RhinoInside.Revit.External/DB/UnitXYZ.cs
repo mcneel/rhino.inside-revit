@@ -28,6 +28,16 @@ namespace RhinoInside.Revit.External.DB
 
     UnitXYZ(XYZ xyz) => Direction = xyz;
     UnitXYZ(double x, double y, double z) => Direction = new XYZ(x, y, z);
+    public UnitXYZ(double x, double y, double z, out double length)
+    {
+      length = Euclidean.Norm(x, y, z);
+      if (length != 0.0)
+      {
+        var inv = 1.0 / length;
+        Direction = new XYZ(x * inv, y * inv, z * inv);
+      }
+      else Direction = NaN.Direction;
+    }
 
     public static implicit operator XYZ(UnitXYZ unit) => unit.Direction;
     public static explicit operator UnitXYZ(XYZ xyz)
