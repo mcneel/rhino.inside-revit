@@ -186,7 +186,7 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-    public static ParameterKey Cast(object source)
+    public static new ParameterKey Cast(object source)
     {
       var document = Revit.ActiveDBDocument;
       var parameterId = ARDB.ElementId.InvalidElementId;
