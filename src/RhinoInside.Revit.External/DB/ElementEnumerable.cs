@@ -107,15 +107,15 @@ namespace RhinoInside.Revit.External.DB
               if
               (
                 view.GetVisibleLink<RevitLinkInstance>(LinkId, out var _) is RevitLinkInstance link &&
-                link.GetTransform().TryGetInverse(out var inverse)
+                link.GetTransform() is Transform transform
               )
               {
-                if (modelClipPlanes.X.Min.HasValue) modelClipPlanes.X.Min = inverse.OfPlaneEquation(modelClipPlanes.X.Min.Value);
-                if (modelClipPlanes.X.Max.HasValue) modelClipPlanes.X.Max = inverse.OfPlaneEquation(modelClipPlanes.X.Max.Value);
-                if (modelClipPlanes.Y.Min.HasValue) modelClipPlanes.Y.Min = inverse.OfPlaneEquation(modelClipPlanes.Y.Min.Value);
-                if (modelClipPlanes.Y.Max.HasValue) modelClipPlanes.Y.Max = inverse.OfPlaneEquation(modelClipPlanes.Y.Max.Value);
-                if (modelClipPlanes.Z.Min.HasValue) modelClipPlanes.Z.Min = inverse.OfPlaneEquation(modelClipPlanes.Z.Min.Value);
-                if (modelClipPlanes.Z.Max.HasValue) modelClipPlanes.Z.Max = inverse.OfPlaneEquation(modelClipPlanes.Z.Max.Value);
+                if (modelClipPlanes.X.Min.HasValue) modelClipPlanes.X.Min = transform.InverseOfPlaneEquation(modelClipPlanes.X.Min.Value);
+                if (modelClipPlanes.X.Max.HasValue) modelClipPlanes.X.Max = transform.InverseOfPlaneEquation(modelClipPlanes.X.Max.Value);
+                if (modelClipPlanes.Y.Min.HasValue) modelClipPlanes.Y.Min = transform.InverseOfPlaneEquation(modelClipPlanes.Y.Min.Value);
+                if (modelClipPlanes.Y.Max.HasValue) modelClipPlanes.Y.Max = transform.InverseOfPlaneEquation(modelClipPlanes.Y.Max.Value);
+                if (modelClipPlanes.Z.Min.HasValue) modelClipPlanes.Z.Min = transform.InverseOfPlaneEquation(modelClipPlanes.Z.Min.Value);
+                if (modelClipPlanes.Z.Max.HasValue) modelClipPlanes.Z.Max = transform.InverseOfPlaneEquation(modelClipPlanes.Z.Max.Value);
               }
               else return x => false;
             }
