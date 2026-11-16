@@ -1111,9 +1111,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
         Transform.Identity, element.Document, element.UniqueId,
         (xform, solid) =>
         {
-          if (solid.Faces.IsEmpty) return new ((IntersectionResult, Face), Reference)[0];
+          if (solid.Faces.IsEmpty) return Array.Empty<((IntersectionResult, Face), Reference)>();
 
-          var projected = solid.Project(xform.Inverse.OfPoint(point), out Face f);
+          var projected = solid.Project(xform.InverseOfPoint(point), out Face f);
           projected.SetXYZPoint(xform.OfPoint(projected.XYZPoint));
           projected.SetDistance(projected.XYZPoint.DistanceTo(point));
 
@@ -1135,9 +1135,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
         Transform.Identity, element.Document, element.UniqueId,
         (xform, solid) =>
         {
-          if (solid.Edges.IsEmpty) return new ((IntersectionResult, Edge), Reference)[0];
+          if (solid.Edges.IsEmpty) return Array.Empty<((IntersectionResult, Edge), Reference)>();
 
-          var projected = solid.Project(xform.Inverse.OfPoint(point), out Edge e);
+          var projected = solid.Project(xform.InverseOfPoint(point), out Edge e);
           projected.SetXYZPoint(xform.OfPoint(projected.XYZPoint));
           projected.SetDistance(projected.XYZPoint.DistanceTo(point));
 
@@ -1159,9 +1159,9 @@ namespace RhinoInside.Revit.External.DB.Extensions
         Transform.Identity, element.Document, element.UniqueId,
         (xform, solid) =>
         {
-          if (solid.Faces.IsEmpty && solid.Edges.IsEmpty) return new IntersectionResult[0];
+          if (solid.Faces.IsEmpty && solid.Edges.IsEmpty) return Array.Empty<IntersectionResult>();
 
-          var projected = solid.Project(xform.Inverse.OfPoint(point));
+          var projected = solid.Project(xform.InverseOfPoint(point));
           projected.SetXYZPoint(xform.OfPoint(projected.XYZPoint));
           projected.SetDistance(projected.XYZPoint.DistanceTo(point));
 
