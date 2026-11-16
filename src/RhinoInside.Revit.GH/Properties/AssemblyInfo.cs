@@ -54,6 +54,8 @@ namespace RhinoInside.Revit.GH
         var types = Assembly.GetExecutingAssembly().GetTypes().Where(x => x.IsDefined(typeof(AssemblyPriorityAttribute), false));
         foreach (var type in types)
           System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+
+        Rhino.Runtime.Code.RhinoCode.Platforms.TryRegister(Scripting.RhinoInsideRevitPlatform.Instance);
       }
       catch { return GH_LoadingInstruction.Abort; }
 
