@@ -330,7 +330,7 @@ namespace RhinoInside.Revit.GH.Parameters
       using (var collector = new ARDB.FilteredElementCollector(doc).OfClass(typeof(ARDB.ReferencePlane)))
       {
         var items = collector.Cast<ARDB.ReferencePlane>().
-          Where(x => !string.IsNullOrWhiteSpace(x.Name)).
+          Where(x => !string.IsNullOrWhiteSpace(x.GetNomen())).
           Select(x => new Types.ReferencePlane(x)).
           OrderBy(x => x.DisplayName, ElementNaming.NameComparer).
           ToList();

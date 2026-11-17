@@ -148,13 +148,13 @@ namespace RhinoInside.Revit.GH.Components.Topology
       ActiveView?.Document.SetActiveView(ActiveView);
       ActiveView = default;
 
-      foreach (var view in (ViewsToClose as IEnumerable<ARDB.View>).Reverse())
+      foreach (var view in ViewsToClose.AsReversed())
         view.Close();
       ViewsToClose.Clear();
 
       if (TemporaryViews.Count > 0)
       {
-        foreach (var views in TemporaryViews.Values.GroupBy(x => x.Document).Reverse())
+        foreach (var views in TemporaryViews.Values.GroupBy(x => x.Document).AsReversed())
         {
           using (var scope = views.Key.CommitScope())
           {

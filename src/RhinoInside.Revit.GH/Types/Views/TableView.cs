@@ -15,9 +15,10 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Schedule")]
-  public class ViewSchedule : TableView
+  public sealed class ViewSchedule : TableView
   {
-    protected override Type ValueType => typeof(ARDB.ViewSchedule);
+    protected sealed override Type ValueType => typeof(ARDB.ViewSchedule);
+    public new ARDB.ViewSchedule Value => base.Value as ARDB.ViewSchedule;
 
     public ViewSchedule() { }
     public ViewSchedule(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }
@@ -25,9 +26,10 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Panel Schedule")]
-  public class PanelScheduleView : TableView
+  public sealed class PanelScheduleView : TableView
   {
-    protected override Type ValueType => typeof(ARDB.Electrical.PanelScheduleView);
+    protected sealed override Type ValueType => typeof(ARDB.Electrical.PanelScheduleView);
+    public new ARDB.Electrical.PanelScheduleView Value => base.Value as ARDB.Electrical.PanelScheduleView;
 
     public PanelScheduleView() { }
     public PanelScheduleView(ARDB.Document doc, ARDB.ElementId id) : base(doc, id) { }

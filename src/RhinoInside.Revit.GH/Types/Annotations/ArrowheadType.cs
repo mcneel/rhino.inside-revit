@@ -3,7 +3,7 @@ using ARDB = Autodesk.Revit.DB;
 namespace RhinoInside.Revit.GH.Types
 {
   [Kernel.Attributes.Name("Arrowhead Type")]
-  public class ArrowheadType : ElementType
+  public sealed class ArrowheadType : ElementType
   {
     public ArrowheadType() { }
     public ArrowheadType(ARDB.ElementType type) : base(type) { }

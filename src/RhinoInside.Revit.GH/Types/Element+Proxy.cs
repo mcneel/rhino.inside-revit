@@ -25,9 +25,6 @@ namespace RhinoInside.Revit.GH.Types
         return $"{id.ToStableRepresentation(null).PadLeft(8, (char)0x2002)} : {owner.Value?.Tooltip() ?? owner.DisplayName}";
       }
 
-      protected virtual bool IsValidId(ARDB.Document doc, ARDB.ElementId id) =>
-        owner.GetType() == Element.FromElementId(doc, id).GetType();
-
       [DisplayName("Document"), Description("The document that references this element."), Category("Reference")]
       public string ReferenceDocument => owner.ReferenceDocument?.GetName();
 
