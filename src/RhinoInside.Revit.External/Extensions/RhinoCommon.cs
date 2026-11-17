@@ -1163,9 +1163,9 @@ namespace Rhino.Geometry
         else
         {
           // Iterate in reverse order to found deeper loops before others
-          foreach (var innerLoop in innerLoops.Reverse())
+          foreach (var innerLoop in innerLoops.AsReversed())
           {
-            foreach (var shell in shells.Reverse())
+            foreach (var shell in shells.AsReversed())
             {
               var containment = Curve.PlanarClosedCurveRelationship(innerLoop.trims, shell[0].trims, Plane.WorldXY, tolerance);
               if (containment == RegionContainment.AInsideB)

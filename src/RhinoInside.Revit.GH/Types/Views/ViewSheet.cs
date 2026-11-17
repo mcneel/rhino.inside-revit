@@ -8,9 +8,9 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Sheet")]
-  public class ViewSheet : View
+  public sealed class ViewSheet : View
   {
-    protected override Type ValueType => typeof(ARDB.ViewSheet);
+    protected sealed override Type ValueType => typeof(ARDB.ViewSheet);
     public new ARDB.ViewSheet Value => base.Value as ARDB.ViewSheet;
 
     public ViewSheet() { }

@@ -10,7 +10,7 @@ namespace RhinoInside.Revit.GH.Types
   using Grasshopper.Kernel;
 
   [Kernel.Attributes.Name("MEP System")]
-  public class MEPSystem : GraphicalElement
+  public sealed class MEPSystem : GraphicalElement
   {
     protected override Type ValueType => typeof(ARDB.MEPSystem);
     public new ARDB.MEPSystem Value => base.Value as ARDB.MEPSystem;
@@ -68,7 +68,7 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("MEP System Type")]
-  public class MEPSystemType : ElementType
+  public sealed class MEPSystemType : ElementType
   {
     protected override Type ValueType => typeof(ARDB.MEPSystemType);
     public new ARDB.MEPSystemType Value => base.Value as ARDB.MEPSystemType;

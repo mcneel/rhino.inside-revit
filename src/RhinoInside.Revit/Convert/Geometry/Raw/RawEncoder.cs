@@ -302,7 +302,7 @@ namespace RhinoInside.Revit.Convert.Geometry.Raw
 
             IEnumerable<BrepTrim> trims = loop.Trims;
             if (face.OrientationIsReversed)
-              trims = trims.Reverse();
+              trims = trims.AsReversed();
 
             foreach (var trim in trims)
             {

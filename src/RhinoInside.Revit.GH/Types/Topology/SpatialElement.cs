@@ -13,8 +13,8 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.SpatialElement);
     public new ARDB.SpatialElement Value => base.Value as ARDB.SpatialElement;
 
-    public SpatialElement() { }
-    public SpatialElement(ARDB.SpatialElement element) : base(element) { }
+    internal SpatialElement() { }
+    internal SpatialElement(ARDB.SpatialElement element) : base(element) { }
 
     public override string DisplayName => Value is ARDB.SpatialElement element ?
       $"{Name} {Number}{(element.Location is null ? " (Unplaced)" : string.Empty)}" : base.DisplayName;

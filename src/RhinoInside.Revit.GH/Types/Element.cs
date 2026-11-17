@@ -81,25 +81,6 @@ namespace RhinoInside.Revit.GH.Types
       LoadReferencedData();
       return Document?.GetElement(Id);
     }
-
-    protected void SetValue(ARDB.Document doc, ARDB.ElementId id)
-    {
-      ResetValue();
-
-      if (!id.IsValid())
-        doc = null;
-
-      _ReferenceDocument = Document = doc;
-      _ReferenceId = _Id = id ?? ARDB.ElementId.InvalidElementId;
-
-      if (Document is object)
-      {
-        ReferenceDocumentId = _ReferenceDocument.GetPersistentGUID();
-        ReferenceUniqueId = _Id.ToUniqueId(Document, out var value);
-
-        base.Value = value;
-      }
-    }
     #endregion
 
     #region ReferenceObject
@@ -181,21 +162,24 @@ namespace RhinoInside.Revit.GH.Types
     }
     #endregion
 
-    protected T SetElement<T>(Element element) where T : ARDB.Element
+    internal Element() { }
+    internal Element(ARDB.Document doc, ARDB.ElementId id)
     {
-      if (element?.IsValid is true)
+      if (!id.IsValid())
+        doc = null;
+
+      _ReferenceDocument = Document = doc;
+      _ReferenceId = _Id = id ?? ARDB.ElementId.InvalidElementId;
+
+      if (Document is object)
       {
-        if (!Document.IsEquivalent(element.Document))
-          throw new Exceptions.RuntimeArgumentException(nameof(element), $"Invalid {typeof(T)} Document");
+        ReferenceDocumentId = _ReferenceDocument.GetPersistentGUID();
+        ReferenceUniqueId = _Id.ToUniqueId(Document, out var value);
 
-        return (T) element.Value;
+        base.Value = value;
       }
-
-      return null;
     }
 
-    public Element() { }
-    internal Element(ARDB.Document doc, ARDB.ElementId id) => SetValue(doc, id);
     protected Element(ARDB.Element element) : base(element?.Document, element)
     {
       if (element is object)
@@ -426,7 +410,7 @@ namespace RhinoInside.Revit.GH.Types
         if (Value is ARDB.Element element)
         {
           return element.Category is ARDB.Category category ?
-          GetElement(Category.FromCategory(category)):
+          GetElement(category):
           new Category();
         }
 

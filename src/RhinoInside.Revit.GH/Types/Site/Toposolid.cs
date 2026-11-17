@@ -6,7 +6,7 @@ namespace RhinoInside.Revit.GH.Types
 {
 #if REVIT_2024
   [Kernel.Attributes.Name("Toposolid")]
-  public class Toposolid : CeilingAndFloor
+  public sealed class Toposolid : CeilingAndFloor
   {
     protected override Type ValueType => typeof(ARDB.Toposolid);
     public new ARDB.Toposolid Value => base.Value as ARDB.Toposolid;

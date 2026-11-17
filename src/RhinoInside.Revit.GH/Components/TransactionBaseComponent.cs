@@ -384,6 +384,10 @@ namespace RhinoInside.Revit.GH.Components
 
     IGH_Param CreateParam(Type argumentType)
     {
+      // HACK : To create same input parameter.
+      if (argumentType == typeof(ARDB.Document))
+        return Parameters.Document.AddTarget();
+
       if (!TryGetParamTypes(argumentType, out var paramTypes))
         return new Param_GenericObject();
 
@@ -448,19 +452,16 @@ namespace RhinoInside.Revit.GH.Components
         if (parameter.GetCustomAttributes(typeof(NickNameAttribute), false).FirstOrDefault() is NickNameAttribute nickNameAttribute)
           nickname = nickNameAttribute.NickName;
 
-        var description = string.Empty;
-        foreach (var descriptionAttribute in parameter.GetCustomAttributes(typeof(DescriptionAttribute), false).Cast<DescriptionAttribute>())
-          description = (description.Length > 0) ? $"{description}{OS.NewLine}{descriptionAttribute.Description}" : descriptionAttribute.Description;
-
         var paramType = (parameter.GetCustomAttributes(typeof(ParamTypeAttribute), false).FirstOrDefault() as ParamTypeAttribute)?.Type;
-
         var param = paramType is null ? CreateParam(argumentType) : Activator.CreateInstance(paramType) as IGH_Param;
         {
+          param.Access = access;
           param.Name = name;
           param.NickName = nickname;
-          param.Description = description;
-          param.Access = access;
-          param.Optional = optional;
+          param.Description = string.Join(OS.NewLine, parameter.GetCustomAttributes(typeof(DescriptionAttribute), false).Cast<DescriptionAttribute>().Select(x => x.Description));
+
+          if (optional)
+            param.Optional = optional;
 
           if (parameter.ParameterType.IsByRef)
           {

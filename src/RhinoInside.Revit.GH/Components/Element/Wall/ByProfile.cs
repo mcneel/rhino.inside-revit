@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
@@ -14,10 +13,10 @@ namespace RhinoInside.Revit.GH.Components.Walls
   using ElementTracking;
   using External.DB;
   using External.DB.Extensions;
-  using Kernel.Attributes;
+  using GH.Exceptions;
 
-  [ComponentVersion(introduced: "1.0", updated: "1.8")]
-  public class WallByProfile : ReconstructElementComponent
+  [ComponentVersion(introduced: "1.0", updated: "1.37")]
+  public class WallByProfile : ElementTrackerComponent
   {
     public override Guid ComponentGuid => new Guid("78b02ae8-2b78-45a7-962e-92e7d9097598");
     public override GH_Exposure Exposure => GH_Exposure.primary;
@@ -80,75 +79,104 @@ namespace RhinoInside.Revit.GH.Components.Walls
     };
     protected override IEnumerable<ARDB.FailureDefinitionId> FailureDefinitionIdsToFix => failureDefinitionIdsToFix;
 
-    bool Reuse
-    (
-      ref ARDB.Wall element,
-      IList<Curve> boundaries,
-      Plane plane, BoundingBox bbox,
-      Line line, double slantAngle,
-      ARDB.WallType type,
-      ARDB.Level level
-    )
+    protected override ParamDefinition[] Inputs => inputs;
+    static readonly ParamDefinition[] inputs =
     {
-      if (element is null) return false;
-
-      if (element.GetTypeId() != type.Id)
-      {
-        if (ARDB.Element.IsValidType(element.Document, new ARDB.ElementId[] { element.Id }, type.Id))
+      new ParamDefinition
+      (
+        Parameters.Document.AddTarget(), ParamRelevance.Occasional
+      ),
+      new ParamDefinition
+       (
+        new Param_Surface
         {
-          if (element.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
-            element = element.Document.GetElement(id) as ARDB.Wall;
+          Name = "Profile",
+          NickName = "P",
+          Description = "Wall profile",
+          Access = GH_ParamAccess.list
         }
-        else return false;
-      }
-
-      element.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(ARDB.ElementId.InvalidElementId);
-      element.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update((bbox.Max.Z - bbox.Min.Z) / Revit.ModelUnits);
-      element.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Id);
-      element.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.GetElevation());
-
-#if REVIT_2021
-      if (slantAngle == 0.0)
-      {
-        element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.Vertical);
-      }
-      else
-      {
-        element.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.SingleSlanted);
-        element.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).Update(slantAngle);
-      }
-#endif
-
-      if (element.Location is ARDB.LocationCurve location && location.Curve is ARDB.Line locationLine)
-      {
-        var pinned = element.Pinned;
-        var mid0 = locationLine.Evaluate(0.5, normalized: true);
-        var mid1 = line.ClosestPoint(mid0.ToPoint3d(), false).ToXYZ();
-        if(!mid0.AlmostEqualPoints(mid1))
+      ),
+      new ParamDefinition
+       (
+        new Parameters.HostObjectType
         {
-          element.Pinned = false;
-          location.Move(mid1 - mid0);
-        }
-
-        var angle0 = Vector3d.VectorAngle(Vector3d.XAxis, locationLine.Direction.ToVector3d(), Vector3d.ZAxis);
-        var angle1 = Vector3d.VectorAngle(Vector3d.XAxis, line.Direction, Vector3d.ZAxis);
-        var angle = angle1 - angle0;
-        if (Math.Abs(angle) > GeometryTolerance.Internal.DefaultTolerance)
+          Name = "Type",
+          NickName = "T",
+          Description = "Wall type",
+          Optional = true,
+          SelectedBuiltInCategory = ARDB.BuiltInCategory.OST_Walls
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Level
         {
-          element.Pinned = false;
-          using (var axis = ARDB.Line.CreateUnbound(mid1, UnitXYZ.BasisZ))
-            location.Rotate(axis, angle);
+          Name = "Level",
+          NickName = "L",
+          Optional = true,
+        }, ParamRelevance.Secondary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Param_Enum<Types.WallLocationLine>
+        {
+          Name = "Location Line",
+          NickName = "LL",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean
+        {
+          Name = "Flipped",
+          NickName = "F",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Param_Boolean
+        {
+          Name = "Allow Joins",
+          NickName = "J",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+      new ParamDefinition
+      (
+        new Parameters.Param_Enum<Types.StructuralWallUsage>
+        {
+          Name = "Structural Usage",
+          NickName = "Su",
+          Optional = true
+        }, ParamRelevance.Primary
+      ),
+    };
+
+    protected override ParamDefinition[] Outputs => outputs;
+    static readonly ParamDefinition[] outputs =
+    {
+      new ParamDefinition
+      (
+        new Parameters.Wall()
+        {
+          Name = _Wall_,
+          NickName = _Wall_.Substring(0, 1),
+          Description = $"Output {_Wall_}",
         }
+      )
+    };
 
-        if (element.Pinned != pinned)
-          element.Pinned = pinned;
-      }
-      else return false;
+    const string _Wall_ = "Wall";
 
-      if (!(element.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundaries, plane.Normal)))
-        return false;
+    public override void AddedToDocument(GH_Document document)
+    {
+      if (Params.Input<IGH_Param>("LocationLine") is IGH_Param locationLine) locationLine.Name = "Location Line";
+      if (Params.Input<IGH_Param>("AllowJoins") is IGH_Param allowJoins) allowJoins.Name = "Allow Joins";
+      if (Params.Input<IGH_Param>("StructuralUsage") is IGH_Param structuralUsage) structuralUsage.Name = "Structural Usage";
 
-      return true;
+      base.AddedToDocument(document);
     }
 
     static readonly ARDB.BuiltInParameter[] ExcludeUniqueProperties =
@@ -169,201 +197,304 @@ namespace RhinoInside.Revit.GH.Components.Walls
 #endif
     };
 
-    void ReconstructWallByProfile
-    (
-      [Optional, NickName("DOC")]
-      ARDB.Document document,
-
-      [Description("New Wall")]
-      ref ARDB.Wall wall,
-
-      [ParamType(typeof(Param_Surface))]
-      IList<Brep> profile,
-      Optional<ARDB.WallType> type,
-      Optional<ARDB.Level> level,
-      [Optional] ARDB.WallLocationLine locationLine,
-      [Optional] bool flipped,
-      [Optional, NickName("J")] bool allowJoins,
-      [Optional] ARDB.Structure.StructuralWallUsage structuralUsage
-    )
+    protected override void TrySolveInstance(IGH_DataAccess DA)
     {
-      var loops = profile.OfType<Brep>().SelectMany(x => x.Loops).Select(x => x.To3dCurve()).ToArray();
-
-      if (loops.Length < 1) return;
+      if (!Parameters.Document.GetDocumentOrCurrent(this, DA, out var doc) || !doc.IsValid) return;
 
       var tol = GeometryTolerance.Model;
-      var boundaryPlane = default(Plane);
-      var maxArea = 0.0;
-      for (int index = 0; index < loops.Length; ++index)
-      {
-        var loop = loops[index];
-        var plane = default(Plane);
-        if
-        (
-           loop is null ||
-           loop.IsShort(tol.ShortCurveTolerance) ||
-          !loop.IsClosed ||
-          !loop.TryGetPlane(out plane, tol.VertexTolerance)
-        )
-          ThrowArgumentException(nameof(profile), "Profile should be a list of planar surfaces.", loop);
+      ReconstructElement<ARDB.Wall>
+      (
+        doc.Value, _Wall_, wall =>
+        {
+          // Input
+          if (!Params.GetDataList(DA, "Profile", out IList<Brep> profile)) return null;
+
+          var loops = profile.OfType<Brep>().SelectMany(x => x.Loops).Select(x => x.To3dCurve()).ToArray();
+
+          if (loops.Length < 1) return null;
+
+          var tol = GeometryTolerance.Model;
+          var boundaryPlane = default(Plane);
+          var maxArea = 0.0;
+          for (int index = 0; index < loops.Length; ++index)
+          {
+            var loop = loops[index];
+            var plane = default(Plane);
+            if
+            (
+               loop is null ||
+               loop.IsShort(tol.ShortCurveTolerance) ||
+              !loop.IsClosed ||
+              !loop.TryGetPlane(out plane, tol.VertexTolerance)
+            )
+              throw new RuntimeArgumentException(nameof(profile), "Profile should be a list of planar surfaces.", profile);
 
 #if !REVIT_2021
-        if (!plane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance))
-          ThrowArgumentException(nameof(profile), "Profile should be a list of planar vertical surfaces.", loop);
+            if (!plane.ZAxis.IsPerpendicularTo(Vector3d.ZAxis, tol.AngleTolerance))
+              throw new RuntimeArgumentException(nameof(profile), "Profile should be a list of planar vertical surfaces.", profile);
 #endif
 
-        loops[index] = loop.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
+            loops[index] = loop.Simplify(CurveSimplifyOptions.All & ~CurveSimplifyOptions.Merge, tol.VertexTolerance, tol.AngleTolerance) ?? loop;
 
-        using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
-        {
-          if (properties is null)
-            ThrowArgumentException(nameof(profile), "Failed to compute Profile Area.", loop);
+            using (var properties = AreaMassProperties.Compute(loop, tol.VertexTolerance))
+            {
+              if (properties is null)
+                throw new RuntimeArgumentException(nameof(profile), "Failed to compute Profile Area.", loop);
 
-          if (properties.Area > maxArea)
-          {
-            maxArea = properties.Area;
-            boundaryPlane = plane;
+              if (properties.Area > maxArea)
+              {
+                maxArea = properties.Area;
+                boundaryPlane = plane;
+              }
+              else if (plane.Normal.IsParallelTo(boundaryPlane.Normal) == 0 || Math.Abs(plane.DistanceTo(boundaryPlane.Origin)) > GeometryTolerance.Internal.DefaultTolerance)
+              {
+                throw new RuntimeArgumentException(nameof(profile), "Profile should be a list of coplanar surfaces.", loops);
+              }
+            }
           }
-          else if (plane.Normal.IsParallelTo(boundaryPlane.Normal) == 0 || Math.Abs(plane.DistanceTo(boundaryPlane.Origin)) > GeometryTolerance.Internal.DefaultTolerance)
+
+          if (!Parameters.ElementType.GetDataOrDefault(this, DA, "Type", out Types.HostObjectType type, doc, ARDB.ElementTypeGroup.WallType)) return null;
+          if (!(type.Value is ARDB.WallType wallType))
+            throw new RuntimeArgumentException(nameof(type), $"Type '{type.Nomen}' is not a valid wall type.");
+
+          var bbox = BoundingBox.Empty;
+          foreach (var geometry in profile)
+            bbox.Union(geometry.GetBoundingBox(true));
+
+          if (!Parameters.Level.GetDataOrDefault(this, DA, "Level", out Types.Level level, doc, bbox.IsValid ? bbox.Min.Z : double.NaN)) return null;
+
+          if (!Params.TryGetData(DA, "Location Line", out ARDB.WallLocationLine? locationLine)) return null;
+          if (!Params.TryGetData(DA, "Flipped", out bool? flipped)) return null;
+          if (!Params.TryGetData(DA, "Allow Joins", out bool? allowJoins)) return null;
+          if (!Params.TryGetData(DA, "Structural Usage", out ARDB.Structure.StructuralWallUsage? structuralUsage)) return null;
+
+          var levelPlane = Plane.WorldXY; levelPlane.Translate(new Vector3d(0.0, 0.0, level.Value.GetElevation() * Revit.ModelUnits));
+          if (!Intersection.PlanePlane(boundaryPlane, levelPlane, out var line) || Vector3d.VectorAngle(boundaryPlane.Normal, Vector3d.ZAxis) < 5.0 * doc.Value.Application.AngleTolerance)
+            throw new RuntimeArgumentException(nameof(profile), "Profile can't be horizontal.", profile);
+
+          var normal = boundaryPlane.Normal;
+          var orientation = new Vector3d(normal.X, normal.Y, 0.0); orientation.Unitize();
+          var direction = new Vector3d(orientation.Y, -orientation.X, 0.0); direction.Unitize();
+          var angle = Math.Atan2(-direction * Vector3d.CrossProduct(orientation, normal), orientation * normal);
+
+          // LocationLine
+          if (locationLine.HasValue && locationLine != ARDB.WallLocationLine.WallCenterline)
           {
-            ThrowArgumentException(nameof(profile), "Profile should be a list of coplanar surfaces.", loops);
+            double offsetDist = type.Value.GetOffsetForLocationLine(locationLine.Value);
+            if (offsetDist != 0.0)
+            {
+              offsetDist *= Revit.ModelUnits / Math.Cos(angle);
+              var translation = orientation * ((wall?.Flipped is true) ? -offsetDist : offsetDist);
+
+              line = new Line(line.From + translation, line.To + translation);
+              boundaryPlane.Translate(translation);
+              for (int l = 0; l < loops.Length; ++l)
+                loops[l].Translate(translation);
+            }
           }
-        }
-      }
 
-      SolveOptionalType(document, ref type, ARDB.ElementTypeGroup.WallType, nameof(type));
-      SolveOptionalLevel(document, loops, ref level, out var bbox);
-
-      var levelPlane = Plane.WorldXY; levelPlane.Translate(new Vector3d(0.0, 0.0, level.Value.GetElevation() * Revit.ModelUnits));
-      if (!Intersection.PlanePlane(boundaryPlane, levelPlane, out var line) || Vector3d.VectorAngle(boundaryPlane.Normal, Vector3d.ZAxis) < 3.0 * document.Application.AngleTolerance)
-        ThrowArgumentException(nameof(profile), "Profile can't be horizontal.");
-
-      var normal = boundaryPlane.Normal;
-      var orientation = new Vector3d(normal.X, normal.Y, 0.0); orientation.Unitize();
-      var direction = new Vector3d(orientation.Y, -orientation.X, 0.0);  direction.Unitize();
-      var angle = Math.Atan2(-direction * Vector3d.CrossProduct(orientation, normal), orientation * normal);
-
-      // LocationLine
-      if (locationLine != ARDB.WallLocationLine.WallCenterline)
-      {
-        double offsetDist = 0.0;
-        if (type.Value.GetCompoundStructure() is ARDB.CompoundStructure compoundStructure)
-        {
-          if (!compoundStructure.IsVerticallyHomogeneous())
-            compoundStructure = ARDB.CompoundStructure.CreateSimpleCompoundStructure(compoundStructure.GetLayers());
-
-          offsetDist = compoundStructure.GetOffsetForLocationLine(locationLine);
-        }
-        else
-        {
-          switch (locationLine)
-          {
-            case ARDB.WallLocationLine.WallCenterline:
-            case ARDB.WallLocationLine.CoreCenterline:
-              break;
-            case ARDB.WallLocationLine.FinishFaceExterior:
-            case ARDB.WallLocationLine.CoreExterior:
-              offsetDist = type.Value.Width / +2.0;
-              break;
-            case ARDB.WallLocationLine.FinishFaceInterior:
-            case ARDB.WallLocationLine.CoreInterior:
-              offsetDist = type.Value.Width / -2.0;
-              break;
-          }
-        }
-
-        if (offsetDist != 0.0)
-        {
-          offsetDist *= Revit.ModelUnits / Math.Cos(angle);
-          var translation = orientation * ((wall?.Flipped is true) ? -offsetDist : offsetDist);
-
-          line = new Line(line.From + translation, line.To + translation);
-          boundaryPlane.Translate(translation);
-          for (int l = 0; l < loops.Length; ++l)
-            loops[l].Translate(translation);
-        }
-      }
-
-      if (!Reuse(ref wall, loops, boundaryPlane, bbox, line, angle, type.Value, level.Value))
-      {
-        // Wall.Create requires vertical boundaries.
-        if (angle != 0.0)
-        {
-          for (int l = 0; l < loops.Length; ++l)
-            loops[l].Rotate(-angle, line.Direction, line.From);
-        }
-
-        var boundaries = loops.
-          SelectMany(x => GeometryEncoder.ToCurveMany(x)).
-          SelectMany(CurveExtension.ToBoundedCurves).
-          ToList();
-
-        try
-        {
-          var newWall = ARDB.Wall.Create
+          // Compute
+          wall = Reconstruct
           (
-            document,
-            boundaries,
-            type.Value.Id,
-            level.Value.Id,
-            structural: structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing,
-            orientation.ToXYZ()
+            wall,
+            doc.Value,
+            loops,
+            bbox,
+            boundaryPlane,
+            line,
+            orientation,
+            angle,
+            wallType,
+            level.Value,
+            structuralUsage ?? ARDB.Structure.StructuralWallUsage.NonBearing
           );
 
-          // Delay join at the end of the Transaction
+          if (wall is object)
           {
-            ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 0);
-            ARDB.WallUtils.DisallowWallJoinAtEnd(newWall, 1);
+            wall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(locationLine ?? ARDB.WallLocationLine.WallCenterline);
+            if (structuralUsage.HasValue && structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing)
+            {
+              wall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(true);
+              wall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Update(structuralUsage.Value);
+            }
+            else
+            {
+              wall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(false);
+            }
+
+            if (wall.Flipped != (flipped ?? false))
+              wall.Flip();
+
+            // Setup joins in a last step
+            if (allowJoins is true) joinedWalls.Add(wall);
           }
 
-          newWall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.Value.GetElevation());
+          DA.SetData(_Wall_, wall);
+          return wall;
+        }
+      );
+    }
 
-          // Walls are created with the last LocationLine used in the Revit editor!!
-          //newWall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(ARDB.WallLocationLine.WallCenterline);
+    bool Reuse
+    (
+      ref ARDB.Wall wall,
+      IList<Curve> boundaries,
+      BoundingBox bbox,
+      Plane plane,
+      Line line,
+      double slantAngle,
+      ARDB.WallType type,
+      ARDB.Level level
+    )
+    {
+      if (wall is null) return false;
 
-          // We turn off analytical model by default
-          newWall.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+      if (wall.GetTypeId() != type.Id)
+      {
+        if (ARDB.Element.IsValidType(wall.Document, new ARDB.ElementId[] { wall.Id }, type.Id))
+        {
+          if (wall.ChangeTypeId(type.Id) is ARDB.ElementId id && id != ARDB.ElementId.InvalidElementId)
+            wall = wall.Document.GetElement(id) as ARDB.Wall;
+        }
+        else return false;
+      }
+
+      wall.get_Parameter(ARDB.BuiltInParameter.WALL_HEIGHT_TYPE).Update(ARDB.ElementId.InvalidElementId);
+      wall.get_Parameter(ARDB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Update((bbox.Max.Z - bbox.Min.Z) / Revit.ModelUnits);
+      wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_CONSTRAINT).Update(level.Id);
+      wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.GetElevation());
 
 #if REVIT_2021
-          if (angle == 0.0)
-          {
-            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.Vertical);
-          }
-          else
-          {
-            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.SingleSlanted);
-            newWall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).Update(angle);
-          }
+      if (slantAngle == 0.0)
+      {
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.Vertical);
+      }
+      else
+      {
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.SingleSlanted);
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).Update(slantAngle);
+      }
 #endif
 
-          ReplaceElement(ref wall, newWall, ExcludeUniqueProperties);
-        }
-        catch (Exception ex)
-        {
-          AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
-          return;
-        }
-      }
-
-      if (wall is object)
+      if (wall.Location is ARDB.LocationCurve location && location.Curve is ARDB.Line locationLine)
       {
-        wall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(locationLine);
-        if (structuralUsage == ARDB.Structure.StructuralWallUsage.NonBearing)
+        var pinned = wall.Pinned;
+        var mid0 = locationLine.Evaluate(0.5, normalized: true);
+        var mid1 = line.ClosestPoint(mid0.ToPoint3d(), false).ToXYZ();
+        if (!mid0.AlmostEqualPoints(mid1))
         {
-          wall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(false);
-        }
-        else
-        {
-          wall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).Update(true);
-          wall.get_Parameter(ARDB.BuiltInParameter.WALL_STRUCTURAL_USAGE_PARAM).Update(structuralUsage);
+          wall.Pinned = false;
+          location.Move(mid1 - mid0);
         }
 
-        if (wall.Flipped != flipped)
-          wall.Flip();
+        var angle0 = Vector3d.VectorAngle(Vector3d.XAxis, locationLine.Direction.ToVector3d(), Vector3d.ZAxis);
+        var angle1 = Vector3d.VectorAngle(Vector3d.XAxis, line.Direction, Vector3d.ZAxis);
+        var angle = angle1 - angle0;
+        if (Math.Abs(angle) > GeometryTolerance.Internal.DefaultTolerance)
+        {
+          wall.Pinned = false;
+          using (var axis = ARDB.Line.CreateUnbound(mid1, UnitXYZ.BasisZ))
+            location.Rotate(axis, angle);
+        }
 
-        // Setup joins in a last step
-        if (allowJoins) joinedWalls.Add(wall);
+        if (wall.Pinned != pinned)
+          wall.Pinned = pinned;
       }
+      else return false;
+
+      if (!(wall.GetSketch() is ARDB.Sketch sketch && Types.Sketch.SetProfile(sketch, boundaries, plane.Normal)))
+        return false;
+
+      return true;
+    }
+
+    ARDB.Wall Create
+    (
+      ARDB.Document doc,
+      IList<Curve> loops,
+      Plane plane,
+      Line line,
+      Vector3d orientation,
+      double slantAngle,
+      ARDB.WallType type,
+      ARDB.Level level,
+      ARDB.Structure.StructuralWallUsage structuralUsage
+    )
+    {
+      if (slantAngle != 0.0)
+      {
+        for (int l = 0; l < loops.Count; ++l)
+          loops[l].Rotate(-slantAngle, line.Direction, line.From);
+      }
+
+      var boundaries = loops.
+        SelectMany(x => GeometryEncoder.ToCurveMany(x)).
+        SelectMany(CurveExtension.ToBoundedCurves).
+        ToList();
+
+      var wall = ARDB.Wall.Create
+      (
+        doc,
+        boundaries,
+        type.Id,
+        level.Id,
+        structural: structuralUsage != ARDB.Structure.StructuralWallUsage.NonBearing,
+        orientation.ToXYZ()
+      );
+
+      // Delay join at the end of the Transaction
+      {
+        ARDB.WallUtils.DisallowWallJoinAtEnd(wall, 0);
+        ARDB.WallUtils.DisallowWallJoinAtEnd(wall, 1);
+      }
+
+      // Walls are created with the last LocationLine used in the Revit editor!!
+      //newWall.get_Parameter(ARDB.BuiltInParameter.WALL_KEY_REF_PARAM).Update(ARDB.WallLocationLine.WallCenterline);
+
+      // We turn off analytical model by default
+      wall.get_Parameter(ARDB.BuiltInParameter.STRUCTURAL_ANALYTICAL_MODEL)?.Update(false);
+
+#if REVIT_2021
+      if (slantAngle == 0.0)
+      {
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.Vertical);
+      }
+      else
+      {
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_CROSS_SECTION).Update(ARDB.WallCrossSection.SingleSlanted);
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_SINGLE_SLANT_ANGLE_FROM_VERTICAL).Update(slantAngle);
+      }
+#endif
+      return wall;
+    }
+
+    ARDB.Wall Reconstruct
+    (
+      ARDB.Wall wall,
+      ARDB.Document doc,
+      IList<Curve> boundaries,
+      BoundingBox bbox,
+      Plane plane,
+      Line line,
+      Vector3d orientation,
+      double slantAngle,
+      ARDB.WallType type,
+      ARDB.Level level,
+      ARDB.Structure.StructuralWallUsage structuralUsage
+    )
+    {
+      if (!Reuse(ref wall, boundaries, bbox, plane, line, slantAngle, type, level))
+      {
+        wall = wall.ReplaceElement
+        (
+          Create(doc, boundaries, plane, line, orientation, slantAngle, type, level, structuralUsage),
+          ExcludeUniqueProperties
+        );
+
+        wall.get_Parameter(ARDB.BuiltInParameter.WALL_BASE_OFFSET).Update(bbox.Min.Z / Revit.ModelUnits - level.GetElevation());
+      }
+
+      return wall;
     }
   }
 }

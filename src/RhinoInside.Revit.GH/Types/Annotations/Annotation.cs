@@ -53,7 +53,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Annotation Type")]
   public abstract class AnnotationType : ElementType
   {
-    public AnnotationType() { }
+    internal AnnotationType() { }
     protected internal AnnotationType(ARDB.ElementType type) : base(type) { }
 
     #region Text Properties
@@ -72,7 +72,7 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.LineAndTextAttrSymbol);
     public new ARDB.LineAndTextAttrSymbol Value => base.Value as ARDB.LineAndTextAttrSymbol;
 
-    public LineAndTextAttrSymbol() { }
-    protected internal LineAndTextAttrSymbol(ARDB.LineAndTextAttrSymbol type) : base(type) { }
+    internal LineAndTextAttrSymbol() { }
+    internal LineAndTextAttrSymbol(ARDB.LineAndTextAttrSymbol type) : base(type) { }
   }
 }
