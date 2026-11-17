@@ -155,6 +155,20 @@ namespace RhinoInside.Revit.AddIn.Commands
             }
 
             ds.SetShape(geometry.ToShape());
+
+            if (options.Material is object)
+            {
+              ds.Document.Regenerate();
+              using (var shape = ds.get_Geometry(new Options() { DetailLevel = ViewDetailLevel.Undefined }))
+              {
+                foreach (var solid in shape.OfType<Solid>())
+                {
+                  foreach (var face in solid.Faces.OfType<Face>())
+                    options.Document.Paint(ds.Id, face, options.Material.Id);
+                }
+              }
+            }
+
             ids.Add(ds.Id);
           }
 
@@ -176,15 +190,13 @@ namespace RhinoInside.Revit.AddIn.Commands
         if (bakeOptsDlg.ShowModal() != Eto.Forms.DialogResult.Ok)
           return Result.Cancelled;
 
-        var groupResult = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
-
         var options = new BakeOptions()
         {
           Document = doc,
           View = data.View,
-          Category = Category.GetCategory(doc, bakeOptsDlg.SelectedCategory),
           Workset = doc.IsWorkshared ? doc.GetWorksetTable().GetWorkset(bakeOptsDlg.SelectedWorkset) : default,
-          Material = default
+          Category = Category.GetCategory(doc, bakeOptsDlg.SelectedCategory),
+          Material = doc.GetElement<Material>(bakeOptsDlg.SelectedMaterial)
         };
 
         var resultingElementIds = new List<ElementId>();
@@ -233,9 +245,9 @@ namespace RhinoInside.Revit.AddIn.Commands
             }
           }
 
-          if (groupResult)
+          if (bakeOptsDlg.Group)
           {
-            using (var trans = new Transaction(options.Document, "Group Bake"))
+            using (var trans = new Transaction(options.Document, "Bake Group"))
             {
               if (trans.Start() == TransactionStatus.Started)
               {
