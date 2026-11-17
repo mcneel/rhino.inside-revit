@@ -187,12 +187,17 @@ namespace RhinoInside.Revit.GH
     /// <summary>
     /// Show Grasshopper window asynchronously
     /// </summary>
-    public static async void ShowEditorAsync()
+    internal static async void ShowEditorAsync()
     {
       // Yield execution back to Revit and show Grasshopper window asynchronously.
-      await External.ActivationGate.Yield();
+      var app = await External.ActivationGate.Yield();
 
-      ShowEditor();
+      try { ShowEditor(); }
+      catch (Exception e)
+      {
+        if (!External.UI.ExternalApplication.InvokeCatchException(app, e, null)) throw;
+        External.UI.ExternalApplication.InvokeReportException(app, e, null);
+      }
     }
 
     /// <summary>

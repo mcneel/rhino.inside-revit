@@ -1012,9 +1012,14 @@ namespace RhinoInside.Revit
 
     internal static async void ShowAsync()
     {
-      await External.ActivationGate.Yield();
+      var app = await External.ActivationGate.Yield();
 
-      Show();
+      try { Show(); }
+      catch (Exception e)
+      {
+        if (!External.UI.ExternalApplication.InvokeCatchException(app, e, null)) throw;
+        External.UI.ExternalApplication.InvokeReportException(app, e, null);
+      }
     }
 
     internal static async void RunScriptAsync(string script, bool activate)
