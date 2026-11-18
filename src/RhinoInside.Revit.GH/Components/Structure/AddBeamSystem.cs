@@ -150,14 +150,14 @@ namespace RhinoInside.Revit.GH.Components.Structure
 
           }
 
-          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Beam Type", out Types.FamilySymbol beamType, doc, ARDB.BuiltInCategory.OST_StructuralFraming)) return null;
+          if (!Parameters.FamilySymbol.GetDataOrDefault(this, DA, "Beam Type", out Types.FamilySymbol type, doc, ARDB.BuiltInCategory.OST_StructuralFraming)) return null;
 
           if (!Params.TryGetData(DA, "Direction", out Vector3d? dir)) return null;
 
           // Compute
           beamSystem = Reconstruct(beamSystem, doc.Value, boundary, sketchPlane.Value,
                                    dir.HasValue ? dir.Value : new Vector3d(1,0,0),
-                                   is3D,  beamType.Value);
+                                   is3D,  type.Value);
 
           DA.SetData(_BeamSystem_, beamSystem);
           return beamSystem;
