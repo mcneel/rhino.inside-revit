@@ -376,8 +376,9 @@ namespace Grasshopper.Kernel
     public static GH_PersistentParam<T> SetDefaultVale<T>(this GH_PersistentParam<T> param, object value)
         where T : class, IGH_Goo, new()
     {
-      var data = new T();
-      if (!data.CastFrom(value))
+      var isT = value is T;
+      var data = isT ? (T) value : new T();
+      if (!isT && !data.CastFrom(value))
         throw new InvalidCastException();
 
       param.PersistentData.Clear();
@@ -392,8 +393,9 @@ namespace Grasshopper.Kernel
       (
         x =>
         {
-          var data = new T();
-          if (!data.CastFrom(x))
+          var isT = value is T;
+          var data = isT ? (T) x : new T();
+          if (!isT && !data.CastFrom(x))
             throw new InvalidCastException();
 
           return data;
