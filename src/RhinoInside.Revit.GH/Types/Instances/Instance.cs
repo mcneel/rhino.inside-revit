@@ -14,8 +14,8 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.Instance);
     public new ARDB.Instance Value => base.Value as ARDB.Instance;
 
-    public Instance() { }
-    public Instance(ARDB.Instance instance) : base(instance) { }
+    internal Instance() { }
+    internal Instance(ARDB.Instance instance) : base(instance) { }
 
     public static new bool IsValidElement(ARDB.Element element)
     {

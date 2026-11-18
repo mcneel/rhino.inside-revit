@@ -11,8 +11,8 @@ namespace RhinoInside.Revit.GH.Types
     protected override Type ValueType => typeof(ARDB.CeilingAndFloor);
     public new ARDB.CeilingAndFloor Value => base.Value as ARDB.CeilingAndFloor;
 
-    public CeilingAndFloor() { }
-    public CeilingAndFloor(ARDB.CeilingAndFloor element) : base(element) { }
+    internal CeilingAndFloor() { }
+    internal CeilingAndFloor(ARDB.CeilingAndFloor element) : base(element) { }
 
     #region ISketchAccess
     public Sketch Sketch => GetElement<Sketch>(Value?.GetSketchId());

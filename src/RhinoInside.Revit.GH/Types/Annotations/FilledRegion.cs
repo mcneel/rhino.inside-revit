@@ -14,9 +14,9 @@ namespace RhinoInside.Revit.GH.Types
   using External.DB.Extensions;
 
   [Kernel.Attributes.Name("Filled Region")]
-  public class FilledRegion : GeometricElement, ISketchAccess/*, Bake.IGH_BakeAwareElement*/
+  public sealed class FilledRegion : GeometricElement, ISketchAccess/*, Bake.IGH_BakeAwareElement*/
   {
-    protected override Type ValueType => typeof(ARDB.FilledRegion);
+    protected sealed override Type ValueType => typeof(ARDB.FilledRegion);
     public new ARDB.FilledRegion Value => base.Value as ARDB.FilledRegion;
 
     public FilledRegion() { }
@@ -240,12 +240,12 @@ namespace RhinoInside.Revit.GH.Types
   }
 
   [Kernel.Attributes.Name("Filled Region Type")]
-  public class FilledRegionType : LineAndTextAttrSymbol
+  public sealed class FilledRegionType : LineAndTextAttrSymbol
   {
     protected override Type ValueType => typeof(ARDB.FilledRegionType);
     public new ARDB.FilledRegionType Value => base.Value as ARDB.FilledRegionType;
 
     public FilledRegionType() { }
-    protected internal FilledRegionType(ARDB.FilledRegionType type) : base(type) { }
+    public FilledRegionType(ARDB.FilledRegionType type) : base(type) { }
   }
 }

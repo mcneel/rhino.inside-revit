@@ -11,8 +11,8 @@ namespace RhinoInside.Revit.GH.Types
   public abstract class ViewInstance : GraphicalElement,
     IHostElementAccess
   {
-    protected ViewInstance() { }
-    public ViewInstance(ARDB.Element element) : base(element) { }
+    internal ViewInstance() { }
+    internal ViewInstance(ARDB.Element element) : base(element) { }
 
     public override bool ConvertTo<Q>(out Q target)
     {
@@ -87,7 +87,7 @@ namespace RhinoInside.Revit.GH.Types
     }
 
     Mesh _Mesh;
-    public override Mesh Mesh => _Mesh ?? (_Mesh = Mesh.CreateFromSurface(Surface));
+    public override Mesh Mesh => _Mesh ??= Mesh.CreateFromSurface(Surface);
 
     #region IHostElementAccess
     GraphicalElement IHostElementAccess.HostElement => Sheet?.Viewer;
@@ -147,7 +147,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Viewport")]
   public sealed class Viewport : ViewInstance
   {
-    protected override Type ValueType => typeof(ARDB.Viewport);
+    protected sealed override Type ValueType => typeof(ARDB.Viewport);
     public new ARDB.Viewport Value => base.Value as ARDB.Viewport;
 
     public Viewport() { }
@@ -298,7 +298,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Schedule Graphics")]
   public sealed class ScheduleSheetInstance : ViewInstance
   {
-    protected override Type ValueType => typeof(ARDB.ScheduleSheetInstance);
+    protected sealed override Type ValueType => typeof(ARDB.ScheduleSheetInstance);
     public new ARDB.ScheduleSheetInstance Value => base.Value as ARDB.ScheduleSheetInstance;
 
     public ScheduleSheetInstance() { }
@@ -335,7 +335,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Schedule Graphics")]
   public sealed class PanelScheduleSheetInstance : ViewInstance
   {
-    protected override Type ValueType => typeof(ARDB.Electrical.PanelScheduleSheetInstance);
+    protected sealed override Type ValueType => typeof(ARDB.Electrical.PanelScheduleSheetInstance);
     public new ARDB.Electrical.PanelScheduleSheetInstance Value => base.Value as ARDB.Electrical.PanelScheduleSheetInstance;
 
     public PanelScheduleSheetInstance() { }

@@ -11,7 +11,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Railing")]
   public sealed class Railing : GeometricElement, ISketchAccess
   {
-    protected override Type ValueType => typeof(ARDB.Architecture.Railing);
+    protected sealed override Type ValueType => typeof(ARDB.Architecture.Railing);
     public new ARDB.Architecture.Railing Value => base.Value as ARDB.Architecture.Railing;
 
     public Railing() { }
@@ -66,7 +66,7 @@ namespace RhinoInside.Revit.GH.Types
   [Kernel.Attributes.Name("Rail")]
   public sealed class ContinuousRail : GeometricElement
   {
-    protected override Type ValueType => typeof(ARDB.Architecture.ContinuousRail);
+    protected sealed override Type ValueType => typeof(ARDB.Architecture.ContinuousRail);
     public new ARDB.Architecture.ContinuousRail Value => base.Value as ARDB.Architecture.ContinuousRail;
 
     public ContinuousRail() { }

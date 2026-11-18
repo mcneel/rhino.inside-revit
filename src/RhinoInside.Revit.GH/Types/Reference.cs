@@ -234,13 +234,13 @@ namespace RhinoInside.Revit.GH.Types
     protected virtual void SubInvalidateGraphics() { }
     #endregion
 
-    public Reference() { }
-    protected Reference(Reference reference)
+    internal Reference() { }
+    internal Reference(Reference reference)
     {
       _ReferenceTransform = reference._ReferenceTransform;
     }
 
-    protected Reference(ARDB.Document doc, object value) : base(doc, value) { }
+    internal Reference(ARDB.Document doc, object value) : base(doc, value) { }
 
     protected internal ARDB.Reference GetAbsoluteReference(ARDB.Reference reference)
     {
@@ -256,7 +256,7 @@ namespace RhinoInside.Revit.GH.Types
       return reference;
     }
 
-    protected internal T GetElement<T>(ARDB.ElementId id) where T : Element, new()
+    protected internal T GetElement<T>(ARDB.ElementId id) where T : Element
     {
       if (id.IsValid())
       {
@@ -266,10 +266,10 @@ namespace RhinoInside.Revit.GH.Types
           Element.FromElementId(Document, id));
       }
 
-      return id == ElementIdExtension.Invalid ? new T() : null;
+      return id == ElementIdExtension.Invalid ? (T) Activator.CreateInstance(typeof(T), nonPublic: true) : null;
     }
 
-    protected internal T GetElement<T>(ARDB.LinkElementId id) where T : Element, new()
+    protected internal T GetElement<T>(ARDB.LinkElementId id) where T : Element
     {
       if (id is object)
       {
@@ -301,7 +301,12 @@ namespace RhinoInside.Revit.GH.Types
       return null;
     }
 
-    protected internal T GetElement<T>(T element) where T : Element
+    protected internal Category GetElement(ARDB.Category category)
+    {
+      return GetElement<Category>(Category.FromCategory(category));
+    }
+
+    T GetElement<T>(T element) where T : Element
     {
       if (element is object)
       {
@@ -332,12 +337,28 @@ namespace RhinoInside.Revit.GH.Types
       return GeometryObject.FromLinkElementId(ReferenceDocument, GetAbsoluteReference(reference).ToLinkElementId()) as GeometryElement;
     }
 
+    protected internal T AssertValid<T>(Element element, string paramName) where T : ARDB.Element
+    {
+      if (AssertValidDocument(element, paramName))
+        return (T) element.Value;
+
+      return null;
+    }
+
+    protected internal T AssertValid<T>(Category category, string paramName) where T : ARDB.Category
+    {
+      if (AssertValidDocument(category, paramName))
+        return (T) category.APIObject;
+
+      return null;
+    }
+
     internal bool AssertValidElementSource(IGH_ElementSource source, bool acceptLinked = false)
     {
       switch (source)
       {
         case null: return false;
-        case Document document: return document.Value.Equals(Document);
+        case Document document: return document.Value.IsEquivalent(Document) || (acceptLinked && document.Value.Equals(ReferenceDocument));
         case RevitLinkInstance instance: return instance.SourceDocument.Equals(Document) || (acceptLinked && instance.ReferenceDocument.Equals(ReferenceDocument));
       }
 

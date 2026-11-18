@@ -28,7 +28,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     protected override ParamDefinition[] Inputs => inputs;
     static readonly ParamDefinition[] inputs =
     {
-      new ParamDefinition(new Parameters.Document()),
+      new ParamDefinition(Parameters.Document.Input()),
       new ParamDefinition
       (
         new Param_FilePath()
@@ -48,7 +48,7 @@ namespace RhinoInside.Revit.GH.Components.Documents
     protected override ParamDefinition[] Outputs => outputs;
     static readonly ParamDefinition[] outputs =
     {
-      new ParamDefinition(new Parameters.Document(), ParamRelevance.Primary),
+      new ParamDefinition(Parameters.Document.Input(), ParamRelevance.Primary),
       ParamDefinition.Create<Param_String>("Path", "P", relevance: ParamRelevance.Primary),
       ParamDefinition.Create<Param_Boolean>("Written", "W", "Wheter or not file is being written to disk", relevance: ParamRelevance.Primary),
     };
