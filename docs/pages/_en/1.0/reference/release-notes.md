@@ -24,7 +24,16 @@ group: Deployment & Configs
 
 ### RC
 
+{% endcapture %}
+
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.37 RC1" version="v1.37.9818.15259" pre_release=true time="11/24/2026" %}
+
 - Now default keyboard shortcuts are only assigned when missing.
+
+{% include ltr/release-header.html title="v1.36" version="v1.36.9818.15046" time="11/24/2026" %}
+
 - Added 'CAD Read Options' component
 - Added 'Link Drafting CAD File' component.
 - Added 'Link Model CAD File' component.
@@ -33,20 +42,17 @@ group: Deployment & Configs
 - Added 'Link Image File' component.
 - Updated 'Add Toposolid Sub-Division' to accept a sub-division type.
 - Fixed 'Host Boundary Profile' to return profile curves on the element location.
+- Miscellaneous improvements and bug fixes
 
-{% endcapture %}
-
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
-
-{% include ltr/release-header.html title="v1.36 RC7" version="v1.36.9698.18734" time="06/21/2026" %}
+{% include ltr/release-header.html title="v1.36 RC7" version="v1.36.9698.18734" pre_release=true time="06/21/2026" %}
 
 - Miscellaneous improvements and bug fixes
 
-{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9698.15636" time="06/21/2026" %}
+{% include ltr/release-header.html title="v1.35 (Hotfix)" version="v1.35.9698.15636" pre_release=true time="06/21/2026" %}
 
 - Miscellaneous improvements and bug fixes
 
-{% include ltr/release-header.html title="v1.36 RC6" version="v1.36.9651.16848" time="06/09/2026" %}
+{% include ltr/release-header.html title="v1.36 RC6" version="v1.36.9651.16848" pre_release=true time="06/09/2026" %}
 
 - Revit 2027 Compatibility Fixes
 
