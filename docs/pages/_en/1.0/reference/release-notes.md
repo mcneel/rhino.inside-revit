@@ -12,6 +12,12 @@ group: Deployment & Configs
 
 ### RC
 
+{% endcapture %}
+
+{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+
+{% include ltr/release-header.html title="v1.36" version="v1.36.9818.15046" time="11/24/2026" %}
+
 - Added 'CAD Read Options' component
 - Added 'Link Drafting CAD File' component.
 - Added 'Link Model CAD File' component.
@@ -20,10 +26,7 @@ group: Deployment & Configs
 - Added 'Link Image File' component.
 - Updated 'Add Toposolid Sub-Division' to accept a sub-division type.
 - Fixed 'Host Boundary Profile' to return profile curves on the element location.
-
-{% endcapture %}
-
-{% include ltr/release_header_next.html title="Upcoming Changes" note=rc_release_notes %}
+- Miscellaneous improvements and bug fixes
 
 {% include ltr/release-header.html title="v1.36 RC7" version="v1.36.9698.18734" time="06/21/2026" %}
 
