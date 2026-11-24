@@ -10,18 +10,6 @@ group: Deployment & Configs
 
 ### WIP
 
-- Added 'Add Floor (Sloped)' component. [#1129](https://github.com/mcneel/rhino.inside-revit/issues/1129)
-- Added 'Add Ceiling (Sloped)' component. [#1129](https://github.com/mcneel/rhino.inside-revit/issues/1129)
-- Added 'Join Element' component. [#407](https://github.com/mcneel/rhino.inside-revit/issues/407)
-- Added 'Cut Element' component.
-- Added 'Add Wall (Reveal)' component.
-- Added 'Add Wall (Sweep)' component.
-- Added 'Check Element Interferences' component.
-- Added 'Query Interfering Elements' component.
-- Added 'Excavate Toposolid' component.
-- Added 'Detail Item (Line)' component.
-- Added 'Add Toposolid (Mesh)' component.
-
 ### RC
 
 {% endcapture %}
