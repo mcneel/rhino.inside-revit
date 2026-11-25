@@ -1,16 +1,9 @@
 using System.Runtime.CompilerServices;
 
 //--------------------------------------------------------------------------------
-// Project online API documentation is built using Sandcastle.
-// See: https://github.com/EWSoftware/SHFB
-//
-// About using NamespaceDoc and NamespaceGroupDoc Classes.
-// See: http://ewsoftware.github.io/XMLCommentsGuide/html/41B2D835-DB0D-4828-8D9E-0E423EDA4590.htm
-//
-// To keep the NamespaceDoc class from appearing in the help file,
-// leave off the public keyword and mark it with a CompilerGenerated attribute.
-// This will cause the class to be automatically ignored when reflection
-// information is generated for the assembly.
+// Online API documentation is built with owl (.github/workflows/build_docs.yml).
+// Each NamespaceDoc summary becomes its namespace's description.
+// Keep them non-public and [CompilerGenerated] so they stay out of the API.
 //--------------------------------------------------------------------------------
 
 namespace RhinoInside.Revit
