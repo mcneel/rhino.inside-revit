@@ -23,7 +23,9 @@
     <PlatformTarget>x64</PlatformTarget>
     <UseWpf>true</UseWpf>
     <UseWindowsForms>true</UseWindowsForms>
-    
+    <!-- lets owl load the projects for API docs off Windows -->
+    <EnableWindowsTargeting Condition="'$(OS)' != 'Windows_NT'">true</EnableWindowsTargeting>
+
     <!-- Constants are provided for revit versions that are not supported anymore -->
     <DefineConstants></DefineConstants>
     

@@ -1,36 +1,93 @@
+# Builds the Rhino.Inside.Revit API reference with owl, one build per Revit year behind a build
+# picker, and publishes it to Heroku, which CloudFront serves at https://developer.rhino3d.com/api/rir/.
+# Mirrors workflow_doc_gen.yml in mcneel/rhino3dm.
+
 name: build_docs
-on: workflow_dispatch
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Push the built site to Heroku
+        type: boolean
+        default: true
+
+env:
+  SLUG: rir
+  HEROKU_APP: mcneel-apidocs-rhinoinrevit
+  TITLE: Rhino.Inside.Revit API
 
 jobs:
   build_docs:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
-      - name: prep repository
-        uses: actions/checkout@v2
+      - name: checkout
+        uses: actions/checkout@v4.1.1
 
-      - name: prep msbuild
-        uses: microsoft/setup-msbuild@v1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
 
-      - name: prep sandcastle
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: install owl
+        run: dotnet tool install McNeel.Owl --tool-path owl-bin
+
+      # Newest Revit first: the site's root opens the first build.
+      # --sandcastle keeps the old <year>/html/*.htm addresses working; the docs site forwards to them.
+      - name: build documentation site (owl)
         run: |
-          nuget install EWSoftware.SHFB -o packages -version 2022.2.6
-          nuget install EWSoftware.SHFB.NETFramework -o packages\components
-          nuget install ResolveThirdPartyReferenceLinks -o packages\components -version "0.1.0-beta"
-          nuget install PythonSyntaxGenerator -o packages\components -version "0.1.0-beta3"
+          ./owl-bin/owl build src/RhinoInside.Revit/RhinoInside.Revit.csproj \
+            -c "Revit 2027:Release-2027-R8:2027" \
+               "Revit 2026:Release-2026-R8:2026" \
+               "Revit 2025:Release-2025-R8:2025" \
+               "Revit 2024:Release-2024-R8:2024" \
+               "Revit 2023:Release-2023-R8:2023" \
+               "Revit 2022:Release-2022-R8:2022" \
+               "Revit 2021:Release-2021-R8:2021" \
+               "Revit 2020:Release-2020-R8:2020" \
+            --name "${{ env.TITLE }}" \
+            --logo docs/assets/img/logo.svg \
+            --favicon docs/assets/favicon.ico \
+            --link RhinoCommon=/api/rhinocommon \
+            --link "RevitAPI=https://api.apidocs.co/resolve/revit/{build}/?asset_id={id}" \
+            --link "RevitAPIUI=https://api.apidocs.co/resolve/revit/{build}/?asset_id={id}" \
+            --sandcastle \
+            --out deploy \
+            --base /api/${{ env.SLUG }} \
+            --site-url https://developer.rhino3d.com \
+            --server \
+            --quiet
 
-      - name: build documentation
-        run: msbuild script/cibuild_docs.msbuild -v:m /p:TrackFileAccess=false
+      - name: upload model
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: ${{ env.SLUG }}-model
+          path: ${{ github.workspace }}/.owl/json
+          include-hidden-files: true
+          if-no-files-found: error
 
-      # - name: upload docs
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: all-docs
-      #     path: docs/api/1.0
-
-      - name: commit & publish
+      - name: deploy to heroku
+        if: inputs.deploy
         run: |
-          git config user.name mcneel-build
-          git config user.email bozo@mcneel.com
-          git add -A docs/api/
-          git commit -m "Publish!"
-          git push
+          cd deploy
+          git init -q
+          git config user.email "bozo@mcneel.com"
+          git config user.name "Bozo"
+          git remote add heroku https://heroku:${{ secrets.HEROKU_API_KEY_EHSAN }}@git.heroku.com/${{ env.HEROKU_APP }}.git
+          git add .
+          git commit -q -m "publish ${{ env.TITLE }} from github.com/mcneel/rhino.inside-revit: ${{ github.ref_name }}"
+          git push heroku HEAD:master --force
+
+      - name: invalidate cloudfront cache
+        if: inputs.deploy
+        run: |
+          curl --fail-with-body --location 'https://api.mcneel.com/cloudfront/invalidate' \
+            --header 'Authorization: Basic ${{ secrets.MCNEEL_API_KEY }}' \
+            --header 'Content-Type: application/json' \
+            --data '{"url":"https://developer.rhino3d.com/api/${{ env.SLUG }}/*"}'

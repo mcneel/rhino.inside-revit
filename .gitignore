@@ -369,9 +369,11 @@ script/.packages
 # skip yak build packages
 *.yak
 
-# discard xml and sandcastle build files
+# discard xml files
 src/RhinoInside.Revit/*.xml
-src/RhinoInside.Revit.Docs/Help/
+
+# owl api docs model
+.owl/
 
 # ignore local jekyl bundle and vendor files
 docs/.bundle
