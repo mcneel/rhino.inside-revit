@@ -42,6 +42,9 @@ version: 1.0
 language: en
 # revit api version used to generate api links on apidoc.co
 revit_api: 2022
+# Rhino.Inside.Revit API reference (one folder per Revit year, from 2020)
+rir_api_url: "https://developer.rhino3d.com/api/rir"
+rir_api_oldest: 2020
 
 # Ruby and Jekyll Settings
 plugins:

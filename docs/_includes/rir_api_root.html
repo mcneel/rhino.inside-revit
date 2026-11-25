@@ -1,1 +1,4 @@
-<a href="{{ site.baseurl }}/api/{{ include.version }}/{{ include.revit }}/index.html" target="_blank">{{ site.terms.rir }} API for Revit {{ include.revit }}</a>
+{%- comment -%} Years before the oldest documented build open the oldest one. {%- endcomment -%}
+{%- assign year = include.revit | plus: 0 -%}
+{%- if year < site.rir_api_oldest -%}{%- assign year = site.rir_api_oldest -%}{%- endif -%}
+<a href="{{ site.rir_api_url }}/{{ year }}/" target="_blank">{{ site.terms.rir }} API for Revit {{ include.revit }}</a>

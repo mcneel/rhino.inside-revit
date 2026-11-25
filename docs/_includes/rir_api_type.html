@@ -1,2 +1,3 @@
-<a href="{{ site.baseurl }}/api/{{ include.version }}/{{ site.revit_api }}/html/{{ include.topic }}.htm"
+{%- comment -%} topic is the old Sandcastle page name; the API site redirects it to the new page. {%- endcomment -%}
+<a href="{{ site.rir_api_url }}/{{ site.revit_api }}/html/{{ include.topic }}.htm"
     target="_blank">{{ include.title }}</a>
