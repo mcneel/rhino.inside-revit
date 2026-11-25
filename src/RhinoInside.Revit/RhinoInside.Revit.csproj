@@ -19,6 +19,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RhinoInside.Revit.External\RhinoInside.Revit.External.csproj" />
+  </ItemGroup>
+
+  <!-- dotnet msbuild (used by owl for API docs) can't load C++ projects -->
+  <ItemGroup Condition="'$(MSBuildRuntimeType)' != 'Core'">
     <ProjectReference Include="..\RhinoInside.Revit.Native\RhinoInside.Revit.Native.vcxproj" />
   </ItemGroup>
 
